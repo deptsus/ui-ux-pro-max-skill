@@ -34,7 +34,7 @@ export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, n
   const started = Object.keys(s.lessons).length > 0;
 
   if (!s.profile.placementDone && !started) {
-    out.push({ id: 'placement', kind: 'placement', priority: W.placement, title: 'Ikuti tes penempatan', reason: 'Kami belum tahu levelmu. Tes singkat ini menentukan titik mulai yang pas.', cta: 'Mulai tes', href: '/placement' });
+    out.push({ id: 'placement', kind: 'placement', priority: W.placement, title: 'Ikuti tes penempatan', reason: 'Kami belum tahu levelmu. Tes singkat ini menentukan titik mulai yang pas.', cta: 'Mulai tes', href: '/app/placement' });
   }
 
   // 1. Repeated wrong-answer patterns -> targeted drill.

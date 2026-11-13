@@ -2,6 +2,7 @@ import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   // PGlite (embedded dev database) ships WASM and must not be bundled.
   serverExternalPackages: ['@electric-sql/pglite'],
   async headers() {
