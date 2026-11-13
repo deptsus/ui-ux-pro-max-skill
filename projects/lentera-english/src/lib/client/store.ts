@@ -7,6 +7,8 @@ import { FREE, type Entitlement, type LearnerState } from '@/lib/engine/types';
 import { api } from './api';
 import { currentSession } from './session';
 
+/** Default profile name of a fresh state (see createState). */
+const GUEST_NAME = 'Pelajar';
 const stateKey = (uid: string) => `lentera.state.${uid}`;
 const entKey = (uid: string) => `lentera.ent.${uid}`;
 
@@ -76,20 +78,27 @@ export async function loadLearner(): Promise<void> {
     ent = FREE;
   }
   const guest = read('guest');
+  let accountName: string | undefined;
   try {
     const { snapshot } = await api<{ snapshot: { state: Partial<LearnerState>; client_updated_at: number } | null }>('/api/sync');
     if (snapshot && (!local || snapshot.client_updated_at > local.updatedAt)) local = hydrate({ ...snapshot.state, outbox: [] }, uid);
-    const me = await api<{ user: { entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
+    const me = await api<{ user: { profile?: { display_name?: string }; entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
     setEntitlement(me.user?.entitlement, uid);
+    accountName = me.user?.profile?.display_name || undefined;
   } catch {
     syncState = 'offline';
   }
   if (!local && hasProgress(guest)) {
-    // First sign-in on this device: keep what the learner did as a guest.
-    local = { ...guest!, userId: uid, outbox: [] };
+    // First sign-in on this device: keep what the learner did as a guest,
+    // including the unsent events, so the XP earned before signing up reaches
+    // the server ledger (leaderboard) and the attempt history. Events are
+    // idempotent and the server still applies its XP caps. A guest who never
+    // chose a name takes the one given at sign-up.
+    const name = guest!.profile.name !== GUEST_NAME ? guest!.profile.name : accountName ?? guest!.profile.name;
+    local = { ...guest!, userId: uid, profile: { ...guest!.profile, name } };
     localStorage.removeItem(stateKey('guest'));
   }
-  state = local ?? createState(uid, now, session.email.split('@')[0]);
+  state = local ?? createState(uid, now, accountName ?? session.email.split('@')[0]);
   persist();
   emit();
   scheduleSync(500);
