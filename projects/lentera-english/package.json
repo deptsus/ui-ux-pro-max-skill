@@ -11,7 +11,8 @@
     "test": "vitest run",
     "content:check": "tsx scripts/check-content.ts",
     "content:export": "tsx scripts/export-content.ts",
-    "e2e": "node e2e/run.mjs"
+    "e2e": "node e2e/run.mjs",
+    "e2e:admin": "node e2e/admin.mjs"
   },
   "engines": {
     "node": ">=20"

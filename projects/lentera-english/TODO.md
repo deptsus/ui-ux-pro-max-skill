@@ -8,11 +8,12 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 
 ## P0 — Bug kritis dan fondasi
 
-- [ ] **Perbaiki `/` (error 500) dan `next build` yang gagal.** `src/app/page.tsx` memanggil `rupiah()` dari modul `'use client'` (`src/components/ui.tsx`). Pindahkan `rupiah`, `dateId`, `dateTimeId` ke `src/lib/format.ts` (tanpa `'use client'`), ekspor ulang dari `ui.tsx`, impor dari `@/lib/format` di `page.tsx`. Selesai bila `npx next build` sukses dan `/` tampil.
-- [ ] **Buat dashboard admin** `src/app/admin/page.tsx` (sekarang 404, ditautkan dari footer landing). Backend sudah siap: `POST /api/admin` dengan aksi `content`, `upsert`, `delete`, `publish`, `versions`, `restore`, `import-bundled`, `payments`. Isi minimal:
+- [x] **Perbaiki `/` (error 500) dan `next build` yang gagal.** `src/app/page.tsx` memanggil `rupiah()` dari modul `'use client'` (`src/components/ui.tsx`). Pindahkan `rupiah`, `dateId`, `dateTimeId` ke `src/lib/format.ts` (tanpa `'use client'`), ekspor ulang dari `ui.tsx`, impor dari `@/lib/format` di `page.tsx`. Selesai bila `npx next build` sukses dan `/` tampil.
+- [x] **Buat dashboard admin** `src/app/admin/page.tsx` (teruji: `npm run e2e:admin` 42 pemeriksaan, `tests/admin.test.ts`; detail di PROJECT_STATUS 2f). Backend: `POST /api/admin` dengan aksi `content`, `upsert`, `delete`, `publish`, `versions`, `restore`, `import-bundled`, `payments`. Isi minimal:
   - Pembayaran: jumlah pengguna Free/Premium, transaksi berhasil/tertunda/gagal/ditinjau, pendapatan bulan dan tahun ini, pendapatan per bulan, riwayat pembayaran, masa aktif pelanggan, status dan log webhook (semua sudah dikembalikan oleh aksi `payments`).
   - CMS: daftar dan form edit untuk bab, unit, pelajaran (status draft/published, passing score, materi, contoh, tujuan), soal + opsi (kunci, penjelasan, alasan salah, tingkat kesulitan, audio), PR, ujian, audio; tombol terbitkan dengan daftar masalah dari gerbang kualitas; daftar versi + rollback.
   - Halaman menolak non-admin (API sudah menolak dengan 403).
+- [~] Uji di browser bagian dashboard admin yang baru tampil: editor jawaban salah yang dikenali, pasangan, tugas menulis, kolom JSON, form PR/ujian/kosakata/audio, pindah urutan baris, impor ulang paket bawaan. Tambahkan ke `e2e/admin.mjs`.
 - [ ] **Perbaiki skrip `package.json` yang menunjuk file tidak ada**: buat `e2e/run.mjs` dan `scripts/export-content.ts`, atau hapus skripnya.
 - [ ] **Buat `e2e/run.mjs`** memakai `e2e/lib.mjs` (helper `answerCurrent`, `runSession`, `check` sudah ada). Ulangi alur yang sudah diverifikasi manual di sesi serah terima: pelajaran penuh sebagai tamu, daftar + progres tamu pindah, checkout QRIS + simulasi bayar → Premium aktif, checkout DANA tertunda + riwayat, percakapan sampai selesai, tes penempatan berhenti di A2, cek semua rute tanpa error.
 - [x] Mesin belajar deterministik (penilaian, penguasaan, pengulangan berjarak, rekomendasi, buka-kunci, ujian, penempatan, gamifikasi).
@@ -46,7 +47,8 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [ ] Alur admin untuk transaksi `NEEDS_REVIEW` (periksa, aktifkan manual, atau catat refund).
 - [ ] Rekonsiliasi berkala transaksi `PENDING` (sekarang status hanya dicek ulang saat pengguna membuka halaman checkout; webhook tetap sumber utama).
 - [ ] Pengingat masa aktif Premium hampir habis (saat ini hanya lencana "Segera berakhir" di halaman paket bila ≤ 7 hari).
-- [ ] Unggah audio dari dashboard admin (storage).
+- [ ] Unggah audio dari dashboard admin (storage). Saat ini admin hanya bisa mendaftarkan URL berkas yang sudah diunggah.
+- [ ] Editor visual untuk skenario percakapan dan panduan pelafalan di dashboard admin (sekarang kolom JSON).
 - [ ] Uji mode belajar offline (IndexedDB + `public/sw.js`) di browser, termasuk sinkronisasi setelah kembali online.
 - [ ] `scripts/export-content.ts`: ekspor kurikulum dari DB ke file, agar perubahan CMS bisa dicadangkan.
 - [ ] README khusus proyek (ringkas, menunjuk ke empat dokumen ini).
@@ -56,6 +58,6 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 
 - [ ] QA visual mode gelap di semua halaman.
 - [ ] Audit aksesibilitas (pembaca layar pada `SessionRunner`, kontras, fokus).
-- [ ] Peringatan React "script tag" dari skrip tema di `src/app/layout.tsx`: periksa ulang setelah bug P0 diperbaiki; bila masih ada, pakai `next/script` `beforeInteractive`.
+- [x] Peringatan React "script tag" dari skrip tema di `src/app/layout.tsx`: tidak muncul lagi setelah bug landing diperbaiki.
 - [ ] Rapikan ekspresi progress bar di `SessionRunner` (`items.length + (result ? 0 : 0)`; tidak salah, hanya berlebihan).
 - [ ] Optimasi ukuran pack konten yang dikirim ke klien bila kurikulum membesar (mis. muat per level).

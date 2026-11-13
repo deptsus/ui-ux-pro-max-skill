@@ -1,7 +1,7 @@
 # PROJECT_STATUS — Lentera English
 
-Terakhir diperbarui: 13 November 2026, saat serah terima ke sesi berikutnya.
-Branch kerja: `ccr-33e68053-ob8ny7` di repo `deptsus/ui-ux-pro-max-skill`.
+Terakhir diperbarui: 13 November 2026, setelah sesi kedua (perbaikan landing + dashboard admin).
+Branch kerja: `ccr-17d3d5e4-jx43zs` di repo `deptsus/ui-ux-pro-max-skill` (melanjutkan `ccr-33e68053-ob8ny7`).
 Lokasi proyek: `projects/lentera-english/` (lihat bagian "Konteks repo" di bawah).
 
 Semua status di dokumen ini diperiksa langsung pada kode dan dengan menjalankan
@@ -84,7 +84,7 @@ Repo `ui-ux-pro-max-skill` adalah produk lain (toolkit desain). Aplikasi ini han
 - Idempotensi dua lapis: webhook duplikat (termasuk 4 kiriman bersamaan) hanya memberi satu periode.
 - Kasus diuji: sukses, gagal, tertunda, kedaluwarsa, webhook duplikat, nominal tidak sesuai, token palsu, ID gateway milik transaksi lain, uang masuk setelah jendela lokal habis, Premium kedaluwarsa kembali Free tanpa kehilangan progres, perpanjangan lebih awal ditumpuk setelah periode berjalan.
 - Data pembayar dari payload webhook tidak disimpan (diuji).
-- Ringkasan admin: jumlah pengguna Free/Premium, transaksi per status, pendapatan bulanan/tahunan, riwayat, masa aktif, log webhook (fungsi SQL dan API diuji; **UI belum dibuat**).
+- Ringkasan admin: jumlah pengguna Free/Premium, transaksi per status, pendapatan bulanan/tahunan, riwayat, masa aktif, log webhook (fungsi SQL dan API diuji; UI ada di `/admin`, lihat 2f).
 
 **Belum siap produksi.** Lihat bagian 4.
 
@@ -117,19 +117,45 @@ teruji di alur pelajaran dan tes penempatan.
 
 `npx tsc --noEmit` lolos tanpa error.
 
+### 2f. Landing dan dashboard admin (sesi kedua)
+
+- **Landing `/`**: Bug #1 diperbaiki. `npx next build` sukses, `/` merespons 200 dan tampil tanpa error atau peringatan konsol (dev dan build produksi).
+- **Dashboard admin `/admin`** (`src/app/admin/page.tsx`, komponen di `src/components/admin/`). Tiga tab:
+  - **Pembayaran**: pengguna total/Free/Premium, transaksi berhasil/tertunda/gagal/perlu ditinjau, pendapatan bulan dan tahun ini, grafik pendapatan 12 bulan (dengan tampilan tabel), riwayat pembayaran (cari + filter status), masa aktif pelanggan, status dan log webhook. Semua angka dari `admin_payment_overview`.
+  - **Konten (CMS)**: daftar, cari, filter, tambah, edit, hapus untuk 14 tabel: level, bab, unit, pelajaran, soal + pilihan jawaban, PR, ujian, topik, pola kesalahan, kosakata, percakapan, menyimak, pelafalan, audio. Form dibangkitkan dari `schema.ts`; validasi dijalankan sebelum kirim dan diulang oleh basis data.
+  - **Terbitkan**: terbitkan dengan gerbang kualitas (daftar masalah + tombol "Buka" ke baris yang bermasalah), riwayat versi, pulihkan versi lama, impor ulang paket bawaan (dengan konfirmasi ketik "IMPOR").
+  - Gerbang akses: tamu diminta masuk, non-admin melihat "Akses ditolak" dan tidak memicu permintaan data admin; server tetap menolak dengan 403.
+
+**Teruji** (`npm run e2e:admin`, 42 pemeriksaan lolos di dev dan di build produksi, desktop + layar ponsel 390 px, tanpa error konsol):
+
+| Alur | Hasil |
+|---|---|
+| Tamu dan non-admin membuka `/admin` | Ditolak di halaman; API 403 |
+| Tab Pembayaran setelah 1 QRIS berhasil + 1 DANA tertunda | Tile, riwayat, filter status, masa aktif, log webhook, grafik cocok dengan data server |
+| Edit ringkasan pelajaran lalu simpan | Tersimpan di DB; materi dan tujuan tidak berubah; pelajar belum menerimanya sebelum terbit |
+| Hapus alasan pilihan salah lalu simpan | Ditolak sebelum dikirim; "Buang perubahan" tidak mengubah soal |
+| Tambah soal pilihan ganda baru, lalu hapus | Tersimpan sebagai draf dengan pilihan + alasan; terhapus setelah konfirmasi |
+| Terbitkan pelajaran tanpa soal tes penguasaan | Ditolak gerbang kualitas; versi pelajar tetap; "Buka" membawa ke pelajarannya |
+| Terbitkan setelah diperbaiki | Versi 2 dipakai pelajar; `/api/content` berisi perubahan; draf tidak ikut |
+| Pulihkan versi 1 | Pelajar kembali ke versi 1; konten kerja tidak berubah |
+
+**Teruji** (`tests/admin.test.ts`, 4 tes, Postgres sungguhan via PGlite): setiap kolom di `schema.ts` ada di tabelnya; semua baris kurikulum bawaan lolos validasi form; menyimpan ulang **setiap** baris dari semua 14 tabel tanpa perubahan menghasilkan kurikulum yang identik; kunci payload yang tidak dikenal form tetap tersimpan.
+
+**Tampil tetapi belum dijalankan di browser**: editor jawaban salah yang dikenali, pasangan, tugas menulis, kolom JSON (percakapan, pelafalan), form PR/ujian/kosakata/audio, pindah urutan baris, dan aksi impor ulang paket bawaan. Logika simpannya tercakup oleh tes bolak-balik di atas, tetapi interaksi UI-nya belum diuji.
+
+Total unit test sekarang 78 (74 lama + 4 baru), semua lolos dengan `TZ=UTC npx vitest run`.
+
 ---
 
 ## 3. Fitur yang sedang dikerjakan (belum selesai)
 
 | Fitur | Kondisi sebenarnya |
 |---|---|
-| Halaman landing `/` | Kode ada di `src/app/page.tsx`, **tetapi rusak**: error 500 dan membuat `next build` gagal (lihat Bug #1). Ini file terakhir yang ditulis. |
-| Dashboard admin (CMS + pembayaran) | Backend (SQL + `POST /api/admin`) selesai dan teruji. **Halaman UI belum dibuat**: `/admin` mengembalikan 404, padahal footer landing menautkannya. |
-| Suite e2e | Helper `e2e/lib.mjs` ada. Runner `e2e/run.mjs` yang dirujuk `npm run e2e` **belum ada**. Skrip uji alur sesi ini hanya ada di scratchpad sesi (tidak ikut repo). |
+| Suite e2e | Helper `e2e/lib.mjs` dan `e2e/admin.mjs` (dashboard admin) ada. Runner `e2e/run.mjs` untuk alur pembelajar, yang dirujuk `npm run e2e`, **belum ada**. |
+| Dashboard admin | Berfungsi dan teruji (lihat 2f). Yang belum: tindak lanjut transaksi `NEEDS_REVIEW` dan unggah berkas audio (keduanya P2); editor percakapan dan pelafalan masih berupa kolom JSON. |
 
 ## 4. Fitur yang belum dibuat
 
-- UI admin: kelola kursus/bab/unit/pelajaran/soal/opsi/audio, terbitkan & rollback versi, dashboard pembayaran.
 - Rekaman audio penutur asli. Tabel `audio_resources` kosong; saat ini audio dibacakan oleh suara bawaan perangkat (`speechSynthesis`) dan UI menyatakannya terang-terangan. Pemutar sudah siap memakai rekaman bila diunggah.
 - 24 pelajaran yang masih "Sedang disusun", serta ujian level B1 sampai C2.
 - Koneksi ke Supabase sungguhan: migrasi belum pernah diterapkan ke proyek Supabase mana pun; jalur Supabase Auth dan PostgREST belum pernah dijalankan.
@@ -143,10 +169,10 @@ teruji di alur pelajaran dan tes penempatan.
 
 | # | Tingkat | Bug | Bukti | Perbaikan yang disarankan |
 |---|---|---|---|---|
-| 1 | **Kritis** | `/` error 500 dan `next build` gagal: `src/app/page.tsx` (server component) memanggil `rupiah()` dari `src/components/ui.tsx` yang bertanda `'use client'`. | `next build` → "Attempted to call rupiah() from the server" di `page.tsx:111`. | Pindahkan `rupiah`, `dateId`, `dateTimeId` ke file baru tanpa `'use client'` (mis. `src/lib/format.ts`), ekspor ulang dari `ui.tsx` agar impor lama tetap jalan, lalu impor dari `@/lib/format` di `page.tsx`. Jalankan ulang `npx next build`. |
-| 2 | Tinggi | `/admin` 404, ditautkan dari footer landing. | Pengecekan rute. | Buat halaman admin (lihat TODO P0). |
+| 1 | ~~Kritis~~ **Selesai** | `/` error 500 dan `next build` gagal karena `page.tsx` memanggil `rupiah()` dari modul `'use client'`. | Diperbaiki: formatter dipindah ke `src/lib/format.ts`, diekspor ulang dari `ui.tsx`. `next build` sukses, `/` 200. | — |
+| 2 | ~~Tinggi~~ **Selesai** | `/admin` 404. | Halaman dibuat; `/admin` 200 dan teruji (2f). | — |
 | 3 | Sedang | `package.json` merujuk file yang tidak ada: `e2e/run.mjs` (`npm run e2e`) dan `scripts/export-content.ts` (`npm run content:export`). | `ls e2e scripts`. | Buat file tersebut atau hapus skripnya. |
-| 4 | Rendah | Peringatan React "Encountered a script tag while rendering React component" (skrip tema di `src/app/layout.tsx`). Terlihat hanya saat halaman error `/` dirender. | Log browser. | Periksa ulang setelah Bug #1 diperbaiki; bila masih muncul, pakai `next/script` dengan `strategy="beforeInteractive"`. |
+| 4 | ~~Rendah~~ **Tidak muncul lagi** | Peringatan React "Encountered a script tag" dari skrip tema. | Setelah Bug #1 diperbaiki, `/`, `/masuk`, `/daftar`, `/admin`, `/app`, `/app/analytics`, `/app/subscription` dibuka di dev tanpa error maupun peringatan konsol. | — |
 
 Catatan: satu cek otomatis sempat gagal ("riwayat transaksi tampil"), tetapi setelah diulang dengan menunggu data selesai dimuat, fitur itu terbukti berfungsi. Itu masalah waktu tunggu di skrip uji, bukan bug.
 
@@ -159,23 +185,37 @@ Urutan commit di branch:
 3. `3c0053e` (WIP) API routes, client store, UI latihan, sebagian besar halaman pembelajar.
 4. Sesudah itu (di-commit bersama dokumen serah terima ini): halaman `profile`, `settings`, `more`, `subscription`, `checkout`, `masuk`, `daftar`, `src/components/AuthForm.tsx`, `src/lib/plans.ts`, dan halaman landing `src/app/page.tsx` (yang masih rusak, Bug #1).
 
-Lalu sesi serah terima ini: memeriksa kode, menjalankan typecheck, validasi konten, 74 unit test, `next build`, pengecekan semua rute, dan uji alur di browser. Tidak ada kode aplikasi yang diubah di sesi ini.
+Lalu sesi serah terima: memeriksa kode, menjalankan typecheck, validasi konten, 74 unit test, `next build`, pengecekan semua rute, dan uji alur di browser. Tidak ada kode aplikasi yang diubah di sesi itu.
+
+Sesi kedua (branch `ccr-17d3d5e4-jx43zs`):
+
+5. Perbaikan Bug #1: `src/lib/format.ts` baru, ekspor ulang di `ui.tsx`, impor di `page.tsx`.
+6. Dashboard admin: `src/app/admin/page.tsx`, `src/components/admin/*`, mode nilai besar di `BarChart` (`src/components/Charts.tsx`), `compactId` di `format.ts`, `e2e/admin.mjs`, `tests/admin.test.ts`, skrip `npm run e2e:admin`.
 
 ## 7. File terakhir yang diubah
 
-1. `src/app/page.tsx` — landing (terakhir ditulis; berisi Bug #1).
-2. `src/app/app/checkout/page.tsx`, `src/app/app/subscription/page.tsx`, `src/lib/plans.ts`.
-3. `src/components/AuthForm.tsx`, `src/app/masuk/page.tsx`, `src/app/daftar/page.tsx`.
-4. `src/app/app/profile/page.tsx`, `src/app/app/settings/page.tsx`, `src/app/app/more/page.tsx`.
-5. Dokumen ini: `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `TODO.md`, `DECISIONS.md`.
+1. `src/app/admin/page.tsx`, `src/components/admin/{schema.ts,fields.tsx,CmsPanel.tsx,PaymentsPanel.tsx,PublishPanel.tsx,Confirm.tsx,api.ts}`.
+2. `e2e/admin.mjs`, `tests/admin.test.ts`, `package.json` (skrip `e2e:admin`).
+3. `src/components/Charts.tsx` (prop `format` dan `column` pada `BarChart`; grafik lama tidak berubah), `src/lib/format.ts`.
+4. `src/components/ui.tsx`, `src/app/page.tsx` (perbaikan Bug #1).
+5. Dokumen: `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `TODO.md`.
 
 ## 8. Langkah persis berikutnya
 
 1. `cd projects/lentera-english && npm install` (bila `node_modules` belum ada).
-2. Perbaiki Bug #1 seperti di tabel bagian 5. Verifikasi: `npx next build` sukses dan `/` tampil.
-3. Jalankan `npx tsc --noEmit`, `TZ=UTC npx vitest run` (harus 74/74), `npx tsx scripts/check-content.ts`.
-4. Buat dashboard admin di `src/app/admin/page.tsx` (lihat TODO P0-2). Backend-nya sudah ada: `src/app/api/admin/route.ts`.
-5. Buat `e2e/run.mjs` memakai `e2e/lib.mjs` untuk mengulang alur di bagian 2e.
+2. Jalankan `npx tsc --noEmit`, `TZ=UTC npx vitest run` (harus 78/78), `npx tsx scripts/check-content.ts`, `npx next build`.
+3. Buat `e2e/run.mjs` memakai `e2e/lib.mjs` untuk mengulang alur pembelajar di bagian 2e, dan bereskan Bug #3 (`scripts/export-content.ts`).
+4. Uji di browser bagian dashboard admin yang baru "Tampil" (daftar di 2f).
+5. Lanjut ke TODO P0 sisanya: proyek Supabase dan verifikasi sandbox Xendit (keduanya butuh kredensial dari pemilik produk).
+
+Menguji dashboard admin (butuh basis data embedded yang masih baru, karena skrip memeriksa nomor versi):
+
+```bash
+cd projects/lentera-english
+LENTERA_BACKEND=embedded LENTERA_DEV_ADMIN_EMAIL=admin@lentera.test \
+  LENTERA_DATA_DIR=/tmp/lentera-e2e/pglite npx next dev -p 3100   # hapus folder itu dulu bila sudah ada
+npm run e2e:admin
+```
 
 Cara menjalankan lokal (tanpa layanan luar):
 

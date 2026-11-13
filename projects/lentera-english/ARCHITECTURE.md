@@ -38,7 +38,8 @@ projects/lentera-english/
 ├── scripts/check-content.ts  Gerbang kualitas konten (npm run content:check)
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx          Landing (server component) — RUSAK, lihat PROJECT_STATUS Bug #1
+│   │   ├── page.tsx          Landing (server component)
+│   │   ├── admin/page.tsx    Dashboard admin: gerbang akses + tab Pembayaran, Konten, Terbitkan
 │   │   ├── layout.tsx        Root layout, skrip tema sebelum paint
 │   │   ├── globals.css       Token warna (CSS variables) + Tailwind
 │   │   ├── masuk/, daftar/   Login & registrasi (AuthForm)
@@ -61,6 +62,8 @@ projects/lentera-english/
 │   │       └── dev-auth/     Akun lokal (hanya mode embedded)
 │   ├── components/           UI: ui.tsx (primitif), ExerciseCard, SessionRunner, LessonContent,
 │   │                         AudioButton, Charts, Mouth, Mascot, AuthForm, nav.ts
+│   │   └── admin/            Dashboard admin: schema.ts (definisi form tiap tabel CMS + validasi),
+│   │                         fields.tsx (kontrol form), CmsPanel, PaymentsPanel, PublishPanel, Confirm, api.ts
 │   └── lib/
 │       ├── content/          types.ts (model konten), validate.ts, rows.ts (pack ⇄ baris DB, packForFree)
 │       ├── engine/           Mesin belajar murni (tanpa React/IO): grading, mastery, srs, state,
@@ -68,6 +71,7 @@ projects/lentera-english/
 │       ├── client/           session.ts, store.ts (state offline-first), content.ts (IndexedDB/offline),
 │       │                     api.ts, audio.ts, hooks.ts
 │       ├── server/           db.ts, auth.ts, api.ts, content.ts, payments.ts, xendit.ts, xendit-mock.ts
+│       ├── format.ts         rupiah, dateId, dateTimeId, compactId. Tanpa 'use client', aman untuk server component
 │       └── plans.ts          Teks paket untuk tampilan (harga tagihan tetap dari DB)
 ├── supabase/
 │   ├── migrations/0001_schema.sql     Tabel
@@ -75,8 +79,9 @@ projects/lentera-english/
 │   ├── migrations/0003_functions.sql  Akun, sync, leaderboard, CMS
 │   ├── migrations/0004_payments.sql   Pembayaran + kunci semua fungsi ke service_role
 │   └── test-shim.sql                  Tiruan auth/roles Supabase. HANYA untuk PGlite. Jangan dijalankan di Supabase.
-├── tests/                    engine.test.ts, db.test.ts, payments.test.ts, helpers.ts
+├── tests/                    engine.test.ts, db.test.ts, payments.test.ts, admin.test.ts, helpers.ts
 ├── e2e/lib.mjs               Helper Playwright (menjawab soal apa pun memakai kunci dari pack)
+├── e2e/admin.mjs             Uji ujung ke ujung dashboard admin (npm run e2e:admin, butuh basis data embedded baru)
 ├── public/                   sw.js (service worker offline), manifest, icon
 └── PROJECT_STATUS.md, ARCHITECTURE.md, TODO.md, DECISIONS.md
 ```
