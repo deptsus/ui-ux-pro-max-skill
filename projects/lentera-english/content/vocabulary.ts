@@ -1,0 +1,106 @@
+// Vocabulary library. IPA follows a broad general transcription.
+import type { Cefr, VocabItem } from '@/lib/content/types';
+
+type Row = [word: string, ipa: string, pos: string, meaning: string, example: string, exampleId: string];
+const set = (level: Cefr, name: string, premium: boolean, rows: Row[]): VocabItem[] =>
+  rows.map(([word, ipa, pos, meaning, example, exampleId]) => ({
+    id: word.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, ''),
+    word, ipa, pos, meaning, example, exampleId, level, set: name, premium,
+  }));
+
+export const vocabulary: VocabItem[] = [
+  ...set('A1', 'Sapaan', false, [
+    ['hello', '/həˈləʊ/', 'interjection', 'halo', 'Hello, my name is Rina.', 'Halo, nama saya Rina.'],
+    ['morning', '/ˈmɔːnɪŋ/', 'noun', 'pagi', 'Good morning, class.', 'Selamat pagi, anak-anak.'],
+    ['afternoon', '/ˌɑːftəˈnuːn/', 'noun', 'siang / sore', 'Good afternoon, sir.', 'Selamat siang, Pak.'],
+    ['evening', '/ˈiːvnɪŋ/', 'noun', 'malam (saat bertemu)', 'Good evening, everyone.', 'Selamat malam, semuanya.'],
+    ['name', '/neɪm/', 'noun', 'nama', 'What is your name?', 'Siapa namamu?'],
+    ['thank you', '/ˈθæŋk juː/', 'phrase', 'terima kasih', 'Thank you for your help.', 'Terima kasih atas bantuanmu.'],
+    ['please', '/pliːz/', 'adverb', 'tolong / silakan', 'Please sit down.', 'Silakan duduk.'],
+    ['sorry', '/ˈsɒri/', 'adjective', 'maaf', 'Sorry, I am late.', 'Maaf, saya terlambat.'],
+  ]),
+  ...set('A1', 'Orang dan Pekerjaan', false, [
+    ['student', '/ˈstjuːdnt/', 'noun', 'pelajar / mahasiswa', 'I am a student.', 'Saya seorang pelajar.'],
+    ['teacher', '/ˈtiːtʃə/', 'noun', 'guru', 'My mother is a teacher.', 'Ibu saya seorang guru.'],
+    ['friend', '/frend/', 'noun', 'teman', 'She is my best friend.', 'Dia sahabat saya.'],
+    ['doctor', '/ˈdɒktə/', 'noun', 'dokter', 'The doctor is very kind.', 'Dokter itu sangat baik.'],
+    ['engineer', '/ˌendʒɪˈnɪə/', 'noun', 'insinyur', 'He is an engineer.', 'Dia seorang insinyur.'],
+    ['child', '/tʃaɪld/', 'noun', 'anak (jamak: children)', 'The child is asleep.', 'Anak itu sedang tidur.'],
+    ['family', '/ˈfæməli/', 'noun', 'keluarga', 'My family lives in Solo.', 'Keluarga saya tinggal di Solo.'],
+    ['neighbour', '/ˈneɪbə/', 'noun', 'tetangga', 'Our neighbour is friendly.', 'Tetangga kami ramah.'],
+  ]),
+  ...set('A1', 'Sifat dan Perasaan', false, [
+    ['happy', '/ˈhæpi/', 'adjective', 'senang / bahagia', 'We are happy today.', 'Kami senang hari ini.'],
+    ['tired', '/ˈtaɪəd/', 'adjective', 'lelah', 'I am tired after work.', 'Saya lelah sepulang kerja.'],
+    ['hungry', '/ˈhʌŋɡri/', 'adjective', 'lapar', 'The children are hungry.', 'Anak-anak itu lapar.'],
+    ['busy', '/ˈbɪzi/', 'adjective', 'sibuk', 'She is busy this week.', 'Dia sibuk minggu ini.'],
+    ['ready', '/ˈredi/', 'adjective', 'siap', 'Are you ready?', 'Apakah kamu siap?'],
+    ['sick', '/sɪk/', 'adjective', 'sakit', 'He was sick yesterday.', 'Dia sakit kemarin.'],
+    ['late', '/leɪt/', 'adjective', 'terlambat', 'Sorry, I am late.', 'Maaf, saya terlambat.'],
+    ['kind', '/kaɪnd/', 'adjective', 'baik hati', 'Our teacher is kind.', 'Guru kami baik hati.'],
+  ]),
+  ...set('A1', 'Benda Sehari-hari', false, [
+    ['apple', '/ˈæpl/', 'noun', 'apel', 'I eat an apple every day.', 'Saya makan apel setiap hari.'],
+    ['book', '/bʊk/', 'noun', 'buku', 'This is my book.', 'Ini buku saya.'],
+    ['umbrella', '/ʌmˈbrelə/', 'noun', 'payung', 'Take an umbrella.', 'Bawalah payung.'],
+    ['hour', '/ˈaʊə/', 'noun', 'jam (lamanya waktu)', 'We waited for an hour.', 'Kami menunggu selama satu jam.'],
+    ['pen', '/pen/', 'noun', 'pena', 'Can I borrow your pen?', 'Bolehkah saya meminjam penamu?'],
+    ['chair', '/tʃeə/', 'noun', 'kursi', 'The chair is broken.', 'Kursi itu rusak.'],
+    ['box', '/bɒks/', 'noun', 'kotak', 'The box is heavy.', 'Kotak itu berat.'],
+    ['house', '/haʊs/', 'noun', 'rumah', 'That is my house.', 'Itu rumah saya.'],
+    ['breakfast', '/ˈbrekfəst/', 'noun', 'sarapan', 'I have breakfast at six.', 'Saya sarapan pukul enam.'],
+  ]),
+  ...set('A1', 'Kegiatan dan Frekuensi', false, [
+    ['work', '/wɜːk/', 'verb', 'bekerja', 'They work in a bank.', 'Mereka bekerja di bank.'],
+    ['study', '/ˈstʌdi/', 'verb', 'belajar', 'I study English at night.', 'Saya belajar bahasa Inggris pada malam hari.'],
+    ['watch', '/wɒtʃ/', 'verb', 'menonton', 'We watch TV together.', 'Kami menonton TV bersama.'],
+    ['like', '/laɪk/', 'verb', 'suka', 'I like spicy food.', 'Saya suka makanan pedas.'],
+    ['speak', '/spiːk/', 'verb', 'berbicara', 'She speaks three languages.', 'Dia berbicara tiga bahasa.'],
+    ['live', '/lɪv/', 'verb', 'tinggal', 'We live in Jakarta.', 'Kami tinggal di Jakarta.'],
+    ['always', '/ˈɔːlweɪz/', 'adverb', 'selalu', 'He always gets up early.', 'Dia selalu bangun pagi.'],
+    ['sometimes', '/ˈsʌmtaɪmz/', 'adverb', 'kadang-kadang', 'I sometimes walk to school.', 'Saya kadang-kadang berjalan ke sekolah.'],
+    ['never', '/ˈnevə/', 'adverb', 'tidak pernah', 'She never eats meat.', 'Dia tidak pernah makan daging.'],
+  ]),
+  ...set('A2', 'Masa Lalu', true, [
+    ['yesterday', '/ˈjestədeɪ/', 'adverb', 'kemarin', 'I was at home yesterday.', 'Saya di rumah kemarin.'],
+    ['last night', '/lɑːst naɪt/', 'phrase', 'tadi malam', 'We watched a film last night.', 'Kami menonton film tadi malam.'],
+    ['ago', '/əˈɡəʊ/', 'adverb', 'yang lalu', 'He left two days ago.', 'Dia pergi dua hari yang lalu.'],
+    ['cook', '/kʊk/', 'verb', 'memasak', 'She cooked dinner.', 'Dia memasak makan malam.'],
+    ['visit', '/ˈvɪzɪt/', 'verb', 'mengunjungi', 'We visited our aunt.', 'Kami mengunjungi bibi kami.'],
+    ['go', '/ɡəʊ/', 'verb', 'pergi (lampau: went)', 'They went to Bali.', 'Mereka pergi ke Bali.'],
+    ['eat', '/iːt/', 'verb', 'makan (lampau: ate)', 'I ate fried rice.', 'Saya makan nasi goreng.'],
+    ['buy', '/baɪ/', 'verb', 'membeli (lampau: bought)', 'She bought a new bag.', 'Dia membeli tas baru.'],
+    ['see', '/siː/', 'verb', 'melihat (lampau: saw)', 'We saw a rainbow.', 'Kami melihat pelangi.'],
+    ['take', '/teɪk/', 'verb', 'mengambil / naik (lampau: took)', 'He took the bus.', 'Dia naik bus.'],
+  ]),
+  ...set('A2', 'Perjalanan', true, [
+    ['ticket', '/ˈtɪkɪt/', 'noun', 'tiket', 'I need a ticket to Bandung.', 'Saya butuh tiket ke Bandung.'],
+    ['luggage', '/ˈlʌɡɪdʒ/', 'noun', 'bagasi (tidak bisa dihitung)', 'My luggage is heavy.', 'Bagasi saya berat.'],
+    ['delay', '/dɪˈleɪ/', 'noun', 'penundaan', 'There is a two-hour delay.', 'Ada penundaan dua jam.'],
+    ['reservation', '/ˌrezəˈveɪʃn/', 'noun', 'reservasi', 'I have a reservation for two nights.', 'Saya punya reservasi untuk dua malam.'],
+    ['direction', '/dəˈrekʃn/', 'noun', 'arah', 'Can you give me directions?', 'Bisakah Anda menunjukkan arah?'],
+    ['straight', '/streɪt/', 'adverb', 'lurus', 'Go straight ahead.', 'Jalan lurus saja.'],
+  ]),
+  ...set('B1', 'Dunia Kerja', true, [
+    ['deadline', '/ˈdedlaɪn/', 'noun', 'tenggat', 'The deadline is next Friday.', 'Tenggatnya Jumat depan.'],
+    ['colleague', '/ˈkɒliːɡ/', 'noun', 'rekan kerja', 'My colleagues are supportive.', 'Rekan kerja saya suportif.'],
+    ['experience', '/ɪkˈspɪəriəns/', 'noun', 'pengalaman', 'I have three years of experience.', 'Saya punya tiga tahun pengalaman.'],
+    ['apply', '/əˈplaɪ/', 'verb', 'melamar / menerapkan', 'She applied for the job.', 'Dia melamar pekerjaan itu.'],
+    ['schedule', '/ˈʃedjuːl/', 'noun', 'jadwal', 'Let me check my schedule.', 'Biar saya periksa jadwal saya.'],
+    ['improve', '/ɪmˈpruːv/', 'verb', 'meningkatkan', 'I want to improve my English.', 'Saya ingin meningkatkan bahasa Inggris saya.'],
+  ]),
+  ...set('B2', 'Akademik', true, [
+    ['significant', '/sɪɡˈnɪfɪkənt/', 'adjective', 'signifikan / berarti', 'There was a significant increase.', 'Terjadi peningkatan yang signifikan.'],
+    ['evidence', '/ˈevɪdəns/', 'noun', 'bukti (tidak bisa dihitung)', 'The evidence supports the claim.', 'Bukti itu mendukung klaim tersebut.'],
+    ['approach', '/əˈprəʊtʃ/', 'noun', 'pendekatan', 'We need a new approach.', 'Kita butuh pendekatan baru.'],
+    ['conduct', '/kənˈdʌkt/', 'verb', 'melaksanakan', 'The survey was conducted in May.', 'Survei itu dilaksanakan pada bulan Mei.'],
+    ['assume', '/əˈsjuːm/', 'verb', 'mengasumsikan', 'Do not assume it is correct.', 'Jangan berasumsi itu benar.'],
+  ]),
+  ...set('C1', 'Register Formal', true, [
+    ['nevertheless', '/ˌnevəðəˈles/', 'adverb', 'meskipun demikian', 'It was costly; nevertheless, it was worthwhile.', 'Biayanya mahal; meskipun demikian, hasilnya sepadan.'],
+    ['albeit', '/ˌɔːlˈbiːɪt/', 'conjunction', 'walaupun', 'He agreed, albeit reluctantly.', 'Dia setuju, walaupun dengan enggan.'],
+    ['mitigate', '/ˈmɪtɪɡeɪt/', 'verb', 'mengurangi (dampak)', 'Measures were taken to mitigate the risk.', 'Langkah-langkah diambil untuk mengurangi risiko.'],
+    ['unprecedented', '/ʌnˈpresɪdentɪd/', 'adjective', 'belum pernah terjadi sebelumnya', 'The response was unprecedented.', 'Tanggapannya belum pernah terjadi sebelumnya.'],
+    ['scrutiny', '/ˈskruːtəni/', 'noun', 'pengawasan cermat', 'The policy is under scrutiny.', 'Kebijakan itu sedang diawasi dengan cermat.'],
+  ]),
+];

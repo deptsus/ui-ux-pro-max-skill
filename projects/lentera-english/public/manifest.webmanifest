@@ -1,0 +1,11 @@
+{
+  "name": "Lentera English",
+  "short_name": "Lentera",
+  "description": "Sekolah bahasa Inggris digital untuk pelajar Indonesia.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#f6f5fb",
+  "theme_color": "#4b3fd6",
+  "lang": "id",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
