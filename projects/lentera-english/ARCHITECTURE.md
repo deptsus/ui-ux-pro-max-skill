@@ -36,6 +36,7 @@ projects/lentera-english/
 │   ├── listening.ts          Materi menyimak, fonem, soal tes penempatan
 │   └── index.ts              Silabus, topik, pola kesalahan, buildPack() → ContentPack
 ├── scripts/check-content.ts  Gerbang kualitas konten (npm run content:check)
+├── scripts/export-content.ts Cadangkan kurikulum dari basis data ke backups/*.json (npm run content:export)
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx          Landing (server component)
@@ -81,6 +82,7 @@ projects/lentera-english/
 │   └── test-shim.sql                  Tiruan auth/roles Supabase. HANYA untuk PGlite. Jangan dijalankan di Supabase.
 ├── tests/                    engine.test.ts, db.test.ts, payments.test.ts, admin.test.ts, helpers.ts
 ├── e2e/lib.mjs               Helper Playwright (menjawab soal apa pun memakai kunci dari pack)
+├── e2e/run.mjs               Suite e2e pembelajar di layar ponsel (npm run e2e): rute, pelajaran, PR, ulangan, ujian, percakapan, penempatan, pembayaran
 ├── e2e/admin.mjs             Uji ujung ke ujung dashboard admin (npm run e2e:admin, butuh basis data embedded baru)
 ├── public/                   sw.js (service worker offline), manifest, icon
 └── PROJECT_STATUS.md, ARCHITECTURE.md, TODO.md, DECISIONS.md

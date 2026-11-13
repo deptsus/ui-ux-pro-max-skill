@@ -204,7 +204,8 @@ await tab('Terbitkan');
 await ui.getByRole('button', { name: 'Periksa dan terbitkan' }).click();
 await ui.getByRole('button', { name: 'Terbitkan', exact: true }).click();
 await ui.getByText(/Versi 2 terbit/).waitFor({ timeout: 30000 });
-check('riwayat versi menandai versi 2 dipakai pelajar', await ui.locator('li', { hasText: `Versi 2 · Uji ${stamp}` }).getByText('Dipakai pelajar').count() === 1);
+// The history reloads right after the success message; wait for it instead of counting at once.
+check('riwayat versi menandai versi 2 dipakai pelajar', await ui.locator('li', { hasText: `Versi 2 · Uji ${stamp}` }).getByText('Dipakai pelajar').waitFor({ timeout: 10000 }).then(() => true, () => false));
 const live = (await get('/api/content')).pack;
 check('pelajar menerima ringkasan baru setelah terbit', live.version === 'db-2' && live.lessons.find((l) => l.id === 'a1-greetings').summary === summary);
 check('pelajaran draf tidak ikut terbit', !live.lessons.some((l) => l.id === badLesson));
@@ -227,7 +228,128 @@ await ui.getByRole('button', { name: 'Hapus permanen' }).click();
 await ui.getByRole('button', { name: 'Tambah pelajaran' }).waitFor({ timeout: 15000 });
 check('pelajaran uji terhapus', !(await post('/api/admin', { action: 'content' }, adminUser.token)).data.lessons.some((l) => l.id === badLesson));
 
-// ───────────── 7. Phone layout ─────────────
+// ───────────── 7. The other editors ─────────────
+const content = async () => (await post('/api/admin', { action: 'content' }, adminUser.token)).data;
+const save = async () => {
+  await ui.getByRole('button', { name: 'Simpan', exact: true }).click();
+  await ui.getByText(/^Tersimpan\./).waitFor({ timeout: 15000 });
+};
+const backToList = () => ui.getByRole('button', { name: /Kembali ke daftar/ }).click();
+/** Opens a row from the list of a content type, by searching for its id. */
+const openRow = async (navName, searchLabel, id) => {
+  await nav.getByRole('button', { name: navName }).click();
+  await ui.getByLabel(searchLabel).fill(id);
+  await ui.locator('ul.divide-y > li > button').first().click();
+  await ui.getByRole('heading', { name: /^Edit / }).waitFor();
+};
+const base = await content();
+
+// Known wrong answers on a typed question: add one, then remove it again.
+const typed = base.questions.find((q) => q.type === 'fill' && Object.keys(q.payload.errors ?? {}).length > 0);
+const known = Object.keys(typed.payload.errors).length;
+await openRow(/^Soal/, 'Cari soal', typed.id);
+await ui.getByRole('button', { name: 'Tambah jawaban salah' }).click();
+await ui.getByLabel(`Jawaban salah ${known + 1}`, { exact: true }).fill('zzz-e2e');
+await save().then(() => check('jawaban salah tanpa penjelasan seharusnya ditolak', false), () => {});
+check('jawaban salah yang dikenali wajib punya penjelasan', await ui.getByText('Setiap jawaban salah yang dikenali wajib punya penjelasan.').count() === 1);
+await ui.getByLabel(`Penjelasan jawaban salah ${known + 1}`).fill('Penjelasan uji.');
+await save();
+let q = (await content()).questions.find((x) => x.id === typed.id);
+check('jawaban salah baru tersimpan tanpa mengubah yang lama', q.payload.errors['zzz-e2e']?.why === 'Penjelasan uji.' && Object.keys(typed.payload.errors).every((k) => JSON.stringify(q.payload.errors[k]) === JSON.stringify(typed.payload.errors[k])));
+await ui.getByRole('button', { name: `Hapus jawaban salah ${known + 1}` }).click();
+await save();
+check('menghapus jawaban salah mengembalikan soal seperti semula', JSON.stringify((await content()).questions.find((x) => x.id === typed.id)) === JSON.stringify(typed));
+await backToList();
+
+// Reordering: swap two pairs of a matching question, then swap back.
+const match = base.questions.find((x) => x.type === 'match');
+await openRow(/^Soal/, 'Cari soal', match.id);
+await ui.getByRole('button', { name: 'Turunkan pasangan 1' }).click();
+await save();
+q = (await content()).questions.find((x) => x.id === match.id);
+check('memindah urutan pasangan tersimpan', JSON.stringify(q.payload.pairs[0]) === JSON.stringify(match.payload.pairs[1]) && JSON.stringify(q.payload.pairs[1]) === JSON.stringify(match.payload.pairs[0]) && q.payload.pairs.length === match.payload.pairs.length);
+await ui.getByRole('button', { name: 'Naikkan pasangan 2' }).click();
+await save();
+check('memindah kembali memulihkan urutan semula', JSON.stringify((await content()).questions.find((x) => x.id === match.id)) === JSON.stringify(match));
+await backToList();
+
+// Writing task of a homework.
+const hwWrite = base.homework.find((h) => h.writing);
+await openRow(/^PR/, 'Cari pr', hwWrite.id);
+await ui.getByLabel(/^Jumlah kata minimal/).fill(String(hwWrite.writing.minWords + 1));
+await save();
+let hwNow = (await content()).homework.find((h) => h.id === hwWrite.id);
+check('tugas menulis tersimpan dan unsur wajibnya utuh', hwNow.writing.minWords === hwWrite.writing.minWords + 1 && JSON.stringify(hwNow.writing.mustInclude) === JSON.stringify(hwWrite.writing.mustInclude) && hwNow.writing.model === hwWrite.writing.model);
+await ui.getByLabel(/^Jumlah kata minimal/).fill(String(hwWrite.writing.minWords));
+await save();
+await backToList();
+
+// Exam settings.
+const exam = base.exams[0];
+await openRow(/^Ujian/, 'Cari ujian', exam.id);
+await ui.getByLabel(/^Jumlah soal yang diambil otomatis/).fill('99');
+await ui.getByRole('button', { name: 'Simpan', exact: true }).click();
+check('angka di luar batas ditolak sebelum dikirim', await ui.getByText('Jumlah soal yang diambil otomatis maksimal 60.').count() === 1);
+await ui.getByLabel(/^Jumlah soal yang diambil otomatis/).fill(String(exam.sample_size + 1));
+await save();
+check('pengaturan ujian tersimpan', (await content()).exams.find((x) => x.id === exam.id).sample_size === exam.sample_size + 1);
+await ui.getByLabel(/^Jumlah soal yang diambil otomatis/).fill(String(exam.sample_size));
+await save();
+await backToList();
+
+// JSON field: broken JSON never reaches the server.
+const sc = base.conversation_scenarios[0];
+await openRow(/^Percakapan/, 'Cari percakapan', sc.id);
+const nodes = ui.getByLabel(/^Giliran dialog \(JSON\)/);
+const original = await nodes.inputValue();
+await nodes.fill(original.slice(0, -5));
+check('JSON rusak ditandai di kolomnya', await ui.getByText(/^JSON belum valid:/).count() === 1);
+await ui.getByRole('button', { name: 'Simpan', exact: true }).click();
+check('JSON rusak tidak bisa disimpan', await ui.getByText('Perbaiki JSON yang belum valid sebelum menyimpan.').count() === 1 && JSON.stringify((await content()).conversation_scenarios.find((x) => x.id === sc.id)) === JSON.stringify(sc));
+await nodes.fill(original);
+check('JSON yang diperbaiki menghapus tanda kesalahan', await ui.getByText(/^JSON belum valid:/).count() === 0);
+await backToList();
+if (await ui.getByRole('button', { name: 'Buang perubahan', exact: true }).isVisible().catch(() => false)) await ui.getByRole('button', { name: 'Buang perubahan', exact: true }).click();
+
+// Audio: register a recording, attach it to a word, delete it again.
+const audioKey = `e2e.audio.${stamp}`;
+await nav.getByRole('button', { name: /^Audio/ }).click();
+check('daftar audio kosong menjelaskan suara perangkat', base.audio_resources.length > 0 || await ui.getByText(/dibacakan oleh suara bawaan perangkat/).count() === 1);
+await ui.getByRole('button', { name: 'Tambah rekaman audio' }).click();
+await ui.locator('#cms-new-id').fill(audioKey);
+await ui.getByLabel(/^URL berkas audio/).fill('ftp://contoh/a.mp3');
+await ui.getByRole('button', { name: 'Simpan', exact: true }).click();
+check('URL audio yang tidak aman ditolak', await ui.getByText('URL audio harus diawali https:// atau /.').count() === 1);
+await ui.getByLabel(/^URL berkas audio/).fill('/audio/e2e.mp3');
+await save();
+check('rekaman audio terdaftar', (await content()).audio_resources.some((a) => a.key === audioKey && a.url === '/audio/e2e.mp3' && a.accent === 'us'));
+await backToList();
+const word = base.vocabulary[0];
+await openRow(/^Kosakata/, 'Cari kosakata', word.id);
+await ui.getByLabel(/^Rekaman audio/).selectOption(audioKey);
+await save();
+check('kosakata terhubung ke rekaman', (await content()).vocabulary.find((v) => v.id === word.id).audio_key === audioKey);
+await backToList();
+await openRow(/^Audio/, 'Cari audio', audioKey);
+await ui.getByRole('button', { name: 'Hapus', exact: true }).click();
+await ui.getByRole('button', { name: 'Hapus permanen' }).click();
+await ui.getByRole('button', { name: 'Tambah rekaman audio' }).waitFor({ timeout: 15000 });
+const afterAudio = await content();
+check('menghapus rekaman melepas tautannya dari kosakata', !afterAudio.audio_resources.some((a) => a.key === audioKey) && afterAudio.vocabulary.find((v) => v.id === word.id).audio_key == null);
+
+// Re-import of the bundled curriculum overwrites CMS edits (typed confirmation required).
+await tab('Terbitkan');
+await ui.getByRole('button', { name: 'Impor ulang...' }).click();
+const confirmImport = ui.getByRole('button', { name: 'Impor dan timpa' });
+check('impor ulang terkunci sampai kata konfirmasi diketik', await confirmImport.isDisabled());
+await ui.getByLabel(/Ketik IMPOR/).fill('IMPOR');
+await confirmImport.click();
+await ui.getByText(/baris diimpor dari paket bawaan/).waitFor({ timeout: 30000 });
+const reimported = await content();
+check('impor ulang mengembalikan pelajaran ke isi bawaan', reimported.lessons.find((l) => l.id === 'a1-greetings').summary === rows.lessons.find((l) => l.id === 'a1-greetings').summary);
+check('impor ulang tidak mengubah versi yang diterima pelajar', (await get('/api/content')).pack.version === 'db-1');
+
+// ───────────── 8. Phone layout ─────────────
 {
   const phone = await open(adminUser, { width: 390, height: 844 });
   await phone.goto(`${BASE}/admin`);

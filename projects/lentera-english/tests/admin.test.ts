@@ -52,6 +52,18 @@ describe('admin CMS schema', () => {
     expect(comparable(await content())).toEqual(comparable(before));
   });
 
+  it('a content_rows export restores an identical curriculum in an empty database', async () => {
+    // scripts/export-content.ts writes exactly this object as its "rows".
+    const exported = await db.rpc<Data>('content_rows', { p_all: true });
+    const other = await openEmbedded(undefined, ROOT);
+    try {
+      await other.rpc('import_content', { p_actor: null, p_rows: exported });
+      expect(comparable(await other.rpc<Data>('content_rows', { p_all: true }))).toEqual(comparable(exported));
+    } finally {
+      await other.close();
+    }
+  });
+
   it('clears optional fields, keeps payload keys it does not know, and rejects invalid rows', async () => {
     const data = await content();
     const def = TABLE.questions;

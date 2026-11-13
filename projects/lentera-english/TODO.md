@@ -13,9 +13,9 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
   - Pembayaran: jumlah pengguna Free/Premium, transaksi berhasil/tertunda/gagal/ditinjau, pendapatan bulan dan tahun ini, pendapatan per bulan, riwayat pembayaran, masa aktif pelanggan, status dan log webhook (semua sudah dikembalikan oleh aksi `payments`).
   - CMS: daftar dan form edit untuk bab, unit, pelajaran (status draft/published, passing score, materi, contoh, tujuan), soal + opsi (kunci, penjelasan, alasan salah, tingkat kesulitan, audio), PR, ujian, audio; tombol terbitkan dengan daftar masalah dari gerbang kualitas; daftar versi + rollback.
   - Halaman menolak non-admin (API sudah menolak dengan 403).
-- [~] Uji di browser bagian dashboard admin yang baru tampil: editor jawaban salah yang dikenali, pasangan, tugas menulis, kolom JSON, form PR/ujian/kosakata/audio, pindah urutan baris, impor ulang paket bawaan. Tambahkan ke `e2e/admin.mjs`.
-- [ ] **Perbaiki skrip `package.json` yang menunjuk file tidak ada**: buat `e2e/run.mjs` dan `scripts/export-content.ts`, atau hapus skripnya.
-- [ ] **Buat `e2e/run.mjs`** memakai `e2e/lib.mjs` (helper `answerCurrent`, `runSession`, `check` sudah ada). Ulangi alur yang sudah diverifikasi manual di sesi serah terima: pelajaran penuh sebagai tamu, daftar + progres tamu pindah, checkout QRIS + simulasi bayar → Premium aktif, checkout DANA tertunda + riwayat, percakapan sampai selesai, tes penempatan berhenti di A2, cek semua rute tanpa error.
+- [x] Uji di browser editor admin lainnya: jawaban salah yang dikenali, pasangan, tugas menulis, kolom JSON, form PR/ujian/kosakata/audio, pindah urutan baris, impor ulang paket bawaan (`e2e/admin.mjs`, 61 pemeriksaan).
+- [x] **Perbaiki skrip `package.json` yang menunjuk file tidak ada**: buat `e2e/run.mjs` dan `scripts/export-content.ts`, atau hapus skripnya.
+- [x] **Buat `e2e/run.mjs`** (64 pemeriksaan, detail di PROJECT_STATUS 2g) memakai `e2e/lib.mjs` (helper `answerCurrent`, `runSession`, `check` sudah ada). Ulangi alur yang sudah diverifikasi manual di sesi serah terima: pelajaran penuh sebagai tamu, daftar + progres tamu pindah, checkout QRIS + simulasi bayar → Premium aktif, checkout DANA tertunda + riwayat, percakapan sampai selesai, tes penempatan berhenti di A2, cek semua rute tanpa error.
 - [x] Mesin belajar deterministik (penilaian, penguasaan, pengulangan berjarak, rekomendasi, buka-kunci, ujian, penempatan, gamifikasi).
 - [x] Model konten + validator kualitas konten.
 - [x] Skema database, RLS, fungsi SQL, sinkronisasi progres.
@@ -33,9 +33,10 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Simulator percakapan bercabang (diuji ujung ke ujung).
 - [x] Halaman paket + checkout QRIS/DANA/GoPay + bukti dan riwayat transaksi (diuji dengan simulator).
 - [x] Registrasi dan login (diuji dengan akun lokal).
-- [~] Pusat Ulangan, Pusat PR (termasuk PR menulis), Pusat Ujian, Pusat Menyimak, latihan perbaikan/topik/tes ulang/Tantangan Kilat: halaman tampil tanpa error, logikanya teruji di unit test, tetapi sesinya belum dijalankan sampai selesai di browser. Tambahkan ke `e2e/run.mjs`.
-- [~] Pustaka kosakata, pustaka tata bahasa, analitik, pencapaian, profil, pengaturan: tampil tanpa error; analitik dengan data dan tombol pengaturan belum diuji di browser.
-- [~] Papan peringkat: SQL teruji; UI hanya diperiksa sebagai tamu. Uji dengan beberapa akun.
+- [x] Pusat Ulangan, Pusat PR (termasuk PR menulis), Pusat Ujian (ujian unit), Pusat Menyimak, latihan perbaikan, Tantangan Kilat: sesinya dijalankan sampai selesai di browser oleh `e2e/run.mjs`.
+- [~] Tes ulang penguasaan (jeda 20 jam, dua hari berbeda), latihan per topik, dan ujian level: logikanya teruji di unit test, sesinya belum dijalankan di browser.
+- [~] Pustaka kosakata, pustaka tata bahasa, pencapaian, profil: tampil tanpa error. Analitik dengan data, tema, dan aksen sudah diuji; target harian dan reset data belum.
+- [~] Papan peringkat: SQL teruji; UI diuji dengan satu akun (muncul dengan XP yang benar). Belum diuji dengan beberapa akun sekaligus.
 - [ ] Rekaman audio penutur asli (aksen US dan UK) untuk contoh, kosakata, menyimak, fonem. Daftarkan di `audio_resources`; pemutar sudah mendukung. Saat ini fallback ke suara perangkat.
 - [ ] Tulis 24 pelajaran yang masih "Sedang disusun" (daftar di `content/index.ts`, field `planned`), lengkap 8 langkah.
 - [ ] Ujian level B1, B2, C1, C2 (baru ada A1 dan A2).
@@ -50,7 +51,8 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [ ] Unggah audio dari dashboard admin (storage). Saat ini admin hanya bisa mendaftarkan URL berkas yang sudah diunggah.
 - [ ] Editor visual untuk skenario percakapan dan panduan pelafalan di dashboard admin (sekarang kolom JSON).
 - [ ] Uji mode belajar offline (IndexedDB + `public/sw.js`) di browser, termasuk sinkronisasi setelah kembali online.
-- [ ] `scripts/export-content.ts`: ekspor kurikulum dari DB ke file, agar perubahan CMS bisa dicadangkan.
+- [x] `scripts/export-content.ts`: ekspor kurikulum dari DB ke file (`npm run content:export`), teruji bolak-balik ekspor → impor.
+- [ ] Outbox event tamu tumbuh tanpa batas selama pengguna tidak pernah mendaftar (tersimpan di localStorage). Batasi atau ringkas untuk tamu jangka panjang.
 - [ ] README khusus proyek (ringkas, menunjuk ke empat dokumen ini).
 - [ ] CI untuk folder ini (workflow repo tidak mencakup `projects/**`).
 

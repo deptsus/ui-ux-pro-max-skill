@@ -1,6 +1,6 @@
 # PROJECT_STATUS — Lentera English
 
-Terakhir diperbarui: 13 November 2026, setelah sesi kedua (perbaikan landing + dashboard admin).
+Terakhir diperbarui: 13 November 2026, setelah sesi ketiga (suite e2e pembelajar, ekspor konten, uji lanjutan dashboard admin).
 Branch kerja: `ccr-17d3d5e4-jx43zs` di repo `deptsus/ui-ux-pro-max-skill` (melanjutkan `ccr-33e68053-ob8ny7`).
 Lokasi proyek: `projects/lentera-english/` (lihat bagian "Konteks repo" di bawah).
 
@@ -126,7 +126,7 @@ teruji di alur pelajaran dan tes penempatan.
   - **Terbitkan**: terbitkan dengan gerbang kualitas (daftar masalah + tombol "Buka" ke baris yang bermasalah), riwayat versi, pulihkan versi lama, impor ulang paket bawaan (dengan konfirmasi ketik "IMPOR").
   - Gerbang akses: tamu diminta masuk, non-admin melihat "Akses ditolak" dan tidak memicu permintaan data admin; server tetap menolak dengan 403.
 
-**Teruji** (`npm run e2e:admin`, 42 pemeriksaan lolos di dev dan di build produksi, desktop + layar ponsel 390 px, tanpa error konsol):
+**Teruji** (`npm run e2e:admin`, 61 pemeriksaan lolos di dev dan di build produksi, desktop + layar ponsel 390 px, tanpa error konsol):
 
 | Alur | Hasil |
 |---|---|
@@ -138,12 +138,34 @@ teruji di alur pelajaran dan tes penempatan.
 | Terbitkan pelajaran tanpa soal tes penguasaan | Ditolak gerbang kualitas; versi pelajar tetap; "Buka" membawa ke pelajarannya |
 | Terbitkan setelah diperbaiki | Versi 2 dipakai pelajar; `/api/content` berisi perubahan; draf tidak ikut |
 | Pulihkan versi 1 | Pelajar kembali ke versi 1; konten kerja tidak berubah |
+| Editor jawaban salah yang dikenali (tambah, wajib penjelasan, hapus) | Tersimpan tanpa mengubah entri lama; menghapus memulihkan soal persis seperti semula |
+| Pindah urutan pasangan pada soal mencocokkan | Urutan tersimpan; dipindah kembali memulihkan soal |
+| Tugas menulis PR, pengaturan ujian (termasuk angka di luar batas) | Tersimpan; unsur wajib utuh; angka di luar batas ditolak |
+| Kolom JSON percakapan diisi JSON rusak | Ditandai, tidak bisa disimpan, data di server tidak berubah |
+| Daftarkan audio (URL tidak aman ditolak), hubungkan ke kosakata, hapus | Terdaftar; terhubung; penghapusan melepas tautan dari kosakata |
+| Impor ulang paket bawaan | Terkunci sampai "IMPOR" diketik; suntingan CMS tertimpa isi bawaan; versi pelajar tidak berubah |
 
-**Teruji** (`tests/admin.test.ts`, 4 tes, Postgres sungguhan via PGlite): setiap kolom di `schema.ts` ada di tabelnya; semua baris kurikulum bawaan lolos validasi form; menyimpan ulang **setiap** baris dari semua 14 tabel tanpa perubahan menghasilkan kurikulum yang identik; kunci payload yang tidak dikenal form tetap tersimpan.
+**Teruji** (`tests/admin.test.ts`, 5 tes, Postgres sungguhan via PGlite): setiap kolom di `schema.ts` ada di tabelnya; semua baris kurikulum bawaan lolos validasi form; menyimpan ulang **setiap** baris dari semua 14 tabel tanpa perubahan menghasilkan kurikulum yang identik; kunci payload yang tidak dikenal form tetap tersimpan; hasil ekspor `content_rows` bila diimpor ke basis data kosong menghasilkan kurikulum yang identik.
 
-**Tampil tetapi belum dijalankan di browser**: editor jawaban salah yang dikenali, pasangan, tugas menulis, kolom JSON (percakapan, pelafalan), form PR/ujian/kosakata/audio, pindah urutan baris, dan aksi impor ulang paket bawaan. Logika simpannya tercakup oleh tes bolak-balik di atas, tetapi interaksi UI-nya belum diuji.
+**Tampil tetapi belum dijalankan di browser**: menambah dan mengedit bagian materi beserta tabel dan contoh kalimatnya secara mendalam (hanya "tambah satu bagian" yang diuji), form topik, pola kesalahan, pelafalan, menyimak, bab, unit, dan level. Logika simpannya tercakup oleh tes bolak-balik di atas.
 
-Total unit test sekarang 78 (74 lama + 4 baru), semua lolos dengan `TZ=UTC npx vitest run`.
+Total unit test sekarang 79 (74 lama + 5 baru), semua lolos dengan `TZ=UTC npx vitest run`.
+
+### 2g. Suite e2e pembelajar (sesi ketiga)
+
+`npm run e2e` (`e2e/run.mjs`) menjalankan aplikasi pembelajar lewat UI sungguhan di layar ponsel 390 px, menjawab soal dari kunci di paket konten yang terbit. 64 pemeriksaan lolos di dev dan di build produksi, tanpa error konsol:
+
+| Skenario | Yang dibuktikan |
+|---|---|
+| `routes` | 29 rute terbuka dengan status 200 tanpa error konsol |
+| `lesson` | Pelajaran kedua terkunci; pelajaran pertama tuntas 8 langkah; jawaban salah memberi alasan + jawaban benar + penjelasan; XP, jadwal ulangan, dan PR tercatat; pelajaran berikutnya terbuka; PR soal dikumpulkan (100); PR menulis (tulisan pendek gagal, contoh jawaban 100%); Tantangan Kilat sempurna memberi bonus XP; ulangan terjadwal dua hari kemudian berjalan sampai selesai, jarak naik 1 → 3 hari, maksimal 10 materi untuk Free; analitik dengan data; tema gelap tersimpan; aksen tersimpan; daftar akun memindahkan progres, nama, dan XP ke server; akun muncul di papan peringkat |
+| `exam` | Ujian unit terkunci; tiga pelajaran unit dituntaskan; ujian lulus dengan dua jawaban salah; nilai sesuai; nilai per topik dan pembahasan tampil; Pusat Ujian menandai lulus |
+| `drill` | Latihan perbaikan selesai dan pola dinyatakan teratasi; kesulitan tidak turun selama benar; menyimak (transkrip, sumber audio dinyatakan jujur, sesi selesai); audio Premium tertutup untuk tamu |
+| `conversation` | Percakapan bercabang sampai selesai; respons dinilai tata bahasa dan kewajarannya; nilai tersimpan; skenario Premium tertutup |
+| `placement` | Benar di blok A1, salah di A2: tes berhenti setelah blok A2, penempatan A2, tanpa XP |
+| `payment` | Akun Free menerima pelajaran Premium tanpa isi; PATCH profil tidak bisa menjadikan admin/Premium; QRIS + simulasi bayar → Premium 365 hari, isi Premium dikirim, lencana tampil; DANA tertunda dengan instruksi; riwayat memuat keduanya; transaksi tertunda tidak memperpanjang; webhook tanpa token 401 |
+
+Belum tercakup: tes ulang penguasaan (butuh jeda 20 jam dan dua hari berbeda), ujian level, belajar offline, GoPay, pengaturan target harian, dan reset data belajar.
 
 ---
 
@@ -151,7 +173,6 @@ Total unit test sekarang 78 (74 lama + 4 baru), semua lolos dengan `TZ=UTC npx v
 
 | Fitur | Kondisi sebenarnya |
 |---|---|
-| Suite e2e | Helper `e2e/lib.mjs` dan `e2e/admin.mjs` (dashboard admin) ada. Runner `e2e/run.mjs` untuk alur pembelajar, yang dirujuk `npm run e2e`, **belum ada**. |
 | Dashboard admin | Berfungsi dan teruji (lihat 2f). Yang belum: tindak lanjut transaksi `NEEDS_REVIEW` dan unggah berkas audio (keduanya P2); editor percakapan dan pelafalan masih berupa kolom JSON. |
 
 ## 4. Fitur yang belum dibuat
@@ -162,7 +183,6 @@ Total unit test sekarang 78 (74 lama + 4 baru), semua lolos dengan `TZ=UTC npx v
 - Uji sandbox Xendit sungguhan (butuh kredensial). Poin yang wajib diverifikasi ditandai `VERIFY` di `src/lib/server/xendit.ts`.
 - Deploy/hosting, domain HTTPS untuk webhook, monitoring.
 - Batas paket Free di sisi server (nyawa, 10 ulangan per hari): saat ini hanya ditegakkan di klien. Pembatasan **konten** Premium sudah di server.
-- Skrip `npm run content:export` (file `scripts/export-content.ts` tidak ada).
 - README khusus proyek.
 
 ## 5. Bug yang masih ditemukan
@@ -171,7 +191,10 @@ Total unit test sekarang 78 (74 lama + 4 baru), semua lolos dengan `TZ=UTC npx v
 |---|---|---|---|---|
 | 1 | ~~Kritis~~ **Selesai** | `/` error 500 dan `next build` gagal karena `page.tsx` memanggil `rupiah()` dari modul `'use client'`. | Diperbaiki: formatter dipindah ke `src/lib/format.ts`, diekspor ulang dari `ui.tsx`. `next build` sukses, `/` 200. | — |
 | 2 | ~~Tinggi~~ **Selesai** | `/admin` 404. | Halaman dibuat; `/admin` 200 dan teruji (2f). | — |
-| 3 | Sedang | `package.json` merujuk file yang tidak ada: `e2e/run.mjs` (`npm run e2e`) dan `scripts/export-content.ts` (`npm run content:export`). | `ls e2e scripts`. | Buat file tersebut atau hapus skripnya. |
+| 3 | ~~Sedang~~ **Selesai** | `package.json` merujuk file yang tidak ada. | `e2e/run.mjs` dan `scripts/export-content.ts` dibuat dan dijalankan. | — |
+| 5 | ~~Sedang~~ **Selesai** | Nama yang diketik di form daftar tidak pernah dipakai: profil memakai nama bawaan tamu atau awalan email, lalu sinkronisasi menimpa nama di server. | Ditemukan oleh `e2e/run.mjs`. Diperbaiki di `loadLearner()` (`src/lib/client/store.ts`): nama diambil dari profil server. | — |
+| 6 | ~~Sedang~~ **Selesai** | XP yang didapat sebagai tamu tidak sampai ke ledger server saat mendaftar (event yang belum terkirim dibuang), sehingga papan peringkat kosong untuk akun itu. | Ditemukan oleh `e2e/run.mjs`. Diperbaiki: event tamu ikut dikirim (idempoten, batas XP server tetap berlaku). Lihat DECISIONS B5. | — |
+| 7 | Rendah (lingkungan dev) | Cache dev Turbopack di `.next/dev` dua kali menjadi basi: semua halaman memuat ulang tanpa henti ("HMR hash mismatch") dan aplikasi tertahan di layar pembuka tanpa pesan error. Pemicunya tidak berhasil direproduksi. | Menghapus `.next/dev` menyembuhkan 3 dari 3 kali. | Cache dev di disk dimatikan di `next.config.ts`. Bila masih terjadi: hentikan server, hapus `.next/dev`, jalankan lagi. |
 | 4 | ~~Rendah~~ **Tidak muncul lagi** | Peringatan React "Encountered a script tag" dari skrip tema. | Setelah Bug #1 diperbaiki, `/`, `/masuk`, `/daftar`, `/admin`, `/app`, `/app/analytics`, `/app/subscription` dibuka di dev tanpa error maupun peringatan konsol. | — |
 
 Catatan: satu cek otomatis sempat gagal ("riwayat transaksi tampil"), tetapi setelah diulang dengan menunggu data selesai dimuat, fitur itu terbukti berfungsi. Itu masalah waktu tunggu di skrip uji, bukan bug.
@@ -192,30 +215,38 @@ Sesi kedua (branch `ccr-17d3d5e4-jx43zs`):
 5. Perbaikan Bug #1: `src/lib/format.ts` baru, ekspor ulang di `ui.tsx`, impor di `page.tsx`.
 6. Dashboard admin: `src/app/admin/page.tsx`, `src/components/admin/*`, mode nilai besar di `BarChart` (`src/components/Charts.tsx`), `compactId` di `format.ts`, `e2e/admin.mjs`, `tests/admin.test.ts`, skrip `npm run e2e:admin`.
 
+Sesi ketiga:
+
+7. `e2e/run.mjs` (suite pembelajar) dan perbaikan dua bug serah terima tamu → akun di `src/lib/client/store.ts` (Bug #5 dan #6).
+8. `scripts/export-content.ts` (`npm run content:export`), perluasan `e2e/admin.mjs` ke editor lain, tes ekspor-impor di `tests/admin.test.ts`.
+9. Editor CMS: JSON yang belum valid dihitung sebagai perubahan belum disimpan (`CmsPanel.tsx`). Cache dev Turbopack dimatikan (`next.config.ts`).
+
 ## 7. File terakhir yang diubah
 
-1. `src/app/admin/page.tsx`, `src/components/admin/{schema.ts,fields.tsx,CmsPanel.tsx,PaymentsPanel.tsx,PublishPanel.tsx,Confirm.tsx,api.ts}`.
-2. `e2e/admin.mjs`, `tests/admin.test.ts`, `package.json` (skrip `e2e:admin`).
-3. `src/components/Charts.tsx` (prop `format` dan `column` pada `BarChart`; grafik lama tidak berubah), `src/lib/format.ts`.
-4. `src/components/ui.tsx`, `src/app/page.tsx` (perbaikan Bug #1).
-5. Dokumen: `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `TODO.md`.
+1. `e2e/run.mjs`, `e2e/admin.mjs`, `scripts/export-content.ts`, `tests/admin.test.ts`.
+2. `src/lib/client/store.ts` (serah terima tamu → akun), `src/components/admin/CmsPanel.tsx`, `next.config.ts`.
+3. Sesi kedua: `src/app/admin/page.tsx`, `src/components/admin/*`, `src/components/Charts.tsx`, `src/lib/format.ts`, `src/components/ui.tsx`, `src/app/page.tsx`.
+4. Dokumen: `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `TODO.md`, `DECISIONS.md`.
 
 ## 8. Langkah persis berikutnya
 
 1. `cd projects/lentera-english && npm install` (bila `node_modules` belum ada).
-2. Jalankan `npx tsc --noEmit`, `TZ=UTC npx vitest run` (harus 78/78), `npx tsx scripts/check-content.ts`, `npx next build`.
-3. Buat `e2e/run.mjs` memakai `e2e/lib.mjs` untuk mengulang alur pembelajar di bagian 2e, dan bereskan Bug #3 (`scripts/export-content.ts`).
-4. Uji di browser bagian dashboard admin yang baru "Tampil" (daftar di 2f).
-5. Lanjut ke TODO P0 sisanya: proyek Supabase dan verifikasi sandbox Xendit (keduanya butuh kredensial dari pemilik produk).
+2. Jalankan `npx tsc --noEmit`, `TZ=UTC npx vitest run` (harus 79/79), `npx tsx scripts/check-content.ts`, `npx next build`, lalu kedua suite e2e di bawah.
+3. TODO P0 sisanya butuh kredensial dari pemilik produk: proyek Supabase (terapkan migrasi, uji ulang daftar/sync/papan peringkat di sana) dan sandbox Xendit (titik `VERIFY` di `src/lib/server/xendit.ts`).
+4. Tanpa kredensial, pekerjaan berikutnya yang paling bernilai: menulis 24 pelajaran yang masih "Sedang disusun", ujian level B1 sampai C2, dan batas paket Free di server (TODO P1).
 
-Menguji dashboard admin (butuh basis data embedded yang masih baru, karena skrip memeriksa nomor versi):
+Menjalankan kedua suite e2e terhadap build produksi (basis data embedded harus masih baru untuk `e2e:admin`, karena skrip memeriksa nomor versi; jalankan `e2e:admin` lebih dulu):
 
 ```bash
 cd projects/lentera-english
-LENTERA_BACKEND=embedded LENTERA_DEV_ADMIN_EMAIL=admin@lentera.test \
-  LENTERA_DATA_DIR=/tmp/lentera-e2e/pglite npx next dev -p 3100   # hapus folder itu dulu bila sudah ada
-npm run e2e:admin
+rm -rf /tmp/lentera-e2e && npx next build
+LENTERA_BACKEND=embedded LENTERA_ALLOW_EMBEDDED=1 LENTERA_DEV_ADMIN_EMAIL=admin@lentera.test \
+  LENTERA_DATA_DIR=/tmp/lentera-e2e/pglite npx next start -p 3100 &
+npm run e2e:admin     # 61 pemeriksaan
+npm run e2e           # 64 pemeriksaan; npm run e2e -- lesson exam untuk skenario tertentu
 ```
+
+Mencadangkan kurikulum dari basis data: `npm run content:export` (konten kerja) atau `npm run content:export -- --published` (versi terbit). Berkas tersimpan di `backups/`. Untuk mode embedded, hentikan server lebih dulu.
 
 Cara menjalankan lokal (tanpa layanan luar):
 

@@ -56,6 +56,7 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
 - Aplikasi berada di `projects/lentera-english/` di dalam repo `ui-ux-pro-max-skill`; kerja di branch, tidak push ke `main`.
 - TypeScript dipatok ke versi 5 (`^5.9.3`). Saat instalasi awal npm memasang TS 7; versi itu sengaja diganti ke 5. Jangan menaikkan mayor versi tanpa menjalankan ulang typecheck, tes, dan build.
 - Playwright diambil dari instalasi global lingkungan, bukan dependency npm.
+- Cache dev Turbopack di disk dimatikan (`experimental.turbopackFileSystemCacheForDev: false` di `next.config.ts`) karena dua kali menjadi basi dan membuat semua halaman memuat ulang tanpa henti. Hidupkan lagi hanya bila masalah itu sudah tidak muncul di versi Next.js yang dipakai.
 - Antarmuka berbahasa Indonesia; konten belajar berbahasa Inggris.
 
 ### B2. Konten
@@ -85,6 +86,7 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
 
 ### B5. Arsitektur data dan keamanan
 - State pembelajar offline-first di perangkat, disinkronkan lewat outbox event idempoten + snapshot. Mode tamu berfungsi penuh; progres tamu pindah ke akun saat login pertama.
+- Saat progres tamu pindah ke akun, event yang belum terkirim ikut dikirim ke server (jawaban, XP, riwayat), sehingga ledger XP dan papan peringkat mencerminkan belajar sebelum mendaftar. Batas XP server (200 per event, 3.000 per hari) tetap berlaku. Nama akun diambil dari form daftar kecuali tamu sudah mengganti namanya sendiri. (Ditambahkan di sesi ketiga; sebelumnya event tamu dibuang.)
 - Klien tidak pernah menulis langsung ke database. Semua tulis lewat fungsi SQL `SECURITY DEFINER` yang hanya bisa dieksekusi `service_role`, dipanggil dari API route setelah sesi diverifikasi. RLS: baca baris sendiri saja.
 - Status Premium dihitung dari periode `subscriptions` dan waktu sekarang, bukan dari flag tersimpan.
 - Konten Premium dipangkas di server untuk akun Free.

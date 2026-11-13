@@ -27,7 +27,8 @@ function RowEditor({ def, initial, isNew, data, reload, onClose, onJump }: { def
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [ask, setAsk] = useState<'delete' | 'leave' | null>(null);
-  const dirty = JSON.stringify(row) !== saved;
+  // Half-typed JSON is not in `row` yet, but it is still work the admin would lose.
+  const dirty = JSON.stringify(row) !== saved || badJson.length > 0;
   const id = row[def.pk];
 
   useEffect(() => {
