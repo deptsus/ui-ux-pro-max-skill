@@ -1,0 +1,40 @@
+{
+  "name": "lentera-english",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lentera English - sekolah bahasa Inggris digital untuk pelajar Indonesia. Deterministik, tanpa AI.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "content:check": "tsx scripts/check-content.ts",
+    "content:export": "tsx scripts/export-content.ts",
+    "e2e": "node e2e/run.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@supabase/supabase-js": "^2.119.0",
+    "lucide-react": "^1.72.0",
+    "next": "^16.4.6",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}
