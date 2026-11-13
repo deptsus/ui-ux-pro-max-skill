@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { BookOpen, Brain, CalendarClock, Check, ClipboardList, GraduationCap, Headphones, MessagesSquare, ShieldCheck, Target, WifiOff, Wrench } from 'lucide-react';
 import { Logo, Mascot } from '@/components/Mascot';
-import { Badge, Card, LinkButton, rupiah } from '@/components/ui';
+import { Badge, Card, LinkButton } from '@/components/ui';
+import { rupiah } from '@/lib/format';
 import { BENCHMARK_MONTHLY, FREE_FEATURES, PLANS, PREMIUM_FEATURES } from '@/lib/plans';
 
 const STEPS = [

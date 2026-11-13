@@ -115,6 +115,5 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 }
 export const inputClass = 'w-full rounded-2xl border-2 border-line bg-surface px-4 py-3 text-base text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none';
 
-export const rupiah = (n: number) => 'Rp' + n.toLocaleString('id-ID');
-export const dateId = (ms: number | string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' }) => new Date(ms).toLocaleDateString('id-ID', opts);
-export const dateTimeId = (ms: number | string) => new Date(ms).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+// Formatter tinggal di '@/lib/format' (tanpa 'use client'); diekspor ulang agar impor lama tetap jalan.
+export { rupiah, dateId, dateTimeId } from '@/lib/format';
