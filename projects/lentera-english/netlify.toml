@@ -1,0 +1,11 @@
+# Netlify build for Lentera English (Next.js, built with the OpenNext adapter
+# that Netlify applies automatically; do not pin @netlify/plugin-nextjs).
+# Runtime variables (Supabase URL and keys) are set in the Netlify project,
+# not here: this file is committed. SUPABASE_SECRET_KEY must never be added here.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
