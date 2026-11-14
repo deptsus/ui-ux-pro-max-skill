@@ -37,7 +37,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-5">
       <Card className="flex flex-col gap-5 sm:flex-row sm:items-center">
-        <Mascot mood={xpToday >= goal ? 'cheer' : 'happy'} size={92} className="shrink-0" />
+        <Mascot mood={xpToday >= goal ? 'cheer' : streak === 0 && learner.streak.longest > 0 && xpToday === 0 ? 'sleep' : 'happy'} size={92} className="shrink-0" />
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-extrabold tracking-tight">{greeting}, {learner.profile.name}!</h1>
           <p className="mt-1 text-muted">{xpToday >= goal ? 'Target harianmu tercapai. Kerja bagus!' : `Target hari ini: ${goal} XP. Kamu sudah mengumpulkan ${xpToday} XP.`}</p>

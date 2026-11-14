@@ -1,6 +1,6 @@
 // Assembles the authored curriculum into the flat ContentPack used by the
 // app, the offline cache and the database import.
-import type { Cefr, Chapter, ContentPack, Exercise, ExamDef, HomeworkDef, Lesson, Level, ListeningItem, MisconceptionTag, Topic, Unit } from '@/lib/content/types';
+import type { Cefr, Chapter, ContentPack, Exercise, ExamDef, HomeworkDef, Lesson, Level, ListeningItem, MisconceptionTag, Story, Topic, Unit } from '@/lib/content/types';
 import { stamp, type Built, type Draft } from './dsl';
 import { greetings, toBe, toBeNegQ } from './a1-1';
 import { articles, chapter1Homework, demonstratives, unit2Extras } from './a1-2';
@@ -18,8 +18,9 @@ import { scenarios } from './conversations';
 import { scenariosUpper } from './conversations-upper';
 import { listening, phonemes, placement } from './listening';
 import { listeningUpper } from './listening-upper';
+import { stories } from './stories';
 
-export const CONTENT_VERSION = '2026.11.4';
+export const CONTENT_VERSION = '2026.12.1';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -117,6 +118,7 @@ const topics: Topic[] = [
   { id: 'c2.understatement', kind: 'skill', level: 'C2', title: 'Ironi dan understatement', summary: 'not bad, a bit of a problem, not uncommon.', lessonId: 'c2-understatement' },
   { id: 'c2.modality', kind: 'grammar', level: 'C2', title: 'Modalitas lanjut', summary: "must/might/can't/should have; needn't have.", lessonId: 'c2-modality' },
   { id: 'skill.listening', kind: 'skill', level: 'A1', title: 'Menyimak', summary: 'Menangkap kata, angka, dan informasi dari audio.' },
+  { id: 'skill.story', kind: 'skill', level: 'A1', title: 'Cerita bergambar', summary: 'Memahami alur, tokoh, dan detail dari cerita pendek beranimasi.' },
 ];
 
 const tags: MisconceptionTag[] = [
@@ -299,6 +301,13 @@ export function buildPack(): ContentPack {
     homework.push({ id: `hw.${chapterId}.listen`, chapterId, title: `Menyimak: ${item.title}`, kind: 'listening', dueDays: 5, exerciseIds: item.questionIds });
   }
 
+  // Illustrated stories.
+  const storyItems: Story[] = stories.map((s) => {
+    const qs = stamp(s.questions, s.id, 'story', 'skill.story', null);
+    exercises.push(...qs);
+    return { id: s.id, level: s.level, title: s.title, summary: s.summary, premium: s.premium, characters: s.characters, scenes: s.scenes, questionIds: qs.map((q) => q.id) };
+  });
+
   // Placement test and level exams.
   exercises.push(...stamp(placement, 'placement', 'placement', 'a1.to-be', null));
   exams.push(
@@ -310,5 +319,5 @@ export function buildPack(): ContentPack {
     { id: 'exam.level.C2', scope: 'level', ref: 'C2', title: 'Ujian Level C2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
   );
 
-  return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios: [...scenarios, ...scenariosUpper], listening: listeningItems, phonemes, homework, exams, audio: [] };
+  return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios: [...scenarios, ...scenariosUpper], listening: listeningItems, stories: storyItems, phonemes, homework, exams, audio: [] };
 }

@@ -97,6 +97,76 @@ button:not(:disabled), [role="button"] { cursor: pointer; }
 :focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
 .en { font-feature-settings: "ss01"; }
 
+/* Pijar, the mascot: CSS-only animation per mood (src/components/Mascot.tsx). */
+.pijar .pj-float, .pijar .pj-wing, .pijar .pj-eyes, .pijar .pj-spark, .pijar .pj-z { transform-box: fill-box; }
+.pijar .pj-float { transform-origin: 50% 100%; animation: pj-float 3s ease-in-out infinite; }
+.pijar-cheer .pj-float { animation: pj-jump 0.9s cubic-bezier(0.3, 0.7, 0.4, 1) infinite; }
+.pijar-dance .pj-float { animation: pj-dance 1.2s ease-in-out infinite; }
+.pijar-think .pj-float { animation: pj-sway 3.2s ease-in-out infinite; }
+.pijar-encourage .pj-float { animation: pj-nod 1.4s ease-in-out infinite; }
+.pijar-sad .pj-float, .pijar-sleep .pj-float { animation: pj-breathe 3.6s ease-in-out infinite; }
+.pijar .pj-wing-l { transform-origin: 100% 100%; animation: pj-flutter-l 0.6s ease-in-out infinite alternate; }
+.pijar .pj-wing-r { transform-origin: 0% 100%; animation: pj-flutter-r 0.6s ease-in-out infinite alternate; }
+.pijar-cheer .pj-wing, .pijar-dance .pj-wing { animation-duration: 0.16s; }
+.pijar-sad .pj-wing, .pijar-sleep .pj-wing { animation: none; }
+.pijar .pj-eyes { transform-origin: center; animation: pj-blink 4.5s infinite; }
+.pijar-sleep .pj-eyes { animation: none; }
+.pijar .pj-glow { animation: glow 2.4s ease-in-out infinite; }
+.pijar-sleep .pj-glow { animation-duration: 5s; opacity: 0.5; }
+.pijar .pj-spark { transform-origin: center; opacity: 0; animation: pj-spark 1.2s ease-out infinite; }
+.pijar .pj-spark:nth-child(2) { animation-delay: 0.4s; }
+.pijar .pj-spark:nth-child(3) { animation-delay: 0.8s; }
+.pijar .pj-z { opacity: 0; animation: pj-z 2.4s ease-in-out infinite; }
+.pijar .pj-z:nth-child(2) { animation-delay: 1.2s; }
+.pijar-still * { animation: none !important; }
+@keyframes pj-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes pj-jump {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(0) scale(1.06, 0.94); }
+  45% { transform: translateY(-12px) scale(0.97, 1.04); }
+  75% { transform: translateY(0) scale(1.03, 0.97); }
+}
+@keyframes pj-dance {
+  0%, 100% { transform: rotate(-8deg) translateY(0); }
+  25% { transform: rotate(0deg) translateY(-6px); }
+  50% { transform: rotate(8deg) translateY(0); }
+  75% { transform: rotate(0deg) translateY(-6px); }
+}
+@keyframes pj-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes pj-nod { 0%, 100% { transform: translateY(0) rotate(0deg); } 30% { transform: translateY(-3px) rotate(-3deg); } 60% { transform: translateY(0) rotate(3deg); } }
+@keyframes pj-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.98); } }
+@keyframes pj-flutter-l { from { transform: rotate(0deg); } to { transform: rotate(-14deg); } }
+@keyframes pj-flutter-r { from { transform: rotate(0deg); } to { transform: rotate(14deg); } }
+@keyframes pj-blink { 0%, 93%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes pj-spark { 0% { opacity: 0; transform: scale(0.3); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: translateY(-6px) scale(0.6); } }
+@keyframes pj-z { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(6px, -14px); } }
+
+/* Story scenes (src/components/story/StoryStage.tsx). */
+.story-stage .st-actor, .story-stage .st-speaking, .story-stage .st-jump { transform-box: fill-box; transform-origin: 50% 100%; }
+.story-stage .st-enter-left { animation: st-enter-left 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.story-stage .st-enter-right { animation: st-enter-right 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.story-stage .st-enter-fade { animation: st-fade 0.7s ease-out both; }
+.story-stage .st-speaking { animation: st-bob 0.45s ease-in-out infinite alternate; }
+.story-stage .st-jump { animation: st-jump 0.55s ease-out; }
+.story-stage .st-arm { transform-box: fill-box; transform-origin: 50% 0; transition: transform 0.35s ease; }
+.story-stage .st-wave { animation: st-wave 0.5s ease-in-out infinite alternate; }
+.story-stage .st-blink { transform-box: fill-box; transform-origin: center; animation: pj-blink 5s infinite; }
+.story-stage .st-talk { transform-box: fill-box; transform-origin: center; animation: st-talk 0.18s ease-in-out infinite alternate; }
+.story-stage .st-dot { animation: st-dot 1s ease-in-out infinite; }
+.story-stage .st-dot:nth-child(3) { animation-delay: 0.15s; }
+.story-stage .st-dot:nth-child(4) { animation-delay: 0.3s; }
+.story-stage .st-cloud { animation: st-drift 24s ease-in-out infinite alternate; }
+@keyframes st-enter-left { from { transform: translateX(-160px); opacity: 0; } 30% { opacity: 1; } to { transform: translateX(0); opacity: 1; } }
+@keyframes st-enter-right { from { transform: translateX(160px); opacity: 0; } 30% { opacity: 1; } to { transform: translateX(0); opacity: 1; } }
+@keyframes st-fade { from { opacity: 0; transform: translateY(-10px) scale(0.9); } to { opacity: 1; transform: none; } }
+@keyframes st-bob { from { transform: translateY(0); } to { transform: translateY(-2.5px); } }
+@keyframes st-jump { 0% { transform: translateY(0); } 35% { transform: translateY(-14px); } 70% { transform: translateY(0) scale(1.04, 0.96); } 100% { transform: none; } }
+@keyframes st-wave { from { transform: rotate(-165deg); } to { transform: rotate(-125deg); } }
+@keyframes st-talk { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+@keyframes st-dot { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-2px); opacity: 1; } }
+@keyframes st-drift { from { transform: translateX(-8px); } to { transform: translateX(10px); } }
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .pijar *, .story-stage * { animation: none !important; }
 }

@@ -8,7 +8,13 @@ import { mapManualError } from '@/lib/server/manual-payments';
 
 export const dynamic = 'force-dynamic';
 
-interface Body { action?: string; table?: string; row?: Record<string, unknown>; id?: string; label?: string; notes?: string; version?: number; note?: string; reason?: string }
+interface Body { action?: string; table?: string; row?: Record<string, unknown>; id?: string; label?: string; notes?: string; version?: number; note?: string; reason?: string; target?: string; all?: boolean; noteId?: number; resolution?: string }
+const NEEDS_0008 = 'Basis data belum diperbarui untuk Rilis 1. Jalankan supabase/manual/apply-0008.sql di Supabase SQL Editor, lalu ulangi.';
+/** Stories and review notes need migration 0008; say so instead of failing halfway. */
+async function require0008(db: { rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> }) {
+  const features = await db.rpc<string[]>('content_features').catch(() => null);
+  if (!Array.isArray(features) || !features.includes('stories')) throw new HttpError(409, NEEDS_0008);
+}
 const isUuid = (s: unknown) => typeof s === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
 export const POST = route(async (req) => {
@@ -34,7 +40,22 @@ export const POST = route(async (req) => {
       return json(result);
     }
     case 'import-bundled':
+      await require0008(db);
       return json(await db.rpc('import_content', { p_actor: userId, p_rows: packToRows(buildPack()) }));
+    // Review notes: the owner flags content in the CMS; the next release works through them.
+    case 'notes':
+      await require0008(db);
+      return json(await db.rpc('admin_list_notes', { p_actor: userId, p_all: !!b.all }));
+    case 'add-note': {
+      const note = String(b.note ?? '').trim();
+      if (!note || note.length > 2000) throw new HttpError(400, 'Tulis catatan 1–2000 karakter.');
+      if (!String(b.target ?? '').trim()) throw new HttpError(400, 'Catatan harus menunjuk satu baris konten.');
+      await require0008(db);
+      return json(await db.rpc('admin_add_note', { p_actor: userId, p_table: String(b.table), p_target: String(b.target), p_note: note }));
+    }
+    case 'resolve-note':
+      await require0008(db);
+      return json(await db.rpc('admin_resolve_note', { p_actor: userId, p_id: Number(b.noteId), p_resolution: String(b.resolution ?? '').slice(0, 1000) }));
     case 'payments':
       return json(await db.rpc('admin_payment_overview', { p_actor: userId }));
     // Cheap number for the admin badge inside the learner app.

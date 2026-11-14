@@ -1,7 +1,7 @@
 // Mapping between the runtime ContentPack and the database rows
 // (see supabase/migrations/0001_schema.sql and content_rows()).
 import { ACHIEVEMENTS } from '@/lib/engine/gamification';
-import type { ContentPack, Exercise, Lesson, ListeningItem } from './types';
+import type { ContentPack, Exercise, Lesson, ListeningItem, Story } from './types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type Rows = Record<string, any[]>;
@@ -16,6 +16,8 @@ const clean = <T extends object>(o: T): T => {
 export function packToRows(pack: ContentPack): Rows {
   const listeningOf = new Map<string, string>();
   for (const l of pack.listening) for (const q of l.questionIds) listeningOf.set(q, l.id);
+  const storyOf = new Map<string, string>();
+  for (const s of pack.stories) for (const q of s.questionIds) storyOf.set(q, s.id);
   return {
     cefr_levels: pack.levels.map((l) => ({ code: l.code, title: l.title, description: l.description, position: l.position, exam_pass_score: l.examPassScore })),
     courses: pack.levels.map((l) => ({ id: `course-${l.code.toLowerCase()}`, level_code: l.code, title: `Bahasa Inggris ${l.code}: ${l.title}`, description: l.description })),
@@ -25,11 +27,12 @@ export function packToRows(pack: ContentPack): Rows {
     misconception_tags: pack.tags.map((t) => ({ id: t.id, topic_id: t.topic, title: t.title, tip: t.tip })),
     audio_resources: pack.audio.map((a) => clean({ key: a.key, accent: a.accent, url: a.url, speaker: a.speaker, transcript: a.transcript })),
     listening_items: pack.listening.map((l) => clean({ id: l.id, level_code: l.level, title: l.title, kind: l.kind, transcript: l.transcript, translation: l.translation, is_premium: l.premium, audio_key: l.audioKey })),
+    stories: pack.stories.map((s) => ({ id: s.id, level_code: s.level, title: s.title, summary: s.summary, is_premium: s.premium, characters: s.characters, scenes: s.scenes })),
     lessons: pack.lessons.map((l) => ({ id: l.id, unit_id: l.unitId, position: l.position, title: l.title, summary: l.summary, topic_id: l.topic, is_premium: l.premium, passing_score: l.passScore, status: 'published', intro: l.intro, teaching: l.teaching, demo: l.demo, vocab: l.vocab ?? [], objectives: l.objectives })),
     questions: pack.exercises.map((e) => {
       const payload: Record<string, unknown> = {};
       for (const k of PAYLOAD_KEYS) if (e[k] !== undefined) payload[k] = e[k];
-      return clean({ id: e.id, lesson_id: e.lessonId ?? null, listening_item_id: listeningOf.get(e.id), stage: e.stage, position: e.position, type: e.type, topic_id: e.topic, focus_tag: e.focus, difficulty: e.difficulty, prompt: e.prompt, explanation: e.explanation, hint: e.hint, time_limit_sec: e.timeLimitSec, audio_key: e.audioKey, cefr_level: e.level, payload, status: 'published', options: e.options ?? [] });
+      return clean({ id: e.id, lesson_id: e.lessonId ?? null, listening_item_id: listeningOf.get(e.id), story_id: storyOf.get(e.id), stage: e.stage, position: e.position, type: e.type, topic_id: e.topic, focus_tag: e.focus, difficulty: e.difficulty, prompt: e.prompt, explanation: e.explanation, hint: e.hint, time_limit_sec: e.timeLimitSec, audio_key: e.audioKey, cefr_level: e.level, payload, status: 'published', options: e.options ?? [] });
     }),
     vocabulary: pack.vocabulary.map((v) => clean({ id: v.id, word: v.word, ipa: v.ipa, part_of_speech: v.pos, meaning: v.meaning, example: v.example, example_translation: v.exampleId, level_code: v.level, set_name: v.set, is_premium: v.premium, audio_key: v.audioKey })),
     conversation_scenarios: pack.scenarios.map((s) => ({ id: s.id, title: s.title, level_code: s.level, setting: s.setting, goal: s.goal, closing: s.closing, is_premium: s.premium, start_node: s.start, nodes: s.nodes })),
@@ -64,13 +67,18 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
       level: opt(q.cefr_level),
     } as Exercise),
   );
-  const listeningQuestions = new Map<string, { id: string; position: number }[]>();
-  for (const q of rows.questions ?? []) {
-    if (!q.listening_item_id) continue;
-    const list = listeningQuestions.get(q.listening_item_id) ?? [];
-    list.push({ id: q.id, position: q.position });
-    listeningQuestions.set(q.listening_item_id, list);
-  }
+  const byParent = (key: 'listening_item_id' | 'story_id') => {
+    const m = new Map<string, { id: string; position: number }[]>();
+    for (const q of rows.questions ?? []) {
+      if (!q[key]) continue;
+      const list = m.get(q[key]) ?? [];
+      list.push({ id: q.id, position: q.position });
+      m.set(q[key], list);
+    }
+    return (id: string) => (m.get(id) ?? []).sort((a, b) => a.position - b.position).map((q) => q.id);
+  };
+  const listeningQuestions = byParent('listening_item_id');
+  const storyQuestions = byParent('story_id');
   return {
     version,
     levels: (rows.cefr_levels ?? []).map((l) => ({ code: l.code, title: l.title, description: l.description, position: l.position, examPassScore: l.exam_pass_score })),
@@ -82,7 +90,9 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
     tags: (rows.misconception_tags ?? []).map((t) => ({ id: t.id, topic: t.topic_id, title: t.title, tip: t.tip })),
     vocabulary: (rows.vocabulary ?? []).map((v) => clean({ id: v.id, word: v.word, ipa: v.ipa, pos: v.part_of_speech, meaning: v.meaning, example: v.example, exampleId: v.example_translation, level: v.level_code, set: v.set_name, premium: v.is_premium, audioKey: opt(v.audio_key) })),
     scenarios: (rows.conversation_scenarios ?? []).map((s) => ({ id: s.id, title: s.title, level: s.level_code, setting: s.setting, goal: s.goal, premium: s.is_premium, start: s.start_node, nodes: s.nodes, closing: s.closing })),
-    listening: (rows.listening_items ?? []).map((l): ListeningItem => clean({ id: l.id, level: l.level_code, title: l.title, kind: l.kind, transcript: l.transcript, translation: l.translation, premium: l.is_premium, audioKey: opt(l.audio_key), questionIds: (listeningQuestions.get(l.id) ?? []).sort((a, b) => a.position - b.position).map((q) => q.id) })),
+    listening: (rows.listening_items ?? []).map((l): ListeningItem => clean({ id: l.id, level: l.level_code, title: l.title, kind: l.kind, transcript: l.transcript, translation: l.translation, premium: l.is_premium, audioKey: opt(l.audio_key), questionIds: listeningQuestions(l.id) })),
+    // Databases without migration 0008 have no stories; the app simply shows none.
+    stories: (rows.stories ?? []).map((s): Story => ({ id: s.id, level: s.level_code, title: s.title, summary: s.summary ?? '', premium: s.is_premium, characters: s.characters ?? [], scenes: s.scenes ?? [], questionIds: storyQuestions(s.id) })),
     phonemes: (rows.pronunciation_guides ?? []).map((p) => ({ id: p.id, ipa: p.ipa, label: p.label, examples: p.examples, howTo: p.how_to, commonError: p.common_error, mouth: p.mouth })),
     homework: (rows.homework ?? []).map((h) => clean({ id: h.id, chapterId: h.chapter_id, lessonId: opt(h.lesson_id), title: h.title, kind: h.kind, dueDays: h.due_days, exerciseIds: h.question_ids ?? [], writing: opt(h.writing) })),
     exams: (rows.exams ?? []).map((x) => ({ id: x.id, scope: x.scope, ref: x.ref, title: x.title, passScore: x.passing_score, timeLimitSec: x.time_limit_sec, premium: x.is_premium, exerciseIds: x.question_ids ?? [], sampleSize: x.sample_size })),
@@ -99,9 +109,10 @@ export function packForFree(pack: ContentPack): ContentPack {
   const lockedLessons = new Set(pack.lessons.filter((l) => l.premium).map((l) => l.id));
   const lockedChapters = new Set(pack.chapters.filter((c) => c.premium).map((c) => c.id));
   const lockedListening = new Set(pack.listening.filter((l) => l.premium).map((l) => l.id));
-  const lockedQuestions = new Set(pack.listening.filter((l) => l.premium).flatMap((l) => l.questionIds));
+  const lockedQuestions = new Set([...pack.listening, ...pack.stories].filter((l) => l.premium).flatMap((l) => l.questionIds));
   const freeTopics = new Set(pack.lessons.filter((l) => !l.premium).map((l) => l.topic));
   freeTopics.add('skill.listening');
+  freeTopics.add('skill.story');
   const exercises = pack.exercises.filter((e) => {
     if (e.lessonId && lockedLessons.has(e.lessonId)) return false;
     if (lockedQuestions.has(e.id)) return false;
@@ -117,6 +128,7 @@ export function packForFree(pack: ContentPack): ContentPack {
     vocabulary: pack.vocabulary.filter((v) => !v.premium),
     scenarios: pack.scenarios.map((s) => (s.premium ? { ...s, locked: true, nodes: [], closing: '' } : s)),
     listening: pack.listening.map((l) => (lockedListening.has(l.id) ? { ...l, locked: true, transcript: '', translation: '', questionIds: [] } : l)),
+    stories: pack.stories.map((s) => (s.premium ? { ...s, locked: true, characters: [], scenes: [], questionIds: [] } : s)),
     // Homework of a Premium lesson or chapter, or pointing at a stripped question, stays on the server.
     homework: pack.homework.filter((h) => (!h.lessonId || !lockedLessons.has(h.lessonId)) && !lockedChapters.has(h.chapterId) && h.exerciseIds.every((id) => kept.has(id))),
   };

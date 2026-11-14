@@ -85,6 +85,8 @@ describe('CMS: import, quality gate, publish, rollback', () => {
     expect(sortById(back.exams)).toEqual(sortById(pack.exams));
     expect(sortById(back.vocabulary)).toEqual(sortById(pack.vocabulary));
     expect(sortById(back.listening)).toEqual(sortById(pack.listening));
+    expect(back.stories.length).toBeGreaterThan(0);
+    expect(sortById(back.stories)).toEqual(sortById(pack.stories));
     expect(sortById(back.units)).toEqual(sortById(pack.units));
     expect(sortById(back.chapters)).toEqual(sortById(pack.chapters));
   });

@@ -1,6 +1,6 @@
 // Content quality gate. Used by `npm run content:check`, by the test suite and
 // by the CMS before a curriculum version is published.
-import type { ContentPack, Exercise } from './types';
+import { STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise } from './types';
 import { grade, normalize } from '@/lib/engine/grading';
 
 export function validateExercise(e: Exercise): string[] {
@@ -75,7 +75,7 @@ export function validatePack(pack: ContentPack): string[] {
   // The same question twice reads as filler.
   const seen = new Map<string, string>();
   for (const e of pack.exercises) {
-    const k = `${e.type}|${e.prompt}|${e.text ?? ''}|${e.context ?? ''}|${(e.options ?? []).map((o) => o.text).join('/')}|${(e.pairs ?? []).flat().join('/')}`.toLowerCase();
+    const k = `${e.type}|${e.prompt}|${e.text ?? ''}|${e.context ?? ''}|${(e.options ?? []).map((o) => o.text).join('/')}|${(e.pairs ?? []).flat().join('/')}|${(e.sentences ?? []).join('/')}|${e.audioText ?? ''}`.toLowerCase();
     if (seen.has(k)) errs.push(`${e.id}: sama persis dengan ${seen.get(k)}`);
     else seen.set(k, e.id);
   }
@@ -135,5 +135,43 @@ export function validatePack(pack: ContentPack): string[] {
     for (const n of s.nodes) if (!seen.has(n.id)) errs.push(`skenario ${s.id}/${n.id}: tidak bisa dicapai dari awal`);
   }
   for (const l of pack.listening) for (const id of l.questionIds) if (!ids.has(id)) errs.push(`listening ${l.id}: soal ${id} tidak ada`);
+  const known = <T extends string>(list: readonly T[], v: string | undefined) => v === undefined || (list as readonly string[]).includes(v);
+  const storyIds = new Set<string>();
+  const stage = new Map(pack.exercises.map((e) => [e.id, e.stage]));
+  for (const s of pack.stories ?? []) {
+    if (storyIds.has(s.id)) errs.push(`cerita ${s.id}: id ganda`);
+    storyIds.add(s.id);
+    if (s.locked) continue;
+    if (!s.title.trim() || !s.summary.trim()) errs.push(`cerita ${s.id}: judul dan ringkasan wajib diisi`);
+    const cast = new Set(s.characters.map((c) => c.id));
+    for (const c of s.characters) {
+      if (!known(STORY_LOOKS, c.look)) errs.push(`cerita ${s.id}: tokoh ${c.id} memakai rupa "${c.look}" yang tidak dikenal`);
+      for (const color of [c.shirt, c.hair, c.skin, c.hijab]) if (color !== undefined && !/^#[0-9a-f]{6}$/i.test(color)) errs.push(`cerita ${s.id}: warna "${color}" pada tokoh ${c.id} harus berbentuk #rrggbb`);
+      if (!c.name.trim()) errs.push(`cerita ${s.id}: tokoh ${c.id} belum punya nama`);
+    }
+    if (s.scenes.length < 2) errs.push(`cerita ${s.id}: minimal dua adegan`);
+    s.scenes.forEach((sc, i) => {
+      const p = `cerita ${s.id}/adegan ${i + 1}`;
+      if (!known(STORY_BACKDROPS, sc.backdrop)) errs.push(`${p}: latar "${sc.backdrop}" tidak dikenal`);
+      if (sc.actors.length > 3) errs.push(`${p}: maksimal tiga tokoh dalam satu adegan`);
+      if (new Set(sc.actors.map((a) => a.at)).size !== sc.actors.length) errs.push(`${p}: dua tokoh berdiri di posisi yang sama`);
+      for (const a of sc.actors) {
+        if (!cast.has(a.who)) errs.push(`${p}: tokoh "${a.who}" tidak ada di daftar tokoh`);
+        if (!known(STORY_POSES, a.pose)) errs.push(`${p}: pose "${a.pose}" tidak dikenal`);
+      }
+      if (!sc.lines.length) errs.push(`${p}: belum ada kalimat`);
+      const onStage = new Set(sc.actors.map((a) => a.who));
+      for (const l of sc.lines) {
+        if (l.who !== 'narrator' && !onStage.has(l.who)) errs.push(`${p}: "${l.who}" berbicara tetapi tidak ada di adegan`);
+        if (!l.en.trim() || !l.tr.trim()) errs.push(`${p}: setiap kalimat butuh teks Inggris dan terjemahan`);
+        if (!known(STORY_POSES, l.pose)) errs.push(`${p}: pose "${l.pose}" tidak dikenal`);
+      }
+    });
+    if (s.questionIds.length < 3) errs.push(`cerita ${s.id}: minimal tiga soal setelah cerita`);
+    for (const id of s.questionIds) {
+      if (!ids.has(id)) errs.push(`cerita ${s.id}: soal ${id} tidak ada`);
+      else if (stage.get(id) !== 'story') errs.push(`cerita ${s.id}: soal ${id} harus bertahap "story"`);
+    }
+  }
   return errs;
 }

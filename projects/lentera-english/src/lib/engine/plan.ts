@@ -14,7 +14,7 @@ export const WEEK = 7 * DAY;
 export const PLAN_WEEKS = 52;
 const YEAR = 365 * DAY;
 
-export type MilestoneKind = 'lesson' | 'unit-exam' | 'level-exam' | 'listening' | 'conversation';
+export type MilestoneKind = 'lesson' | 'unit-exam' | 'level-exam' | 'listening' | 'conversation' | 'story';
 export interface Milestone {
   /** `${kind}:${ref}`; unique within a plan. */
   key: string;
@@ -27,7 +27,7 @@ export interface Milestone {
   minutes: number;
 }
 
-const MINUTES: Record<MilestoneKind, number> = { lesson: 30, 'unit-exam': 15, 'level-exam': 30, listening: 10, conversation: 10 };
+const MINUTES: Record<MilestoneKind, number> = { lesson: 30, 'unit-exam': 15, 'level-exam': 30, listening: 10, conversation: 10, story: 10 };
 const milestone = (kind: MilestoneKind, ref: string, level: Cefr, title: string, href: string): Milestone => ({ key: `${kind}:${ref}`, kind, ref, level, title, href, minutes: MINUTES[kind] });
 
 /** Monday 00:00 local time of the week containing `ms`. */
@@ -57,11 +57,13 @@ export function planMilestones(ix: ContentIndex, from: Cefr): Milestone[] {
   for (const level of CEFR_ORDER.slice(CEFR_ORDER.indexOf(from))) {
     const chapters = pack.chapters.filter((c) => c.level === level && !c.planned).sort((a, b) => a.position - b.position);
     if (!chapters.length) continue;
-    // Listening and conversation practice alternate, spread over the level's chapters.
+    // Stories, listening and conversation practice take turns, spread over the level's chapters.
     const listening = pack.listening.filter((l) => l.level === level);
     const talks = pack.scenarios.filter((s) => s.level === level);
+    const tales = (pack.stories ?? []).filter((s) => s.level === level);
     const skills: Milestone[] = [];
-    for (let i = 0; i < Math.max(listening.length, talks.length); i++) {
+    for (let i = 0; i < Math.max(listening.length, talks.length, tales.length); i++) {
+      if (tales[i]) skills.push(milestone('story', tales[i].id, level, tales[i].title, `/app/stories?id=${tales[i].id}`));
       if (listening[i]) skills.push(milestone('listening', listening[i].id, level, listening[i].title, `/app/listening?id=${listening[i].id}`));
       if (talks[i]) skills.push(milestone('conversation', talks[i].id, level, talks[i].title, `/app/conversations?id=${talks[i].id}`));
     }
@@ -87,6 +89,7 @@ export function completedAt(s: LearnerState, m: Milestone): number | undefined {
     case 'unit-exam':
     case 'level-exam': return s.exams[m.ref]?.attempts.find((a) => a.passed)?.at;
     case 'listening': return s.rewards[`listening:${m.ref}`];
+    case 'story': return s.rewards[`story:${m.ref}`];
     // Older progress has no first-completion stamp; the last play is the best estimate.
     case 'conversation': return s.rewards[`conversation:${m.ref}`] ?? s.conversations[m.ref]?.lastAt;
   }

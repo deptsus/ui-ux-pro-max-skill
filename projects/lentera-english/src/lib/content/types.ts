@@ -12,7 +12,8 @@ export type Stage =
   | 'drill'
   | 'exam'
   | 'placement'
-  | 'listening';
+  | 'listening'
+  | 'story';
 
 export type ExerciseType =
   | 'mc' // multiple choice
@@ -210,6 +211,62 @@ export interface ListeningItem {
   questionIds: string[];
 }
 
+/** Illustrated story exercises (Rilis 1). The app draws every scene; content only says who stands where and what they say. */
+export const STORY_BACKDROPS = ['home', 'bedroom', 'school', 'street', 'market', 'station', 'cafe', 'park', 'shop', 'temple'] as const;
+export type StoryBackdrop = (typeof STORY_BACKDROPS)[number];
+export const STORY_POSES = ['stand', 'wave', 'happy', 'sad', 'surprised', 'think', 'point'] as const;
+export type StoryPose = (typeof STORY_POSES)[number];
+export const STORY_LOOKS = ['pijar', 'girl', 'boy', 'woman', 'man', 'grandma', 'grandpa'] as const;
+export type StoryLook = (typeof STORY_LOOKS)[number];
+
+export interface StoryCharacter {
+  id: string;
+  name: string;
+  look: StoryLook;
+  /** Shirt colour (hex). */
+  shirt: string;
+  /** Hair colour (hex); ignored for Pijar. */
+  hair?: string;
+  /** Skin tone (hex); ignored for Pijar. */
+  skin?: string;
+  /** Hijab colour (hex); drawn instead of hair when set. */
+  hijab?: string;
+}
+export interface StoryActor {
+  who: string;
+  at: 'left' | 'center' | 'right';
+  pose?: StoryPose;
+  /** How the actor arrives when the scene opens. */
+  enter?: 'left' | 'right' | 'fade';
+}
+export interface StoryLine {
+  /** A character id, or "narrator" for a caption. */
+  who: string;
+  en: string;
+  /** Indonesian translation. */
+  tr: string;
+  /** Pose of the speaker while saying this line. */
+  pose?: StoryPose;
+}
+export interface StoryScene {
+  backdrop: StoryBackdrop;
+  time?: 'day' | 'evening' | 'night';
+  actors: StoryActor[];
+  lines: StoryLine[];
+}
+export interface Story {
+  id: string;
+  level: Cefr;
+  title: string;
+  summary: string;
+  premium: boolean;
+  locked?: boolean;
+  characters: StoryCharacter[];
+  scenes: StoryScene[];
+  /** Exercise ids (stage "story") answered after the story. */
+  questionIds: string[];
+}
+
 export interface Phoneme {
   id: string;
   ipa: string;
@@ -266,6 +323,7 @@ export interface ContentPack {
   vocabulary: VocabItem[];
   scenarios: Scenario[];
   listening: ListeningItem[];
+  stories: Story[];
   phonemes: Phoneme[];
   homework: HomeworkDef[];
   exams: ExamDef[];

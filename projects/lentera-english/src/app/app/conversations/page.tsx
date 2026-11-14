@@ -101,7 +101,7 @@ function Conversations() {
 
         {ended && (
           <Card className="space-y-3 text-center">
-            <Mascot mood={score >= 70 ? 'cheer' : 'think'} size={80} className="mx-auto" />
+            <Mascot mood={score >= 90 ? 'dance' : score >= 70 ? 'cheer' : 'encourage'} size={80} className="mx-auto" />
             <Ring value={score} tone={score >= 70 ? 'ok' : 'accent'} size={104}><span className="text-2xl font-extrabold">{score}%</span></Ring>
             <p className="text-sm text-muted">Nilai menggabungkan ketepatan tata bahasa dan kewajaran tiap responsmu.</p>
             <Notice tone="brand">{scenario.closing}</Notice>

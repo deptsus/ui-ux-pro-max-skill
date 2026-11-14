@@ -8,7 +8,7 @@ import { dateId } from '@/lib/format';
 import { planWindow, weekPlan, type Habit, type MilestoneKind, type PlanTarget, type WeekPlan } from '@/lib/engine/plan';
 import { Badge, Card, LinkButton, Ring, cx } from '@/components/ui';
 
-export const KIND_LABEL: Record<MilestoneKind, string> = { lesson: 'Pelajaran', 'unit-exam': 'Ujian unit', 'level-exam': 'Ujian level', listening: 'Menyimak', conversation: 'Percakapan' };
+export const KIND_LABEL: Record<MilestoneKind, string> = { lesson: 'Pelajaran', 'unit-exam': 'Ujian unit', 'level-exam': 'Ujian level', listening: 'Menyimak', conversation: 'Percakapan', story: 'Cerita' };
 
 /** The learner's plan this week, or null when they are not on a yearly plan. */
 export function useWeekPlan(): { plan: WeekPlan | null; end?: number } {

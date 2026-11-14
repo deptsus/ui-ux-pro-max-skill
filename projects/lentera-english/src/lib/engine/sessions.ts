@@ -21,7 +21,8 @@ export function topicPool(ix: ContentIndex, topicId: string): Exercise[] {
 
 export function tagPool(ix: ContentIndex, tag: string): Exercise[] {
   const topic = ix.tagById.get(tag)?.topic;
-  const focused = ix.pack.exercises.filter((e) => e.focus === tag && e.stage !== 'placement');
+  // Story questions only make sense right after their story, so drills skip them.
+  const focused = ix.pack.exercises.filter((e) => e.focus === tag && e.stage !== 'placement' && e.stage !== 'story');
   if (focused.length >= DRILL.size || !topic) return focused;
   // Top up from the topic so a drill is never trivially short.
   const rest = topicPool(ix, topic).filter((e) => !focused.includes(e));

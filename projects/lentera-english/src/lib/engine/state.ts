@@ -78,6 +78,7 @@ const XP_BY_CTX: Record<AttemptContext, number> = {
   mastery: GAME.xp.masteryCorrect,
   drill: GAME.xp.drillCorrect,
   review: GAME.xp.reviewCorrect,
+  story: GAME.xp.reviewCorrect,
   retest: GAME.xp.drillCorrect,
   listening: GAME.xp.reviewCorrect,
   timed: GAME.xp.timedCorrect,
@@ -261,6 +262,11 @@ export function completeConversation(s: LearnerState, id: string, scorePct: numb
   s.streak = nextStreak(s.streak, at);
   today(s, at).conversations += 1;
   if (!prev) addXp(s, GAME.xp.conversationComplete, 'conversation', at, id);
+}
+
+/** First time a story's questions were finished (the weekly plan counts it as done). */
+export function completeStory(s: LearnerState, id: string, at: number) {
+  s.rewards[`story:${id}`] ??= at;
 }
 
 /** First time a listening item was played to the end (the weekly plan counts it as done). */

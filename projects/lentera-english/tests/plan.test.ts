@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { buildPack } from '@content/index';
 import { indexContent } from '@/lib/content/types';
 import { completedAt, planMilestones, planWindow, weekPlan, weekStart, WEEK, type Milestone } from '@/lib/engine/plan';
-import { completeConversation, completeListening, createState } from '@/lib/engine/state';
+import { completeConversation, completeListening, completeStory, createState } from '@/lib/engine/state';
 import { dayKey } from '@/lib/engine/mastery';
 import type { Entitlement, LearnerState } from '@/lib/engine/types';
 
@@ -17,6 +17,7 @@ function finish(s: LearnerState, m: Milestone, at: number) {
   if (m.kind === 'lesson') s.lessons[m.ref] = { startedAt: at, step: 7, masteryBest: 100, masteryAttempts: 1, completedAt: at };
   else if (m.kind === 'unit-exam' || m.kind === 'level-exam') s.exams[m.ref] = { attempts: [{ at, score: 90, passed: true }] };
   else if (m.kind === 'listening') completeListening(s, m.ref, at);
+  else if (m.kind === 'story') completeStory(s, m.ref, at);
   else completeConversation(s, m.ref, 100, at);
 }
 
@@ -31,6 +32,7 @@ describe('urutan rencana', () => {
     expect(all.filter((m) => m.kind === 'level-exam').length).toBe(6);
     expect(all.filter((m) => m.kind === 'listening').length).toBe(p.listening.length);
     expect(all.filter((m) => m.kind === 'conversation').length).toBe(p.scenarios.length);
+    expect(all.filter((m) => m.kind === 'story').length).toBe(p.stories.length);
   });
 
   it('pelajaran mengikuti urutan kurikulum, ujian unit setelah pelajaran terakhir unitnya, ujian level paling akhir di levelnya', () => {

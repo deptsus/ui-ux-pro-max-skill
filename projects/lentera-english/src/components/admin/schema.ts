@@ -9,7 +9,7 @@ export type Data = Record<string, Row[]>;
 export type TableId =
   | 'cefr_levels' | 'chapters' | 'units' | 'lessons' | 'questions' | 'homework' | 'exams'
   | 'grammar_topics' | 'misconception_tags' | 'vocabulary' | 'conversation_scenarios'
-  | 'listening_items' | 'pronunciation_guides' | 'audio_resources';
+  | 'listening_items' | 'stories' | 'pronunciation_guides' | 'audio_resources';
 
 export type FieldKind =
   | 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'ref' | 'lines' | 'json' | 'date'
@@ -66,7 +66,7 @@ export interface TableDef {
 
 const LEVELS = [['A1', 'A1'], ['A2', 'A2'], ['B1', 'B1'], ['B2', 'B2'], ['C1', 'C1'], ['C2', 'C2']] as const;
 const STATUS = [['draft', 'Draf'], ['published', 'Terbit']] as const;
-export const STAGES = [['guided', 'Latihan terbimbing'], ['independent', 'Latihan mandiri'], ['homework', 'PR'], ['mastery', 'Tes penguasaan'], ['drill', 'Bank latihan perbaikan'], ['exam', 'Ujian'], ['placement', 'Tes penempatan'], ['listening', 'Menyimak']] as const;
+export const STAGES = [['guided', 'Latihan terbimbing'], ['independent', 'Latihan mandiri'], ['homework', 'PR'], ['mastery', 'Tes penguasaan'], ['drill', 'Bank latihan perbaikan'], ['exam', 'Ujian'], ['placement', 'Tes penempatan'], ['listening', 'Menyimak'], ['story', 'Cerita bergambar']] as const;
 export const TYPES = [['mc', 'Pilihan ganda'], ['fill', 'Isian'], ['arrange', 'Susun kata'], ['construct', 'Susun kalimat dari kata kunci'], ['match', 'Mencocokkan'], ['translate', 'Terjemahan'], ['fix', 'Perbaiki kesalahan'], ['listen', 'Menyimak'], ['read', 'Membaca'], ['dialogue', 'Melengkapi dialog'], ['tf', 'Benar atau salah'], ['spot', 'Temukan kata yang salah'], ['vocab', 'Kosakata dalam konteks'], ['para', 'Susun paragraf']] as const;
 
 export const OPTION_TYPES = ['mc', 'vocab', 'dialogue', 'read', 'listen', 'tf'];
@@ -207,6 +207,7 @@ export const TABLES: TableDef[] = [
       { key: 'time_limit_sec', label: 'Batas waktu (detik, opsional)', kind: 'number', min: 3, max: 600, nullable: true },
       { key: 'audio_key', label: 'Rekaman audio', kind: 'ref', ref: 'audio_resources', nullable: true, hint: 'Tanpa rekaman, audio dibacakan oleh suara bawaan perangkat.' },
       { key: 'listening_item_id', label: 'Materi menyimak', kind: 'ref', ref: 'listening_items', nullable: true, when: (r) => r.stage === 'listening' || !!r.listening_item_id },
+      { key: 'story_id', label: 'Cerita bergambar', kind: 'ref', ref: 'stories', nullable: true, when: (r) => r.stage === 'story' || !!r.story_id },
       { key: 'cefr_level', label: 'Level CEFR', kind: 'select', choices: LEVELS, nullable: true, when: (r) => r.stage === 'placement' || !!r.cefr_level, hint: 'Wajib untuk soal tes penempatan.' },
     ],
     blank: () => ({ stage: 'guided', type: 'mc', position: 1, difficulty: 2, status: 'draft', prompt: '', explanation: '', payload: {}, options: [{ text: '', correct: true }, { text: '', why: '' }] }),
@@ -324,6 +325,23 @@ export const TABLES: TableDef[] = [
     blank: () => ({ level_code: 'A1', kind: 'sentence', translation: '', is_premium: true }),
     cascade: (r, d) => plural(count(d.questions, (q) => q.listening_item_id === r.id), 'soal'),
     related: [{ table: 'questions', filterKey: 'listening_item_id', label: 'Soal materi ini' }],
+  },
+  {
+    id: 'stories', label: 'Cerita', singular: 'cerita bergambar', group: 'Pustaka', pk: 'id', idHint: 'Contoh: story-market-day',
+    title: (r) => r.title,
+    subtitle: (r, d) => `${r.level_code} · ${(r.scenes ?? []).length} adegan · ${count(d.questions, (q) => q.story_id === r.id)} soal`,
+    badges: (r) => [[r.is_premium ? 'Premium' : 'Gratis', r.is_premium ? 'accent' : 'ok']],
+    fields: [
+      { key: 'title', label: 'Judul', kind: 'text', required: true },
+      { key: 'level_code', label: 'Level', kind: 'select', choices: LEVELS, required: true, filter: true },
+      { key: 'summary', label: 'Ringkasan', kind: 'textarea', rows: 2, required: true, hint: 'Tampil di daftar cerita, juga untuk pengguna Free pada cerita Premium.' },
+      { key: 'is_premium', label: 'Hanya untuk Premium', kind: 'bool' },
+      { key: 'characters', label: 'Tokoh (JSON)', kind: 'json', rows: 8, required: true, hint: 'Daftar { "id", "name", "look", "shirt", "hair", "skin", "hijab" }. look: pijar, girl, boy, woman, man, grandma, grandpa. Warna berbentuk #rrggbb.' },
+      { key: 'scenes', label: 'Adegan (JSON)', kind: 'json', rows: 18, required: true, hint: 'Daftar adegan { "backdrop", "time", "actors": [{ "who", "at", "pose", "enter" }], "lines": [{ "who", "en", "tr", "pose" }] }. backdrop: home, bedroom, school, street, market, station, cafe, park, shop, temple. at: left, center, right. pose: stand, wave, happy, sad, surprised, think, point. who "narrator" untuk narasi.' },
+    ],
+    blank: () => ({ level_code: 'A1', is_premium: true, summary: '', characters: [], scenes: [] }),
+    cascade: (r, d) => plural(count(d.questions, (q) => q.story_id === r.id), 'soal'),
+    related: [{ table: 'questions', filterKey: 'story_id', label: 'Soal cerita ini' }],
   },
   {
     id: 'pronunciation_guides', label: 'Pelafalan', singular: 'panduan pelafalan', group: 'Pustaka', pk: 'id', idHint: 'Contoh: th-voiced',

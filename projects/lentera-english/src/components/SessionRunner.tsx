@@ -162,7 +162,10 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
           {result ? (
             <div className="animate-rise space-y-3" role="status" aria-live="polite">
               <div className="flex items-start gap-3">
-                <span className={cx('grid h-9 w-9 shrink-0 place-items-center rounded-full text-on-brand', result.correct ? 'bg-ok' : 'bg-bad')}>{result.correct ? <Check size={20} /> : <X size={20} />}</span>
+                <span className="relative shrink-0">
+                  <Mascot mood={result.correct ? 'cheer' : 'encourage'} size={56} decorative className="-my-2" />
+                  <span className={cx('absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full text-on-brand ring-2 ring-surface', result.correct ? 'bg-ok' : 'bg-bad')}>{result.correct ? <Check size={14} aria-hidden /> : <X size={14} aria-hidden />}</span>
+                </span>
                 <div className="min-w-0 space-y-1.5 text-sm">
                   <p className={cx('text-lg font-extrabold', result.correct ? 'text-ok' : 'text-bad')}>{result.correct ? 'Benar!' : 'Belum tepat'}</p>
                   {!result.correct && <p><span className="font-bold">Kenapa salah: </span>{result.feedback}</p>}
@@ -199,7 +202,7 @@ export function SessionSummary({ result, title, passScore, children, onRetry, do
   return (
     <div className="mx-auto max-w-2xl space-y-5 pb-10">
       <Card className="flex flex-col items-center gap-3 text-center">
-        <Mascot mood={passed ? 'cheer' : 'think'} size={88} />
+        <Mascot mood={result.score >= 90 ? 'dance' : passed ? 'cheer' : 'encourage'} size={88} />
         <h1 className="text-2xl font-extrabold">{title}</h1>
         <Ring value={result.score} tone={passed ? 'ok' : 'bad'} size={120}>
           <span className="text-3xl font-extrabold">{result.score}%</span>

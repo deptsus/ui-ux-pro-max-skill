@@ -2,7 +2,7 @@ import type { Cefr } from '@/lib/content/types';
 import type { TopicStat } from './mastery';
 import type { ReviewItem } from './srs';
 
-export type AttemptContext = 'guided' | 'independent' | 'homework' | 'mastery' | 'drill' | 'review' | 'retest' | 'exam' | 'placement' | 'timed' | 'listening';
+export type AttemptContext = 'guided' | 'independent' | 'homework' | 'mastery' | 'drill' | 'review' | 'retest' | 'exam' | 'placement' | 'timed' | 'listening' | 'story';
 
 export interface AttemptLog {
   id: string;
