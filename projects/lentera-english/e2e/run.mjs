@@ -34,11 +34,25 @@ const open = async (ctx, url) => {
   await page.locator('main').first().waitFor({ timeout: 45000 });
   return page;
 };
-const state = (page) => page.evaluate(() => {
-  const s = JSON.parse(localStorage.getItem('lentera.session') ?? 'null');
-  return JSON.parse(localStorage.getItem(`lentera.state.${s?.userId ?? 'guest'}`) ?? 'null');
-});
-const session = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('lentera.session') ?? 'null'));
+/**
+ * The signed-in account as { userId, email, token }, or null. Embedded servers keep it in
+ * `lentera.session`; with Supabase, supabase-js keeps it in `sb-<project>-auth-token`.
+ * A string expression so it can run inside page.evaluate and page.waitForFunction.
+ */
+const SESSION_JS = `(() => {
+  try { const d = JSON.parse(localStorage.getItem('lentera.session') ?? 'null'); if (d) return d; } catch {}
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!/^sb-.+-auth-token$/.test(k ?? '')) continue;
+    try { const v = JSON.parse(localStorage.getItem(k)); const s = v?.currentSession ?? v; if (s?.user?.id) return { userId: s.user.id, email: s.user.email ?? '', token: s.access_token }; } catch {}
+  }
+  return null;
+})()`;
+const state = (page) => page.evaluate(`(() => {
+  const s = ${SESSION_JS};
+  return JSON.parse(localStorage.getItem('lentera.state.' + (s?.userId ?? 'guest')) ?? 'null');
+})()`);
+const session = (page) => page.evaluate(SESSION_JS);
 /** True once the locator shows up; false if it never does (pages render after the app shell boots). */
 const seen = (locator, timeout = 10000) => locator.first().waitFor({ timeout }).then(() => true, () => false);
 const button = (page, name) => page.getByRole('button', { name });
@@ -211,7 +225,7 @@ scenario('lesson: tamu menuntaskan pelajaran, PR, ulangan, tantangan kilat, lalu
   await page.getByLabel('Kata sandi').fill(PASSWORD);
   await button(page, 'Daftar').click();
   await page.waitForURL(/\/app$/, { timeout: 30000 });
-  await page.waitForFunction(() => { const x = JSON.parse(localStorage.getItem('lentera.session') ?? 'null'); return x && localStorage.getItem(`lentera.state.${x.userId}`); }, null, { timeout: 30000 });
+  await page.waitForFunction(`(() => { const x = ${SESSION_JS}; return !!x && !!localStorage.getItem('lentera.state.' + x.userId); })()`, null, { timeout: 30000 });
   const sess = await session(page);
   s = await state(page);
   check('progres tamu pindah ke akun baru', s.userId === sess.userId && s.xp === guest.xp && !!s.lessons[lesson.id]?.completedAt && await page.evaluate(() => localStorage.getItem('lentera.state.guest') === null));
