@@ -37,11 +37,12 @@ export function supabaseKeyHeaders(key: string): Record<string, string> {
 }
 
 export function backendMode(): BackendMode {
-  if (process.env.SUPABASE_URL && supabaseSecretKey()) return 'supabase';
+  // An explicit request for the embedded database wins, so local runs and the
+  // e2e suite never touch the real project just because its variables are set.
+  // It never starts in a production build unless explicitly allowed.
   const wantsEmbedded = process.env.LENTERA_BACKEND === 'embedded';
-  // The embedded database is a development tool. It never starts in a
-  // production build unless explicitly allowed (used by the e2e suite).
   if (wantsEmbedded && (process.env.NODE_ENV !== 'production' || process.env.LENTERA_ALLOW_EMBEDDED === '1')) return 'embedded';
+  if (process.env.SUPABASE_URL && supabaseSecretKey()) return 'supabase';
   return 'none';
 }
 

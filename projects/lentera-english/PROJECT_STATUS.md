@@ -246,7 +246,12 @@ Sesi ketiga:
 
 1. `cd projects/lentera-english && npm install` (bila `node_modules` belum ada).
 2. Jalankan `npx tsc --noEmit`, `TZ=UTC npx vitest run` (harus 100/100), `npx tsx scripts/check-content.ts`, `npx next build`, lalu kedua suite e2e di bawah.
-3. Supabase: proyek "Lentera english" (ref `vkajprusgayizxhbdwcz`). Lihat bagian Supabase di bawah untuk status migrasi dan kunci yang masih dibutuhkan.
+3. Supabase: proyek "Lentera english" (ref `vkajprusgayizxhbdwcz`, region Sydney, organisasi `deptsus`).
+   - Migrasi terpasang: `0001_schema`, `0002_security`. **Belum**: `0003_functions`, `0004_payments`, `0005_manual_qris`. Memasang 0003 memicu pertanyaan konfirmasi dari konektor Supabase (trigger pada `auth.users`) yang harus disetujui pemilik dalam 60 detik; dua kali tidak terjawab.
+   - Environment cloud `ui-ux-pro-max-skill` sudah berisi `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` dan izin host proyek. **Belum**: `SUPABASE_SECRET_KEY` (rahasia; diisi pemilik sendiri sebagai environment variable, bukan network secret, karena browser di container juga lewat proxy dan Supabase menolak kunci rahasia dari browser).
+   - Auth: konfirmasi email aktif (`mailer_autoconfirm: false`). Pengirim email bawaan Supabase hanya mengirim ke anggota tim proyek, jadi sebelum dibuka ke publik pilih: matikan konfirmasi email, atau pasang SMTP sendiri (Authentication → Emails → SMTP).
+   - Setelah migrasi lengkap: buat akun admin pertama (`update profiles set role = 'admin' where id = '<uuid>'`), impor dan terbitkan kurikulum lewat dashboard admin, lalu uji daftar, sinkronisasi, papan peringkat, dan pembayaran di sana.
+   - `LENTERA_BACKEND=embedded` selalu memakai basis data lokal walaupun variabel Supabase ada (tes dan e2e tidak pernah menyentuh proyek sungguhan).
 4. Tanpa kredensial, pekerjaan berikutnya yang paling bernilai: menulis 24 pelajaran yang masih "Sedang disusun", ujian level B1 sampai C2, dan batas paket Free di server (TODO P1).
 
 Menjalankan kedua suite e2e terhadap build produksi (basis data embedded harus masih baru untuk `e2e:admin`, karena skrip memeriksa nomor versi; jalankan `e2e:admin` lebih dulu):

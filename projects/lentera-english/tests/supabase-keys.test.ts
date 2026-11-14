@@ -21,7 +21,16 @@ describe('Supabase keys', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_new');
     expect([supabaseSecretKey(), supabasePublicKey()]).toEqual(['sb_secret_new', 'sb_publishable_new']);
   });
+  it('an explicit embedded backend wins over Supabase variables', () => {
+    vi.stubEnv('SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('SUPABASE_SECRET_KEY', 'sb_secret_new');
+    vi.stubEnv('LENTERA_BACKEND', 'embedded');
+    expect(backendMode()).toBe('embedded');
+    vi.stubEnv('LENTERA_BACKEND', '');
+    expect(backendMode()).toBe('supabase');
+  });
   it('turns on the Supabase backend with either secret key name', () => {
+    vi.stubEnv('LENTERA_BACKEND', '');
     vi.stubEnv('SUPABASE_URL', 'https://example.supabase.co');
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '');
     vi.stubEnv('SUPABASE_SECRET_KEY', 'sb_secret_new');
