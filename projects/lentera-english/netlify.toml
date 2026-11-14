@@ -8,6 +8,9 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  # Build only when the newest commit message contains [deploy]; other pushes
+  # are saved on GitHub without spending deploy credits. See the script.
+  ignore = "bash scripts/netlify-ignore.sh"
 
 [build.environment]
   NODE_VERSION = "22"
