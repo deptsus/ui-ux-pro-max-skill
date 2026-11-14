@@ -50,6 +50,31 @@ function split<T>(items: T[], parts: number): T[][] {
   return out;
 }
 
+/**
+ * Index (within `chapterIds`) of the last chapter whose lessons teach a topic
+ * that the given questions test, judged by the misconception tags on their
+ * answers and their focus tags. Undefined when none of them belongs to these chapters.
+ */
+export function storyChapter(ix: ContentIndex, questionIds: string[], chapterIds: string[]): number | undefined {
+  const chapterOfTopic = new Map<string, number>();
+  chapterIds.forEach((cid, ci) => {
+    for (const u of ix.pack.units.filter((x) => x.chapterId === cid)) {
+      for (const l of ix.pack.lessons.filter((x) => x.unitId === u.id)) chapterOfTopic.set(l.topic, ci);
+    }
+  });
+  let best: number | undefined;
+  for (const id of questionIds) {
+    const e = ix.exerciseById.get(id);
+    if (!e) continue;
+    const tags = [e.focus, ...(e.options ?? []).map((o) => o.tag), ...Object.values(e.errors ?? {}).map((x) => x.tag)];
+    for (const tag of tags) {
+      const ci = tag ? chapterOfTopic.get(ix.tagById.get(tag)?.topic ?? '') : undefined;
+      if (ci !== undefined && (best === undefined || ci > best)) best = ci;
+    }
+  }
+  return best;
+}
+
 /** The learner's path from `from` to C2, in the order the plan asks for it. */
 export function planMilestones(ix: ContentIndex, from: Cefr): Milestone[] {
   const { pack } = ix;
@@ -57,13 +82,24 @@ export function planMilestones(ix: ContentIndex, from: Cefr): Milestone[] {
   for (const level of CEFR_ORDER.slice(CEFR_ORDER.indexOf(from))) {
     const chapters = pack.chapters.filter((c) => c.level === level && !c.planned).sort((a, b) => a.position - b.position);
     if (!chapters.length) continue;
-    // Stories, listening and conversation practice take turns, spread over the level's chapters.
+    // A story comes right after the chapter that teaches the grammar its questions
+    // check (found through the misconception tags on its answers), so it never
+    // asks about something the learner has not met yet.
+    const tales = (pack.stories ?? []).filter((s) => s.level === level);
+    const after = new Map<number, Milestone[]>();
+    const loose: Milestone[] = [];
+    for (const t of tales) {
+      const ci = storyChapter(ix, t.questionIds, chapters.map((c) => c.id));
+      const m = milestone('story', t.id, level, t.title, `/app/stories?id=${t.id}`);
+      if (ci === undefined) loose.push(m);
+      else after.set(ci, [...(after.get(ci) ?? []), m]);
+    }
+    // Listening and conversation practice (and any story without grammar tags) take turns, spread over the chapters.
     const listening = pack.listening.filter((l) => l.level === level);
     const talks = pack.scenarios.filter((s) => s.level === level);
-    const tales = (pack.stories ?? []).filter((s) => s.level === level);
     const skills: Milestone[] = [];
-    for (let i = 0; i < Math.max(listening.length, talks.length, tales.length); i++) {
-      if (tales[i]) skills.push(milestone('story', tales[i].id, level, tales[i].title, `/app/stories?id=${tales[i].id}`));
+    for (let i = 0; i < Math.max(listening.length, talks.length, loose.length); i++) {
+      if (loose[i]) skills.push(loose[i]);
       if (listening[i]) skills.push(milestone('listening', listening[i].id, level, listening[i].title, `/app/listening?id=${listening[i].id}`));
       if (talks[i]) skills.push(milestone('conversation', talks[i].id, level, talks[i].title, `/app/conversations?id=${talks[i].id}`));
     }
@@ -74,7 +110,7 @@ export function planMilestones(ix: ContentIndex, from: Cefr): Milestone[] {
         const exam = pack.exams.find((e) => e.scope === 'unit' && e.ref === u.id);
         if (exam) out.push(milestone('unit-exam', exam.id, level, exam.title.replace(/^Ujian Unit:\s*/i, ''), `/app/exams?id=${exam.id}`));
       }
-      out.push(...skillRuns[ci]);
+      out.push(...(after.get(ci) ?? []), ...skillRuns[ci]);
     });
     const levelExam = pack.exams.find((e) => e.scope === 'level' && e.ref === level);
     if (levelExam) out.push(milestone('level-exam', levelExam.id, level, `Seluruh materi ${level}`, `/app/exams?id=${levelExam.id}`));

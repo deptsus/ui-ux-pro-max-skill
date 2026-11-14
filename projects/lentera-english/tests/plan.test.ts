@@ -55,6 +55,22 @@ describe('urutan rencana', () => {
     expect(firstSkill).toBeLessThan(lastLesson);
   });
 
+  it('setiap cerita dijadwalkan setelah bab yang mengajarkan tata bahasa yang diuji soalnya', () => {
+    const chapterOf = (lessonId: string) => ix.unitById.get(ix.lessonById.get(lessonId)!.unitId)!.chapterId;
+    for (const st of ix.pack.stories) {
+      const at = all.findIndex((m) => m.key === `story:${st.id}`);
+      const taught = new Set<string>();
+      for (const q of st.questionIds) {
+        const e = ix.exerciseById.get(q)!;
+        for (const tag of (e.options ?? []).map((o) => o.tag)) if (tag) taught.add(ix.tagById.get(tag)!.topic);
+      }
+      // Every lesson of the same level that teaches one of those topics comes before the story.
+      for (const l of ix.pack.lessons.filter((x) => taught.has(x.topic) && ix.chapterById.get(chapterOf(x.id))!.level === st.level)) {
+        expect(all.findIndex((m) => m.key === `lesson:${l.id}`), `${st.id} setelah ${l.id}`).toBeLessThan(at);
+      }
+    }
+  });
+
   it('dimulai dari level hasil tes penempatan', () => {
     const fromB1 = planMilestones(ix, 'B1');
     expect(fromB1[0].level).toBe('B1');

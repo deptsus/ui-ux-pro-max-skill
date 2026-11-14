@@ -84,6 +84,7 @@ Repo `ui-ux-pro-max-skill` adalah produk lain (toolkit desain). Aplikasi ini han
 - CMS di sisi database: impor, edit sebagian, gerbang kualitas sebelum terbit, versi kurikulum, rollback (diuji).
 - Sinkronisasi progres: event idempoten, batas XP di server (200 per event, 3000 per hari), snapshot lama tidak menimpa yang baru (diuji).
 - Papan peringkat mingguan dari ledger XP (diuji).
+- **Perbaikan setelah Rilis 2 (belum di-deploy, ikut Rilis 3)**: rencana mingguan kini menjadwalkan setiap cerita tepat setelah bab yang mengajarkan tata bahasa yang diuji soal-soalnya (dibaca dari tag pola kesalahan pada jawabannya, `storyChapter` di `src/lib/engine/plan.ts`). Sebelumnya cerita dibagi rata, sehingga misalnya "Lomba Memasak" (too/enough, -ing; B1 Bab 3) muncul setelah B1 Bab 2. Diuji di `tests/plan.test.ts`.
 - **Rilis 2 (diuji)**:
   - **Pelajaran A2** (`content/a2-3.ts`, bab "Kebiasaan dan Kisah" dan "Aturan, Saran, dan Arah"): Seberapa Sering? (kata keterangan frekuensi), Much/Many/Some/Any, Past Continuous, Must dan Have to, Should, Imperatif dan Petunjuk Arah.
   - **Pelajaran B1** (`content/b1-3.ts`, bab "Kebiasaan Lama dan Percakapan", dua unit): Used to, Gerund atau To-Infinitive, Question Tags, Too dan Enough.
