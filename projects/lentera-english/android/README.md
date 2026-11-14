@@ -8,11 +8,19 @@ langsung terlihat di aplikasi tanpa perlu membuat APK baru.
 | | |
 |---|---|
 | Nama paket | `id.lenteraenglish.app` (permanen setelah terbit di Play Store) |
-| Versi | 1.0.0 (versionCode 1) |
+| Versi | 1.1.0 (versionCode 2): notifikasi web tampil sebagai notifikasi aplikasi Lentera (notification delegation, izin `POST_NOTIFICATIONS`). 1.0.0 (versionCode 1) tanpa notifikasi. |
 | Android minimum | 7.0 (API 24); target API 36 |
 | Unduhan | `/download/lentera-english.apk` (tombol di halaman depan) |
 | Verifikasi situs | `public/.well-known/assetlinks.json` |
 | Sidik jari sertifikat (SHA-256, publik) | `74:B2:DD:32:1D:1F:DC:49:6B:C9:E0:3C:BC:B9:0B:98:DB:29:9C:E3:AD:FF:F6:4B:84:EE:7E:77:29:E9:DA:A5` |
+
+## Notifikasi admin
+
+Notifikasi pembayaran untuk admin dikirim lewat Web Push dari situs (`/api/push`,
+`public/admin-sw.js`). Di aplikasi Android 1.1.0 ke atas, notifikasi itu tampil
+sebagai notifikasi aplikasi Lentera. Admin mengaktifkannya sekali per HP di
+`/admin` → panel "Notifikasi HP" → "Aktifkan notifikasi". Memasang APK baru di
+atas versi lama tidak menghapus data maupun login.
 
 ## Kunci tanda tangan
 

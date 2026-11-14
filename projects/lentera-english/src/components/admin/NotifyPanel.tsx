@@ -60,7 +60,8 @@ export function NotifyPanel() {
         </p>
         {message && <p role="status" className={cx('mt-1 text-sm font-bold', message.tone === 'ok' ? 'text-ok' : 'text-bad')}>{message.text}</p>}
       </div>
-      <div className="flex flex-wrap gap-2">
+      {/* Own full-width row on phones, so the explanation is not squeezed. */}
+      <div className="flex w-full flex-wrap gap-2 sm:w-auto">
         {status === 'on' ? (
           <>
             <Button size="sm" variant="secondary" onClick={() => void test()}>Kirim uji</Button>
