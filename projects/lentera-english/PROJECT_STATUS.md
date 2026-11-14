@@ -244,10 +244,11 @@ Sesi keempat dan kelima:
 11. `7e21185`..`dd59ec1` Supabase: migrasi 0001–0006, kurikulum terbit, admin pertama.
 12. `efce061`, `468e48f` konfigurasi Netlify (`netlify.toml`, adapter `@netlify/plugin-nextjs` wajib ditulis; tanpanya semua rute 404). `ae39e72` perbaikan hydration di Netlify (Bug #8).
 13. `ad8ffbf` e2e membaca sesi Supabase (`sb-<project>-auth-token`) selain `lentera.session`, sehingga suite pembelajar bisa dijalankan ke situs live.
+14. `8284c8f` ikon PNG (192, 512, maskable 512, apple-icon 180) dan manifest diperbarui. `d4afa8a` aplikasi Android TWA: APK di `public/download/`, `assetlinks.json`, header Netlify, tautan unduh di halaman depan, `android/` (generator + langkah build).
 
 ## 7. File terakhir yang diubah
 
-1. Sesi kelima: `src/instrumentation-client.ts`, `e2e/run.mjs`, `netlify.toml`, `.gitignore`.
+1. Sesi kelima: `src/instrumentation-client.ts`, `e2e/run.mjs`, `netlify.toml`, `.gitignore`, `public/manifest.webmanifest`, ikon PNG, `src/app/apple-icon.png`, `public/.well-known/assetlinks.json`, `public/download/lentera-english.apk`, `android/*`, `src/app/page.tsx`.
 2. Sesi keempat: `src/lib/qris.ts`, `src/lib/server/manual-payments.ts`, `src/components/ManualQrisCheckout.tsx`, `supabase/migrations/0005_manual_qris.sql`, `0006_lint_fixes.sql`, `src/lib/server/db.ts`, `src/lib/server/api.ts`.
 3. Sesi ketiga: `e2e/run.mjs`, `e2e/admin.mjs`, `scripts/export-content.ts`, `tests/admin.test.ts`.
 4. `src/lib/client/store.ts` (serah terima tamu → akun), `src/components/admin/CmsPanel.tsx`, `next.config.ts`.
@@ -274,7 +275,8 @@ Sesi keempat dan kelima:
    - Render ditolak karena meminta kartu pembayaran walau paket gratis; Vercel belum diotorisasi.
    - `LENTERA_BACKEND=embedded` selalu memakai basis data lokal walaupun variabel Supabase ada (tes dan e2e tidak pernah menyentuh proyek sungguhan).
    - Konektor Supabase meminta konfirmasi pemilik untuk perintah yang dianggap merusak (`drop`, trigger pada `auth.users`, isi fungsi dengan `delete`); di aplikasi pemilik, pertanyaan itu tidak tampil sehingga selalu habis waktu. Jalur yang terbukti: SQL Editor.
-5. Tanpa kredensial, pekerjaan berikutnya yang paling bernilai: menulis 24 pelajaran yang masih "Sedang disusun", ujian level B1 sampai C2, dan batas paket Free di server (TODO P1).
+5. **Aplikasi Android (TWA)** `id.lenteraenglish.app` 1.0.0, minSdk 24, target 36: membuka `/app` di situs live layar penuh. APK di `/download/lentera-english.apk` (tautan di hero dan footer halaman depan); `public/.well-known/assetlinks.json` berisi sidik jari publik sertifikat. Diperiksa: APK dan AAB tertandatangani (apksigner v2+v3, jarsigner) dengan sidik jari yang sama; API Digital Asset Links Google mengembalikan pernyataan situs → aplikasi; APK live identik (sha256 `2482de35…`) dan tersaji sebagai `application/vnd.android.package-archive`. **Belum diuji di HP sungguhan** (tidak ada emulator di lingkungan ini). Kunci tanda tangan dan kata sandinya diserahkan ke pemilik, tidak ada di repo; cara build ulang di `android/README.md`. Environment cloud diberi izin host `dl.google.com` untuk Android SDK (pemilik menyetujui Perjanjian Lisensi Android SDK). Play Store belum: butuh akun Play Console, AAB dari build yang sama, dan sidik jari Play App Signing ditambahkan ke `assetlinks.json`.
+6. Tanpa kredensial, pekerjaan berikutnya yang paling bernilai: menulis 24 pelajaran yang masih "Sedang disusun", ujian level B1 sampai C2, dan batas paket Free di server (TODO P1).
 
 Menjalankan kedua suite e2e terhadap build produksi (basis data embedded harus masih baru untuk `e2e:admin`, karena skrip memeriksa nomor versi; jalankan `e2e:admin` lebih dulu):
 
