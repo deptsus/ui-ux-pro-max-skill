@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "id.lenteraenglish.app",
+      "sha256_cert_fingerprints": [
+        "74:B2:DD:32:1D:1F:DC:49:6B:C9:E0:3C:BC:B9:0B:98:DB:29:9C:E3:AD:FF:F6:4B:84:EE:7E:77:29:E9:DA:A5"
+      ]
+    }
+  }
+]

@@ -9,3 +9,8 @@ e2e/shots/
 AGENTS.md
 .vitest/
 .netlify
+
+# Android signing keys: never commit (see android/README.md)
+*.jks
+*.keystore
+.storepass
