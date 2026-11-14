@@ -28,6 +28,8 @@ export function validateExercise(e: Exercise): string[] {
     else {
       // The model answer must grade as correct, and listed errors as wrong.
       if (!grade(e, { text: e.answers[0] }).correct) bad('kunci jawaban tidak lolos pemeriksaan');
+      // Every accepted alternative must also grade as correct.
+      for (const alt of e.answers.slice(1)) if (!grade(e, { text: alt }).correct) bad(`jawaban alternatif "${alt}" tidak dinilai benar`);
       for (const wrong of Object.keys(e.errors ?? {})) {
         if (grade(e, { text: wrong }).correct) bad(`jawaban salah "${wrong}" ternyata dinilai benar`);
       }
@@ -36,6 +38,13 @@ export function validateExercise(e: Exercise): string[] {
     if (e.type === 'arrange' && (e.answers?.[0] ?? '').split(' ').length < 3) bad('arrange butuh minimal tiga kata');
   }
   if (e.type === 'listen' && !e.audioText && !e.audioKey) bad('listen butuh audioText atau audioKey');
+  // A hint must point the way, not give the answer away. Naming the answer
+  // among the alternatives ("am / is / are") is fine; naming it alone is not.
+  const hint = (e.hint ?? '').toLowerCase();
+  const key = e.type === 'fill' ? e.answers?.[0] : e.options?.find((o) => o.correct)?.text;
+  const others = e.type === 'fill' ? Object.keys(e.errors ?? {}) : (e.options ?? []).filter((o) => !o.correct).map((o) => o.text);
+  const mentions = (w: string) => w.length > 1 && new RegExp(`(^|[^a-z'])${w.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z']|$)`).test(hint);
+  if (hint && key && mentions(key) && !others.some(mentions)) bad(`petunjuk membocorkan jawaban "${key}"`);
   return errs;
 }
 
@@ -58,6 +67,14 @@ export function validatePack(pack: ContentPack): string[] {
     for (const x of Object.values(e.errors ?? {})) if (x.tag && !tags.has(x.tag)) errs.push(`${e.id}: tag "${x.tag}" tidak terdaftar`);
   }
   for (const t of pack.tags) if (!topics.has(t.topic)) errs.push(`tag ${t.id}: topik "${t.topic}" tidak terdaftar`);
+  // The same question twice reads as filler.
+  const seen = new Map<string, string>();
+  for (const e of pack.exercises) {
+    const k = `${e.type}|${e.prompt}|${e.text ?? ''}|${e.context ?? ''}|${(e.options ?? []).map((o) => o.text).join('/')}|${(e.pairs ?? []).flat().join('/')}`.toLowerCase();
+    if (seen.has(k)) errs.push(`${e.id}: sama persis dengan ${seen.get(k)}`);
+    else seen.set(k, e.id);
+  }
+  const PRODUCTION = new Set(['fill', 'translate', 'construct', 'fix', 'arrange']);
   for (const l of pack.lessons) {
     const p = `pelajaran ${l.id}`;
     if (!units.has(l.unitId)) errs.push(`${p}: unit tidak ditemukan`);
@@ -68,6 +85,12 @@ export function validatePack(pack: ContentPack): string[] {
     if (!l.teaching?.length) errs.push(`${p}: tidak ada penjelasan materi`);
     if (!l.demo?.length) errs.push(`${p}: tidak ada contoh benar/salah`);
     for (const v of l.vocab ?? []) if (!vocab.has(v)) errs.push(`${p}: kosakata "${v}" tidak ada`);
+    for (const t of l.teaching ?? []) for (const x of t.examples ?? []) if (!x.en?.trim() || !x.id?.trim()) errs.push(`${p}: contoh di "${t.heading}" belum lengkap (en/id)`);
+    for (const d of l.demo ?? []) if (!d.why?.trim() || d.good.trim() === d.bad.trim()) errs.push(`${p}: contoh benar/salah "${d.good}" tidak lengkap`);
+    // Learners must produce English, not only recognise it.
+    for (const stage of ['independent', 'mastery'] as const) {
+      if (!pack.exercises.some((e) => e.lessonId === l.id && e.stage === stage && PRODUCTION.has(e.type))) errs.push(`${p}: tahap ${stage} tidak punya soal menulis/menyusun`);
+    }
     for (const stage of ['guided', 'independent', 'homework', 'mastery'] as const) {
       const n = pack.exercises.filter((e) => e.lessonId === l.id && e.stage === stage).length;
       if (n < 3) errs.push(`${p}: tahap ${stage} hanya punya ${n} soal`);
