@@ -1,8 +1,9 @@
-import { Award, BarChart3, BookOpen, ClipboardList, Crown, GraduationCap, Headphones, Home, LayoutGrid, Library, Map, MessagesSquare, Repeat, Settings, User, Users } from 'lucide-react';
+import { Award, BarChart3, BookOpen, CalendarCheck, ClipboardList, Crown, GraduationCap, Headphones, Home, LayoutGrid, Library, Map, MessagesSquare, Repeat, Settings, User, Users } from 'lucide-react';
 
 export const NAV = [
   { href: '/app', label: 'Beranda', icon: Home },
   { href: '/app/path', label: 'Jalur Belajar', icon: Map },
+  { href: '/app/plan', label: 'Rencana Mingguan', icon: CalendarCheck },
   { href: '/app/review', label: 'Ulangan', icon: Repeat },
   { href: '/app/homework', label: 'PR', icon: ClipboardList, desc: 'Tugas tiap pelajaran dan bab, lengkap dengan tenggat.' },
   { href: '/app/exams', label: 'Ujian', icon: GraduationCap },

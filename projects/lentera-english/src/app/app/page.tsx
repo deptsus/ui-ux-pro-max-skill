@@ -11,6 +11,7 @@ import { useApp } from '@/lib/client/hooks';
 import { useSession } from '@/lib/client/session';
 import { act } from '@/lib/client/store';
 import { Mascot } from '@/components/Mascot';
+import { WeekPlanCard } from '@/components/WeekPlan';
 import { Badge, Button, Card, LinkButton, Progress, Ring } from '@/components/ui';
 
 const REC_ICON: Record<Recommendation['kind'], typeof Wrench> = { placement: Compass, remediate: Wrench, revise: BookOpen, practice: Target, retest: CheckCircle2, review: Repeat, homework: ClipboardList, exam: GraduationCap, lesson: ArrowRight };
@@ -85,6 +86,8 @@ export default function Dashboard() {
           )}
         </section>
       )}
+
+      <WeekPlanCard />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Ringkasan">
         <Card className="p-4"><p className="flex items-center gap-1.5 text-sm font-bold text-muted"><Flame size={16} className="text-accent" aria-hidden />Beruntun</p><p className="mt-1 text-2xl font-extrabold">{streak} hari</p><p className="text-xs text-muted">Terpanjang {learner.streak.longest} · pelindung {learner.streak.freezes}</p></Card>

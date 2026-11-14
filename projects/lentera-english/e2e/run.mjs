@@ -116,7 +116,7 @@ scenario('routes: semua halaman terbuka tanpa error', async () => {
   const ctx = await newContext();
   const page = await open(ctx, '/app');
   const pack = await fetchPack(page);
-  const routes = ['/', '/masuk', '/daftar', '/admin', '/app', '/app/path', '/app/review', '/app/homework', '/app/exams', `/app/exams?id=${pack.exams[0].id}`, '/app/vocabulary', '/app/grammar', `/app/grammar?topic=${encodeURIComponent(pack.topics[0].id)}`, '/app/listening', '/app/listening?tab=pelafalan', `/app/listening?id=${pack.listening[0].id}`, '/app/conversations', '/app/analytics', '/app/achievements', '/app/leaderboard', '/app/profile', '/app/subscription', '/app/settings', '/app/more', '/app/placement', '/app/practice?mode=timed', `/app/practice?mode=drill&tag=${encodeURIComponent(pack.tags[0].id)}`, '/app/checkout', `/app/lesson?id=${pack.lessons.find((l) => l.locked).id}`];
+  const routes = ['/', '/masuk', '/daftar', '/admin', '/app', '/app/path', '/app/plan', '/app/review', '/app/homework', '/app/exams', `/app/exams?id=${pack.exams[0].id}`, '/app/vocabulary', '/app/grammar', `/app/grammar?topic=${encodeURIComponent(pack.topics[0].id)}`, '/app/listening', '/app/listening?tab=pelafalan', `/app/listening?id=${pack.listening[0].id}`, '/app/conversations', '/app/analytics', '/app/achievements', '/app/leaderboard', '/app/profile', '/app/subscription', '/app/settings', '/app/more', '/app/placement', '/app/practice?mode=timed', `/app/practice?mode=drill&tag=${encodeURIComponent(pack.tags[0].id)}`, '/app/checkout', `/app/lesson?id=${pack.lessons.find((l) => l.locked).id}`];
   const bad = [];
   for (const r of routes) {
     const before = issues.length;
@@ -391,6 +391,10 @@ scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif
   const premiumLesson = free.lessons.find((l) => l.locked);
   check('akun Free menerima pelajaran Premium tanpa isi', !!premiumLesson && premiumLesson.teaching.length === 0 && !free.exercises.some((e) => e.lessonId === premiumLesson.id));
   check('klien tidak bisa menjadikan dirinya Premium lewat profil', (await fetch(`${BASE}/api/me`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess.token}` }, body: JSON.stringify({ role: 'admin', premium: true, plan: 'premium_yearly' }) }).then((r) => r.json())).profile.role === 'student' && (await api('/api/me', sess.token)).data.user.entitlement.premium === false);
+  // Weekly plan: Free accounts see what it is and where to get it.
+  await page.getByText('Rencana belajar 52 minggu').waitFor({ timeout: 20000 });
+  await page.goto(`${BASE}/app/plan`);
+  check('akun Free: rencana mingguan menjelaskan bahwa ini fitur paket tahunan', await page.getByText('Rencana 52 minggu ada di paket tahunan').waitFor({ timeout: 20000 }).then(() => true).catch(() => false));
 
   // Plans: yearly shows the struck-through price and the discount; QRIS is the only method.
   await page.goto(`${BASE}/app/subscription`);
@@ -433,6 +437,15 @@ scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif
   await page.goto(`${BASE}/app`);
   await link(page, 'Premium').first().waitFor({ timeout: 20000 });
   check('lencana Premium tampil di aplikasi', await link(page, 'Premium').count() >= 1);
+  // Weekly plan for the yearly subscriber: week 1, starting with the first lesson of their path.
+  await page.getByRole('heading', { name: 'Rencana minggu ini' }).waitFor({ timeout: 20000 });
+  const targets = page.getByRole('list', { name: 'Target minggu ini' });
+  const firstLesson = full.lessons.find((l) => l.id === 'a1-greetings') ?? full.lessons[0];
+  check('pelanggan tahunan: Beranda menampilkan rencana minggu 1 yang dimulai dari pelajaran pertama', await page.getByText(/^Minggu 1 dari 5[23]$/).count() === 1 && await targets.getByText(firstLesson.title, { exact: true }).count() === 1, await page.locator('section[aria-labelledby=plan-title]').innerText().catch(() => ''));
+  await page.goto(`${BASE}/app/plan`);
+  await page.getByRole('heading', { name: 'Minggu-minggu berikutnya' }).waitFor({ timeout: 20000 });
+  check('pelanggan tahunan: halaman rencana menampilkan minggu ini, proyeksi, dan cara kerjanya', await page.getByText('Cara kerja rencana ini').count() === 1 && await page.getByText(/Tampilkan \d+ minggu lainnya/).count() === 1);
+  await page.screenshot({ path: path.join(SHOTS, 'plan.png'), fullPage: true });
   await page.goto(`${BASE}/app/lesson?id=${premiumLesson.id}`);
   await page.locator('main h1, main p').first().waitFor();
   check('pelajaran Premium tidak lagi meminta berlangganan', await page.getByText('Pelajaran Premium', { exact: true }).count() === 0 && await page.getByText(/Pelajaran masih terkunci|Langkah 1 dari 8/).count() === 1);

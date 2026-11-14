@@ -1,6 +1,6 @@
 # PROJECT_STATUS — Lentera English
 
-Terakhir diperbarui: 14 November 2026, setelah tahap 3 materi (menyimak dan percakapan B1–C2) selesai dan menunggu pemeriksaan pemilik. **Sesi baru: mulai dari bagian 8, "Mulai dari sini".**
+Terakhir diperbarui: 14 November 2026, setelah tahap 3 (menyimak dan percakapan B1–C2, menunggu pemeriksaan pemilik) dan tahap 4 (rencana belajar mingguan untuk paket tahunan). **Sesi baru: mulai dari bagian 8, "Mulai dari sini".**
 Alamat live: https://lentera-english-app.netlify.app (backend Supabase, pembayaran QRIS manual).
 Branch kerja: `ccr-17d3d5e4-jx43zs` di repo `deptsus/ui-ux-pro-max-skill` (melanjutkan `ccr-33e68053-ob8ny7`).
 Lokasi proyek: `projects/lentera-english/` (lihat bagian "Konteks repo" di bawah).
@@ -84,6 +84,7 @@ Repo `ui-ux-pro-max-skill` adalah produk lain (toolkit desain). Aplikasi ini han
 - CMS di sisi database: impor, edit sebagian, gerbang kualitas sebelum terbit, versi kurikulum, rollback (diuji).
 - Sinkronisasi progres: event idempoten, batas XP di server (200 per event, 3000 per hari), snapshot lama tidak menimpa yang baru (diuji).
 - Papan peringkat mingguan dari ledger XP (diuji).
+- **Rencana belajar mingguan untuk Premium Tahunan (tahap 4, diuji)**: `src/lib/engine/plan.ts`, `src/components/WeekPlan.tsx`, `/app/plan`. Isinya seluruh jalur dari level hasil tes penempatan sampai C2 (A1: 92 langkah = 38 pelajaran, 15 ujian unit, 6 ujian level, 17 materi menyimak, 16 percakapan; menyimak dan percakapan diselipkan per bab), dibagi rata sampai paket berakhir. Jatah minggu ini = langkah yang masih terbuka pada hari Senin ÷ minggu tersisa (dibulatkan ke atas), tetap sepanjang minggu; tertinggal → jatah naik sedikit, lebih cepat → tercatat sebagai bonus dan minggu berikutnya lebih ringan. Ditambah dua kebiasaan: belajar di 4 hari berbeda dan ulangan jatuh tempo tuntas. Kartu "Rencana minggu ini" di Beranda; halaman lengkap dengan proyeksi minggu-minggu berikutnya. Berlaku untuk paket `premium_yearly`, admin, dan siapa pun yang Premium-nya masih lebih dari 31 hari (paket bulanan yang disusul paket tahunan); paket bulanan dan Free melihat penjelasan dan ajakan ke paket tahunan. Waktu tuntas pertama materi menyimak dan percakapan kini dicatat (`rewards['listening:…']`, `rewards['conversation:…']`). Teruji: `tests/plan.test.ts` (16 tes, juga di zona waktu Asia/Jakarta dan America/New_York), skenario e2e `routes` dan `payment` (akun Free melihat ajakan; setelah paket tahunan dikonfirmasi admin, Beranda menampilkan "Minggu 1 dari 53" yang dimulai dari pelajaran pertama).
 
 ### 2d-1. Pembayaran QRIS manual (aktif; Teruji: `tests/manual-payments.test.ts`, 17 tes, dan e2e)
 
@@ -278,7 +279,8 @@ Sesi keempat dan kelima:
   3. Sambungkan di `content/index.ts` (bila perlu PR menyimak), naikkan `CONTENT_VERSION` ke `2026.11.4`.
   4. Periksa: `npx tsc --noEmit`, `npx tsx scripts/check-content.ts`, `TZ=UTC npx vitest run` (138 tes), lalu e2e di server baru (`npm run e2e:curriculum`, `npm run e2e:skills`).
   5. Perbarui dokumen ini dan `TODO.md`, commit, push, lalu minta pemilik memeriksa dan menerbitkan: `/admin` → Terbitkan → Impor ulang paket bawaan (ketik IMPOR) → Terbitkan kurikulum (tunggu deploy Netlify selesai dulu).
-- **Pekerjaan berikutnya (tahap 4)**: rencana belajar mingguan untuk pelanggan tahunan.
+- **Tahap 4 (selesai, kode langsung live setelah deploy)**: rencana belajar mingguan untuk pelanggan tahunan (bagian 2, "Rencana belajar mingguan"). Tidak butuh penerbitan kurikulum, tetapi isi rencananya ikut bertambah setelah tahap 3 diterbitkan.
+- **Ide berikutnya (belum diminta pemilik)**: batas paket Free di server (TODO P1), editor visual skenario percakapan di admin, rekaman audio penutur asli.
 - **Aturan materi**: pemilik memeriksa sendiri semua materi sebelum terbit. Fokus mutu, bukan jumlah. Penilai jawaban hanya mencocokkan teks setelah normalisasi (`src/lib/engine/grading.ts`), jadi soal ketik tidak bisa menguji tanda baca atau huruf besar.
 - **Tugas pemilik yang masih terbuka**: hapus akun uji `uji-admin-…@lentera.test` di Supabase (butir 6) bila belum; pasang APK 1.2.0 dan uji "Aktifkan notifikasi" + "Kirim uji" di HP; uji bayar QRIS sungguhan.
 
@@ -315,7 +317,7 @@ rm -rf /tmp/lentera-e2e && npx next build
 LENTERA_BACKEND=embedded LENTERA_ALLOW_EMBEDDED=1 LENTERA_DEV_ADMIN_EMAIL=admin@lentera.test \
   LENTERA_DATA_DIR=/tmp/lentera-e2e/pglite npx next start -p 3100 &
 npm run e2e:admin     # 67 pemeriksaan
-npm run e2e           # 75 pemeriksaan; npm run e2e -- lesson exam untuk skenario tertentu
+npm run e2e           # 84 pemeriksaan; npm run e2e -- lesson exam untuk skenario tertentu
 ```
 
 Mencadangkan kurikulum dari basis data: `npm run content:export` (konten kerja) atau `npm run content:export -- --published` (versi terbit). Berkas tersimpan di `backups/`. Untuk mode embedded, hentikan server lebih dulu.

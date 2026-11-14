@@ -257,9 +257,15 @@ export function finishRetest(s: LearnerState, topicId: string, scorePct: number,
 export function completeConversation(s: LearnerState, id: string, scorePct: number, at: number) {
   const prev = s.conversations[id];
   s.conversations[id] = { best: Math.max(prev?.best ?? 0, scorePct), plays: (prev?.plays ?? 0) + 1, lastAt: at };
+  s.rewards[`conversation:${id}`] ??= at;
   s.streak = nextStreak(s.streak, at);
   today(s, at).conversations += 1;
   if (!prev) addXp(s, GAME.xp.conversationComplete, 'conversation', at, id);
+}
+
+/** First time a listening item was played to the end (the weekly plan counts it as done). */
+export function completeListening(s: LearnerState, id: string, at: number) {
+  s.rewards[`listening:${id}`] ??= at;
 }
 
 export function learnVocab(s: LearnerState, id: string, at: number) {

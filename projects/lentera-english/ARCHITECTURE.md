@@ -71,7 +71,8 @@ projects/lentera-english/
 │   └── lib/
 │       ├── content/          types.ts (model konten), validate.ts, rows.ts (pack ⇄ baris DB, packForFree)
 │       ├── engine/           Mesin belajar murni (tanpa React/IO): grading, mastery, srs, state,
-│       │                     recommend, unlock, sessions, placement, gamification, analytics, config
+│       │                     recommend, unlock, sessions, placement, gamification, analytics, config,
+│       │                     plan (rencana belajar mingguan paket tahunan)
 │       ├── client/           session.ts, store.ts (state offline-first), content.ts (IndexedDB/offline),
 │       │                     api.ts, audio.ts, hooks.ts
 │       ├── server/           db.ts, auth.ts, api.ts, content.ts, manual-payments.ts (QRIS, aktif),
@@ -196,9 +197,9 @@ LENTERA_BACKEND=embedded LENTERA_DEV_ADMIN_EMAIL=admin@lentera.test npx next dev
 
 # Pemeriksaan
 npx tsc --noEmit
-TZ=UTC npx vitest run              # 74 tes: engine 28, db 16, payments 30
+TZ=UTC npx vitest run              # 154 tes (engine, db, pembayaran, admin, push, android, konten menyimak/percakapan, rencana mingguan)
 npx tsx scripts/check-content.ts   # gerbang kualitas konten
-npx next build                     # SAAT INI GAGAL karena Bug #1 di PROJECT_STATUS.md
+npx next build
 ```
 
 Reset data dev: hentikan server, hapus `.data/pglite`.

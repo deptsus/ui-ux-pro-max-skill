@@ -6,6 +6,7 @@ import { CEFR_ORDER, type Exercise } from '@/lib/content/types';
 import { audioSource } from '@/lib/client/audio';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
+import { completeListening } from '@/lib/engine/state';
 import { AudioButton } from '@/components/AudioButton';
 import { Mouth } from '@/components/Mouth';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
@@ -57,7 +58,7 @@ function Listening() {
   const questions = useMemo(() => (item?.questionIds ?? []).map((q) => ix.exerciseById.get(q)).filter((e): e is Exercise => !!e), [item, ix]);
   const accent = learner.profile.accent;
 
-  if (item && running) return <SessionRunner title={item.title} ctx="listening" exercises={questions} feedback="immediate" seed={item.id} exitHref="/app/listening" onFinish={(r) => { setResult(r); setRunning(false); }} />;
+  if (item && running) return <SessionRunner title={item.title} ctx="listening" exercises={questions} feedback="immediate" seed={item.id} exitHref="/app/listening" onFinish={(r) => { act((d, at) => completeListening(d, item.id, at)); setResult(r); setRunning(false); }} />;
   if (item && result) return <SessionSummary result={result} title="Latihan menyimak selesai" doneHref="/app/listening" doneLabel="Pusat Menyimak" onRetry={() => { setResult(null); setRunning(true); }} />;
   if (item) {
     if (item.locked) return <Empty title="Audio Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat Premium</LinkButton>}>{item.title} tersedia di paket Premium.</Empty>;
