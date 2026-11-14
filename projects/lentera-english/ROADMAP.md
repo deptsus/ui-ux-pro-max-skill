@@ -114,7 +114,11 @@ lewat SQL Editor. Cerita bisa diedit di CMS tanpa deploy.
 **Selesai bila**: semua cerita dimainkan sampai habis oleh e2e baru, animasi
 lolos pemeriksaan "kurangi gerakan", tidak ada error konsol, unit test lolos.
 
-### Rilis 2 — "Kedalaman A2–B1" (perkiraan akhir Desember 2026)
+### Rilis 2 — "Kedalaman A2–B1" — **SELESAI 14 November 2026** (versi konten 2026.12.2)
+
+Dikerjakan dengan penyesuaian: present perfect dan passive sudah ada di B1/B2, jadi diganti should (A2) dan too/enough (B1). Isi akhirnya: A2 frekuensi, much/many/some/any, past continuous, must/have to, should, imperatif dan arah; B1 used to, gerund/to-infinitive, question tags, too/enough; 4 cerita, 2 percakapan, 2 materi menyimak, PR menulis tiap bab A2–B1.
+
+Rencana awal:
 
 - **+6 pelajaran A2** (A2 jadi 12, setara A1): present perfect dasar,
   kata keterangan frekuensi, countable/uncountable lanjutan, imperatif dan

@@ -29,6 +29,7 @@ const C = {
   ayah: { id: 'ayah', name: 'Ayah', look: 'man', shirt: '#475569', hair: '#1c1917', skin: '#efc39f' },
   nenek: { id: 'nenek', name: 'Nenek', look: 'grandma', shirt: '#a855f7', hair: '#d4d4d8', skin: '#f3d2ba', hijab: '#e9d5ff' },
   joko: { id: 'joko', name: 'Pak Joko', look: 'man', shirt: '#ea580c', hair: '#1c1917', skin: '#ecbf99' },
+  tom: { id: 'tom', name: 'Tom', look: 'man', shirt: '#2563eb', hair: '#a16207', skin: '#fde3d0' },
 } satisfies Record<string, StoryCharacter>;
 
 // ---------------------------------------------------------------- helpers
@@ -352,6 +353,205 @@ export const stories: StoryDraft[] = [
         ['cheaper', 'lebih murah'],
         ['the best', 'yang terbaik'],
       ], 'Kata sifat pendek: -er (bigger, cheaper). Kata sifat panjang: more (more expensive). Superlatif: the + -est atau bentuk khusus (the best).', S),
+    ],
+  },
+  // ---------------------------------------------------------------- Rilis 2
+  {
+    id: 'story-lost-tourist', level: 'A2', title: 'Turis yang Tersesat', premium: true,
+    summary: 'Dimas menolong Tom, turis dari Inggris, mencari pasar batik: petunjuk arah, saran, dan ajakan.',
+    characters: [C.dimas, C.tom, C.pijar, C.joko],
+    scenes: [
+      { backdrop: 'street', actors: [at('dimas', 'left'), at('tom', 'right', 'stand', 'right')], lines: [
+        tell('On Saturday morning, Dimas meets a tourist with a big map.', 'Sabtu pagi, Dimas bertemu seorang turis yang membawa peta besar.'),
+        say('tom', "Excuse me. I'm lost. How do I get to the batik market?", 'Permisi. Saya tersesat. Bagaimana cara ke pasar batik?', 'think'),
+        say('dimas', 'Go straight on and turn left at the traffic lights.', 'Jalan lurus, lalu belok kiri di lampu lalu lintas.', 'point'),
+        say('tom', 'Turn left at the traffic lights. Is it far?', 'Belok kiri di lampu lalu lintas. Apakah jauh?'),
+        say('dimas', "Not really. It's about ten minutes on foot.", 'Tidak terlalu. Sekitar sepuluh menit jalan kaki.'),
+      ] },
+      { backdrop: 'street', actors: [at('dimas', 'left'), at('pijar', 'center', 'stand', 'fade'), at('tom', 'right')], lines: [
+        say('pijar', 'Dimas, the market is very crowded today.', 'Dimas, pasarnya sangat ramai hari ini.', 'think'),
+        say('dimas', "You're right. Tom, you should keep your bag in front of you.", 'Kamu benar. Tom, sebaiknya Anda menaruh tas di depan badan.', 'think'),
+        say('tom', 'Thanks for the advice! Should I take a taxi?', 'Terima kasih atas sarannya! Sebaiknya saya naik taksi?'),
+        say('dimas', "You don't have to. Let's walk together. I'm going there too.", 'Tidak perlu. Ayo jalan bersama. Saya juga mau ke sana.', 'happy'),
+      ] },
+      { backdrop: 'market', actors: [at('tom', 'left', 'stand', 'left'), at('dimas', 'center', 'stand', 'left'), at('joko', 'right')], lines: [
+        tell('Ten minutes later, they arrive at the market.', 'Sepuluh menit kemudian, mereka tiba di pasar.'),
+        say('joko', 'Welcome! Please come in and look around.', 'Selamat datang! Silakan masuk dan lihat-lihat.', 'wave'),
+        say('tom', "Wow, these shirts are beautiful! Don't let me spend all my money!", 'Wah, kemeja-kemeja ini indah! Jangan biarkan saya menghabiskan semua uang saya!', 'happy'),
+        say('dimas', "Don't worry. I'll help you choose.", 'Jangan khawatir. Saya akan membantu Anda memilih.', 'happy'),
+      ] },
+    ],
+    questions: [
+      mc(2, Q, 'Where does Tom want to go?', [
+        ['To the batik market', true],
+        ['To the traffic lights', 'Lampu lalu lintas hanya tempat berbelok.'],
+        ['To the taxi stand', 'Tom bertanya apakah sebaiknya naik taksi, tetapi tujuannya pasar batik.'],
+      ], 'Tom: "How do I get to the batik market?"', S),
+      mc(2, Q, 'Where should Tom turn left?', [
+        ['At the traffic lights', true],
+        ['At the market', 'Pasar adalah tujuan akhirnya.'],
+        ['At the bus stop', 'Dimas tidak menyebut halte bus.'],
+      ], 'Dimas: "Go straight on and turn left at the traffic lights."', S),
+      mc(2, 'Lengkapi kalimat Dimas dalam cerita.', 'Tom, you ___ keep your bag in front of you.', [
+        ['should', true],
+        ['should to', 'Setelah "should" tanpa "to".', 'modal-to'],
+        ['shoulds', '"should" tidak pernah diberi -s.', 'should-base'],
+      ], 'Saran: should + bentuk dasar.', S),
+      tf(2, 'Dimas tells Tom to take a taxi.', false, 'Dimas berkata "You don\'t have to. Let\'s walk together."', 'Dimas justru mengajak Tom berjalan kaki bersama.', S),
+      para(2, 'Urutkan kejadian dalam cerita.', [
+        'Tom asks Dimas for directions.',
+        'Pijar says the market is crowded.',
+        'Dimas offers to walk with Tom.',
+        'Pak Joko welcomes them to the market.',
+      ], 'Bertanya arah, peringatan Pijar, ajakan berjalan bersama, lalu tiba di pasar.', S),
+    ],
+  },
+  {
+    id: 'story-stormy-night', level: 'A2', title: 'Malam Badai', premium: true,
+    summary: 'Sari bercerita kepada Bu Emma tentang malam ketika badai datang dan listrik padam.',
+    characters: [C.sari, C.emma, C.ibu, C.pijar],
+    scenes: [
+      { backdrop: 'school', actors: [at('sari', 'left', 'stand', 'left'), at('emma', 'right')], lines: [
+        say('emma', 'Sari, you look sleepy. What happened?', 'Sari, kamu kelihatan mengantuk. Ada apa?', 'think'),
+        say('sari', "There was a big storm last night. I didn't sleep much.", 'Ada badai besar tadi malam. Saya tidak banyak tidur.', 'sad'),
+      ] },
+      { backdrop: 'home', time: 'night', actors: [at('sari', 'left'), at('ibu', 'right')], lines: [
+        tell("At nine o'clock, Sari was reading a book and her mother was watching TV.", 'Pukul sembilan, Sari sedang membaca buku dan ibunya sedang menonton TV.'),
+        tell('Suddenly, there was a loud noise and the lights went out.', 'Tiba-tiba, terdengar suara keras dan lampu padam.'),
+        say('sari', "Mum! I can't see anything!", 'Bu! Aku tidak bisa melihat apa-apa!', 'surprised'),
+      ] },
+      { backdrop: 'home', time: 'night', actors: [at('sari', 'left'), at('pijar', 'center', 'stand', 'fade'), at('ibu', 'right')], lines: [
+        say('pijar', "Don't worry. I can help. I'm a firefly!", 'Jangan khawatir. Aku bisa bantu. Aku kunang-kunang!', 'happy'),
+        tell('While Pijar was glowing, Mum was looking for candles.', 'Selagi Pijar bersinar, Ibu sedang mencari lilin.'),
+        say('ibu', 'Thank you, Pijar. Now we can see!', 'Terima kasih, Pijar. Sekarang kita bisa melihat!', 'happy'),
+        say('sari', 'What were you doing when the storm started, Pijar?', 'Kamu sedang apa waktu badainya mulai, Pijar?', 'think'),
+        say('pijar', 'I was sleeping in a tree. The wind woke me up!', 'Aku sedang tidur di pohon. Anginnya membangunkanku!', 'sad'),
+      ] },
+      { backdrop: 'school', actors: [at('sari', 'left'), at('emma', 'right')], lines: [
+        say('emma', 'So you were awake for a long time?', 'Jadi kamu lama terjaga?', 'think'),
+        say('sari', 'Yes, but it was fun. We were telling stories until midnight!', 'Ya, tapi seru. Kami bercerita sampai tengah malam!', 'happy'),
+      ] },
+    ],
+    questions: [
+      mc(2, Q, 'What was Sari doing when the lights went out?', [
+        ['Reading a book', true],
+        ['Watching TV', 'Yang menonton TV adalah ibunya.'],
+        ['Sleeping', 'Sari belum tidur; ia sedang membaca.'],
+      ], '"Sari was reading a book and her mother was watching TV. Suddenly ... the lights went out."', S),
+      mc(2, Q, 'What was Mum doing while Pijar was glowing?', [
+        ['Looking for candles', true],
+        ['Telling stories', 'Mereka bercerita setelahnya, sampai tengah malam.'],
+        ['Cooking dinner', 'Cerita tidak menyebut memasak.'],
+      ], '"While Pijar was glowing, Mum was looking for candles."', S),
+      mc(2, 'Lengkapi kalimat dari cerita.', "At nine o'clock, Sari ___ reading a book.", [
+        ['was', true],
+        ['were', '"Sari" = she, jadi "was".', 'was-were'],
+        ['is', 'Ceritanya tentang tadi malam, jadi "was".', 'was-ing-missing'],
+      ], 'Kegiatan yang sedang berlangsung di masa lalu: was + -ing.', S),
+      tf(2, 'Pijar was sleeping in a tree when the storm started.', true, 'Pijar: "I was sleeping in a tree. The wind woke me up!"', 'Pijar memang sedang tidur di pohon. Pernyataan ini benar.', S),
+      para(2, 'Urutkan kejadian dalam cerita.', [
+        'The lights went out.',
+        'Pijar offered to help.',
+        'Mum thanked Pijar.',
+        'They told stories until midnight.',
+      ], 'Listrik padam, Pijar menawarkan bantuan, Ibu berterima kasih, lalu mereka bercerita sampai tengah malam.', S),
+    ],
+  },
+  {
+    id: 'story-old-photos', level: 'B1', title: 'Foto-foto Lama Nenek', premium: true,
+    summary: 'Nenek menunjukkan album foto lamanya kepada Sari dan Dimas, dan bercerita tentang hidupnya dulu di desa.',
+    characters: [C.sari, C.nenek, C.dimas],
+    scenes: [
+      { backdrop: 'home', actors: [at('sari', 'left'), at('nenek', 'center'), at('dimas', 'right')], lines: [
+        tell('On Sunday, Grandma shows Sari and Dimas an old photo album.', 'Hari Minggu, Nenek menunjukkan album foto lama kepada Sari dan Dimas.'),
+        say('sari', 'Is that you, Grandma? You look so young!', 'Itu Nenek? Nenek kelihatan muda sekali!', 'point'),
+        say('nenek', 'Yes. I used to live in a village near Klaten.', 'Ya. Dulu Nenek tinggal di sebuah desa dekat Klaten.', 'happy'),
+        say('dimas', "There wasn't a lot of traffic there, was there?", 'Di sana tidak banyak kendaraan, kan?', 'think'),
+        say('nenek', "No, there wasn't. We used to walk everywhere.", 'Tidak. Dulu kami berjalan kaki ke mana-mana.'),
+      ] },
+      { backdrop: 'home', actors: [at('sari', 'left'), at('nenek', 'center'), at('dimas', 'right')], lines: [
+        say('sari', 'Did you use to go to school by bike?', 'Dulu Nenek pergi ke sekolah naik sepeda?', 'think'),
+        say('nenek', "No, I didn't. I didn't use to have a bike. I walked five kilometres!", 'Tidak. Dulu Nenek tidak punya sepeda. Nenek berjalan lima kilometer!'),
+        say('dimas', "Five kilometres? That's too far for me!", 'Lima kilometer? Itu terlalu jauh untukku!', 'surprised'),
+        say('nenek', "You're young and strong enough, aren't you?", 'Kamu masih muda dan cukup kuat, kan?', 'happy'),
+      ] },
+      { backdrop: 'home', time: 'evening', actors: [at('sari', 'left'), at('nenek', 'center'), at('dimas', 'right')], lines: [
+        say('sari', "You used to sing too, didn't you? Mum told me.", 'Dulu Nenek juga suka menyanyi, kan? Ibu yang cerita.', 'happy'),
+        say('nenek', 'Yes, I did. I enjoyed singing at weddings.', 'Ya. Nenek senang menyanyi di acara pernikahan.', 'happy'),
+        say('dimas', 'Will you sing for us now, Grandma?', 'Maukah Nenek menyanyi untuk kami sekarang?', 'happy'),
+        say('nenek', 'Only if you sing with me!', 'Hanya kalau kalian ikut menyanyi bersama Nenek!', 'wave'),
+      ] },
+    ],
+    questions: [
+      mc(3, Q, 'Where did Grandma use to live?', [
+        ['In a village near Klaten', true],
+        ['In a big city', 'Nenek berkata "I used to live in a village near Klaten."'],
+        ['Next to her school', 'Sekolahnya justru lima kilometer jauhnya.'],
+      ], '"I used to live in a village near Klaten."', S),
+      mc(3, Q, 'How did Grandma use to go to school?', [
+        ['She walked.', true],
+        ['By bike', 'Nenek berkata "I didn\'t use to have a bike."'],
+        ['By car', 'Nenek berkata "We used to walk everywhere."'],
+      ], '"I didn\'t use to have a bike. I walked five kilometres!"', S),
+      mc(3, 'Lengkapi pertanyaan Sari dalam cerita.', 'Did you ___ go to school by bike?', [
+        ['use to', true],
+        ['used to', 'Setelah "Did", tanpa -d: use to.', 'used-to-form'],
+        ['using to', 'Setelah "Did": use to + bentuk dasar.', 'used-to-form'],
+      ], 'Pertanyaan tentang kebiasaan dulu: Did + subjek + use to + bentuk dasar?', S),
+      mc(3, 'Lengkapi kalimat Sari dalam cerita.', 'You used to sing too, ___?', [
+        ["didn't you", true],
+        ["isn't it", 'Tag dibentuk dari kata kerja bantu dan subjeknya. Kalimat lampau dengan used to → didn\'t you?', 'tag-isnt-it'],
+        ['did you', 'Kalimat positif diberi tag negatif.', 'tag-polarity'],
+      ], 'Kalimat positif lampau → tag negatif: didn\'t you?', S),
+      tf(3, 'Grandma still lives in the village.', false, '"I used to live in a village" berarti dulu; sekarang tidak lagi.', '"used to" menunjukkan keadaan yang sudah berubah.', S),
+    ],
+  },
+  {
+    id: 'story-cooking-contest', level: 'B1', title: 'Lomba Memasak', premium: true,
+    summary: 'Dimas ragu ikut lomba memasak, berlatih membuat soto, lalu tampil di depan juri.',
+    characters: [C.dimas, C.sari, C.pijar, C.emma],
+    scenes: [
+      { backdrop: 'school', actors: [at('dimas', 'left'), at('sari', 'right')], lines: [
+        say('sari', 'Dimas, do you want to join the cooking contest on Friday?', 'Dimas, kamu mau ikut lomba memasak hari Jumat?', 'happy'),
+        say('dimas', "I enjoy cooking, but I'm not good enough.", 'Aku senang memasak, tapi aku belum cukup jago.', 'think'),
+        say('sari', "Don't worry. Practising is the best way to improve!", 'Tenang. Berlatih adalah cara terbaik untuk berkembang!', 'happy'),
+        say('dimas', "OK. I've decided to try!", 'Oke. Aku sudah memutuskan untuk mencoba!', 'happy'),
+      ] },
+      { backdrop: 'home', time: 'evening', actors: [at('dimas', 'center'), at('pijar', 'right', 'stand', 'fade')], lines: [
+        tell('That evening, Dimas practises making soto ayam.', 'Malam itu, Dimas berlatih membuat soto ayam.'),
+        say('pijar', "Mmm... it's a bit too salty.", 'Mmm... agak terlalu asin.', 'think'),
+        say('dimas', 'Too salty? I should avoid adding so much salt.', 'Terlalu asin? Sebaiknya aku tidak menambahkan garam sebanyak itu.', 'sad'),
+        say('pijar', 'Try again. You have enough time before Friday.', 'Coba lagi. Masih ada cukup waktu sebelum Jumat.', 'happy'),
+      ] },
+      { backdrop: 'school', actors: [at('dimas', 'left'), at('emma', 'center'), at('sari', 'right')], lines: [
+        tell('On Friday, Ms Emma is one of the judges.', 'Hari Jumat, Bu Emma menjadi salah satu juri.'),
+        say('emma', "This soto is delicious. It isn't too salty, and it's hot enough.", 'Soto ini enak. Tidak terlalu asin, dan cukup panas.', 'happy'),
+        say('sari', 'You won second place, Dimas!', 'Kamu juara kedua, Dimas!', 'happy'),
+        say('dimas', "I'm looking forward to cooking for everyone again!", 'Aku tak sabar memasak untuk semua orang lagi!', 'happy'),
+      ] },
+    ],
+    questions: [
+      mc(3, Q, "Why doesn't Dimas want to join the contest at first?", [
+        ["He thinks he isn't good enough.", true],
+        ["He doesn't enjoy cooking.", 'Dimas berkata "I enjoy cooking".'],
+        ['He is busy on Friday.', 'Cerita tidak menyebut itu.'],
+      ], 'Dimas: "I enjoy cooking, but I\'m not good enough."', S),
+      mc(3, Q, "What was wrong with Dimas's first soto?", [
+        ['It was too salty.', true],
+        ["It wasn't hot enough.", 'Bu Emma justru memuji sotonya "hot enough" pada hari lomba.'],
+        ['It was too spicy.', 'Pijar berkata "too salty", bukan pedas.'],
+      ], 'Pijar: "it\'s a bit too salty."', S),
+      mc(3, 'Lengkapi kalimat Dimas dalam cerita.', 'I should avoid ___ so much salt.', [
+        ['adding', true],
+        ['to add', '"avoid" diikuti -ing.', 'verb-ing-to'],
+        ['add', '"avoid" diikuti -ing: adding.', 'verb-ing-to'],
+      ], 'avoid + -ing.', S),
+      mc(3, 'Lengkapi kalimat Bu Emma dalam cerita.', "It isn't too salty, and it's hot ___.", [
+        ['enough', true],
+        ['too', '"too" berarti terlalu. Pujiannya "hot enough" (cukup panas).', 'too-very'],
+        ['very', '"very" diletakkan sebelum kata sifat, bukan sesudahnya.', 'too-very'],
+      ], 'kata sifat + enough: hot enough.', S),
+      tf(3, 'Dimas won first place.', false, 'Sari berkata "You won second place, Dimas!"', 'Dimas juara kedua, bukan pertama.', S),
     ],
   },
 ];

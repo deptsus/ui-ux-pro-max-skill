@@ -1,4 +1,4 @@
-// Branching conversations for B2–C2 (tahap 3). Same rules as conversations.ts:
+// Branching conversations added after the first set: B2–C2 (tahap 3) and A2–B1 (Rilis 2). Same rules as conversations.ts:
 // every line and every piece of feedback is written by hand. "correct: false"
 // always means a grammar error; a grammatical but tactless reply is
 // "correct: true" with a low naturalness score and an explanation why.
@@ -122,6 +122,49 @@ export const scenariosUpper: Scenario[] = [
       ["Change their password, and be wary of any email asking for personal details, even if it appears to come from us. We'll never ask for a password by email.", true, 3, 'Langkah konkret dalam kalimat perintah yang jelas, ditambah satu fakta yang menenangkan.', ['They should reset their password and ignore any email asking for their details.'], 'end'],
       ["They don't need to do anything; everything is under control.", true, 1, 'Meremehkan risiko setelah kebocoran data justru membahayakan pengguna dan reputasimu.', ['As a precaution, they should change their password.'], 'end'],
       ['They should to change their password immediately.', false, 2, 'Setelah modal "should" tidak dipakai "to": They should change ...', ['They should change their password immediately.'], 'end'],
+    ]],
+  ]),
+  scenario('pharmacy', 'Di Apotek', 'A2', true, 'Kamu demam dan batuk. Kamu pergi ke apotek dekat rumah.', 'Menjelaskan gejala, meminta obat, dan memahami aturan pakainya.', 'Kamu mendapat obat dan aturan pakainya. Menjelaskan gejala, lalu bertanya "How often should I take them?" membuat semuanya jelas.', [
+    ['n1', 'Pharmacist', 'Good afternoon. How can I help you?', 'Selamat siang. Ada yang bisa saya bantu?', [
+      ['Hi. I have a fever and a cough. Do you have any medicine for that?', true, 3, 'Gejala disebut dengan jelas, lalu "Do you have any ...?" (any untuk pertanyaan).', ['I have a cough and a fever. What do you recommend?'], 'n2'],
+      ['I want medicine. I sick.', false, 1, 'Kalimat butuh to be: I am sick. "I want" juga terdengar kurang sopan.', ["I'm sick. Could I have some medicine, please?"], 'n2'],
+      ['Do you have some medicines for cough?', false, 2, 'Pertanyaan biasa memakai "any", dan "medicine" di sini tak terhitung: any medicine for a cough.', ['Do you have any medicine for a cough?'], 'n2'],
+    ]],
+    ['n2', 'Pharmacist', 'I see. Do you have a headache too?', 'Begitu. Apakah kepala Anda juga sakit?', [
+      ['Yes, a little. It started this morning.', true, 3, 'Jawaban pendek ditambah informasi yang membantu, dengan simple past (started).', ['Yes, I do. Since this morning.'], 'n3'],
+      ['Yes, I am.', false, 1, 'Pertanyaannya memakai "Do you have", jadi jawabannya "Yes, I do."', ['Yes, I do.'], 'n3'],
+      ['Yes, very much headache.', false, 1, '"headache" bisa dihitung: I have a bad headache.', ['Yes, I have a bad headache.'], 'n3'],
+    ]],
+    ['n3', 'Pharmacist', 'Take these tablets. You should drink a lot of water and get some rest.', 'Minum tablet ini. Sebaiknya Anda minum banyak air dan beristirahat.', [
+      ['Thank you. How often should I take them?', true, 3, '"How often should I ...?" menanyakan aturan pakai dengan tepat.', ['How many tablets should I take a day?'], 'n4'],
+      ['How much tablets I take?', false, 1, '"tablets" bisa dihitung, jadi How many. Pertanyaannya juga butuh "should" atau "do": How many tablets should I take?', ['How many tablets should I take?'], 'n4'],
+      ['OK. I must to drink water?', false, 2, 'Setelah "must" tanpa "to". Untuk bertanya: Should I drink a lot of water?', ['Should I drink a lot of water?'], 'n4'],
+    ]],
+    ['n4', 'Pharmacist', "Two tablets three times a day, after meals. You mustn't take more than six a day.", 'Dua tablet tiga kali sehari, setelah makan. Anda tidak boleh minum lebih dari enam tablet sehari.', [
+      ['Two tablets three times a day after meals, and not more than six. Thank you!', true, 3, 'Mengulang aturan pakai memastikan kamu tidak salah paham.', ['Got it. Thank you for your help.'], 'end'],
+      ["OK, so I don't have to take more than six.", true, 1, 'Tata bahasanya benar, tetapi maknanya keliru: "don\'t have to" berarti tidak perlu, padahal apoteker berkata "mustn\'t" (tidak boleh). Salah mengulang aturan obat bisa berbahaya.', ["OK, so I mustn't take more than six."], 'end'],
+      ['Thank you. I will taking after eat.', false, 1, 'Setelah "will", bentuk dasar: I will take them after meals.', ['Thank you. I will take them after meals.'], 'end'],
+    ]],
+  ]),
+  scenario('neighbour', 'Tetangga yang Berisik', 'B1', true, 'Pukul sebelas malam. Musik dari rumah tetangga barumu sangat keras, padahal besok kamu ujian.', 'Meminta tetangga mengecilkan musik dengan sopan, tetap ramah, dan mencapai kesepakatan.', 'Masalah selesai tanpa bertengkar. "Do you mind ...-ing?" dan question tag yang ramah membuat permintaan terdengar sopan.', [
+    ['n1', 'Mr Hadi', "Oh, hello! You live next door, don't you?", 'Oh, halo! Kamu tinggal di sebelah, kan?', [
+      ['Yes, I do. Sorry to bother you so late. Do you mind turning the music down a little?', true, 3, 'Menjawab tag dengan "Yes, I do", minta maaf, lalu "Do you mind + -ing?" yang sopan.', ['Hi, yes. Would you mind turning the music down, please?'], 'n2'],
+      ["Yes, isn't it. Your music is too loud.", false, 1, 'Jawaban untuk "..., don\'t you?" adalah "Yes, I do." Langsung mengeluh juga terdengar kasar.', ["Yes, I do. I'm afraid the music is a bit loud."], 'r1'],
+      ['Yes. Do you mind to turn down the music?', false, 2, '"mind" diikuti -ing: Do you mind turning down the music?', ['Do you mind turning down the music?'], 'n2'],
+    ]],
+    ['r1', 'Mr Hadi', "Too loud? It's not that loud, is it?", 'Terlalu keras? Tidak sekeras itu, kan?', [
+      ["I'm sorry, I didn't mean to be rude. It's just that I have an exam tomorrow.", true, 3, 'Minta maaf atas nada sebelumnya, lalu memberi alasan yang jujur.', ["Sorry, that sounded rude. I have an exam tomorrow, that's all."], 'n2'],
+      ["Yes, it is. It's very too loud.", false, 1, '"very" dan "too" tidak dipakai bersama. Pakai "too loud" atau "far too loud".', ["Yes, I'm afraid it's too loud."], 'n2'],
+    ]],
+    ['n2', 'Mr Hadi', "Oh, sorry! I didn't realise it was so late. We're having a small party.", 'Oh, maaf! Saya tidak sadar sudah selarut ini. Kami sedang mengadakan pesta kecil.', [
+      ["No problem. I've got an exam tomorrow, so I need to get enough sleep.", true, 3, '"need to + bentuk dasar" dan "enough + kata benda" dipakai dengan tepat. Alasan yang jelas membuat permintaan masuk akal.', ["That's OK. I just need to sleep early tonight because of an exam."], 'n3'],
+      ["It's fine. I need sleeping enough.", false, 1, '"need" diikuti to + bentuk dasar, dan "enough" sebelum kata benda: I need to get enough sleep.', ['I need to get enough sleep.'], 'n3'],
+      ['Parties are not allowed after ten, you know.', true, 2, 'Tata bahasanya benar, tetapi terdengar seperti ancaman kepada tetangga baru. Mulailah dengan alasanmu sendiri.', ["I understand. It's just that I have an exam tomorrow."], 'n3'],
+    ]],
+    ['n3', 'Mr Hadi', "Of course. We'll turn it down now. You aren't angry, are you?", 'Tentu. Kami kecilkan sekarang. Kamu tidak marah, kan?', [
+      ["No, I'm not. Thanks for understanding. Enjoy your party!", true, 3, 'Menjawab tag sesuai kenyataan ("No, I\'m not"), lalu menutup dengan ramah.', ['Not at all. Thank you, and have a nice evening!'], 'end'],
+      ["Yes, I'm not.", false, 1, '"Yes" dan "not" bertentangan. Kalau tidak marah: No, I\'m not.', ["No, I'm not."], 'end'],
+      ["No, I don't. Thank you.", false, 2, 'Pertanyaannya memakai "are", jadi jawabannya "No, I\'m not."', ["No, I'm not. Thank you."], 'end'],
     ]],
   ]),
 ];

@@ -15,6 +15,8 @@ export interface ListeningDraft {
 
 const P1 = 'Hello. My name is Anna, and I am from Canada. I am a teacher. I live in Jakarta with my family.';
 const P2 = 'Yesterday was a busy day. I got up at six and took the bus to work. In the afternoon I had a meeting, and in the evening I cooked dinner for my friends. We ate together and watched a film.';
+const P_BLACKOUT = "Last night I was doing my homework when the lights suddenly went out. My mother was cooking dinner, and my little brother was taking a shower. He started shouting because the water was cold and it was dark! While we were looking for candles, our neighbours knocked on the door. They were having the same problem. The electricity came back after an hour.";
+const P_DIRECTIONS = "Excuse me, how do I get to the post office? Go straight on until you reach the traffic lights, then turn left. Walk past the bank and take the second right. The post office is on the corner, opposite a big supermarket. It's about five minutes on foot.";
 const P3 = 'Attention, please. The 10:15 train to Yogyakarta has been delayed by thirty minutes because of heavy rain. It will now leave from platform four, not platform two. We apologise for the inconvenience.';
 
 export const listening: ListeningDraft[] = [
@@ -83,6 +85,54 @@ export const listening: ListeningDraft[] = [
         ['Had a meeting', 'Rapatnya "in the afternoon", bukan malam hari.'],
         ['Went to the cinema', 'Mereka menonton film, tetapi teks tidak menyebut bioskop: mereka makan bersama lalu menonton.'],
       ], '"in the evening I cooked dinner for my friends".', { topic: 'skill.listening' }),
+    ],
+  },
+  {
+    id: 'listen-a2-blackout', level: 'A2', title: 'Malam saat listrik padam', kind: 'passage', transcript: P_BLACKOUT, premium: true,
+    translation: 'Tadi malam saya sedang mengerjakan PR ketika lampu tiba-tiba padam. Ibu saya sedang memasak makan malam, dan adik laki-laki saya sedang mandi. Dia mulai berteriak karena airnya dingin dan gelap! Ketika kami sedang mencari lilin, tetangga kami mengetuk pintu. Mereka mengalami masalah yang sama. Listrik menyala lagi setelah satu jam.',
+    questions: [
+      listen(2, P_BLACKOUT, 'What was the speaker doing when the lights went out?', [
+        ['Doing homework', true],
+        ['Cooking dinner', 'Yang memasak adalah ibunya: "My mother was cooking dinner".'],
+        ['Taking a shower', 'Yang mandi adalah adiknya.'],
+      ], '"I was doing my homework when the lights suddenly went out." Kegiatan yang sedang berlangsung memakai was + -ing.', { topic: 'skill.listening' }),
+      listen(3, P_BLACKOUT, 'Why did the little brother start shouting?', [
+        ['The water was cold and it was dark.', true],
+        ['The neighbours knocked on the door.', 'Tetangga datang setelahnya, ketika mereka mencari lilin.'],
+        ['He was afraid of the storm.', 'Teks tidak menyebut badai.'],
+      ], '"He started shouting because the water was cold and it was dark!"', { topic: 'skill.listening' }),
+      listen(2, P_BLACKOUT, 'How long was the electricity off?', [
+        ['About an hour', true],
+        ['About ten minutes', 'Teks berkata "The electricity came back after an hour."'],
+        ['All night', 'Listrik menyala lagi setelah satu jam.'],
+      ], '"The electricity came back after an hour."', { topic: 'skill.listening' }),
+      dictation(2, 'While we were looking for candles, our neighbours knocked on the door.', 'While we ___ looking for candles, our neighbours knocked on the door.', ['were'],
+        '"we" memakai "were": we were looking. Bentuk lemah "were" sering terdengar pendek /wə/.',
+        { was: ['"we" memakai "were", bukan "was".', 'was-were'] }, { topic: 'skill.listening' }),
+    ],
+  },
+  {
+    id: 'listen-a2-directions', level: 'A2', title: 'Menanyakan jalan ke kantor pos', kind: 'passage', transcript: P_DIRECTIONS, premium: true,
+    translation: 'Permisi, bagaimana cara ke kantor pos? Jalan lurus sampai lampu lalu lintas, lalu belok kiri. Lewati bank dan ambil belokan kanan kedua. Kantor pos ada di sudut jalan, di seberang sebuah supermarket besar. Sekitar lima menit jalan kaki.',
+    questions: [
+      listen(2, P_DIRECTIONS, 'Where do you turn left?', [
+        ['At the traffic lights', true],
+        ['At the bank', 'Bank hanya dilewati: "Walk past the bank".'],
+        ['At the supermarket', 'Supermarket ada di seberang kantor pos.'],
+      ], '"Go straight on until you reach the traffic lights, then turn left."', { topic: 'skill.listening' }),
+      listen(3, P_DIRECTIONS, 'Which turning do you take after the bank?', [
+        ['The second right', true],
+        ['The first right', '"take the second right" berarti belokan kanan kedua.', 'direction-words'],
+        ['The second left', 'Setelah bank, beloknya ke kanan.', 'direction-words'],
+      ], '"Walk past the bank and take the second right."', { topic: 'skill.listening' }),
+      listen(2, P_DIRECTIONS, 'What is opposite the post office?', [
+        ['A big supermarket', true],
+        ['The bank', 'Bank dilewati sebelum belokan kanan kedua.'],
+        ['The traffic lights', 'Lampu lalu lintas adalah tempat belok kiri.'],
+      ], '"The post office is on the corner, opposite a big supermarket."', { topic: 'skill.listening' }),
+      dictation(2, 'Walk past the bank and take the second right.', 'Walk past the bank and take the ___ right.', ['second', '2nd'],
+        '"second" = kedua. Untuk urutan dipakai first, second, third, bukan one, two, three.',
+        { two: ['Untuk urutan dipakai "second" (kedua), bukan "two".'], first: ['Yang terdengar "second" /ˈsekənd/, bukan "first".'] }, { topic: 'skill.listening' }),
     ],
   },
   {

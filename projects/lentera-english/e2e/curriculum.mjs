@@ -104,6 +104,22 @@ async function chapterListening(l) {
     check(`${hw.id}: gagal`, false, String(e.message).split('\n')[0].slice(0, 200));
   }
 }
+// A chapter's writing task: the model answer must pass its own checklist in the browser.
+async function chapterWriting(l) {
+  const hw = pack.homework.find((h) => h.id === `hw.${unitOf.get(l.unitId).chapterId}.write`);
+  if (!hw || doneChapterHw.has(hw.id)) return;
+  doneChapterHw.add(hw.id);
+  try {
+    await page.goto(`${BASE}/app/homework?id=${hw.id}`);
+    await page.getByLabel('Tulisanmu').fill(hw.writing.model, { timeout: 30000 });
+    await button('Kumpulkan').click();
+    const score = await page.getByRole('heading', { name: /Hasil pemeriksaan/ }).innerText({ timeout: 15000 });
+    check(`${hw.id}: PR menulis, contoh jawaban dinilai ${score.replace('Hasil pemeriksaan · ', '')}`, score.endsWith('100%'), score);
+  } catch (e) {
+    await page.screenshot({ path: path.join(SHOTS, `kurikulum-gagal-${hw.id}.png`), fullPage: true }).catch(() => {});
+    check(`${hw.id}: gagal`, false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+}
 const unitExam = (unitId) => { const x = pack.exams.find((e) => e.scope === 'unit' && e.ref === unitId); return x ? takeExam(x) : null; };
 const levelExam = (level) => { const x = pack.exams.find((e) => e.scope === 'level' && e.ref === level); return x ? takeExam(x) : null; };
 
@@ -142,6 +158,7 @@ for (const l of lessons) {
     check(`${l.id}: macet setelah ${answered} soal`, false, String(e.message).split('\n')[0].slice(0, 200));
   }
   await chapterListening(l);
+  await chapterWriting(l);
   if (lastOfUnit.get(l.unitId) === l.id) await unitExam(l.unitId);
   if (!only.length && lastOfLevel.get(levelOf(l)) === l.id) await levelExam(levelOf(l));
 }

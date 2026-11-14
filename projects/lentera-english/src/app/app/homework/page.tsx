@@ -4,27 +4,13 @@ import { Suspense, useMemo, useState } from 'react';
 import { CheckCircle2, Clock } from 'lucide-react';
 import type { Exercise, HomeworkDef } from '@/lib/content/types';
 import { assignHomework, submitHomework } from '@/lib/engine/state';
+import { checkWriting } from '@/lib/engine/writing';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
 import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, dateId, dateTimeId, inputClass } from '@/components/ui';
 
 const KIND: Record<HomeworkDef['kind'], string> = { vocabulary: 'Kosakata', grammar: 'Tata bahasa', translation: 'Terjemahan', reading: 'Membaca', listening: 'Menyimak', construction: 'Menyusun kalimat', writing: 'Menulis singkat' };
-
-/** Deterministic checklist for short writing. It checks form, not quality. */
-function checkWriting(text: string, w: NonNullable<HomeworkDef['writing']>) {
-  const lower = ` ${text.toLowerCase().replace(/[‘’]/g, "'")} `;
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  const items = [
-    { label: `Minimal ${w.minWords} kata (kamu menulis ${words})`, ok: words >= w.minWords },
-    ...w.mustInclude.map((rule) => {
-      const [label, alts] = rule.split('::');
-      return { label, ok: alts.split('|').some((a) => lower.includes(a)) };
-    }),
-    { label: 'Tiap kalimat diakhiri tanda baca', ok: /[.!?]\s*$/.test(text.trim()) },
-  ];
-  return { items, score: Math.round((items.filter((i) => i.ok).length / items.length) * 100) };
-}
 
 function Writing({ def }: { def: HomeworkDef }) {
   const { learner } = useApp();

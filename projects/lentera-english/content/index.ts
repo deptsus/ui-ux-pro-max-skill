@@ -8,7 +8,9 @@ import { doDoes, simplePresent, thirdPersonDrills } from './a1-3';
 import { canLesson, possessivesLesson, prepTimeLesson, thereIsLesson, timeLesson } from './a1-4';
 import { pastBe, pastIrregular, pastRegular, wasWereDrills } from './a2';
 import { comparativesLesson, futureLesson, presentContinuous } from './a2-2';
+import { countableLesson, frequencyLesson, imperativesLesson, mustLesson, pastContinuousLesson, shouldLesson } from './a2-3';
 import { conditionals, deduction, ppContinuous, relativeClauses } from './b1-2';
+import { gerundLesson, questionTagsLesson, tooEnoughLesson, usedToLesson } from './b1-3';
 import { causative, mixedConditionals, reportedSpeech, thirdConditional } from './b2-2';
 import { cleft, discourseMarkers, hedging, nominalisation } from './c1-2';
 import { advancedModality, collocations, ellipsis, understatement } from './c2-2';
@@ -20,7 +22,7 @@ import { listening, phonemes, placement } from './listening';
 import { listeningUpper } from './listening-upper';
 import { stories } from './stories';
 
-export const CONTENT_VERSION = '2026.12.1';
+export const CONTENT_VERSION = '2026.12.2';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -52,11 +54,21 @@ const syllabus: ChapterSpec[] = [
   { id: 'a2-c2', level: 'A2', title: 'Rencana dan Perbandingan', description: 'Membicarakan rencana dan membandingkan.', premium: true, units: [
     { id: 'a2-c2-u1', title: 'Sekarang, Rencana, dan Perbandingan', description: 'Present continuous, going to/will, dan perbandingan.', lessons: [presentContinuous, futureLesson, comparativesLesson] },
   ] },
+  { id: 'a2-c3', level: 'A2', title: 'Kebiasaan dan Kisah', description: 'Seberapa sering, berapa banyak, dan apa yang sedang terjadi di masa lalu.', premium: true, units: [
+    { id: 'a2-c3-u1', title: 'Kebiasaan, Jumlah, dan Latar Cerita', description: 'Kata keterangan frekuensi, countable/uncountable, dan past continuous.', lessons: [frequencyLesson, countableLesson, pastContinuousLesson] },
+  ] },
+  { id: 'a2-c4', level: 'A2', title: 'Aturan, Saran, dan Arah', description: 'Kewajiban, larangan, saran, dan petunjuk arah.', premium: true, units: [
+    { id: 'a2-c4-u1', title: 'Must, Should, dan Imperatif', description: 'must/have to, should, kalimat perintah, dan petunjuk arah.', lessons: [mustLesson, shouldLesson, imperativesLesson] },
+  ] },
   { id: 'b1-c1', level: 'B1', title: 'Pengalaman dan Hasil', description: 'Menghubungkan masa lalu dengan masa kini.', premium: true, units: [
     { id: 'b1-c1-u1', title: 'Present Perfect', description: 'Present perfect, simple past, dan present perfect continuous.', lessons: [presentPerfect, ppContinuous] },
   ] },
   { id: 'b1-c2', level: 'B1', title: 'Pengandaian dan Kemungkinan', description: 'Conditional, modal, dan klausa relatif.', premium: true, units: [
     { id: 'b1-c2-u1', title: 'Conditionals dan Modals', description: 'Pengandaian, menyimpulkan, dan klausa relatif.', lessons: [conditionals, deduction, relativeClauses] },
+  ] },
+  { id: 'b1-c3', level: 'B1', title: 'Kebiasaan Lama dan Percakapan', description: 'Used to, pola kata kerja, question tags, too dan enough.', premium: true, units: [
+    { id: 'b1-c3-u1', title: 'Used to dan Pola Kata Kerja', description: 'used to, gerund, dan to-infinitive.', lessons: [usedToLesson, gerundLesson] },
+    { id: 'b1-c3-u2', title: 'Memastikan dan Menakar', description: 'Question tags, too, dan enough.', lessons: [questionTagsLesson, tooEnoughLesson] },
   ] },
   { id: 'b2-c1', level: 'B2', title: 'Fokus dan Sudut Pandang', description: 'Mengatur fokus kalimat dengan struktur pasif.', premium: true, units: [
     { id: 'b2-c1-u1', title: 'Passive Voice', description: 'Kalimat pasif dan causative.', lessons: [passive, causative] },
@@ -97,6 +109,12 @@ const topics: Topic[] = [
   { id: 'a2.present-continuous', kind: 'grammar', level: 'A2', title: 'Present continuous', summary: 'am/is/are + -ing untuk yang sedang terjadi.', lessonId: 'a2-present-continuous' },
   { id: 'a2.future', kind: 'grammar', level: 'A2', title: 'Going to dan will', summary: 'Rencana: be going to. Keputusan spontan dan janji: will.', lessonId: 'a2-future' },
   { id: 'a2.comparatives', kind: 'grammar', level: 'A2', title: 'Comparative dan superlative', summary: 'cheaper than, more expensive than, the best.', lessonId: 'a2-comparatives' },
+  { id: 'a2.frequency', kind: 'grammar', level: 'A2', title: 'Kata keterangan frekuensi', summary: 'always, usually, often, sometimes, rarely, never; How often?', lessonId: 'a2-frequency' },
+  { id: 'a2.countable', kind: 'grammar', level: 'A2', title: 'Countable dan uncountable', summary: 'much/many, some/any, a lot of; information, advice.', lessonId: 'a2-countable' },
+  { id: 'a2.past-continuous', kind: 'grammar', level: 'A2', title: 'Past continuous', summary: 'was/were + -ing; when dan while.', lessonId: 'a2-past-continuous' },
+  { id: 'a2.must', kind: 'grammar', level: 'A2', title: 'Must dan have to', summary: "must, have to, mustn't, don't have to, had to.", lessonId: 'a2-must' },
+  { id: 'a2.should', kind: 'grammar', level: 'A2', title: 'Should (saran)', summary: "should, shouldn't, Why don't you ...?", lessonId: 'a2-should' },
+  { id: 'a2.imperatives', kind: 'grammar', level: 'A2', title: 'Imperatif dan petunjuk arah', summary: "Open ..., Don't ..., Let's ...; turn left, opposite.", lessonId: 'a2-imperatives' },
   { id: 'b1.present-perfect', kind: 'grammar', level: 'B1', title: 'Present perfect vs simple past', summary: 'have/has + bentuk ketiga; for dan since.', lessonId: 'b1-present-perfect' },
   { id: 'b2.passive', kind: 'grammar', level: 'B2', title: 'Passive voice', summary: 'be + past participle di berbagai tense.', lessonId: 'b2-passive' },
   { id: 'c1.inversion', kind: 'grammar', level: 'C1', title: 'Inversi untuk penekanan', summary: 'Never have I ..., Not only does she ...', lessonId: 'c1-inversion' },
@@ -105,6 +123,10 @@ const topics: Topic[] = [
   { id: 'b1.conditionals', kind: 'grammar', level: 'B1', title: 'First dan second conditional', summary: 'If + present, will; If + past, would.', lessonId: 'b1-conditionals' },
   { id: 'b1.deduction', kind: 'grammar', level: 'B1', title: 'Modals of deduction', summary: "must, might, could, can't + bentuk dasar.", lessonId: 'b1-deduction' },
   { id: 'b1.relative', kind: 'grammar', level: 'B1', title: 'Relative clauses', summary: 'who, which, that, where, whose.', lessonId: 'b1-relative' },
+  { id: 'b1.used-to', kind: 'grammar', level: 'B1', title: 'Used to', summary: "used to, didn't use to, Did you use to ...?", lessonId: 'b1-used-to' },
+  { id: 'b1.gerund-infinitive', kind: 'grammar', level: 'B1', title: 'Gerund dan to-infinitive', summary: 'enjoy -ing, want to, interested in -ing.', lessonId: 'b1-gerund-infinitive' },
+  { id: 'b1.question-tags', kind: 'grammar', level: 'B1', title: 'Question tags', summary: "..., isn't it? / don't you? / did they?", lessonId: 'b1-question-tags' },
+  { id: 'b1.too-enough', kind: 'grammar', level: 'B1', title: 'Too dan enough', summary: 'too hot, old enough, enough money; too atau very.', lessonId: 'b1-too-enough' },
   { id: 'b2.causative', kind: 'grammar', level: 'B2', title: 'Causative', summary: 'have/get + objek + bentuk ketiga.', lessonId: 'b2-causative' },
   { id: 'b2.reported', kind: 'grammar', level: 'B2', title: 'Reported speech', summary: 'Tense mundur, say/tell, pertanyaan tidak langsung.', lessonId: 'b2-reported' },
   { id: 'b2.third-conditional', kind: 'grammar', level: 'B2', title: 'Third conditional', summary: 'If + had + bentuk ketiga, would have + bentuk ketiga.', lessonId: 'b2-third-conditional' },
@@ -157,6 +179,30 @@ const tags: MisconceptionTag[] = [
   { id: 'will-vs-going-to', topic: 'a2.future', title: 'Will atau going to?', tip: 'Sudah direncanakan atau ada bukti → going to. Diputuskan saat bicara, janji, tawaran → will.' },
   { id: 'more-er', topic: 'a2.comparatives', title: 'Bentuk comparative', tip: 'Pendek: -er (cheaper). Panjang: more (more expensive). Jangan keduanya (more cheaper). good → better, bad → worse.' },
   { id: 'than-from', topic: 'a2.comparatives', title: '"Daripada" = than', tip: '"Lebih ... dari/daripada" = ... than, bukan from atau then.' },
+  { id: 'freq-position', topic: 'a2.frequency', title: 'Posisi kata keterangan frekuensi', tip: 'Sebelum kata kerja biasa (I always walk), sesudah to be (I am always late).' },
+  { id: 'freq-never', topic: 'a2.frequency', title: 'Never tanpa not', tip: "\"never\" sudah negatif: I never eat meat, bukan I don't never eat meat." },
+  { id: 'freq-how-often', topic: 'a2.frequency', title: 'Menjawab How often', tip: 'How often ...? dijawab dengan every day, once a week, twice a month, sometimes, dan seterusnya.' },
+  { id: 'much-many', topic: 'a2.countable', title: 'Much atau many', tip: 'many + benda terhitung jamak; much + benda tak terhitung. Di kalimat positif: a lot of. Harga: How much.' },
+  { id: 'uncountable-plural', topic: 'a2.countable', title: 'Benda tak terhitung tanpa -s', tip: 'information, advice, furniture, homework, luggage, news: tanpa -s dan tanpa a/an.' },
+  { id: 'some-any', topic: 'a2.countable', title: 'Some atau any', tip: 'some: kalimat positif dan tawaran. any: kalimat negatif dan pertanyaan.' },
+  { id: 'was-ing-missing', topic: 'a2.past-continuous', title: 'Was/were + -ing', tip: 'Dua bagian wajib: was/were dan -ing. I was reading, bukan I was read atau I reading.' },
+  { id: 'when-while', topic: 'a2.past-continuous', title: 'When atau while', tip: 'while + kegiatan panjang (past continuous); when + kejadian singkat (simple past).' },
+  { id: 'modal-to', topic: 'a2.must', title: 'Modal tanpa to', tip: 'must, should, can + bentuk dasar tanpa "to": must go, should go.' },
+  { id: 'mustnt-dont-have', topic: 'a2.must', title: "Mustn't atau don't have to", tip: "mustn't = dilarang; don't have to = tidak perlu." },
+  { id: 'has-to', topic: 'a2.must', title: 'Has to untuk he/she/it', tip: "he/she/it has to; pertanyaan dan negatif: Does she have to / doesn't have to; masa lalu: had to." },
+  { id: 'should-base', topic: 'a2.should', title: 'Should + bentuk dasar', tip: "should go (bukan should goes atau should going); negatifnya shouldn't, bukan don't should." },
+  { id: 'imperative-form', topic: 'a2.imperatives', title: 'Bentuk kalimat perintah', tip: "Perintah: bentuk dasar di awal. Larangan: Don't + bentuk dasar. Ajakan: Let's + bentuk dasar. Tanpa to, tanpa -ing." },
+  { id: 'dont-be', topic: 'a2.imperatives', title: "Don't be + kata sifat", tip: "Larangan dengan kata sifat butuh be: Don't be late, bukan Don't late." },
+  { id: 'direction-words', topic: 'a2.imperatives', title: 'Ungkapan arah', tip: 'turn left/right (tanpa to atau on), go straight on, on the corner, opposite, next to.' },
+  { id: 'used-to-form', topic: 'b1.used-to', title: 'Bentuk used to', tip: "Positif: used to + bentuk dasar. Negatif dan pertanyaan: didn't use to / Did ... use to (tanpa -d)." },
+  { id: 'used-to-now', topic: 'b1.used-to', title: 'Used to hanya untuk dulu', tip: 'Kebiasaan sekarang: simple present (I usually ...), bukan use to.' },
+  { id: 'verb-ing-to', topic: 'b1.gerund-infinitive', title: 'Kata kerja + -ing atau to', tip: 'enjoy, avoid, finish, mind, suggest + -ing; want, decide, hope, plan, need + to + bentuk dasar.' },
+  { id: 'prep-ing', topic: 'b1.gerund-infinitive', title: 'Kata depan + -ing', tip: 'Setelah kata depan selalu -ing: interested in learning, good at cooking, look forward to meeting.' },
+  { id: 'tag-isnt-it', topic: 'b1.question-tags', title: '"Isn\'t it" untuk semua kalimat', tip: "Tag dibentuk dari kata kerja bantu dan subjeknya: You like it, don't you? Bukan isn't it." },
+  { id: 'tag-auxiliary', topic: 'b1.question-tags', title: 'Kata kerja bantu pada tag', tip: "Pakai kata kerja bantu kalimatnya (is, have, can, will); kalau tidak ada, do/does/did. I am → aren't I. Let's → shall we." },
+  { id: 'tag-polarity', topic: 'b1.question-tags', title: 'Positif-negatif pada tag', tip: 'Kalimat positif → tag negatif; kalimat negatif (termasuk never, nobody) → tag positif.' },
+  { id: 'enough-order', topic: 'b1.too-enough', title: 'Letak enough', tip: 'Sesudah kata sifat (old enough), sebelum kata benda (enough money).' },
+  { id: 'too-very', topic: 'b1.too-enough', title: 'Too atau very', tip: 'too = terlalu (ada masalah); very = sangat. Untuk memuji: very/really delicious, bukan too delicious.' },
   { id: 'superlative-the', topic: 'a2.comparatives', title: 'The pada superlative', tip: 'Paling: the + -est / the most. Comparative (lebih) tidak memakai the.' },
   { id: 'perfect-vs-past', topic: 'b1.present-perfect', title: 'Present perfect vs simple past', tip: 'Ada waktu selesai (yesterday, in 2015, ago)? Simple past. Tidak ada atau masih berlanjut? Present perfect.' },
   { id: 'since-for', topic: 'b1.present-perfect', title: 'Tertukar for / since', tip: 'for + lamanya (for two years); since + titik awal (since 2020).' },
@@ -217,11 +263,59 @@ const tags: MisconceptionTag[] = [
   { id: 'weak-forms', topic: 'skill.listening', title: 'Kontraksi dan bentuk lemah', tip: "Dengarkan bunyi kecil setelah subjek: I'd = I would/had, we'll = we will, she's + bentuk ketiga = she has. 'can' positif lemah /kən/, 'can't' bertekanan." },
 ];
 
+type Writing = NonNullable<HomeworkDef['writing']>;
+const WRITING_HOMEWORK: [chapterId: string, title: string, writing: Writing][] = [
+  ['a2-c1', 'Akhir Pekan Lalu', {
+    prompt: 'Tulis 5–7 kalimat tentang akhir pekan lalu: ke mana kamu pergi, apa yang kamu lakukan, dan bagaimana rasanya.',
+    minWords: 40,
+    mustInclude: ['Memakai was atau were:: was | were ', 'Memakai kata kerja lampau (visited, went, ate, ...)::ed |ed.|ed,| went | had | saw | ate | took | bought | made | met | came | got ', 'Menyebut waktu lampau (last weekend, yesterday, ... ago)::last |yesterday| ago'],
+    model: 'Last weekend was great. On Saturday morning, I visited my grandmother in Bogor. We cooked fried rice together and talked for hours. In the afternoon it rained, so we stayed inside and watched an old film. On Sunday, I went to the park with my friends. We played badminton and ate ice cream. I was tired, but very happy.',
+  }],
+  ['a2-c2', 'Rencana Liburan', {
+    prompt: 'Tulis 5–7 kalimat tentang rencana liburanmu: ke mana, dengan siapa, apa yang akan kamu lakukan, dan bandingkan dengan liburan sebelumnya.',
+    minWords: 40,
+    mustInclude: ['Memakai going to::going to', "Memakai will:: will |'ll ", 'Memakai perbandingan (-er than atau more ... than):: than '],
+    model: "Next holiday, I'm going to visit Lombok with my cousins. We're going to stay in a small hotel near the beach. I think it will be sunny, so we will swim every day. Lombok is quieter than Bali, and the beaches are cleaner. I'm going to try snorkelling for the first time. It will be more exciting than last year's holiday!",
+  }],
+  ['a2-c3', 'Kebiasaan dan Kejadian', {
+    prompt: 'Tulis 5–7 kalimat tentang kebiasaan harianmu, lalu ceritakan satu kejadian yang mengganggu rutinitasmu dengan was/were + -ing.',
+    minWords: 45,
+    mustInclude: ['Memakai kata keterangan frekuensi (always, usually, often, ...)::always|usually|often|sometimes|rarely|never', 'Memakai was atau were untuk latar kejadian:: was | were ', 'Memakai much, many, some, any, atau a lot of:: much | many | some | any |a lot of'],
+    model: "I usually wake up at five and always pray before breakfast. I often walk to school with my sister, and we rarely take the bus. Last Monday was different. I was walking to school when it suddenly started to rain. I didn't have an umbrella, and there weren't many shops on the road. While I was waiting under a tree, my father arrived with the car. I was lucky!",
+  }],
+  ['a2-c4', 'Aturan dan Saran', {
+    prompt: 'Tulis 5–7 kalimat untuk teman yang baru pindah ke sekolahmu: aturan yang harus diikuti, yang dilarang, yang tidak perlu, dan saranmu.',
+    minWords: 45,
+    mustInclude: ['Memakai must atau have to:: must |have to|has to', "Memakai mustn't atau don't have to::mustn't|must not|don't have to|do not have to|doesn't have to", 'Memberi saran dengan should::should'],
+    model: "Welcome to our school! You must wear your uniform from Monday to Thursday, and you have to arrive before seven. You mustn't use your phone in class. You don't have to bring lunch because the canteen is cheap and good. You should join a club, because it is the best way to make friends. You should also talk to Bu Rina in the library. She is very kind!",
+  }],
+  ['b1-c1', 'Pengalaman Pertama', {
+    prompt: 'Tulis 6–8 kalimat tentang pengalaman yang pernah kamu alami, dan sesuatu yang sudah lama kamu lakukan sampai sekarang.',
+    minWords: 55,
+    mustInclude: ["Memakai present perfect (have/has + bentuk ketiga):: have | has |'ve ", 'Memakai since atau for:: since | for ', 'Memakai ever atau never:: ever | never '],
+    model: 'I have never travelled abroad, but I have visited many cities in Indonesia. The most beautiful place I have ever seen is Raja Ampat. I went there with my uncle two years ago. I have been learning English since I was twelve, and I have studied with Lentera for six months. I have made a lot of progress, but I still find listening difficult. Have you ever been to Raja Ampat?',
+  }],
+  ['b1-c2', 'Seandainya ...', {
+    prompt: 'Tulis 6–8 kalimat: apa yang akan kamu lakukan dalam satu situasi yang mungkin terjadi (if + present, will), dan dalam satu situasi andai-andai (if + past, would).',
+    minWords: 55,
+    mustInclude: ['Memakai if::if ', "First conditional dengan will:: will |'ll ", "Second conditional dengan would::would|'d "],
+    model: 'If it rains this weekend, I will stay at home and read a novel. If my friends visit me, we will cook pancakes together. But if I won a lot of money, I would travel around the world. I would visit Japan first, because I love Japanese food. If I had more free time, I would learn to play the guitar. What would you do if you were rich?',
+  }],
+  ['b1-c3', 'Dulu dan Sekarang', {
+    prompt: 'Tulis 6–8 kalimat yang membandingkan hidupmu dulu dan sekarang: kebiasaan lama, hal yang kamu sukai, dan apa yang berubah.',
+    minWords: 55,
+    mustInclude: ['Memakai used to::used to', 'Memakai kata kerja + -ing atau to (enjoy, want to, decide to, ...)::enjoy|want to|wanted to|decided to|hope to|avoid|like ', 'Memakai too atau enough:: too |enough'],
+    model: "When I was a child, I used to live in a small village near Garut. I used to play in the rice fields every afternoon, and I didn't use to watch much TV. Nowadays I live in Bandung, and I enjoy riding my bike around the city. Life here is busier, and sometimes the streets are too crowded. I decided to study IT because I want to build apps one day. I still miss the quiet village, but I am happy here.",
+  }],
+];
+
 const HOMEWORK_KIND: Record<string, HomeworkDef['kind']> = {
   'a1-greetings': 'construction', 'a1-to-be-neg-q': 'translation', 'a1-simple-present': 'construction', 'a1-do-does': 'translation',
   'a2-past-irregular': 'reading', 'b2-passive': 'translation',
   'a1-time': 'reading', 'a1-there-is': 'reading', 'a1-possessives': 'reading', 'a1-can': 'construction',
   'a2-present-continuous': 'reading', 'a2-future': 'reading', 'a2-comparatives': 'reading',
+  'a2-frequency': 'reading', 'a2-countable': 'reading', 'a2-past-continuous': 'reading', 'a2-must': 'reading', 'a2-should': 'reading', 'a2-imperatives': 'reading',
+  'b1-used-to': 'reading', 'b1-gerund-infinitive': 'reading', 'b1-question-tags': 'reading', 'b1-too-enough': 'reading',
   'b1-pp-continuous': 'reading', 'b1-conditionals': 'reading', 'b1-deduction': 'reading', 'b1-relative': 'reading',
   'b2-causative': 'reading', 'b2-reported': 'reading', 'b2-third-conditional': 'reading', 'b2-mixed-conditionals': 'reading',
   'c1-cleft': 'reading', 'c1-hedging': 'reading', 'c1-nominalisation': 'reading', 'c1-discourse': 'reading',
@@ -287,8 +381,12 @@ export function buildPack(): ContentPack {
   homework.push({ id: 'hw.a1-c1.listen', chapterId: 'a1-c1', title: 'Menyimak: Perkenalan Anna', kind: 'listening', dueDays: 5, exerciseIds: hwListen.questionIds });
   // One listening assignment per B1–C2 chapter, chosen to echo its grammar.
   const LISTENING_HOMEWORK: [chapterId: string, listeningId: string][] = [
+    ['a2-c1', 'listen-yesterday'], // simple past
+    ['a2-c3', 'listen-a2-blackout'], // past continuous
+    ['a2-c4', 'listen-a2-directions'], // imperatives and directions
     ['b1-c1', 'listen-b1-contractions'], // she's finished = she has finished
     ['b1-c2', 'listen-b1-voicemail'],
+    ['b1-c3', 'listen-announcement'],
     ['b2-c1', 'listen-b2-news'], // will be reviewed, was tested
     ['b2-c2', 'listen-b2-meeting'],
     ['c1-c1', 'listen-c1-remote'], // "What I would say is that ..." (cleft)
@@ -296,6 +394,10 @@ export function buildPack(): ContentPack {
     ['c2-c1', 'listen-c2-tax'],
     ['c2-c2', 'listen-c2-app'], // understatement and irony
   ];
+  // One short writing task per A2–B1 chapter (Rilis 2), checked by a deterministic checklist.
+  for (const [chapterId, title, writing] of WRITING_HOMEWORK) {
+    homework.push({ id: `hw.${chapterId}.write`, chapterId, title: `Menulis: ${title}`, kind: 'writing', dueDays: 7, exerciseIds: [], writing });
+  }
   for (const [chapterId, listeningId] of LISTENING_HOMEWORK) {
     const item = listeningItems.find((l) => l.id === listeningId)!;
     homework.push({ id: `hw.${chapterId}.listen`, chapterId, title: `Menyimak: ${item.title}`, kind: 'listening', dueDays: 5, exerciseIds: item.questionIds });
@@ -312,8 +414,8 @@ export function buildPack(): ContentPack {
   exercises.push(...stamp(placement, 'placement', 'placement', 'a1.to-be', null));
   exams.push(
     { id: 'exam.level.A1', scope: 'level', ref: 'A1', title: 'Ujian Level A1', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 16 },
-    { id: 'exam.level.A2', scope: 'level', ref: 'A2', title: 'Ujian Level A2', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 12 },
-    { id: 'exam.level.B1', scope: 'level', ref: 'B1', title: 'Ujian Level B1', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
+    { id: 'exam.level.A2', scope: 'level', ref: 'A2', title: 'Ujian Level A2', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 18 },
+    { id: 'exam.level.B1', scope: 'level', ref: 'B1', title: 'Ujian Level B1', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 18 },
     { id: 'exam.level.B2', scope: 'level', ref: 'B2', title: 'Ujian Level B2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
     { id: 'exam.level.C1', scope: 'level', ref: 'C1', title: 'Ujian Level C1', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
     { id: 'exam.level.C2', scope: 'level', ref: 'C2', title: 'Ujian Level C2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },

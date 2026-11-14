@@ -29,9 +29,10 @@ projects/lentera-english/
 ├── content/                  Kurikulum yang ditulis tangan (TypeScript)
 │   ├── dsl.ts                Helper penulisan soal: mc, fill, dictation, tr, fix, arrange, spot, match, para, ...
 │   ├── a1-1.ts … a1-4.ts     Pelajaran A1
-│   ├── a2.ts a2-2.ts         Pelajaran A2 + bank latihan was/were
+│   ├── a2.ts a2-2.ts a2-3.ts Pelajaran A2 + bank latihan was/were (a2-3: Rilis 2)
 │   ├── upper.ts              Pelajaran pertama B1, B2, C1, C2
 │   ├── b1-2.ts b2-2.ts c1-2.ts c2-2.ts   Pelajaran B1–C2 lainnya (tahap 2)
+│   ├── b1-3.ts               4 pelajaran B1 (Rilis 2)
 │   ├── vocabulary.ts         148 kosakata
 │   ├── conversations.ts      11 skenario dialog bercabang A1–B2 + helper scenario()
 │   ├── conversations-upper.ts 5 skenario B2–C2 (tahap 3)
