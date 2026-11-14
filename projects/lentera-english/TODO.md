@@ -41,8 +41,10 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [~] Pustaka kosakata, pustaka tata bahasa, pencapaian, profil: tampil tanpa error. Analitik dengan data, tema, dan aksen sudah diuji; target harian dan reset data belum.
 - [~] Papan peringkat: SQL teruji; UI diuji dengan satu akun (muncul dengan XP yang benar). Belum diuji dengan beberapa akun sekaligus.
 - [ ] Rekaman audio penutur asli (aksen US dan UK) untuk contoh, kosakata, menyimak, fonem. Daftarkan di `audio_resources`; pemutar sudah mendukung. Saat ini fallback ke suara perangkat.
-- [x] Tahap 1: 8 pelajaran A1–A2 (`content/a1-4.ts`, `content/a2-2.ts`). Menunggu pemeriksaan pengajar sebelum diterbitkan.
-- [ ] Tahap 2: 16 pelajaran B1–C2 yang masih "Sedang disusun" (daftar di `content/index.ts`, field `planned`), lengkap 8 langkah, lolos `npm run e2e:curriculum`.
+- [x] Tahap 1: 8 pelajaran A1–A2 (`content/a1-4.ts`, `content/a2-2.ts`). Sudah terbit (db-2).
+- [x] Tahap 2: 16 pelajaran B1–C2 + ujian level B1–C2 (`content/b1-2.ts`, `b2-2.ts`, `c1-2.ts`, `c2-2.ts`). Menunggu pemeriksaan pemilik sebelum diterbitkan.
+- [ ] Materi menyimak dan percakapan untuk B1–C2.
+- [ ] Rencana belajar mingguan untuk pelanggan tahunan.
 - [ ] Ujian level B1, B2, C1, C2 (baru ada A1 dan A2).
 - [ ] Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Sekarang hanya di klien; konten Premium sudah dipangkas di server.
 - [ ] Deploy (hosting Next.js + Supabase), domain HTTPS, env produksi.

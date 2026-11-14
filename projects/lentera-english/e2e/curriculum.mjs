@@ -1,6 +1,7 @@
 // Walks EVERY lesson of the curriculum through the real UI on a phone viewport:
 // guided practice, independent practice, the mastery test and the lesson's
-// homework, answering each question with its authored key. A question whose
+// homework, answering each question with its authored key. After a unit's last
+// lesson it also takes that unit's exam, which opens the next unit. A question whose
 // key the app does not accept as "Benar!", a step that never appears, or a
 // console error fails that lesson. Run after adding or editing lessons.
 //
@@ -69,6 +70,24 @@ const lessons = [...pack.lessons].sort((a, b) => {
   return 0;
 }).filter((l) => !only.length || only.some((w) => l.id.includes(w)));
 
+const lastOfUnit = new Map(lessons.map((l) => [l.unitId, l.id]));
+const levelOf = (l) => chapterOf.get(unitOf.get(l.unitId).chapterId).level;
+const lastOfLevel = new Map(lessons.map((l) => [levelOf(l), l.id]));
+async function takeExam(exam) {
+  try {
+    await page.goto(`${BASE}/app/exams?id=${exam.id}`);
+    await button(/Mulai ujian/).click({ timeout: 30000 });
+    const answered = await runSession(page, pack, { deferred: true });
+    await page.getByRole('heading', { name: new RegExp(`Lulus: ${exam.title}`) }).waitFor({ timeout: 20000 });
+    check(`${exam.id}: ${answered.length} soal, lulus`, true);
+  } catch (e) {
+    await page.screenshot({ path: path.join(SHOTS, `kurikulum-gagal-${exam.id}.png`), fullPage: true }).catch(() => {});
+    check(`${exam.id}: gagal`, false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+}
+const unitExam = (unitId) => { const x = pack.exams.find((e) => e.scope === 'unit' && e.ref === unitId); return x ? takeExam(x) : null; };
+const levelExam = (level) => { const x = pack.exams.find((e) => e.scope === 'level' && e.ref === level); return x ? takeExam(x) : null; };
+
 const started = Date.now();
 for (const l of lessons) {
   const before = issues.length;
@@ -103,6 +122,8 @@ for (const l of lessons) {
     await page.screenshot({ path: path.join(SHOTS, `kurikulum-gagal-${l.id}.png`), fullPage: true }).catch(() => {});
     check(`${l.id}: macet setelah ${answered} soal`, false, String(e.message).split('\n')[0].slice(0, 200));
   }
+  if (lastOfUnit.get(l.unitId) === l.id) await unitExam(l.unitId);
+  if (!only.length && lastOfLevel.get(levelOf(l)) === l.id) await levelExam(levelOf(l));
 }
 console.log(`\n${lessons.length} pelajaran dalam ${Math.round((Date.now() - started) / 60000)} menit.`);
 await browser.close();

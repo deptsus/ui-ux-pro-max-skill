@@ -1,5 +1,5 @@
-// B1 – C2: satu pelajaran lengkap per level. Unit lain di level ini masih
-// berada di silabus (lihat syllabus.ts) dan ditandai "sedang disusun".
+// B1 – C2: pelajaran pertama setiap level. Pelajaran lanjutannya ada di
+// b1-2.ts, b2-2.ts, c1-2.ts, dan c2-2.ts.
 import { arrange, construct, dlg, fill, fix, lesson, match, mc, read, spot, tf, tr } from './dsl';
 
 export const presentPerfect = lesson({

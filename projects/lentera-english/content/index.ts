@@ -8,12 +8,16 @@ import { doDoes, simplePresent, thirdPersonDrills } from './a1-3';
 import { canLesson, possessivesLesson, prepTimeLesson, thereIsLesson, timeLesson } from './a1-4';
 import { pastBe, pastIrregular, pastRegular, wasWereDrills } from './a2';
 import { comparativesLesson, futureLesson, presentContinuous } from './a2-2';
+import { conditionals, deduction, ppContinuous, relativeClauses } from './b1-2';
+import { causative, mixedConditionals, reportedSpeech, thirdConditional } from './b2-2';
+import { cleft, discourseMarkers, hedging, nominalisation } from './c1-2';
+import { advancedModality, collocations, ellipsis, understatement } from './c2-2';
 import { inversion, passive, presentPerfect, subjunctive } from './upper';
 import { vocabulary } from './vocabulary';
 import { scenarios } from './conversations';
 import { listening, phonemes, placement } from './listening';
 
-export const CONTENT_VERSION = '2026.11.2';
+export const CONTENT_VERSION = '2026.11.3';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -46,28 +50,28 @@ const syllabus: ChapterSpec[] = [
     { id: 'a2-c2-u1', title: 'Sekarang, Rencana, dan Perbandingan', description: 'Present continuous, going to/will, dan perbandingan.', lessons: [presentContinuous, futureLesson, comparativesLesson] },
   ] },
   { id: 'b1-c1', level: 'B1', title: 'Pengalaman dan Hasil', description: 'Menghubungkan masa lalu dengan masa kini.', premium: true, units: [
-    { id: 'b1-c1-u1', title: 'Present Perfect', lessons: [presentPerfect], planned: ['Present Perfect Continuous'] },
+    { id: 'b1-c1-u1', title: 'Present Perfect', description: 'Present perfect, simple past, dan present perfect continuous.', lessons: [presentPerfect, ppContinuous] },
   ] },
   { id: 'b1-c2', level: 'B1', title: 'Pengandaian dan Kemungkinan', description: 'Conditional, modal, dan klausa relatif.', premium: true, units: [
-    { id: 'b1-c2-u1', title: 'Conditionals dan Modals', lessons: [], planned: ['First dan Second Conditional', 'Modals of Deduction', 'Relative Clauses'] },
+    { id: 'b1-c2-u1', title: 'Conditionals dan Modals', description: 'Pengandaian, menyimpulkan, dan klausa relatif.', lessons: [conditionals, deduction, relativeClauses] },
   ] },
   { id: 'b2-c1', level: 'B2', title: 'Fokus dan Sudut Pandang', description: 'Mengatur fokus kalimat dengan struktur pasif.', premium: true, units: [
-    { id: 'b2-c1-u1', title: 'Passive Voice', lessons: [passive], planned: ['Causative: have/get something done'] },
+    { id: 'b2-c1-u1', title: 'Passive Voice', description: 'Kalimat pasif dan causative.', lessons: [passive, causative] },
   ] },
   { id: 'b2-c2', level: 'B2', title: 'Melaporkan dan Berandai', description: 'Kalimat tidak langsung dan pengandaian lampau.', premium: true, units: [
-    { id: 'b2-c2-u1', title: 'Reported Speech dan Conditionals', lessons: [], planned: ['Reported Speech', 'Third Conditional', 'Mixed Conditionals'] },
+    { id: 'b2-c2-u1', title: 'Reported Speech dan Conditionals', description: 'Kalimat tidak langsung, third conditional, dan mixed conditionals.', lessons: [reportedSpeech, thirdConditional, mixedConditionals] },
   ] },
   { id: 'c1-c1', level: 'C1', title: 'Penekanan dan Gaya', description: 'Struktur penekanan dalam bahasa formal.', premium: true, units: [
-    { id: 'c1-c1-u1', title: 'Inversi dan Cleft', lessons: [inversion], planned: ['Cleft Sentences: It is ... that / What ... is'] },
+    { id: 'c1-c1-u1', title: 'Inversi dan Cleft', description: 'Struktur penekanan dalam bahasa formal.', lessons: [inversion, cleft] },
   ] },
   { id: 'c1-c2', level: 'C1', title: 'Wacana Akademik', description: 'Menulis dan berbicara secara akademik.', premium: true, units: [
-    { id: 'c1-c2-u1', title: 'Gaya Akademik', lessons: [], planned: ['Hedging', 'Nominalisation', 'Discourse Markers'] },
+    { id: 'c1-c2-u1', title: 'Gaya Akademik', description: 'Hedging, nominalisasi, dan penghubung wacana.', lessons: [hedging, nominalisation, discourseMarkers] },
   ] },
   { id: 'c2-c1', level: 'C2', title: 'Presisi dan Register', description: 'Struktur langka yang menandai kemahiran penuh.', premium: true, units: [
-    { id: 'c2-c1-u1', title: 'Subjunctive', lessons: [subjunctive], planned: ['Ellipsis dan Substitution'] },
+    { id: 'c2-c1-u1', title: 'Subjunctive', description: 'Subjunctive, ellipsis, dan substitution.', lessons: [subjunctive, ellipsis] },
   ] },
   { id: 'c2-c2', level: 'C2', title: 'Nuansa dan Idiom', description: 'Kolokasi idiomatis, ironi, dan modalitas lanjut.', premium: true, units: [
-    { id: 'c2-c2-u1', title: 'Nuansa Makna', lessons: [], planned: ['Kolokasi Idiomatis', 'Ironi dan Understatement', 'Modalitas Lanjut'] },
+    { id: 'c2-c2-u1', title: 'Nuansa Makna', description: 'Kolokasi, understatement, dan modalitas lanjut.', lessons: [collocations, understatement, advancedModality] },
   ] },
 ];
 
@@ -94,6 +98,22 @@ const topics: Topic[] = [
   { id: 'b2.passive', kind: 'grammar', level: 'B2', title: 'Passive voice', summary: 'be + past participle di berbagai tense.', lessonId: 'b2-passive' },
   { id: 'c1.inversion', kind: 'grammar', level: 'C1', title: 'Inversi untuk penekanan', summary: 'Never have I ..., Not only does she ...', lessonId: 'c1-inversion' },
   { id: 'c2.subjunctive', kind: 'grammar', level: 'C2', title: 'Subjunctive formal', summary: 'insist that he resign; Were I ..., Had she ...', lessonId: 'c2-subjunctive' },
+  { id: 'b1.pp-continuous', kind: 'grammar', level: 'B1', title: 'Present perfect continuous', summary: 'have/has been + -ing; for, since, How long ...?', lessonId: 'b1-pp-continuous' },
+  { id: 'b1.conditionals', kind: 'grammar', level: 'B1', title: 'First dan second conditional', summary: 'If + present, will; If + past, would.', lessonId: 'b1-conditionals' },
+  { id: 'b1.deduction', kind: 'grammar', level: 'B1', title: 'Modals of deduction', summary: "must, might, could, can't + bentuk dasar.", lessonId: 'b1-deduction' },
+  { id: 'b1.relative', kind: 'grammar', level: 'B1', title: 'Relative clauses', summary: 'who, which, that, where, whose.', lessonId: 'b1-relative' },
+  { id: 'b2.causative', kind: 'grammar', level: 'B2', title: 'Causative', summary: 'have/get + objek + bentuk ketiga.', lessonId: 'b2-causative' },
+  { id: 'b2.reported', kind: 'grammar', level: 'B2', title: 'Reported speech', summary: 'Tense mundur, say/tell, pertanyaan tidak langsung.', lessonId: 'b2-reported' },
+  { id: 'b2.third-conditional', kind: 'grammar', level: 'B2', title: 'Third conditional', summary: 'If + had + bentuk ketiga, would have + bentuk ketiga.', lessonId: 'b2-third-conditional' },
+  { id: 'b2.mixed-conditionals', kind: 'grammar', level: 'B2', title: 'Mixed conditionals', summary: 'Penyebab dan akibat di waktu yang berbeda.', lessonId: 'b2-mixed-conditionals' },
+  { id: 'c1.cleft', kind: 'grammar', level: 'C1', title: 'Cleft sentences', summary: 'It was ... who/that; What I need is ...', lessonId: 'c1-cleft' },
+  { id: 'c1.hedging', kind: 'skill', level: 'C1', title: 'Hedging', summary: 'may, suggest, appear to, is likely to.', lessonId: 'c1-hedging' },
+  { id: 'c1.nominalisation', kind: 'grammar', level: 'C1', title: 'Nominalisation', summary: 'decision, growth; increase in, impact on.', lessonId: 'c1-nominalisation' },
+  { id: 'c1.discourse', kind: 'skill', level: 'C1', title: 'Discourse markers', summary: 'however, therefore, although vs despite.', lessonId: 'c1-discourse' },
+  { id: 'c2.ellipsis', kind: 'grammar', level: 'C2', title: 'Ellipsis dan substitution', summary: 'I think so, so do I, one/ones, do so.', lessonId: 'c2-ellipsis' },
+  { id: 'c2.collocations', kind: 'vocabulary', level: 'C2', title: 'Kolokasi idiomatis', summary: 'make/do, heavy rain, pay attention.', lessonId: 'c2-collocations' },
+  { id: 'c2.understatement', kind: 'skill', level: 'C2', title: 'Ironi dan understatement', summary: 'not bad, a bit of a problem, not uncommon.', lessonId: 'c2-understatement' },
+  { id: 'c2.modality', kind: 'grammar', level: 'C2', title: 'Modalitas lanjut', summary: "must/might/can't/should have; needn't have.", lessonId: 'c2-modality' },
   { id: 'skill.listening', kind: 'skill', level: 'A1', title: 'Menyimak', summary: 'Menangkap kata, angka, dan informasi dari audio.' },
 ];
 
@@ -143,6 +163,52 @@ const tags: MisconceptionTag[] = [
   { id: 'inversion-pair', topic: 'c1.inversion', title: 'Pasangan no sooner / hardly', tip: 'No sooner ... than. Hardly/Scarcely ... when.' },
   { id: 'subjunctive-base', topic: 'c2.subjunctive', title: 'Bentuk dasar dalam subjunctive', tip: 'Setelah insist/suggest/essential that: bentuk dasar untuk semua subjek, tanpa -s.' },
   { id: 'subjunctive-were', topic: 'c2.subjunctive', title: 'Were dan inversi pengandaian', tip: 'If I were ...; Were I ...; Had she ...; Should you ...' },
+  { id: 'ppc-form', topic: 'b1.pp-continuous', title: 'Bentuk present perfect continuous', tip: 'have/has + been + -ing. "Sudah ... sejak/selama" untuk kegiatan yang masih berlangsung tidak memakai present continuous.' },
+  { id: 'ppc-vs-pp', topic: 'b1.pp-continuous', title: 'Lamanya kegiatan atau hasil?', tip: 'Lamanya kegiatan → have been + -ing. Hasil atau jumlah (three books, twice) → have + bentuk ketiga.' },
+  { id: 'stative-ppc', topic: 'b1.pp-continuous', title: 'Kata kerja keadaan', tip: 'know, like, own, believe tidak memakai -ing: I have known her for years.' },
+  { id: 'if-will', topic: 'b1.conditionals', title: 'Will di bagian if', tip: 'Bagian "if" tidak memakai will atau would: If it rains, we will stay.' },
+  { id: 'second-past', topic: 'b1.conditionals', title: 'Bentuk second conditional', tip: 'If + past (If I had / If I were), would + bentuk dasar.' },
+  { id: 'real-unreal', topic: 'b1.conditionals', title: 'Nyata atau bayangan?', tip: 'Mungkin terjadi → first (present + will). Tidak nyata → second (past + would).' },
+  { id: 'must-cant', topic: 'b1.deduction', title: "Can't, bukan mustn't", tip: "Kesimpulan negatif = can't (It can't be true). mustn't berarti larangan." },
+  { id: 'deduction-certainty', topic: 'b1.deduction', title: 'Memilih tingkat kepastian', tip: "Bukti kuat → must; tidak yakin → might/may/could; mustahil → can't." },
+  { id: 'modal-base', topic: 'b1.deduction', title: 'Bentuk setelah modal', tip: 'Modal + bentuk dasar, tanpa to dan tanpa -s: She must be tired.' },
+  { id: 'who-which', topic: 'b1.relative', title: 'Tertukar who / which', tip: 'who untuk orang, which untuk benda; that untuk keduanya.' },
+  { id: 'relative-extra-pronoun', topic: 'b1.relative', title: 'Kata ganti ganda', tip: 'Kata relatif sudah menggantikan bendanya: the book that I bought (tanpa "it").' },
+  { id: 'whose-where', topic: 'b1.relative', title: 'Where dan whose', tip: 'Tempat + klausa lengkap → where. Kepemilikan → whose + kata benda.' },
+  { id: 'causative-order', topic: 'b2.causative', title: 'Urutan causative', tip: 'have + OBJEK + bentuk ketiga: I had my hair cut (bukan I had cut my hair).' },
+  { id: 'causative-participle', topic: 'b2.causative', title: 'Bentuk ketiga dalam causative', tip: 'Setelah objek pakai bentuk ketiga: get the car repaired, have it stolen.' },
+  { id: 'causative-get', topic: 'b2.causative', title: 'Have someone do / get someone to do', tip: 'have + orang + bentuk dasar; get + orang + TO + bentuk dasar.' },
+  { id: 'backshift', topic: 'b2.reported', title: 'Tense dan kata ganti dalam reported speech', tip: 'am → was, will → would, have done → had done; I → he/she sesuai orangnya.' },
+  { id: 'say-tell', topic: 'b2.reported', title: 'Say atau tell?', tip: 'tell + orang (told me); say tanpa orang. Perintah: told me to + bentuk dasar.' },
+  { id: 'reported-question', topic: 'b2.reported', title: 'Urutan pertanyaan tidak langsung', tip: 'asked where I lived (bukan where did I live); ya/tidak → if/whether.' },
+  { id: 'third-form', topic: 'b2.third-conditional', title: 'Bagian if pada third conditional', tip: 'If + had + bentuk ketiga, bukan "If I would have".' },
+  { id: 'would-have-pp', topic: 'b2.third-conditional', title: 'Would have + bentuk ketiga', tip: 'would/could have + bentuk ketiga: would have gone, could have saved.' },
+  { id: 'conditional-type', topic: 'b2.third-conditional', title: 'Memilih jenis conditional', tip: 'Sekarang/umum tidak nyata → second. Masa lalu yang tidak terjadi → third.' },
+  { id: 'mixed-time', topic: 'b2.mixed-conditionals', title: 'Waktu tiap bagian conditional', tip: 'now/today → would + bentuk dasar; yesterday/last year → would have + bentuk ketiga.' },
+  { id: 'cleft-it', topic: 'c1.cleft', title: 'Bentuk it-cleft', tip: 'It + is/was (selalu tunggal) + fokus + who/that. Kata kerja sesudahnya mengikuti fokus.' },
+  { id: 'cleft-what', topic: 'c1.cleft', title: 'Bentuk what-cleft', tip: 'What I need is ... (tanpa "it" tambahan).' },
+  { id: 'cleft-verb', topic: 'c1.cleft', title: 'Menekankan tindakan', tip: 'What she did was call / to call ... (bentuk dasar, bukan called).' },
+  { id: 'overclaim', topic: 'c1.hedging', title: 'Klaim berlebihan', tip: 'prove, always, all, definitely terlalu kuat untuk bukti terbatas. Pakai suggest, may, most.' },
+  { id: 'hedge-form', topic: 'c1.hedging', title: 'Bentuk hedging', tip: 'seem/appear/tend + to + bentuk dasar; X is likely to ...; It is likely that ...' },
+  { id: 'over-hedge', topic: 'c1.hedging', title: 'Hedging berlebihan', tip: 'Satu atau dua hedge cukup. "might possibly perhaps" membuat klaim kabur.' },
+  { id: 'noun-form', topic: 'c1.nominalisation', title: 'Bentuk kata benda', tip: 'decide → decision, fail → failure, analyse → analysis, introduce → introduction.' },
+  { id: 'nominal-preposition', topic: 'c1.nominalisation', title: 'Preposisi pasangan kata benda', tip: 'increase in, impact on, demand for, cause of.' },
+  { id: 'nominal-adjective', topic: 'c1.nominalisation', title: 'Kata sifat di depan kata benda', tip: 'rapidly grew → rapid growth (kata sifat, bukan -ly).' },
+  { id: 'however-punctuation', topic: 'c1.discourse', title: 'Tanda baca however', tip: 'Kalimat 1. However, kalimat 2. (atau ; however,) Bukan koma saja.' },
+  { id: 'despite-although', topic: 'c1.discourse', title: 'Although atau despite?', tip: 'although + klausa; despite / in spite of + kata benda atau -ing. Tanpa "despite of" dan tanpa "although ... but".' },
+  { id: 'marker-meaning', topic: 'c1.discourse', title: 'Fungsi penghubung', tip: 'Kontras: however, nevertheless. Tambahan: moreover. Akibat: therefore. Contoh: for instance.' },
+  { id: 'so-not', topic: 'c2.ellipsis', title: 'So dan not', tip: 'I think so / I hope not / I\'m afraid not (bukan I think yes / I hope no).' },
+  { id: 'aux-ellipsis', topic: 'c2.ellipsis', title: 'Kata bantu pengganti', tip: 'Ikuti kata bantu kalimat pertama: likes → so do I; can\'t → neither can I; haven\'t → neither have I.' },
+  { id: 'one-ones', topic: 'c2.ellipsis', title: 'One dan ones', tip: 'a new one, the black ones. Kata sifat tidak berdiri sendiri.' },
+  { id: 'make-do', topic: 'c2.collocations', title: 'Make atau do?', tip: 'make a mistake/decision/progress; do research/homework/a favour.' },
+  { id: 'adj-noun-collocation', topic: 'c2.collocations', title: 'Kata sifat + kata benda', tip: 'heavy rain, heavy traffic, strong coffee, high price.' },
+  { id: 'verb-noun-collocation', topic: 'c2.collocations', title: 'Kata kerja + kata benda', tip: 'pay attention, take a risk, commit a crime, draw a conclusion, reach a consensus.' },
+  { id: 'literal-reading', topic: 'c2.understatement', title: 'Membaca terlalu harfiah', tip: '"not bad" = bagus; "a bit of a problem" = masalah serius; "I\'m not entirely convinced" = tidak setuju.' },
+  { id: 'litotes', topic: 'c2.understatement', title: 'Litotes', tip: 'not uncommon = cukup sering; not without risks = ada risikonya. Setelah "is not" pakai kata sifat.' },
+  { id: 'irony-cue', topic: 'c2.understatement', title: 'Mengenali ironi', tip: 'Kata positif dalam situasi buruk ("Oh, perfect.") biasanya ironi.' },
+  { id: 'modal-have-pp', topic: 'c2.modality', title: 'Modal + have + bentuk ketiga', tip: 'must/should/could have + bentuk ketiga: should have gone (bukan should have went).' },
+  { id: 'neednt-didnt-need', topic: 'c2.modality', title: "Needn't have atau didn't need to?", tip: "needn't have done = sudah dilakukan, ternyata tidak perlu. didn't need to do = tidak perlu." },
+  { id: 'modal-past-meaning', topic: 'c2.modality', title: 'Makna modal masa lalu', tip: "must have = hampir pasti; might have = mungkin; can't have = tidak mungkin; should have = kritik." },
   { id: 'short-long-i', topic: 'skill.listening', title: 'Vokal /ɪ/ pendek dan /iː/ panjang', tip: 'ship /ɪ/ pendek dan kendur; sheep /iː/ panjang dengan bibir tersenyum.' },
 ];
 
@@ -151,6 +217,10 @@ const HOMEWORK_KIND: Record<string, HomeworkDef['kind']> = {
   'a2-past-irregular': 'reading', 'b2-passive': 'translation',
   'a1-time': 'reading', 'a1-there-is': 'reading', 'a1-possessives': 'reading', 'a1-can': 'construction',
   'a2-present-continuous': 'reading', 'a2-future': 'reading', 'a2-comparatives': 'reading',
+  'b1-pp-continuous': 'reading', 'b1-conditionals': 'reading', 'b1-deduction': 'reading', 'b1-relative': 'reading',
+  'b2-causative': 'reading', 'b2-reported': 'reading', 'b2-third-conditional': 'reading', 'b2-mixed-conditionals': 'reading',
+  'c1-cleft': 'reading', 'c1-hedging': 'reading', 'c1-nominalisation': 'reading', 'c1-discourse': 'reading',
+  'c2-ellipsis': 'reading', 'c2-collocations': 'reading', 'c2-understatement': 'reading', 'c2-modality': 'reading',
 };
 
 export function buildPack(): ContentPack {
@@ -216,6 +286,10 @@ export function buildPack(): ContentPack {
   exams.push(
     { id: 'exam.level.A1', scope: 'level', ref: 'A1', title: 'Ujian Level A1', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 16 },
     { id: 'exam.level.A2', scope: 'level', ref: 'A2', title: 'Ujian Level A2', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 12 },
+    { id: 'exam.level.B1', scope: 'level', ref: 'B1', title: 'Ujian Level B1', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
+    { id: 'exam.level.B2', scope: 'level', ref: 'B2', title: 'Ujian Level B2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
+    { id: 'exam.level.C1', scope: 'level', ref: 'C1', title: 'Ujian Level C1', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
+    { id: 'exam.level.C2', scope: 'level', ref: 'C2', title: 'Ujian Level C2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
   );
 
   return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios, listening: listeningItems, phonemes, homework, exams, audio: [] };
