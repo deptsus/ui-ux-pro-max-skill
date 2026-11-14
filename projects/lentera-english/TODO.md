@@ -44,6 +44,7 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Tahap 1: 8 pelajaran A1–A2 (`content/a1-4.ts`, `content/a2-2.ts`). Sudah terbit (db-2).
 - [x] Tahap 2: 16 pelajaran B1–C2 + ujian level B1–C2 (`content/b1-2.ts`, `b2-2.ts`, `c1-2.ts`, `c2-2.ts`). Sudah terbit (db-4).
 - [x] Tahap 3: 11 materi menyimak B1–C2 (dengan dikte) dan 5 skenario percakapan B2–C2, PR menyimak per bab B1–C2 (`content/listening-upper.ts`, `content/conversations-upper.ts`; `npm run e2e:skills`). Menunggu pemeriksaan pemilik sebelum diterbitkan.
+- [ ] Rilis 1–6 dari `ROADMAP.md` (dikerjakan per rilis, satu deploy per rilis).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).
 - [ ] Ujian level B1, B2, C1, C2 (baru ada A1 dan A2).
 - [ ] Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Sekarang hanya di klien; konten Premium sudah dipangkas di server.
