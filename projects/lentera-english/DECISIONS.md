@@ -25,20 +25,23 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
 - Jangan ada tombol kosong atau fungsi palsu.
 
 ### A3. Paket dan harga
-- Free: Rp0. Premium Bulanan: Rp58.500 untuk 30 hari. Premium Tahunan: Rp585.000 untuk 365 hari.
+- Free: Rp0. Premium Bulanan: Rp58.500 untuk 30 hari. Premium Tahunan: Rp585.000 dicoret, **diskon 15%**, dibayar **Rp497.250** untuk 365 hari (diubah 14 November 2026). Tampilan selalu menunjukkan harga coret dan label diskon.
 - Posisi harga sekitar 70% di bawah patokan Rp195.000 per bulan.
 - Manfaat Free dan Premium sesuai daftar di `src/lib/plans.ts`.
 
-### A4. Pembayaran
-- Hanya tiga metode: **QRIS, DANA, GoPay**. Gateway: **Xendit**, dengan endpoint dari dokumentasi resmi (tidak mengarang endpoint atau SDK). Sandbox dulu.
-- Alur: pilih paket → pilih metode → backend membuat transaksi di Xendit → pengguna membayar → backend menerima dan memverifikasi webhook → Premium aktif otomatis → bukti dan riwayat tampil di akun.
-- Premium tidak pernah aktif hanya dari halaman redirect sukses.
-- Validasi nominal, mata uang IDR, ID transaksi, dan status. Webhook duplikat tidak boleh memperpanjang dua kali.
-- API key dan secret hanya di environment variable backend. Data sensitif pembayaran pengguna tidak disimpan. Pengguna tidak bisa mengubah dirinya sendiri menjadi Premium.
-- Masa aktif dihitung sejak pembayaran berhasil (30 / 365 hari). Tidak ada auto-debit; pengguna memperpanjang sendiri.
+### A4. Pembayaran (diubah pemilik produk, 14 November 2026)
+- **Satu metode: QRIS milik pemilik produk** (QRIS dinamis dari DANA, merchant "Lentera english, Service", NMID ID1026639132426). Satu QR per paket, nominal sudah tertanam di QR: Rp58.500 dan Rp497.250. Tanpa gateway; DANA dan GoPay sebagai metode terpisah serta Xendit tidak dipakai.
+- Nominal tetap, **tanpa kode unik**.
+- Alur: pilih paket → server membuat transaksi dengan harga dari database → aplikasi menampilkan QR paket itu (bisa disimpan sebagai gambar) → pelajar membayar → pelajar menekan "Saya sudah bayar" dan mengisi nama pemilik akun pembayar → **admin mencocokkan dengan mutasi di aplikasi merchant lalu menekan Konfirmasi** → Premium aktif → bukti dan riwayat tampil di akun.
+- Premium **hanya** aktif oleh konfirmasi admin. Membuka halaman pembayaran atau menekan "Saya sudah bayar" tidak mengaktifkan apa pun.
+- Admin bisa menolak dengan alasan wajib; pelajar melihat alasannya. Penolakan bisa dibalik dengan mengonfirmasi.
+- Satu pembayaran maksimal satu periode langganan; konfirmasi ganda tidak memperpanjang dua kali.
+- Data pembayar yang disimpan hanya nama pemilik akun dan catatan singkat. Tidak ada nomor rekening, PIN, atau OTP. Pengguna tidak bisa mengubah dirinya sendiri menjadi Premium.
+- Masa aktif dihitung sejak konfirmasi admin (30 / 365 hari). Tidak ada auto-debit; pengguna memperpanjang sendiri.
 - Saat masa aktif habis, akun otomatis kembali Free; riwayat belajar, XP, beruntun, pencapaian, dan progres tetap tersimpan.
-- Dashboard admin wajib menampilkan: total pengguna Free dan Premium, transaksi berhasil/tertunda/gagal, pendapatan bulanan dan tahunan, riwayat pembayaran, masa aktif Premium pengguna, status webhook dan log transaksi.
-- **Jangan menyebut sistem pembayaran siap produksi** sebelum kredensial produksi, aktivasi metode pembayaran, webhook HTTPS, dan transaksi nyata berhasil diuji. Status saat ini: belum siap produksi.
+- Dashboard admin wajib menampilkan: antrean pembayaran yang menunggu konfirmasi, total pengguna Free dan Premium, transaksi berhasil/tertunda/gagal, pendapatan bulanan dan tahunan, riwayat pembayaran, masa aktif Premium pengguna, dan log keputusan admin.
+- Kode integrasi Xendit disimpan tetapi **nonaktif** (hanya aktif dengan `PAYMENT_PROVIDER=xendit`), agar bisa dipakai lagi kelak tanpa menulis ulang.
+- Sebelum menyebut pembayaran siap produksi: lakukan satu pembayaran nyata kecil ke tiap QR dari minimal dua aplikasi berbeda, lalu konfirmasi lewat dashboard di server produksi.
 
 ### A5. Produk dan teknologi
 - Frontend Next.js + TypeScript + Tailwind. Backend Supabase (PostgreSQL).
@@ -95,6 +98,15 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
 - Belajar offline (Premium): pack di IndexedDB + service worker untuk halaman dan aset.
 
 ### B6. Detail pembayaran
+**QRIS manual (aktif):**
+- QR per paket disimpan di `subscription_plans.qris_payload` (migrasi `0005_manual_qris.sql`) dan disalin ke transaksi saat checkout dibuat, sehingga mengganti QR kelak tidak mengubah apa yang sudah ditunjukkan ke pelajar.
+- Server memeriksa isi QR (`src/lib/qris.ts`): checksum CRC, mata uang 360, negara ID, dan nominal tag 54 harus sama persis dengan harga paket. Bila tidak, checkout ditolak (503) dan QR tidak ditampilkan.
+- Aplikasi menggambar QR dari isi kodenya (bukan dari foto); hasilnya sudah dipindai ulang dan identik dengan QR asli DANA.
+- Status: `PENDING` (checkout dibuka) → `AWAITING_CONFIRMATION` (pelajar melapor) → `SUCCEEDED` (admin konfirmasi) atau `FAILED` dengan `failure_code = REJECTED` (admin tolak). `PENDING` yang tidak dilaporkan 24 jam menjadi `EXPIRED`, tetapi tetap bisa dilaporkan atau dikonfirmasi bila uangnya ternyata masuk. Laporan yang sudah masuk tidak pernah kedaluwarsa sendiri.
+- Satu checkout terbuka per paket per pengguna (dibuka ulang, bukan diduplikasi); maksimal 10 checkout per akun per jam.
+- Keputusan admin dicatat di `payment_webhook_events` dengan `source = 'admin'`.
+
+**Xendit (nonaktif, disimpan):**
 - Xendit Payments API v3, `api-version: 2024-11-11`, Basic auth, `type: PAY`, `capture_method: AUTOMATIC`.
 - Jendela checkout 30 menit; setelah itu request dibatalkan di Xendit dan transaksi ditandai EXPIRED.
 - Pembukaan checkout yang sama dipakai ulang (bukan duplikat); maksimal 10 checkout per akun per jam.

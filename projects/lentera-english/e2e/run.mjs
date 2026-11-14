@@ -43,6 +43,14 @@ const session = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('l
 const seen = (locator, timeout = 10000) => locator.first().waitFor({ timeout }).then(() => true, () => false);
 const button = (page, name) => page.getByRole('button', { name });
 const link = (page, name) => page.getByRole('link', { name });
+/** The admin account of the e2e server (LENTERA_DEV_ADMIN_EMAIL). */
+const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@lentera.test';
+async function adminAccount() {
+  let r = await api('/api/dev-auth', null, { action: 'signin', email: ADMIN_EMAIL, password: PASSWORD });
+  if (r.status !== 200) r = await api('/api/dev-auth', null, { action: 'signup', email: ADMIN_EMAIL, password: PASSWORD, name: 'Admin Uji' });
+  if (r.status !== 200) throw new Error(`admin account unavailable: ${JSON.stringify(r.data)}`);
+  return r.data;
+}
 const api = async (url, token, body) => {
   const res = await fetch(BASE + url, { method: body ? 'POST' : 'GET', headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: body ? JSON.stringify(body) : undefined });
   return { status: res.status, data: await res.json().catch(() => ({})) };
@@ -327,7 +335,7 @@ scenario('placement: tes penempatan berhenti di level yang belum dikuasai', asyn
   await ctx.close();
 });
 
-scenario('payment: daftar, QRIS berhasil mengaktifkan Premium, DANA tertunda', async () => {
+scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif', async () => {
   const ctx = await newContext();
   const page = await open(ctx, '/daftar');
   const email = `bayar${stamp}@lentera.test`;
@@ -342,19 +350,42 @@ scenario('payment: daftar, QRIS berhasil mengaktifkan Premium, DANA tertunda', a
   check('akun Free menerima pelajaran Premium tanpa isi', !!premiumLesson && premiumLesson.teaching.length === 0 && !free.exercises.some((e) => e.lessonId === premiumLesson.id));
   check('klien tidak bisa menjadikan dirinya Premium lewat profil', (await fetch(`${BASE}/api/me`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess.token}` }, body: JSON.stringify({ role: 'admin', premium: true, plan: 'premium_yearly' }) }).then((r) => r.json())).profile.role === 'student' && (await api('/api/me', sess.token)).data.user.entitlement.premium === false);
 
+  // Plans: yearly shows the struck-through price and the discount; QRIS is the only method.
   await page.goto(`${BASE}/app/subscription`);
+  const yearly = page.locator('label', { has: page.getByRole('radio', { name: /Premium Tahunan/ }) });
+  await yearly.waitFor({ timeout: 20000 });
+  check('paket tahunan menampilkan Rp585.000 dicoret, diskon 15%, dan Rp497.250', await yearly.locator('.line-through', { hasText: 'Rp585.000' }).count() === 1 && await yearly.getByText('Diskon 15%').count() === 1 && await yearly.getByText('Rp497.250', { exact: true }).count() === 1);
+  check('hanya QRIS yang ditawarkan sebagai metode pembayaran', await page.getByRole('radio', { name: /DANA|GoPay/ }).count() === 0 && await page.getByText('QRIS', { exact: true }).count() >= 1);
   await page.getByRole('radio', { name: /Premium Tahunan/ }).check();
-  await page.getByRole('radio', { name: /QRIS/ }).check();
-  await button(page, /Bayar Rp585\.000 dengan QRIS/).click();
+  await button(page, /Bayar Rp497\.250 dengan QRIS/).click();
   await page.waitForURL(/\/app\/checkout\?tx=/, { timeout: 30000 });
-  await page.getByAltText('Kode QRIS untuk pembayaran ini').waitFor({ timeout: 30000 });
-  check('halaman checkout menampilkan kode QR dan belum mengaktifkan Premium', (await api('/api/me', sess.token)).data.user.entitlement.premium === false);
+  const txId = new URL(page.url()).searchParams.get('tx');
+  await page.getByAltText(/Kode QRIS pembayaran Premium Tahunan, Rp497\.250/).waitFor({ timeout: 30000 });
+  const tx = (await api(`/api/payments/${txId}`, sess.token)).data.transaction;
+  check('QR yang ditampilkan berisi nominal Rp497.250 dari server', tx.amount_idr === 497250 && tx.checkout.value.includes('5406497250') && tx.method === 'manual_qris');
+  check('gambar QR bisa disimpan untuk dipindai dari galeri', await page.getByRole('link', { name: 'Simpan gambar QR' }).getAttribute('download') === 'qris-lentera-premium_yearly.png');
+  check('membuka halaman pembayaran tidak mengaktifkan Premium', (await api('/api/me', sess.token)).data.user.entitlement.premium === false);
   await page.screenshot({ path: path.join(SHOTS, 'checkout-qris.png'), fullPage: true });
-  await button(page, /Simulasikan pembayaran berhasil/).click();
-  await page.getByRole('heading', { name: 'Pembayaran berhasil' }).waitFor({ timeout: 30000 });
+
+  // The learner reports the payment.
+  await button(page, 'Saya sudah bayar').waitFor();
+  check('tombol lapor nonaktif sebelum nama pembayar diisi', await button(page, 'Saya sudah bayar').isDisabled());
+  await page.getByLabel('Nama pemilik akun yang membayar').fill('Pembayar Uji');
+  await page.getByLabel(/Catatan/).fill('Dibayar pakai DANA');
+  await button(page, 'Saya sudah bayar').click();
+  await page.getByText('Menunggu konfirmasi').first().waitFor({ timeout: 20000 });
+  check('laporan bayar tidak mengaktifkan Premium', (await api('/api/me', sess.token)).data.user.entitlement.premium === false);
+  await page.screenshot({ path: path.join(SHOTS, 'checkout-awaiting.png'), fullPage: true });
+
+  // An admin confirms it; the open checkout page notices by itself.
+  const adminSession = await adminAccount();
+  check('pelajar tidak bisa mengonfirmasi pembayarannya sendiri', (await api('/api/admin', sess.token, { action: 'confirm-payment', id: txId })).status === 403);
+  const confirmed = await api('/api/admin', adminSession.token, { action: 'confirm-payment', id: txId });
+  check('admin mengonfirmasi pembayaran', confirmed.status === 200 && confirmed.data.outcome === 'activated', JSON.stringify(confirmed.data).slice(0, 200));
+  await page.getByRole('heading', { name: 'Pembayaran dikonfirmasi' }).waitFor({ timeout: 30000 });
   const ent = (await api('/api/me', sess.token)).data.user.entitlement;
   const days = (new Date(ent.expires_at).getTime() - Date.now()) / DAY;
-  check('Premium aktif 365 hari setelah webhook', ent.premium === true && ent.plan === 'premium_yearly' && days > 364.9 && days <= 365, JSON.stringify(ent));
+  check('Premium aktif 365 hari setelah konfirmasi admin', ent.premium === true && ent.plan === 'premium_yearly' && days > 364.9 && days <= 365, JSON.stringify(ent));
   const full = (await api('/api/content', sess.token)).data.pack;
   check('server mengirim isi pelajaran Premium setelah aktif', full.lessons.find((l) => l.id === premiumLesson.id).teaching.length > 0 && full.exercises.some((e) => e.lessonId === premiumLesson.id));
   await page.goto(`${BASE}/app`);
@@ -364,20 +395,30 @@ scenario('payment: daftar, QRIS berhasil mengaktifkan Premium, DANA tertunda', a
   await page.locator('main h1, main p').first().waitFor();
   check('pelajaran Premium tidak lagi meminta berlangganan', await page.getByText('Pelajaran Premium', { exact: true }).count() === 0 && await page.getByText(/Pelajaran masih terkunci|Langkah 1 dari 8/).count() === 1);
 
+  // A monthly renewal that the admin rejects.
   await page.goto(`${BASE}/app/subscription`);
   await page.getByText(/Premium aktif sampai/).waitFor({ timeout: 20000 });
   await page.getByRole('radio', { name: /Premium Bulanan/ }).check();
-  await page.getByRole('radio', { name: /DANA/ }).check();
-  await button(page, /Bayar Rp58\.500 dengan DANA/).click();
+  await button(page, /Bayar Rp58\.500 dengan QRIS/).click();
   await page.waitForURL(/\/app\/checkout\?tx=/, { timeout: 30000 });
-  await page.getByRole('heading', { name: /Cara membayar dengan DANA/ }).waitFor({ timeout: 30000 });
-  check('checkout DANA menunggu pembayaran dengan instruksi', await page.getByText(/Menunggu pembayaran/).count() >= 1);
+  const monthlyId = new URL(page.url()).searchParams.get('tx');
+  await page.getByAltText(/Rp58\.500/).waitFor({ timeout: 30000 });
+  await page.getByLabel('Nama pemilik akun yang membayar').fill('Nama Lain');
+  await button(page, 'Saya sudah bayar').click();
+  await page.getByText('Menunggu konfirmasi').first().waitFor({ timeout: 20000 });
+  check('penolakan tanpa alasan ditolak server', (await api('/api/admin', adminSession.token, { action: 'reject-payment', id: monthlyId, reason: ' ' })).status === 400);
+  const rejected = await api('/api/admin', adminSession.token, { action: 'reject-payment', id: monthlyId, reason: 'Tidak ada dana masuk atas nama ini.' });
+  check('admin menolak pembayaran dengan alasan', rejected.status === 200 && rejected.data.outcome === 'rejected');
+  await page.getByRole('heading', { name: 'Pembayaran belum bisa dikonfirmasi' }).waitFor({ timeout: 30000 });
+  check('pelajar melihat alasan penolakan', await page.getByText('Tidak ada dana masuk atas nama ini.').count() === 1);
+  check('Premium tidak diperpanjang oleh pembayaran yang ditolak', Math.abs(new Date((await api('/api/me', sess.token)).data.user.entitlement.expires_at).getTime() - new Date(ent.expires_at).getTime()) < 1000);
+
   await page.goto(`${BASE}/app/subscription`);
   const history = page.locator('table tbody tr');
   await history.first().waitFor({ timeout: 20000 });
-  check('riwayat transaksi memuat keduanya dengan status yang benar', await history.filter({ hasText: 'QRIS' }).filter({ hasText: 'Berhasil' }).count() === 1 && await history.filter({ hasText: 'DANA' }).filter({ hasText: 'Menunggu pembayaran' }).count() === 1);
-  check('Premium tidak diperpanjang oleh transaksi tertunda', Math.abs(new Date((await api('/api/me', sess.token)).data.user.entitlement.expires_at).getTime() - new Date(ent.expires_at).getTime()) < 1000);
-  check('webhook tanpa token ditolak', (await api('/api/webhooks/xendit', null, { event: 'payment.capture', data: {} })).status === 401);
+  check('riwayat transaksi memuat keduanya dengan status yang benar', await history.filter({ hasText: 'Rp497.250' }).filter({ hasText: 'Berhasil' }).count() === 1 && await history.filter({ hasText: 'Rp58.500' }).filter({ hasText: 'Gagal' }).count() === 1);
+  check('endpoint webhook Xendit tidak aktif', (await api('/api/webhooks/xendit', null, { event: 'payment.capture', data: {} })).status === 404);
+  check('simulasi pembayaran Xendit tidak tersedia', (await api(`/api/payments/${txId}`, sess.token, { action: 'simulate' })).status === 403);
   await ctx.close();
 });
 

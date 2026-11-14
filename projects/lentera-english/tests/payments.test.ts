@@ -52,7 +52,7 @@ describe('checkout creation', () => {
   });
   it('gives DANA and GoPay a redirect action and the yearly price', async () => {
     const dana = await createCheckout(deps, user, 'premium_yearly', 'DANA');
-    expect(dana).toMatchObject({ amount_idr: 585000, channel: 'DANA' });
+    expect(dana).toMatchObject({ amount_idr: 497250, channel: 'DANA' });
     expect(dana.checkout).toMatchObject({ kind: 'redirect' });
     expect(dana.checkout!.value).toMatch(/^https:\/\//);
     const gopay = await createCheckout(deps, user, 'premium_monthly', 'GOPAY');
@@ -153,7 +153,7 @@ describe('duplicate and replayed webhooks', () => {
     const pr = mock.requests.get(tx.gateway_payment_request_id!)!;
     pr.payment_id = 'py-concurrent';
     pr.status = 'SUCCEEDED';
-    const body = mock.webhookBody('payment.capture', pr, { captures: [{ capture_id: 'cp-c', capture_amount: 585000 }] });
+    const body = mock.webhookBody('payment.capture', pr, { captures: [{ capture_id: 'cp-c', capture_amount: 497250 }] });
     const out = await Promise.all([1, 2, 3, 4].map(() => handleWebhook(deps, TOKEN, body)));
     expect(out.map((o) => o.body.outcome).sort()).toEqual(['activated', 'duplicate', 'duplicate', 'duplicate']);
     expect(await periods()).toHaveLength(1);
@@ -199,7 +199,7 @@ describe('rejected webhooks', () => {
     const mine = await createCheckout(deps, user, 'premium_yearly', 'QRIS');
     const other = await newUser(db, 'Lain');
     const cheap = await createCheckout(deps, other, 'premium_monthly', 'QRIS');
-    const body = JSON.stringify({ event: 'payment.capture', data: { payment_id: 'py-swap', payment_request_id: cheap.gateway_payment_request_id, reference_id: mine.reference_id, status: 'SUCCEEDED', request_amount: 585000, currency: 'IDR', channel_code: 'QRIS' } });
+    const body = JSON.stringify({ event: 'payment.capture', data: { payment_id: 'py-swap', payment_request_id: cheap.gateway_payment_request_id, reference_id: mine.reference_id, status: 'SUCCEEDED', request_amount: 497250, currency: 'IDR', channel_code: 'QRIS' } });
     expect((await handleWebhook(deps, TOKEN, body)).body.outcome).toBe('request_mismatch');
     expect((await entitlement()).premium).toBe(false);
   });
@@ -308,7 +308,7 @@ describe('account history and admin dashboard', () => {
     const failed = await createCheckout(deps, user, 'premium_yearly', 'DANA');
     await mock.fail(failed.gateway_payment_request_id!);
     const list = await db.rpc<{ transactions: { status: string; amount_idr: number; channel: string; plan_name: string }[]; periods: unknown[]; entitlement: Ent }>('list_payments', { p_user: user });
-    expect(list.transactions.map((t) => [t.status, t.amount_idr, t.channel]).sort()).toEqual([['FAILED', 585000, 'DANA'], ['SUCCEEDED', 58500, 'QRIS']]);
+    expect(list.transactions.map((t) => [t.status, t.amount_idr, t.channel]).sort()).toEqual([['FAILED', 497250, 'DANA'], ['SUCCEEDED', 58500, 'QRIS']]);
     expect(list.periods).toHaveLength(1);
     expect(list.entitlement.premium).toBe(true);
   });
@@ -332,8 +332,8 @@ describe('account history and admin dashboard', () => {
     expect(o.transactions.pending).toBeGreaterThan(0);
     expect(o.transactions.failed).toBeGreaterThan(0);
     expect(o.transactions.needs_review).toBeGreaterThan(0);
-    expect(o.revenue.month - before.revenue.month).toBe(585000);
-    expect(o.revenue.year - before.revenue.year).toBe(585000);
+    expect(o.revenue.month - before.revenue.month).toBe(497250);
+    expect(o.revenue.year - before.revenue.year).toBe(497250);
     expect(o.revenue.by_month.at(-1)!.total).toBe(o.revenue.month);
     expect(o.history.find((h) => h.reference_id === tx.reference_id)?.status).toBe('SUCCEEDED');
     expect(o.subscribers.some((s) => s.user_id === user)).toBe(true);

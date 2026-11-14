@@ -1,6 +1,6 @@
 # PROJECT_STATUS — Lentera English
 
-Terakhir diperbarui: 13 November 2026, setelah sesi ketiga (suite e2e pembelajar, ekspor konten, uji lanjutan dashboard admin).
+Terakhir diperbarui: 14 November 2026, setelah sesi keempat (pembayaran QRIS manual, harga tahunan diskon, persiapan Supabase).
 Branch kerja: `ccr-17d3d5e4-jx43zs` di repo `deptsus/ui-ux-pro-max-skill` (melanjutkan `ccr-33e68053-ob8ny7`).
 Lokasi proyek: `projects/lentera-english/` (lihat bagian "Konteks repo" di bawah).
 
@@ -27,8 +27,9 @@ pengantar, materi, contoh benar/salah, latihan terbimbing, latihan mandiri, PR,
 tes penguasaan, jadwal ulangan.
 
 Model bisnis: Free (Rp0), Premium Bulanan (Rp58.500 / 30 hari), Premium Tahunan
-(Rp585.000 / 365 hari). Pembayaran hanya QRIS, DANA, GoPay lewat Xendit. Tidak ada
-perpanjangan otomatis.
+(Rp585.000 dicoret, diskon 15%, dibayar Rp497.250 / 365 hari). Pembayaran hanya
+lewat QRIS milik pemilik produk; Premium aktif setelah admin mengonfirmasi
+pembayaran. Tidak ada perpanjangan otomatis. Lihat DECISIONS A3, A4, B6.
 
 Nama produk, maskot (Pijar, kunang-kunang), dan desain adalah orisinal.
 
@@ -76,7 +77,18 @@ Repo `ui-ux-pro-max-skill` adalah produk lain (toolkit desain). Aplikasi ini han
 - Sinkronisasi progres: event idempoten, batas XP di server (200 per event, 3000 per hari), snapshot lama tidak menimpa yang baru (diuji).
 - Papan peringkat mingguan dari ledger XP (diuji).
 
-### 2d. Pembayaran Xendit (Teruji: `tests/payments.test.ts`, 30 tes lolos, dengan simulator Xendit)
+### 2d-1. Pembayaran QRIS manual (aktif; Teruji: `tests/manual-payments.test.ts`, 17 tes, dan e2e)
+
+- Dua QR dari pemilik produk (QRIS dinamis DANA, NMID ID1026639132426) tersimpan per paket. Isi kodenya sudah dibaca dari foto: nominal Rp58.500 dan Rp497.250, mata uang rupiah, checksum benar.
+- Aplikasi menggambar QR dari isi kodenya; hasil gambar dipindai ulang dan **identik** dengan QR asli.
+- Server menolak menampilkan QR bila nominal di dalamnya berbeda dari harga paket (diuji).
+- Alur diuji di browser (`e2e/run.mjs` skenario `payment`, `e2e/admin.mjs`): pilih paket tahunan (harga coret + diskon tampil) → QR Rp497.250 + tombol simpan gambar → "Saya sudah bayar" dengan nama pembayar → antrean admin → admin konfirmasi → halaman pelajar berubah sendiri menjadi "Pembayaran dikonfirmasi", Premium 365 hari, isi Premium dikirim server. Penolakan dengan alasan tampil ke pelajar.
+- Diuji di SQL: hanya admin yang bisa konfirmasi/tolak; konfirmasi ganda dan bersamaan hanya memberi satu periode; perpanjangan ditumpuk; checkout tak dilaporkan kedaluwarsa 24 jam tetapi tetap bisa dikonfirmasi; laporan tidak pernah kedaluwarsa sendiri; peran API tidak bisa memanggil fungsi pembayaran.
+- **Belum diuji dengan uang sungguhan.** Sebelum dibuka ke publik: bayar kedua QR dengan nominal sebenarnya dari minimal dua aplikasi berbeda, lalu konfirmasi lewat dashboard di server produksi.
+
+### 2d-2. Pembayaran Xendit (nonaktif, disimpan; Teruji: `tests/payments.test.ts`, 30 tes lolos, dengan simulator Xendit)
+
+Hanya aktif dengan `PAYMENT_PROVIDER=xendit`. Kunci uji Xendit yang tersimpan di environment cloud ditolak Xendit (`401 INVALID_API_KEY`) dan tidak lagi diperlukan.
 
 - Checkout QRIS/DANA/GoPay, harga ditentukan server dari tabel `subscription_plans`.
 - Premium **hanya** aktif lewat webhook terverifikasi (`x-callback-token`) atau lewat status dari API resmi. Halaman redirect tidak mengaktifkan apa pun.
@@ -163,9 +175,9 @@ Total unit test sekarang 79 (74 lama + 5 baru), semua lolos dengan `TZ=UTC npx v
 | `drill` | Latihan perbaikan selesai dan pola dinyatakan teratasi; kesulitan tidak turun selama benar; menyimak (transkrip, sumber audio dinyatakan jujur, sesi selesai); audio Premium tertutup untuk tamu |
 | `conversation` | Percakapan bercabang sampai selesai; respons dinilai tata bahasa dan kewajarannya; nilai tersimpan; skenario Premium tertutup |
 | `placement` | Benar di blok A1, salah di A2: tes berhenti setelah blok A2, penempatan A2, tanpa XP |
-| `payment` | Akun Free menerima pelajaran Premium tanpa isi; PATCH profil tidak bisa menjadikan admin/Premium; QRIS + simulasi bayar → Premium 365 hari, isi Premium dikirim, lencana tampil; DANA tertunda dengan instruksi; riwayat memuat keduanya; transaksi tertunda tidak memperpanjang; webhook tanpa token 401 |
+| `payment` | Akun Free menerima pelajaran Premium tanpa isi; PATCH profil tidak bisa menjadikan admin/Premium; harga tahunan coret + diskon 15%; hanya QRIS; QR berisi Rp497.250 dan bisa disimpan; laporan bayar tidak mengaktifkan Premium; pelajar tidak bisa mengonfirmasi sendiri; konfirmasi admin → Premium 365 hari; penolakan dengan alasan tampil ke pelajar dan tidak memperpanjang; webhook Xendit 404; simulasi Xendit 403 |
 
-Belum tercakup: tes ulang penguasaan (butuh jeda 20 jam dan dua hari berbeda), ujian level, belajar offline, GoPay, pengaturan target harian, dan reset data belajar.
+Belum tercakup: tes ulang penguasaan (butuh jeda 20 jam dan dua hari berbeda), ujian level, belajar offline, pengaturan target harian, dan reset data belajar.
 
 ---
 
@@ -180,8 +192,10 @@ Belum tercakup: tes ulang penguasaan (butuh jeda 20 jam dan dua hari berbeda), u
 - Rekaman audio penutur asli. Tabel `audio_resources` kosong; saat ini audio dibacakan oleh suara bawaan perangkat (`speechSynthesis`) dan UI menyatakannya terang-terangan. Pemutar sudah siap memakai rekaman bila diunggah.
 - 24 pelajaran yang masih "Sedang disusun", serta ujian level B1 sampai C2.
 - Koneksi ke Supabase sungguhan: migrasi belum pernah diterapkan ke proyek Supabase mana pun; jalur Supabase Auth dan PostgREST belum pernah dijalankan.
-- Uji sandbox Xendit sungguhan (butuh kredensial). Poin yang wajib diverifikasi ditandai `VERIFY` di `src/lib/server/xendit.ts`.
-- Deploy/hosting, domain HTTPS untuk webhook, monitoring.
+- Pembayaran nyata ke kedua QR lalu konfirmasi di server produksi (lihat 2d-1).
+- Admin belum bisa mengganti QR dari dashboard; QR baru dipasang lewat migrasi atau SQL (`subscription_plans.qris_payload`).
+- Pemberitahuan ke admin saat ada pembayaran baru dilaporkan (sekarang admin harus membuka dashboard).
+- Deploy/hosting, domain HTTPS, monitoring.
 - Batas paket Free di sisi server (nyawa, 10 ulangan per hari): saat ini hanya ditegakkan di klien. Pembatasan **konten** Premium sudah di server.
 - README khusus proyek.
 
@@ -231,8 +245,8 @@ Sesi ketiga:
 ## 8. Langkah persis berikutnya
 
 1. `cd projects/lentera-english && npm install` (bila `node_modules` belum ada).
-2. Jalankan `npx tsc --noEmit`, `TZ=UTC npx vitest run` (harus 79/79), `npx tsx scripts/check-content.ts`, `npx next build`, lalu kedua suite e2e di bawah.
-3. TODO P0 sisanya butuh kredensial dari pemilik produk: proyek Supabase (terapkan migrasi, uji ulang daftar/sync/papan peringkat di sana) dan sandbox Xendit (titik `VERIFY` di `src/lib/server/xendit.ts`).
+2. Jalankan `npx tsc --noEmit`, `TZ=UTC npx vitest run` (harus 100/100), `npx tsx scripts/check-content.ts`, `npx next build`, lalu kedua suite e2e di bawah.
+3. Supabase: proyek "Lentera english" (ref `vkajprusgayizxhbdwcz`). Lihat bagian Supabase di bawah untuk status migrasi dan kunci yang masih dibutuhkan.
 4. Tanpa kredensial, pekerjaan berikutnya yang paling bernilai: menulis 24 pelajaran yang masih "Sedang disusun", ujian level B1 sampai C2, dan batas paket Free di server (TODO P1).
 
 Menjalankan kedua suite e2e terhadap build produksi (basis data embedded harus masih baru untuk `e2e:admin`, karena skrip memeriksa nomor versi; jalankan `e2e:admin` lebih dulu):
@@ -242,8 +256,8 @@ cd projects/lentera-english
 rm -rf /tmp/lentera-e2e && npx next build
 LENTERA_BACKEND=embedded LENTERA_ALLOW_EMBEDDED=1 LENTERA_DEV_ADMIN_EMAIL=admin@lentera.test \
   LENTERA_DATA_DIR=/tmp/lentera-e2e/pglite npx next start -p 3100 &
-npm run e2e:admin     # 61 pemeriksaan
-npm run e2e           # 64 pemeriksaan; npm run e2e -- lesson exam untuk skenario tertentu
+npm run e2e:admin     # 67 pemeriksaan
+npm run e2e           # 75 pemeriksaan; npm run e2e -- lesson exam untuk skenario tertentu
 ```
 
 Mencadangkan kurikulum dari basis data: `npm run content:export` (konten kerja) atau `npm run content:export -- --published` (versi terbit). Berkas tersimpan di `backups/`. Untuk mode embedded, hentikan server lebih dulu.

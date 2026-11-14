@@ -71,16 +71,19 @@ projects/lentera-english/
 │       │                     recommend, unlock, sessions, placement, gamification, analytics, config
 │       ├── client/           session.ts, store.ts (state offline-first), content.ts (IndexedDB/offline),
 │       │                     api.ts, audio.ts, hooks.ts
-│       ├── server/           db.ts, auth.ts, api.ts, content.ts, payments.ts, xendit.ts, xendit-mock.ts
+│       ├── server/           db.ts, auth.ts, api.ts, content.ts, manual-payments.ts (QRIS, aktif),
+│       │                     payments.ts + xendit.ts + xendit-mock.ts (Xendit, nonaktif)
 │       ├── format.ts         rupiah, dateId, dateTimeId, compactId. Tanpa 'use client', aman untuk server component
+│       ├── qris.ts           Baca dan validasi isi QRIS (TLV, CRC, nominal tag 54)
 │       └── plans.ts          Teks paket untuk tampilan (harga tagihan tetap dari DB)
 ├── supabase/
 │   ├── migrations/0001_schema.sql     Tabel
 │   ├── migrations/0002_security.sql   RLS dan hak akses
 │   ├── migrations/0003_functions.sql  Akun, sync, leaderboard, CMS
-│   ├── migrations/0004_payments.sql   Pembayaran + kunci semua fungsi ke service_role
+│   ├── migrations/0004_payments.sql   Pembayaran Xendit + kunci semua fungsi ke service_role
+│   ├── migrations/0005_manual_qris.sql QRIS manual: QR per paket, harga tahunan diskon, laporan + konfirmasi admin
 │   └── test-shim.sql                  Tiruan auth/roles Supabase. HANYA untuk PGlite. Jangan dijalankan di Supabase.
-├── tests/                    engine.test.ts, db.test.ts, payments.test.ts, admin.test.ts, helpers.ts
+├── tests/                    engine, db, payments (Xendit), manual-payments (QRIS), admin, supabase-keys, helpers
 ├── e2e/lib.mjs               Helper Playwright (menjawab soal apa pun memakai kunci dari pack)
 ├── e2e/run.mjs               Suite e2e pembelajar di layar ponsel (npm run e2e): rute, pelajaran, PR, ulangan, ujian, percakapan, penempatan, pembayaran
 ├── e2e/admin.mjs             Uji ujung ke ujung dashboard admin (npm run e2e:admin, butuh basis data embedded baru)
@@ -214,8 +217,9 @@ Jangan pernah commit nilainya. `.env*` sudah di-ignore.
 | `NEXT_PUBLIC_SUPABASE_URL` | klien | produksi | Supabase Auth di browser |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | klien | produksi | Kunci publik baru (`sb_publishable_...`) untuk Supabase Auth di browser |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | klien | produksi, lama | Alternatif untuk proyek lama (kunci JWT `anon`). Dipakai bila kunci publishable kosong |
-| `XENDIT_SECRET_KEY` | server (rahasia) | untuk pembayaran | Kunci Xendit; prefiks produksi → mode `live`, lainnya → `test` |
-| `XENDIT_WEBHOOK_TOKEN` | server (rahasia) | untuk pembayaran | Token verifikasi webhook dari dashboard Xendit |
+| `PAYMENT_PROVIDER` | server | opsional | Kosong = QRIS manual (bawaan). `xendit` = pakai Xendit (butuh dua variabel di bawah) |
+| `XENDIT_SECRET_KEY` | server (rahasia) | hanya bila `PAYMENT_PROVIDER=xendit` | Kunci Xendit; prefiks produksi → mode `live`, lainnya → `test` |
+| `XENDIT_WEBHOOK_TOKEN` | server (rahasia) | hanya bila `PAYMENT_PROVIDER=xendit` | Token verifikasi webhook dari dashboard Xendit |
 | `XENDIT_CHANNEL_PROPERTIES_JSON` | server | opsional | Override `channel_properties` per kanal; mendukung `{RETURN_URL}`, `{EXPIRES_AT}` |
 | `APP_URL` | server | disarankan | URL publik aplikasi untuk return URL pembayaran |
 | `LENTERA_BACKEND` | server | dev | `embedded` untuk PGlite |

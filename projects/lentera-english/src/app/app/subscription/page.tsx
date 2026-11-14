@@ -10,7 +10,7 @@ import { BENCHMARK_MONTHLY, CHANNELS, FREE_FEATURES, PLANS, PREMIUM_FEATURES, ty
 import { Badge, Button, Card, LinkButton, Notice, PageHeader, cx, dateId, dateTimeId, rupiah } from '@/components/ui';
 
 interface Tx { id: string; reference_id: string; plan_name: string; amount_idr: number; channel: string; status: string; created_at: string; paid_at: string | null }
-const STATUS: Record<string, [string, 'ok' | 'bad' | 'accent' | 'muted']> = { SUCCEEDED: ['Berhasil', 'ok'], PENDING: ['Menunggu pembayaran', 'accent'], FAILED: ['Gagal', 'bad'], EXPIRED: ['Kedaluwarsa', 'muted'], CANCELED: ['Dibatalkan', 'muted'], NEEDS_REVIEW: ['Sedang ditinjau', 'accent'] };
+const STATUS: Record<string, [string, 'ok' | 'bad' | 'accent' | 'muted']> = { SUCCEEDED: ['Berhasil', 'ok'], PENDING: ['Menunggu pembayaran', 'accent'], AWAITING_CONFIRMATION: ['Menunggu konfirmasi', 'accent'], FAILED: ['Gagal', 'bad'], EXPIRED: ['Kedaluwarsa', 'muted'], CANCELED: ['Dibatalkan', 'muted'], NEEDS_REVIEW: ['Sedang ditinjau', 'accent'] };
 const ICON = { QRIS: QrCode, DANA: Wallet, GOPAY: Smartphone };
 
 export default function SubscriptionPage() {
@@ -36,6 +36,7 @@ export default function SubscriptionPage() {
       setBusy(false);
     }
   };
+  const manual = info.payments === 'manual';
   const daysLeft = premium ? Math.ceil((ent.expiresAt! - now) / 86_400_000) : 0;
   const saving = Math.round((1 - PLANS.premium_monthly.price / BENCHMARK_MONTHLY) * 100);
 
@@ -61,7 +62,7 @@ export default function SubscriptionPage() {
         <Card className="border-2 border-brand">
           <div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-extrabold">Premium</h2><Badge tone="accent">±{saving}% di bawah patokan {rupiah(BENCHMARK_MONTHLY)}/bulan</Badge></div>
           <p className="mt-1 text-3xl font-extrabold">{rupiah(PLANS.premium_monthly.price)}<span className="text-base font-bold text-muted"> / bulan</span></p>
-          <p className="text-sm text-muted">atau {rupiah(PLANS.premium_yearly.price)} per tahun (bayar 10 bulan, belajar 12 bulan)</p>
+          <p className="text-sm text-muted">atau <span className="line-through">{rupiah(PLANS.premium_yearly.listPrice)}</span> <span className="font-bold text-ink">{rupiah(PLANS.premium_yearly.price)}</span> per tahun (diskon {PLANS.premium_yearly.discountPct}%)</p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">{PREMIUM_FEATURES.map((f) => <li key={f} className="flex gap-2 text-sm"><Check size={18} className="mt-0.5 shrink-0 text-ok" aria-hidden />{f}</li>)}</ul>
         </Card>
       </div>
@@ -74,12 +75,21 @@ export default function SubscriptionPage() {
             {(Object.values(PLANS)).map((p) => (
               <label key={p.id} className={cx('flex cursor-pointer items-center gap-3 rounded-2xl border-2 p-3', plan === p.id ? 'border-brand bg-brand-soft' : 'border-line')}>
                 <input type="radio" name="plan" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id)} className="h-5 w-5 accent-[var(--brand)]" />
-                <span className="min-w-0 flex-1"><span className="block font-extrabold">{p.name}{p.id === 'premium_yearly' && <Badge tone="ok" className="ml-2">Hemat 2 bulan</Badge>}</span><span className="block text-sm text-muted">{p.note}</span></span>
-                <span className="font-extrabold">{rupiah(p.price)}</span>
+                <span className="min-w-0 flex-1"><span className="block font-extrabold">{p.name}{p.discountPct > 0 && <Badge tone="ok" className="ml-2">Diskon {p.discountPct}%</Badge>}</span><span className="block text-sm text-muted">{p.note}</span></span>
+                <span className="text-right">{p.listPrice && <span className="block text-sm text-muted line-through" aria-label={`Harga normal ${rupiah(p.listPrice)}`}>{rupiah(p.listPrice)}</span>}<span className="block font-extrabold">{rupiah(p.price)}</span></span>
               </label>
             ))}
           </div>
         </fieldset>
+        {manual ? (
+          <div>
+            <p className="mb-2 text-sm font-bold">2. Metode pembayaran</p>
+            <div className="flex items-center gap-3 rounded-2xl border-2 border-brand bg-brand-soft p-3">
+              <QrCode size={22} className="text-brand" aria-hidden />
+              <span><span className="block font-extrabold">QRIS</span><span className="block text-xs text-muted">Bayar dari aplikasi mobile banking atau e-wallet apa pun</span></span>
+            </div>
+          </div>
+        ) : (
         <fieldset>
           <legend className="mb-2 text-sm font-bold">2. Pilih metode pembayaran</legend>
           <div className="grid gap-2 sm:grid-cols-3">
@@ -92,16 +102,19 @@ export default function SubscriptionPage() {
             ); })}
           </div>
         </fieldset>
+        )}
         {info.payments === 'mock' && <Notice tone="accent" title="Mode simulasi lokal">Server ini memakai simulator gerbang pembayaran. Tidak ada uang sungguhan yang berpindah.</Notice>}
         {info.payments === 'test' && <Notice tone="accent" title="Mode uji (sandbox Xendit)">Transaksi di mode ini tidak memindahkan uang sungguhan.</Notice>}
         {info.payments === 'off' && <Notice tone="bad" title="Pembayaran belum aktif">Server ini belum dikonfigurasi dengan gerbang pembayaran.</Notice>}
         {error && <p className="rounded-xl bg-bad-soft px-3 py-2 text-sm font-bold text-bad" role="alert">{error}</p>}
         {session ? (
-          <Button full size="lg" disabled={busy || info.payments === 'off'} onClick={pay}>{busy ? 'Membuat pembayaran...' : `Bayar ${rupiah(PLANS[plan].price)} dengan ${CHANNELS.find((c) => c.id === channel)!.name}`}</Button>
+          <Button full size="lg" disabled={busy || info.payments === 'off'} onClick={pay}>{busy ? 'Membuat pembayaran...' : `Bayar ${rupiah(PLANS[plan].price)} dengan ${manual ? 'QRIS' : CHANNELS.find((c) => c.id === channel)!.name}`}</Button>
         ) : (
           <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface-2 p-3"><p className="min-w-0 flex-1 text-sm">Buat akun dulu supaya Premium terikat ke akunmu, bukan ke satu perangkat.</p><LinkButton href="/daftar" size="sm">Daftar</LinkButton><LinkButton href="/masuk" size="sm" variant="secondary">Masuk</LinkButton></div>
         )}
-        <p className="text-xs text-muted">Pembayaran diproses oleh Xendit. Kami tidak menyimpan data rekening atau e-wallet. Premium aktif otomatis setelah Xendit mengonfirmasi pembayaran ke server kami.</p>
+        <p className="text-xs text-muted">{manual
+          ? 'Setelah membayar, laporkan pembayaranmu di halaman berikutnya. Premium aktif setelah pembayaran kami cocokkan dan konfirmasi. Kami tidak menyimpan data rekening atau e-wallet.'
+          : 'Pembayaran diproses oleh Xendit. Kami tidak menyimpan data rekening atau e-wallet. Premium aktif otomatis setelah Xendit mengonfirmasi pembayaran ke server kami.'}</p>
       </Card>
 
       {session && (

@@ -13,7 +13,7 @@ export interface Session {
 }
 export interface ServerInfo {
   backend: 'supabase' | 'embedded' | 'none';
-  payments: 'live' | 'test' | 'mock' | 'off';
+  payments: 'manual' | 'live' | 'test' | 'mock' | 'off';
 }
 
 const SESSION_KEY = 'lentera.session';

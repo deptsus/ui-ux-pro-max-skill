@@ -29,7 +29,14 @@ export interface Transaction {
   amount_idr: number;
   currency: string;
   channel: Channel;
-  status: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'NEEDS_REVIEW';
+  status: 'PENDING' | 'AWAITING_CONFIRMATION' | 'SUCCEEDED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'NEEDS_REVIEW';
+  /** 'manual_qris' (owner's own QRIS, admin-confirmed) or 'xendit'. */
+  method?: 'manual_qris' | 'xendit';
+  payer_name?: string | null;
+  payer_note?: string | null;
+  claimed_at?: string | null;
+  reviewed_at?: string | null;
+  review_note?: string | null;
   gateway_payment_request_id: string | null;
   gateway_payment_id: string | null;
   checkout: { kind: 'qr' | 'redirect' | 'none'; value: string; deeplink?: string } | null;

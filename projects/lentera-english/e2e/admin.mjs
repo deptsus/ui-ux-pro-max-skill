@@ -69,16 +69,14 @@ const learner = await account(LEARNER, 'Siswa Uji');
 }
 
 // ───────────── 2. Payment data to look at ─────────────
-const paid = await post('/api/payments', { planId: 'premium_yearly', channel: 'QRIS' }, learner.token);
-check('checkout QRIS dibuat', paid.status === 200, JSON.stringify(paid.data));
-const sim = await post(`/api/payments/${paid.data.transaction.id}`, { action: 'simulate' }, learner.token);
-check('simulasi bayar diterima', sim.status === 200, JSON.stringify(sim.data));
-for (let i = 0; i < 20; i++) {
-  if ((await get(`/api/payments/${paid.data.transaction.id}`, learner.token)).transaction?.status === 'SUCCEEDED') break;
-  await new Promise((r) => setTimeout(r, 500));
-}
-const pendingTx = await post('/api/payments', { planId: 'premium_monthly', channel: 'DANA' }, learner.token);
-check('checkout DANA dibuat (tertunda)', pendingTx.status === 200, JSON.stringify(pendingTx.data));
+// Manual QRIS: the learner opens a checkout and reports paying; a second checkout stays unreported.
+const yearly = await post('/api/payments', { planId: 'premium_yearly' }, learner.token);
+check('checkout QRIS tahunan dibuat dengan harga server', yearly.status === 200 && yearly.data.transaction.amount_idr === 497250 && yearly.data.transaction.method === 'manual_qris', JSON.stringify(yearly.data).slice(0, 200));
+const claim = await post(`/api/payments/${yearly.data.transaction.id}`, { action: 'claim', payerName: 'Siswa Uji', note: 'Dibayar pakai DANA' }, learner.token);
+check('pelajar melaporkan pembayaran', claim.status === 200 && claim.data.transaction.status === 'AWAITING_CONFIRMATION', JSON.stringify(claim.data).slice(0, 200));
+const pendingTx = await post('/api/payments', { planId: 'premium_monthly' }, learner.token);
+check('checkout bulanan dibuat tanpa dilaporkan', pendingTx.status === 200 && pendingTx.data.transaction.status === 'PENDING', JSON.stringify(pendingTx.data).slice(0, 200));
+check('laporan saja tidak mengaktifkan Premium', (await get('/api/me', learner.token)).user.entitlement.premium === false);
 
 // ───────────── 3. Payments tab ─────────────
 const adminUser = await account(ADMIN, 'Admin Uji');
@@ -86,19 +84,33 @@ page = await open(adminUser);
 ui = page.locator(PANEL.Pembayaran);
 await page.goto(`${BASE}/admin`);
 await page.getByRole('tab', { name: 'Pembayaran' }).waitFor({ timeout: 30000 });
+await ui.getByRole('heading', { name: 'Menunggu konfirmasi' }).waitFor({ timeout: 30000 });
+const reportedRow = ui.locator('li', { hasText: 'Nama pembayar' }).filter({ hasText: 'Siswa Uji' }).filter({ hasText: 'Rp497.250' });
+check('antrean menampilkan pembayaran yang dilaporkan beserta nama dan catatan', await reportedRow.count() === 1 && await reportedRow.getByText('Dibayar pakai DANA').count() === 1);
+check('antrean memisahkan checkout yang belum dilaporkan', await ui.getByText(/^Belum dilaporkan \(\d+\)$/).count() === 1 && await ui.getByText(/^Sudah dilaporkan pelajar \(1\)$/).count() === 1);
+await page.screenshot({ path: path.join(SHOTS, 'admin-queue.png') });
+await reportedRow.getByRole('button', { name: 'Konfirmasi' }).click();
+check('dialog konfirmasi mengingatkan untuk mencocokkan mutasi', await page.getByText(/Pastikan dana Rp497\.250 atas nama Siswa Uji sudah masuk/).count() === 1);
+await page.getByRole('button', { name: 'Ya, aktifkan Premium' }).click();
+await ui.getByText(/Premium Siswa Uji aktif/).waitFor({ timeout: 20000 });
+const learnerEnt = (await get('/api/me', learner.token)).user.entitlement;
+check('konfirmasi admin mengaktifkan Premium tahunan pelajar', learnerEnt.premium === true && learnerEnt.plan === 'premium_yearly', JSON.stringify(learnerEnt));
 await ui.getByRole('heading', { name: 'Riwayat pembayaran' }).waitFor({ timeout: 30000 });
+await ui.locator('li', { hasText: 'Nama pembayar' }).filter({ hasText: 'Rp497.250' }).waitFor({ state: 'detached', timeout: 20000 }).catch(() => {});
+check('pembayaran yang dikonfirmasi keluar dari antrean', await ui.locator('li', { hasText: 'Nama pembayar' }).filter({ hasText: 'Rp497.250' }).count() === 0);
+
 const overview = (await post('/api/admin', { action: 'payments' }, adminUser.token)).data;
 check('tile total pengguna cocok dengan server', await tile(page, 'Total pengguna terdaftar') === overview.users.total.toLocaleString('id-ID'));
 check('tile Premium aktif cocok dengan server', await tile(page, 'Premium aktif') === String(overview.users.premium) && overview.users.premium >= 1);
-check('tile pendapatan bulan ini cocok dengan server', (await tile(page, 'Bulan ini')).replace(/\D/g, '') === String(overview.revenue.month) && Number(overview.revenue.month) >= 585000, await tile(page, 'Bulan ini'));
+check('tile pendapatan bulan ini cocok dengan server', (await tile(page, 'Bulan ini')).replace(/\D/g, '') === String(overview.revenue.month) && Number(overview.revenue.month) >= 497250, await tile(page, 'Bulan ini'));
 check('tile transaksi berhasil dan tertunda', await tile(page, 'Berhasil') === String(overview.transactions.succeeded) && await tile(page, 'Tertunda') === String(overview.transactions.pending) && overview.transactions.pending >= 1);
 const historyRows = ui.locator('section', { has: page.getByRole('heading', { name: 'Riwayat pembayaran' }) }).locator('tbody tr');
-check('riwayat memuat transaksi QRIS berhasil', await historyRows.filter({ hasText: 'QRIS' }).filter({ hasText: 'Berhasil' }).filter({ hasText: 'Rp585.000' }).count() >= 1);
+check('riwayat memuat transaksi QRIS berhasil dengan nama pembayar dan admin', await historyRows.filter({ hasText: 'QRIS' }).filter({ hasText: 'Berhasil' }).filter({ hasText: 'Rp497.250' }).filter({ hasText: 'a.n. Siswa Uji' }).filter({ hasText: 'oleh Admin Uji' }).count() >= 1);
 await ui.getByLabel('Status').selectOption('PENDING');
 check('filter status menyisakan transaksi tertunda saja', (await historyRows.count()) === overview.transactions.pending && (await historyRows.filter({ hasText: 'Berhasil' }).count()) === 0);
 await ui.getByLabel('Status').selectOption('');
 check('masa aktif Premium menampilkan pelanggan', await ui.locator('section', { has: page.getByRole('heading', { name: 'Masa aktif Premium' }) }).locator('tbody tr', { hasText: 'Siswa Uji' }).filter({ hasText: 'Premium Tahunan' }).count() >= 1);
-check('log webhook mencatat aktivasi', await ui.locator('section', { has: page.getByRole('heading', { name: 'Webhook', exact: true }) }).locator('tbody tr', { hasText: 'Premium diaktifkan' }).count() >= 1);
+check('log pembayaran mencatat keputusan admin', await ui.locator('section', { has: page.getByRole('heading', { name: 'Log pembayaran', exact: true }) }).locator('tbody tr', { hasText: 'Premium diaktifkan' }).filter({ hasText: 'Admin' }).count() >= 1);
 check('grafik pendapatan per bulan tampil', await ui.getByRole('img', { name: /Pendapatan per bulan/ }).count() === 1);
 await ui.getByRole('button', { name: 'Lihat tabel' }).click();
 check('tampilan tabel grafik memuat pendapatan bulan ini', await ui.locator('section', { has: page.getByRole('heading', { name: 'Pendapatan', exact: true }) }).locator('tbody tr').filter({ hasText: /Rp[1-9]/ }).count() >= 1);

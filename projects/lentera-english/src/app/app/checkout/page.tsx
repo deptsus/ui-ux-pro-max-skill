@@ -1,7 +1,8 @@
 'use client';
 // Checkout status page. It only DISPLAYS the state of a transaction: Premium
-// is activated on the server after Xendit confirms the payment by webhook
-// (or through the official status API), never by reaching this page.
+// is activated on the server, by an admin confirming a manual QRIS payment
+// (default) or, with Xendit enabled, by a verified webhook or the official
+// status API. Never by reaching this page.
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import QRCode from 'qrcode';
@@ -10,11 +11,12 @@ import { api } from '@/lib/client/api';
 import { useNow } from '@/lib/client/hooks';
 import { useSession } from '@/lib/client/session';
 import { syncNow } from '@/lib/client/store';
+import { ManualQrisCheckout, type ManualTx } from '@/components/ManualQrisCheckout';
 import { Mascot } from '@/components/Mascot';
 import { Badge, Button, Card, Empty, LinkButton, Notice, dateId, dateTimeId, rupiah } from '@/components/ui';
 
 interface Tx { id: string; reference_id: string; plan_id: string; plan_name: string; duration_days: number; amount_idr: number; currency: string; channel: 'QRIS' | 'DANA' | 'GOPAY'; status: string; checkout: { kind: 'qr' | 'redirect' | 'none'; value: string; deeplink?: string } | null; expires_at: string | null; paid_at: string | null; failure_code: string | null; created_at: string }
-interface Res { transaction: Tx; entitlement: { premium: boolean; expires_at: string | null }; mode: 'live' | 'test' | 'mock' | 'off' }
+interface Res { transaction: Tx; entitlement: { premium: boolean; expires_at: string | null }; mode: 'manual' | 'live' | 'test' | 'mock' | 'off' }
 const NAME = { QRIS: 'QRIS', DANA: 'DANA', GOPAY: 'GoPay' };
 const STEPS: Record<Tx['channel'], string[]> = {
   QRIS: ['Buka aplikasi mobile banking atau e-wallet apa pun yang mendukung QRIS.', 'Pilih menu Scan / Bayar, lalu pindai kode QR di atas.', 'Periksa nama merchant dan nominalnya, lalu konfirmasi pembayaran.', 'Kembali ke halaman ini. Status akan berubah otomatis.'],
@@ -43,11 +45,14 @@ function Checkout() {
   }, [id]);
   useEffect(() => { if (session) void load(); }, [session, load]);
   const status = data?.transaction.status;
+  const manual = data?.mode === 'manual';
   useEffect(() => {
-    if (status !== 'PENDING') return;
-    const t = setInterval(() => void load(), 4000);
+    // Xendit: poll while waiting for the gateway. Manual: poll only after the
+    // learner reported paying, while an admin checks it.
+    if (manual ? status !== 'AWAITING_CONFIRMATION' : status !== 'PENDING') return;
+    const t = setInterval(() => void load(), manual ? 15000 : 4000);
     return () => clearInterval(t);
-  }, [status, load]);
+  }, [status, load, manual]);
   // Once the server reports success, refresh the local entitlement.
   useEffect(() => { if (status === 'SUCCEEDED') void syncNow(); }, [status]);
   const qrValue = data?.transaction.checkout?.kind === 'qr' ? data.transaction.checkout.value : null;
@@ -57,6 +62,15 @@ function Checkout() {
   if (!session) return <Empty title="Masuk untuk melihat transaksi" action={<LinkButton href="/masuk">Masuk</LinkButton>} />;
   if (error && !data) return <Empty title="Transaksi belum bisa dimuat" action={<Button onClick={load}>Coba lagi</Button>}>{error}</Empty>;
   if (!data) return <Card className="mx-auto max-w-xl text-muted"><span role="status">Memuat transaksi...</span></Card>;
+
+  if (data.mode === 'manual') {
+    return (
+      <div className="mx-auto max-w-xl space-y-4">
+        <h1 className="text-2xl font-extrabold">Pembayaran</h1>
+        <ManualQrisCheckout tx={data.transaction as unknown as ManualTx} premiumUntil={data.entitlement.premium ? data.entitlement.expires_at : null} reload={() => void load()} />
+      </div>
+    );
+  }
 
   const tx = data.transaction;
   const left = tx.expires_at ? Math.max(0, Math.floor((new Date(tx.expires_at).getTime() - now) / 1000)) : null;

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui';
 import { input } from './fields';
 
 /** Modal confirmation built on <dialog> (focus trap and Escape come for free). */
-export function Confirm({ open, title, children, confirmLabel, tone = 'danger', typeToConfirm, busy, onConfirm, onCancel }: { open: boolean; title: string; children: ReactNode; confirmLabel: string; tone?: 'danger' | 'primary'; typeToConfirm?: string; busy?: boolean; onConfirm: () => void; onCancel: () => void }) {
+export function Confirm({ open, title, children, confirmLabel, tone = 'danger', typeToConfirm, busy, confirmDisabled, onConfirm, onCancel }: { open: boolean; title: string; children: ReactNode; confirmLabel: string; tone?: 'danger' | 'primary' | 'success'; typeToConfirm?: string; busy?: boolean; confirmDisabled?: boolean; onConfirm: () => void; onCancel: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [typed, setTyped] = useState('');
   useEffect(() => {
@@ -28,7 +28,7 @@ export function Confirm({ open, title, children, confirmLabel, tone = 'danger', 
           )}
           <div className="flex flex-wrap justify-end gap-2">
             <Button variant="secondary" onClick={onCancel} disabled={busy}>Batal</Button>
-            <Button variant={tone} onClick={onConfirm} disabled={busy || (!!typeToConfirm && typed.trim() !== typeToConfirm)}>{busy ? 'Memproses...' : confirmLabel}</Button>
+            <Button variant={tone} onClick={onConfirm} disabled={busy || confirmDisabled || (!!typeToConfirm && typed.trim() !== typeToConfirm)}>{busy ? 'Memproses...' : confirmLabel}</Button>
           </div>
         </div>
       )}

@@ -54,12 +54,20 @@ export function route<A extends unknown[]>(fn: (req: Request, ...args: A) => Pro
   };
 }
 
-export type PaymentMode = 'live' | 'test' | 'mock' | 'off';
+/**
+ * manual : the owner's own QRIS, confirmed by an admin (the default).
+ * live / test / mock : Xendit, only with PAYMENT_PROVIDER=xendit.
+ * off : no database, so nothing can be recorded.
+ */
+export type PaymentMode = 'manual' | 'live' | 'test' | 'mock' | 'off';
 
 export function paymentMode(): PaymentMode {
+  const backend = backendMode();
+  if (backend === 'none') return 'off';
+  if (process.env.PAYMENT_PROVIDER !== 'xendit') return 'manual';
   const key = process.env.XENDIT_SECRET_KEY;
   if (key && process.env.XENDIT_WEBHOOK_TOKEN) return isLiveKey(key) ? 'live' : 'test';
-  return backendMode() === 'embedded' ? 'mock' : 'off';
+  return backend === 'embedded' ? 'mock' : 'off';
 }
 
 const g = globalThis as unknown as { __lenteraMock?: MockXendit };
@@ -67,7 +75,7 @@ const g = globalThis as unknown as { __lenteraMock?: MockXendit };
 export function paymentDeps(db: ServerDb, req: Request): PaymentDeps {
   const mode = paymentMode();
   const appUrl = process.env.APP_URL ?? new URL(req.url).origin;
-  if (mode === 'off') throw new HttpError(503, 'Pembayaran belum diaktifkan di server ini.', 'payments_off');
+  if (mode === 'off' || mode === 'manual') throw new HttpError(503, 'Pembayaran otomatis tidak aktif di server ini.', 'payments_off');
   if (mode === 'mock') {
     // Local simulator: its webhooks go through the very same handler.
     const deps: PaymentDeps = { db, appUrl, xendit: undefined as never };

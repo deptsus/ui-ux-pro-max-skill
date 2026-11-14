@@ -22,7 +22,10 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Backend pembayaran Xendit + simulator + 30 tes.
 - [x] Akun lokal (mode embedded) dan alur daftar/masuk.
 - [ ] Siapkan proyek Supabase: terapkan migrasi `0001`–`0004` (bukan `test-shim.sql`), aktifkan Auth email, set env, buat admin, impor + terbitkan kurikulum. Uji ulang daftar, sync, papan peringkat di sana.
-- [ ] Verifikasi Xendit sandbox dengan kredensial uji: semua titik `VERIFY` di `src/lib/server/xendit.ts`, aktivasi QRIS/DANA/GOPAY, webhook ke URL HTTPS, simulasi + transaksi uji nyata. Sesudahnya baru boleh menyebut pembayaran siap produksi.
+- [x] ~~Verifikasi Xendit sandbox~~ Diganti: pemilik produk memilih QRIS milik sendiri dengan konfirmasi admin (DECISIONS A4). Kode Xendit disimpan nonaktif.
+- [x] Pembayaran QRIS manual: QR per paket, laporan "Saya sudah bayar", antrean konfirmasi/tolak di dashboard admin, harga tahunan diskon 15% (tes SQL + e2e).
+- [ ] Uji pembayaran nyata ke kedua QR dari minimal dua aplikasi berbeda, lalu konfirmasi lewat dashboard di server produksi.
+- [ ] (Lama, hanya bila Xendit dihidupkan lagi) Verifikasi Xendit sandbox dengan kredensial uji: semua titik `VERIFY` di `src/lib/server/xendit.ts`, aktivasi QRIS/DANA/GOPAY, webhook ke URL HTTPS, simulasi + transaksi uji nyata. Sesudahnya baru boleh menyebut pembayaran siap produksi.
 
 ## P1 — Fitur utama
 
@@ -45,8 +48,10 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 
 ## P2 — Fitur tambahan
 
-- [ ] Alur admin untuk transaksi `NEEDS_REVIEW` (periksa, aktifkan manual, atau catat refund).
-- [ ] Rekonsiliasi berkala transaksi `PENDING` (sekarang status hanya dicek ulang saat pengguna membuka halaman checkout; webhook tetap sumber utama).
+- [ ] Ganti QR paket dari dashboard admin (unggah foto atau tempel isi kode; server memvalidasi nominal dan checksum).
+- [ ] Beri tahu admin (mis. email) saat ada pembayaran baru yang dilaporkan.
+- [ ] Alur admin untuk transaksi `NEEDS_REVIEW` (hanya relevan bila Xendit dihidupkan).
+- [ ] Rekonsiliasi berkala transaksi `PENDING` Xendit (hanya relevan bila Xendit dihidupkan).
 - [ ] Pengingat masa aktif Premium hampir habis (saat ini hanya lencana "Segera berakhir" di halaman paket bila ≤ 7 hari).
 - [ ] Unggah audio dari dashboard admin (storage). Saat ini admin hanya bisa mendaftarkan URL berkas yang sudah diunggah.
 - [ ] Editor visual untuk skenario percakapan dan panduan pelafalan di dashboard admin (sekarang kolom JSON).
