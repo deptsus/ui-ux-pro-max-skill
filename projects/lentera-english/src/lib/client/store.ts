@@ -11,9 +11,13 @@ import { currentSession } from './session';
 const GUEST_NAME = 'Pelajar';
 const stateKey = (uid: string) => `lentera.state.${uid}`;
 const entKey = (uid: string) => `lentera.ent.${uid}`;
+const roleKey = (uid: string) => `lentera.role.${uid}`;
+export type Role = 'student' | 'admin';
 
 let state: LearnerState | null = null;
 let ent: Entitlement = FREE;
+/** Only decides what the UI shows (admin shortcuts); every admin action is re-checked on the server. */
+let role: Role = 'student';
 let syncState: 'idle' | 'syncing' | 'offline' | 'error' = 'idle';
 let timer: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Set<() => void>();
@@ -54,7 +58,9 @@ const hasProgress = (s: LearnerState | null) => !!s && (s.xp > 0 || s.profile.pl
 
 function setEntitlement(raw: { premium?: boolean; plan?: string; expires_at?: string | null } | undefined, uid: string) {
   const before = ent.premium;
-  ent = raw?.premium && raw.expires_at ? { premium: true, plan: raw.plan, expiresAt: new Date(raw.expires_at).getTime() } : FREE;
+  ent = raw?.premium && raw.plan === 'admin'
+    ? { premium: true, plan: 'admin' }
+    : raw?.premium && raw.expires_at ? { premium: true, plan: raw.plan, expiresAt: new Date(raw.expires_at).getTime() } : FREE;
   localStorage.setItem(entKey(uid), JSON.stringify(ent));
   if (before !== ent.premium) entListeners.forEach((l) => l(ent.premium));
 }
@@ -66,6 +72,7 @@ export async function loadLearner(): Promise<void> {
   if (!session) {
     state = read('guest') ?? createState('guest', now);
     ent = FREE;
+    role = 'student';
     persist();
     emit();
     return;
@@ -77,13 +84,16 @@ export async function loadLearner(): Promise<void> {
   } catch {
     ent = FREE;
   }
+  role = localStorage.getItem(roleKey(uid)) === 'admin' ? 'admin' : 'student';
   const guest = read('guest');
   let accountName: string | undefined;
   try {
     const { snapshot } = await api<{ snapshot: { state: Partial<LearnerState>; client_updated_at: number } | null }>('/api/sync');
     if (snapshot && (!local || snapshot.client_updated_at > local.updatedAt)) local = hydrate({ ...snapshot.state, outbox: [] }, uid);
-    const me = await api<{ user: { profile?: { display_name?: string }; entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
+    const me = await api<{ user: { profile?: { display_name?: string; role?: string }; entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
     setEntitlement(me.user?.entitlement, uid);
+    role = me.user?.profile?.role === 'admin' ? 'admin' : 'student';
+    localStorage.setItem(roleKey(uid), role);
     accountName = me.user?.profile?.display_name || undefined;
   } catch {
     syncState = 'offline';
@@ -154,6 +164,7 @@ export function resetLearner() {
 const serverState = createState('guest', 0);
 export const useLearner = (): LearnerState => useSyncExternalStore(subscribe, () => state ?? serverState, () => serverState);
 export const useEntitlement = (): Entitlement => useSyncExternalStore(subscribe, () => ent, () => FREE);
+export const useRole = (): Role => useSyncExternalStore(subscribe, () => role, () => 'student' as const);
 export const useSyncStatus = () => useSyncExternalStore(subscribe, () => syncState, () => 'idle' as const);
 export const getLearner = () => state;
 export const getEntitlement = () => ent;

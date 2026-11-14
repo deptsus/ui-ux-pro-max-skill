@@ -1,10 +1,11 @@
 'use client';
 import { useState } from 'react';
-import { Crown, LogOut } from 'lucide-react';
+import { Crown, LogOut, ShieldCheck } from 'lucide-react';
 import { ACHIEVEMENTS, liveStreak, playerLevel } from '@/lib/engine/gamification';
 import { useApp } from '@/lib/client/hooks';
 import { signOut, useServerInfo, useSession } from '@/lib/client/session';
-import { act, syncNow, useSyncStatus } from '@/lib/client/store';
+import { isAdminPlan } from '@/lib/engine/types';
+import { act, syncNow, useRole, useSyncStatus } from '@/lib/client/store';
 import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
 
 const COLORS = ['#4b3fd6', '#f59e0b', '#15803d', '#be123c', '#0e7490', '#7c3aed', '#c2410c', '#0f766e'];
@@ -14,6 +15,7 @@ export default function ProfilePage() {
   const session = useSession();
   const info = useServerInfo();
   const sync = useSyncStatus();
+  const admin = useRole() === 'admin' && !!session;
   const [name, setName] = useState(learner.profile.name);
   const level = playerLevel(learner.xp);
   const done = Object.values(learner.lessons).filter((l) => l.completedAt).length;
@@ -29,7 +31,7 @@ export default function ProfilePage() {
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-2xl font-extrabold">{learner.profile.name}</h2>
           <p className="text-sm text-muted">{session ? session.email : 'Tamu · progres hanya di perangkat ini'} · bergabung {dateId(learner.createdAt)}</p>
-          <div className="mt-2 flex flex-wrap gap-2">{premium ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium sampai {dateId(ent.expiresAt!)}</Badge> : <Badge tone="muted">Paket Free</Badge>}{session && <Badge tone={sync === 'idle' ? 'ok' : sync === 'syncing' ? 'brand' : 'bad'}>{sync === 'idle' ? `Tersinkron${learner.outbox.length ? ` · ${learner.outbox.length} menunggu` : ''}` : sync === 'syncing' ? 'Menyinkronkan...' : sync === 'offline' ? 'Offline · disimpan di perangkat' : 'Sinkronisasi gagal'}</Badge>}</div>
+          <div className="mt-2 flex flex-wrap gap-2">{premium ? <Badge tone="accent"><Crown size={12} aria-hidden />{isAdminPlan(ent) ? 'Premium · Admin' : `Premium sampai ${dateId(ent.expiresAt!)}`}</Badge> : <Badge tone="muted">Paket Free</Badge>}{session && <Badge tone={sync === 'idle' ? 'ok' : sync === 'syncing' ? 'brand' : 'bad'}>{sync === 'idle' ? `Tersinkron${learner.outbox.length ? ` · ${learner.outbox.length} menunggu` : ''}` : sync === 'syncing' ? 'Menyinkronkan...' : sync === 'offline' ? 'Offline · disimpan di perangkat' : 'Sinkronisasi gagal'}</Badge>}</div>
         </div>
       </Card>
 
@@ -47,6 +49,9 @@ export default function ProfilePage() {
         <Button disabled={!name.trim() || name.trim() === learner.profile.name} onClick={() => { act((d) => { d.profile.name = name.trim().slice(0, 40); }); void syncNow(); }}>Simpan</Button>
       </Card>
 
+      {admin && (
+        <Card className="flex flex-wrap items-center justify-between gap-3 border-2 border-ink"><div className="flex items-center gap-3"><ShieldCheck size={28} className="shrink-0" aria-hidden /><div><p className="font-extrabold">Kamu admin</p><p className="text-sm text-muted">Konfirmasi pembayaran, kelola materi, dan atur notifikasi HP. Semua fitur Premium aktif gratis untuk akun admin.</p></div></div><LinkButton href="/admin">Dashboard admin</LinkButton></Card>
+      )}
       {session ? (
         <Card className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-extrabold">Akun</p><p className="text-sm text-muted">{session.email}</p></div><Button variant="secondary" onClick={() => void syncNow().then(signOut)}><LogOut size={16} aria-hidden />Keluar</Button></Card>
       ) : info.backend === 'none' ? (

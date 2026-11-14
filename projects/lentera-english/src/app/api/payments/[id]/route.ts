@@ -1,5 +1,6 @@
 import { HttpError, json, paymentDeps, paymentMode, readJson, requireUser, route } from '@/lib/server/api';
-import { claimManualPayment, getManualPayment } from '@/lib/server/manual-payments';
+import { claimManualPayment, claimNotification, getManualPayment } from '@/lib/server/manual-payments';
+import { notifyAdmins } from '@/lib/server/push';
 import { refreshPayment, simulateCheckout } from '@/lib/server/payments';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,12 @@ export const POST = route(async (req: Request, ctx: Ctx) => {
   const body = await readJson<{ action?: string; payerName?: string; note?: string }>(req, 2000);
   const mode = paymentMode();
   if (body.action === 'claim' && mode === 'manual') {
-    return json({ transaction: await claimManualPayment(db, userId, id, String(body.payerName ?? ''), String(body.note ?? '')) });
+    const transaction = await claimManualPayment(db, userId, id, String(body.payerName ?? ''), String(body.note ?? ''));
+    // Tell the admins' phones. Awaited (serverless functions stop after the
+    // response) but bounded, and notifyAdmins never throws.
+    const message = claimNotification(transaction);
+    if (message) await notifyAdmins(db, message, { origin: new URL(req.url).origin, timeoutMs: 4000 });
+    return json({ transaction });
   }
   if (body.action !== 'simulate' || !['test', 'mock'].includes(mode)) throw new HttpError(403, 'Tindakan tidak tersedia.');
   return json(await simulateCheckout(paymentDeps(db, req), userId, id));

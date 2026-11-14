@@ -18,7 +18,12 @@ export function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => { void initSession().then(() => setReady(true)); }, []);
-  useEffect(() => { if (ready && session) router.replace('/app'); }, [ready, session, router]);
+  useEffect(() => {
+    if (!ready || !session) return;
+    // ?next=/admin brings an admin straight back to the dashboard. Only local paths.
+    const next = new URLSearchParams(window.location.search).get('next') ?? '';
+    router.replace(/^\/(?!\/)[\w\-/?=&]*$/.test(next) ? next : '/app');
+  }, [ready, session, router]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

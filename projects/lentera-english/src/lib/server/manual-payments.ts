@@ -1,9 +1,12 @@
 // Manual QRIS payments: the learner pays the owner's own QRIS and reports it;
 // an admin confirms the payment, which is the only thing that grants Premium
 // (admin_confirm_payment in 0005_manual_qris.sql).
+import { rupiah } from '@/lib/format';
+import { PLANS } from '@/lib/plans';
 import { qrisProblems } from '@/lib/qris';
 import { DbError, type ServerDb } from './db';
 import { PaymentError, type Transaction } from './payments';
+import type { PushMessage } from './push';
 
 const MESSAGES: Record<string, [number, string]> = {
   invalid_plan: [400, 'Paket tidak tersedia.'],
@@ -40,6 +43,23 @@ export async function getManualPayment(db: ServerDb, userId: string, txId: strin
   const tx = await db.rpc<Transaction | null>('get_payment', { p_user: userId, p_tx: txId });
   if (!tx) throw new PaymentError(404, 'payment_not_found', MESSAGES.payment_not_found[1]);
   return tx;
+}
+
+/**
+ * The admin notification for a learner's "Saya sudah bayar", or null when the
+ * report was only re-sent (e.g. the payer name corrected): the SQL keeps the
+ * first claimed_at and sets updated_at on every claim, so they are equal only
+ * the first time.
+ */
+export function claimNotification(tx: Transaction & { claimed_at?: string | null; updated_at?: string | null }): PushMessage | null {
+  if (tx.status !== 'AWAITING_CONFIRMATION' || !tx.claimed_at || tx.claimed_at !== tx.updated_at) return null;
+  const plan = PLANS[tx.plan_id as keyof typeof PLANS]?.name ?? tx.plan_id;
+  return {
+    title: 'Pembayaran baru menunggu konfirmasi',
+    body: `${plan} · ${rupiah(tx.amount_idr)}${tx.payer_name ? ` · dari ${tx.payer_name}` : ''}. Cocokkan dengan mutasi QRIS, lalu konfirmasi.`,
+    url: '/admin',
+    tag: `payment-${tx.id}`,
+  };
 }
 
 export function claimManualPayment(db: ServerDb, userId: string, txId: string, payerName: string, note: string): Promise<Transaction> {

@@ -37,6 +37,9 @@ export const POST = route(async (req) => {
       return json(await db.rpc('import_content', { p_actor: userId, p_rows: packToRows(buildPack()) }));
     case 'payments':
       return json(await db.rpc('admin_payment_overview', { p_actor: userId }));
+    // Cheap number for the admin badge inside the learner app.
+    case 'pending-count':
+      return json({ pending: await db.rpc<number>('admin_pending_count', { p_actor: userId }) });
     // Manual QRIS: confirming is what grants Premium; the SQL re-checks the admin role.
     case 'confirm-payment':
       if (!isUuid(b.id)) throw new HttpError(400, 'Transaksi tidak valid.');

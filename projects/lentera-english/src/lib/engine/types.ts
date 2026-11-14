@@ -106,13 +106,17 @@ export interface LearnerState {
 
 export interface Entitlement {
   premium: boolean;
+  /** 'admin' = free Premium for admins, with no end date (see 0007 migration). */
   plan?: string;
-  /** Epoch ms when premium ends. */
+  /** Epoch ms when premium ends. Absent for plan 'admin'. */
   expiresAt?: number;
 }
 
 export const FREE: Entitlement = { premium: false };
 
+/** Admin Premium has no end date; it ends when the server stops reporting it. */
+export const isAdminPlan = (e: Entitlement | undefined): boolean => !!e && e.premium && e.plan === 'admin';
+
 /** Premium is always time-checked, so an expired period is Free offline too. */
 export const isPremium = (e: Entitlement | undefined, now: number): boolean =>
-  !!e && e.premium && !!e.expiresAt && e.expiresAt > now;
+  !!e && e.premium && (isAdminPlan(e) || (!!e.expiresAt && e.expiresAt > now));

@@ -2,7 +2,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Check, Crown, QrCode, Smartphone, Wallet } from 'lucide-react';
+import { Check, Crown, QrCode, ShieldCheck, Smartphone, Wallet } from 'lucide-react';
+import { isAdminPlan } from '@/lib/engine/types';
 import { api } from '@/lib/client/api';
 import { useApp } from '@/lib/client/hooks';
 import { useServerInfo, useSession } from '@/lib/client/session';
@@ -37,13 +38,20 @@ export default function SubscriptionPage() {
     }
   };
   const manual = info.payments === 'manual';
-  const daysLeft = premium ? Math.ceil((ent.expiresAt! - now) / 86_400_000) : 0;
+  const adminPlan = isAdminPlan(ent);
+  const daysLeft = premium && !adminPlan ? Math.ceil((ent.expiresAt! - now) / 86_400_000) : 0;
   const saving = Math.round((1 - PLANS.premium_monthly.price / BENCHMARK_MONTHLY) * 100);
 
   return (
     <div className="space-y-5">
       <PageHeader title="Paket Belajar" subtitle="Harga tetap, tanpa perpanjangan otomatis, tanpa biaya tersembunyi." />
-      {premium ? (
+      {adminPlan ? (
+        <Card className="flex flex-wrap items-center gap-3 border-2 border-accent">
+          <ShieldCheck className="text-accent" size={28} aria-hidden />
+          <div className="min-w-0 flex-1"><p className="text-lg font-extrabold">Premium aktif gratis untuk admin</p><p className="text-sm text-muted">Tanpa batas waktu, selama akun ini berperan admin. Tidak tercatat sebagai pembayaran atau pelanggan.</p></div>
+          <LinkButton href="/admin" variant="secondary" size="sm">Dashboard admin</LinkButton>
+        </Card>
+      ) : premium ? (
         <Card className="flex flex-wrap items-center gap-3 border-2 border-accent">
           <Crown className="text-accent" size={28} aria-hidden />
           <div className="min-w-0 flex-1"><p className="text-lg font-extrabold">Premium aktif sampai {dateId(ent.expiresAt!)}</p><p className="text-sm text-muted">{daysLeft} hari lagi. Tidak ada tagihan otomatis: perpanjang sendiri kapan pun. Perpanjangan lebih awal ditambahkan setelah masa aktif sekarang berakhir.</p></div>

@@ -100,6 +100,7 @@ const translate = (m: string) => AUTH_MESSAGES.find(([re]) => re.test(m))?.[1] ?
 
 /** Returns "confirm" when the account needs e-mail confirmation first. */
 export async function signUp(email: string, password: string, name: string): Promise<'ok' | 'confirm'> {
+  await initSession();
   if (info.backend === 'none') throw new Error('Pendaftaran akun belum tersedia di server ini. Kamu tetap bisa belajar sebagai tamu.');
   if (password.length < 8) throw new Error('Kata sandi minimal 8 karakter.');
   if (info.backend === 'embedded') {
@@ -117,6 +118,8 @@ export async function signUp(email: string, password: string, name: string): Pro
 }
 
 export async function signIn(email: string, password: string): Promise<void> {
+  // A fast submit can come before the server info has loaded.
+  await initSession();
   if (info.backend === 'none') throw new Error('Login akun belum tersedia di server ini. Kamu tetap bisa belajar sebagai tamu.');
   if (info.backend === 'embedded') {
     session = await devAuth('signin', email, password);

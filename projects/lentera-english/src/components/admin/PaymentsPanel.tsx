@@ -55,9 +55,9 @@ function Tile({ label, value, note, icon }: { label: string; value: string; note
   );
 }
 
-function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+function Section({ id, title, subtitle, children }: { id?: string; title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <section>
+    <section id={id} className="scroll-mt-28">
       <h2 className="text-lg font-extrabold">{title}</h2>
       {subtitle && <p className="text-sm text-muted">{subtitle}</p>}
       <div className="mt-3">{children}</div>
@@ -118,7 +118,7 @@ function ConfirmationQueue({ queue, reload }: { queue: QueueItem[]; reload: () =
     </li>
   );
   return (
-    <Section title="Menunggu konfirmasi" subtitle="Cocokkan dengan mutasi di aplikasi merchant QRIS (DANA Bisnis) sebelum mengonfirmasi. Konfirmasi langsung mengaktifkan Premium.">
+    <Section id="antrean-konfirmasi" title="Menunggu konfirmasi" subtitle="Cocokkan dengan mutasi di aplikasi merchant QRIS (DANA Bisnis) sebelum mengonfirmasi. Konfirmasi langsung mengaktifkan Premium.">
       {done && <Notice tone="ok" title="Tersimpan">{done}</Notice>}
       <Card className="mt-3">
         {queue.length === 0 ? <p className="text-sm text-muted">Tidak ada pembayaran yang menunggu.</p> : (

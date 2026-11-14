@@ -81,8 +81,9 @@ export async function setOffline(on: boolean, onProgress?: (msg: string) => void
     localStorage.removeItem(OFFLINE_FLAG);
     await idbSet('pack', null);
     if ('caches' in window) await caches.delete('lentera-pages');
+    // Only the offline worker: the admin notification worker (/admin-sw.js) stays.
     const regs = (await navigator.serviceWorker?.getRegistrations?.()) ?? [];
-    await Promise.all(regs.map((r) => r.unregister()));
+    await Promise.all(regs.filter((r) => [r.active, r.waiting, r.installing].some((w) => w?.scriptURL.endsWith('/sw.js'))).map((r) => r.unregister()));
     emit();
     return;
   }

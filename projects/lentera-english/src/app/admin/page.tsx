@@ -3,15 +3,16 @@
 // or hides UI; the real gate is the server, which checks the admin role inside
 // every database function behind POST /api/admin.
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
-import { BookOpen, LogOut, Send, ShieldCheck, Wallet } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { BellRing, BookOpen, LogOut, Send, ShieldCheck, Wallet, X } from 'lucide-react';
 import { admin } from '@/components/admin/api';
 import { CmsPanel, type CmsTarget } from '@/components/admin/CmsPanel';
+import { NotifyPanel } from '@/components/admin/NotifyPanel';
 import { PaymentsPanel, type Overview } from '@/components/admin/PaymentsPanel';
 import { PublishPanel } from '@/components/admin/PublishPanel';
 import type { Data } from '@/components/admin/schema';
 import { Logo, Mascot } from '@/components/Mascot';
-import { Badge, Button, Card, LinkButton, Notice, cx } from '@/components/ui';
+import { Badge, Button, Card, LinkButton, Notice, cx, rupiah } from '@/components/ui';
 import { api } from '@/lib/client/api';
 import { initSession, signOut, useServerInfo, useSession } from '@/lib/client/session';
 
@@ -27,7 +28,7 @@ function Gatekeeper({ gate, email, onRetry }: { gate: Exclude<Gate, 'admin'>; em
   const body = {
     loading: <p className="font-bold text-muted" role="status">Memeriksa akses...</p>,
     'no-backend': <><h1 className="text-2xl font-extrabold">Dashboard admin belum tersedia</h1><p className="text-muted">Server ini berjalan tanpa basis data, jadi tidak ada akun admin maupun konten yang bisa dikelola.</p><LinkButton href="/" variant="secondary">Kembali ke beranda</LinkButton></>,
-    'signed-out': <><h1 className="text-2xl font-extrabold">Masuk sebagai admin</h1><p className="text-muted">Dashboard ini hanya untuk akun dengan peran admin. Setelah masuk, buka kembali halaman ini.</p><LinkButton href="/masuk">Masuk</LinkButton></>,
+    'signed-out': <><h1 className="text-2xl font-extrabold">Masuk sebagai admin</h1><p className="text-muted">Dashboard ini hanya untuk akun dengan peran admin. Setelah masuk, kamu langsung kembali ke sini.</p><LinkButton href="/masuk?next=/admin">Masuk</LinkButton></>,
     forbidden: <><h1 className="text-2xl font-extrabold">Akses ditolak</h1><p className="text-muted">Akun {email} tidak memiliki peran admin. Bila seharusnya punya, minta pemilik produk mengubah peranmu di basis data.</p><div className="flex flex-wrap justify-center gap-2"><LinkButton href="/app">Buka aplikasi belajar</LinkButton><Button variant="secondary" onClick={() => void signOut()}>Keluar</Button></div></>,
     error: <><h1 className="text-2xl font-extrabold">Akses belum bisa diperiksa</h1><p className="text-muted">Server tidak menjawab. Periksa koneksimu, lalu coba lagi.</p><Button onClick={onRetry}>Coba lagi</Button></>,
   }[gate];
@@ -52,6 +53,9 @@ export default function AdminPage() {
   const [overviewError, setOverviewError] = useState<string | null>(null);
   const [overviewLoading, setOverviewLoading] = useState(false);
   const [target, setTarget] = useState<CmsTarget | null>(null);
+  /** In-page alert for payment reports that arrived while the dashboard was open. */
+  const [fresh, setFresh] = useState<string | null>(null);
+  const seen = useRef<Set<string> | null>(null);
 
   // Decide what to show. A non-admin never triggers an admin data request.
   useEffect(() => {
@@ -80,22 +84,41 @@ export default function AdminPage() {
       setContentError((e as Error).message);
     }
   }, []);
-  const loadOverview = useCallback(async () => {
-    setOverviewLoading(true);
+  const loadOverview = useCallback(async (quiet = false) => {
+    if (!quiet) setOverviewLoading(true);
     try {
-      setOverview(await admin<Overview>('payments'));
+      const next = await admin<Overview>('payments');
+      const waiting = next.queue.filter((q) => q.status === 'AWAITING_CONFIRMATION');
+      if (seen.current) {
+        const added = waiting.filter((q) => !seen.current!.has(q.id));
+        if (added.length === 1) setFresh(`Pembayaran baru: ${added[0].payer_name ?? added[0].user} · ${rupiah(added[0].amount_idr)}. Cocokkan dengan mutasi QRIS, lalu konfirmasi.`);
+        else if (added.length > 1) setFresh(`${added.length} pembayaran baru menunggu konfirmasi.`);
+      }
+      seen.current = new Set(waiting.map((q) => q.id));
+      setOverview(next);
       setOverviewAt(Date.now());
       setOverviewError(null);
     } catch (e) {
-      setOverviewError((e as Error).message);
+      if (!quiet) setOverviewError((e as Error).message);
     }
-    setOverviewLoading(false);
+    if (!quiet) setOverviewLoading(false);
   }, []);
   useEffect(() => {
     if (gate !== 'admin') return;
     void loadOverview();
     void loadContent();
   }, [gate, loadOverview, loadContent]);
+  // Keep payments fresh while the dashboard is open and visible.
+  useEffect(() => {
+    if (gate !== 'admin') return;
+    const tick = () => { if (document.visibilityState === 'visible') void loadOverview(true); };
+    const t = setInterval(tick, 20_000);
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [gate, loadOverview]);
 
   if (gate !== 'admin') return <Gatekeeper gate={gate} email={session?.email} onRetry={() => setAttempt((n) => n + 1)} />;
 
@@ -131,7 +154,16 @@ export default function AdminPage() {
       {/* Panels stay mounted so an unsaved form survives a tab switch. */}
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-6">
         <h1 className="sr-only">Dashboard admin Lentera English</h1>
+        {fresh && (
+          <div role="status" className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-bad bg-bad-soft p-3 text-sm">
+            <BellRing size={20} className="shrink-0 text-bad" aria-hidden />
+            <p className="flex-1 font-bold">{fresh}</p>
+            <Button size="sm" onClick={() => { setTab('payments'); setFresh(null); document.getElementById('antrean-konfirmasi')?.scrollIntoView({ behavior: 'smooth' }); }}>Lihat</Button>
+            <button type="button" onClick={() => setFresh(null)} className="text-muted" aria-label="Tutup pemberitahuan"><X size={18} aria-hidden /></button>
+          </div>
+        )}
         <div role="tabpanel" id="panel-payments" aria-labelledby="tab-payments" hidden={tab !== 'payments'}>
+          <div className="mb-5"><NotifyPanel /></div>
           <PaymentsPanel data={overview} loadedAt={overviewAt} loading={overviewLoading} error={overviewError} reload={() => void loadOverview()} payments={info.payments} />
         </div>
         <div role="tabpanel" id="panel-content" aria-labelledby="tab-content" hidden={tab !== 'content'}>
