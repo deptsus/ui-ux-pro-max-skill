@@ -63,7 +63,9 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit }: Props) {
   const [text, setText] = useState('');
   const [picked, setPicked] = useState<number[]>([]);
   const [wordIndex, setWordIndex] = useState<number | null>(null);
-  const [matchState, setMatchState] = useState<{ left: number | null; done: number[]; mistakes: number; flash: number | null }>({ left: null, done: [], mistakes: 0, flash: null });
+  // Left and right are tracked separately: two answers can share the same text
+  // ("I → was", "It → was"), and either of them is right for both.
+  const [matchState, setMatchState] = useState<{ left: number | null; doneL: number[]; doneR: number[]; mistakes: number; flash: number | null }>({ left: null, doneL: [], doneR: [], mistakes: 0, flash: null });
 
   // Options keep their authored order for true/false, otherwise shuffle per attempt.
   const optionOrder = useMemo(() => {
@@ -82,7 +84,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit }: Props) {
     setText('');
     setPicked([]);
     setWordIndex(null);
-    setMatchState({ left: null, done: [], mistakes: 0, flash: null });
+    setMatchState({ left: null, doneL: [], doneR: [], mistakes: 0, flash: null });
     onChange(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ex.id, seed]);
@@ -199,25 +201,25 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             {ex.pairs!.map(([l], i) => (
-              <button key={i} type="button" disabled={locked || matchState.done.includes(i)} onClick={() => setMatchState((m) => ({ ...m, left: i, flash: null }))}
-                className={cx('en w-full rounded-2xl border-2 border-b-4 px-3 py-3 text-left font-bold transition', matchState.done.includes(i) ? 'border-ok bg-ok-soft opacity-70' : matchState.left === i ? 'border-brand bg-brand-soft' : 'border-line bg-surface')}>{l}</button>
+              <button key={i} type="button" disabled={locked || matchState.doneL.includes(i)} onClick={() => setMatchState((m) => ({ ...m, left: i, flash: null }))}
+                className={cx('en w-full rounded-2xl border-2 border-b-4 px-3 py-3 text-left font-bold transition', matchState.doneL.includes(i) ? 'border-ok bg-ok-soft opacity-70' : matchState.left === i ? 'border-brand bg-brand-soft' : 'border-line bg-surface')}>{l}</button>
             ))}
           </div>
           <div className="space-y-2">
             {rights.map((ri) => (
-              <button key={ri} type="button" disabled={locked || matchState.done.includes(ri) || matchState.left === null}
+              <button key={ri} type="button" disabled={locked || matchState.doneR.includes(ri) || matchState.left === null}
                 onClick={() => {
                   const m = matchState;
                   if (m.left === null) return;
-                  if (m.left === ri) {
-                    const done = [...m.done, ri];
-                    setMatchState({ ...m, left: null, done, flash: null });
-                    if (done.length === ex.pairs!.length) onChange({ mistakes: m.mistakes });
+                  if (ex.pairs![ri][1].trim() === ex.pairs![m.left][1].trim()) {
+                    const doneL = [...m.doneL, m.left];
+                    setMatchState({ ...m, left: null, doneL, doneR: [...m.doneR, ri], flash: null });
+                    if (doneL.length === ex.pairs!.length) onChange({ mistakes: m.mistakes });
                   } else {
                     setMatchState({ ...m, left: null, mistakes: m.mistakes + 1, flash: ri });
                   }
                 }}
-                className={cx('w-full rounded-2xl border-2 border-b-4 px-3 py-3 text-left font-bold transition', matchState.done.includes(ri) ? 'border-ok bg-ok-soft opacity-70' : matchState.flash === ri ? 'border-bad bg-bad-soft' : 'border-line bg-surface')}>{ex.pairs![ri][1]}</button>
+                className={cx('w-full rounded-2xl border-2 border-b-4 px-3 py-3 text-left font-bold transition', matchState.doneR.includes(ri) ? 'border-ok bg-ok-soft opacity-70' : matchState.flash === ri ? 'border-bad bg-bad-soft' : 'border-line bg-surface')}>{ex.pairs![ri][1]}</button>
             ))}
           </div>
           <p className="col-span-2 text-sm text-muted">Ketuk satu kata di kiri, lalu pasangannya di kanan.{matchState.mistakes > 0 && ` Salah pasang: ${matchState.mistakes}.`}</p>

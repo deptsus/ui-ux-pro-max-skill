@@ -5,13 +5,15 @@ import { stamp, type Built, type Draft } from './dsl';
 import { greetings, toBe, toBeNegQ } from './a1-1';
 import { articles, chapter1Homework, demonstratives, unit2Extras } from './a1-2';
 import { doDoes, simplePresent, thirdPersonDrills } from './a1-3';
+import { canLesson, possessivesLesson, prepTimeLesson, thereIsLesson, timeLesson } from './a1-4';
 import { pastBe, pastIrregular, pastRegular, wasWereDrills } from './a2';
+import { comparativesLesson, futureLesson, presentContinuous } from './a2-2';
 import { inversion, passive, presentPerfect, subjunctive } from './upper';
 import { vocabulary } from './vocabulary';
 import { scenarios } from './conversations';
 import { listening, phonemes, placement } from './listening';
 
-export const CONTENT_VERSION = '2026.11.1';
+export const CONTENT_VERSION = '2026.11.2';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -32,16 +34,16 @@ const syllabus: ChapterSpec[] = [
   ] },
   { id: 'a1-c2', level: 'A1', title: 'Kegiatan Sehari-hari', description: 'Menceritakan rutinitas dengan simple present.', premium: false, units: [
     { id: 'a1-c2-u1', title: 'Simple Present', description: 'Kebiasaan, akhiran -s, dan do/does.', lessons: [simplePresent, doDoes] },
-    { id: 'a1-c2-u2', title: 'Waktu dan Jadwal', lessons: [], planned: ['Angka, Jam, dan Hari', 'Preposisi Waktu: in, on, at'] },
+    { id: 'a1-c2-u2', title: 'Waktu dan Jadwal', description: 'Angka, jam, hari, dan at/on/in.', lessons: [timeLesson, prepTimeLesson] },
   ] },
   { id: 'a1-c3', level: 'A1', title: 'Rumah dan Keluarga', description: 'Menjelaskan rumah, keluarga, dan kemampuan.', premium: true, units: [
-    { id: 'a1-c3-u1', title: 'Rumah dan Kepemilikan', lessons: [], planned: ['There is / There are', 'Possessive: my, your, his, her', 'Can dan Can\'t'] },
+    { id: 'a1-c3-u1', title: 'Rumah dan Kepemilikan', description: 'There is/are, kata kepemilikan, dan can.', lessons: [thereIsLesson, possessivesLesson, canLesson] },
   ] },
   { id: 'a2-c1', level: 'A2', title: 'Bercerita tentang Masa Lalu', description: 'Simple past: was/were, kata kerja beraturan dan tak beraturan.', premium: true, units: [
     { id: 'a2-c1-u1', title: 'Simple Past', description: 'Keadaan dan kegiatan di masa lalu.', lessons: [pastBe, pastRegular, pastIrregular] },
   ] },
   { id: 'a2-c2', level: 'A2', title: 'Rencana dan Perbandingan', description: 'Membicarakan rencana dan membandingkan.', premium: true, units: [
-    { id: 'a2-c2-u1', title: 'Masa Depan dan Perbandingan', lessons: [], planned: ['Going to dan Will', 'Present Continuous', 'Comparative dan Superlative'] },
+    { id: 'a2-c2-u1', title: 'Sekarang, Rencana, dan Perbandingan', description: 'Present continuous, going to/will, dan perbandingan.', lessons: [presentContinuous, futureLesson, comparativesLesson] },
   ] },
   { id: 'b1-c1', level: 'B1', title: 'Pengalaman dan Hasil', description: 'Menghubungkan masa lalu dengan masa kini.', premium: true, units: [
     { id: 'b1-c1-u1', title: 'Present Perfect', lessons: [presentPerfect], planned: ['Present Perfect Continuous'] },
@@ -77,9 +79,17 @@ const topics: Topic[] = [
   { id: 'a1.demonstratives', kind: 'grammar', level: 'A1', title: 'This, that, these, those', summary: 'Dekat/jauh dan tunggal/jamak.', lessonId: 'a1-demonstratives' },
   { id: 'a1.simple-present', kind: 'grammar', level: 'A1', title: 'Simple present', summary: 'Kebiasaan dan fakta; -s untuk he/she/it.', lessonId: 'a1-simple-present' },
   { id: 'a1.do-does', kind: 'grammar', level: 'A1', title: 'Do dan does', summary: "Negatif dan pertanyaan: don't/doesn't + bentuk dasar.", lessonId: 'a1-do-does' },
+  { id: 'a1.time', kind: 'grammar', level: 'A1', title: 'Angka, jam, dan hari', summary: 'thirteen/thirty, half past seven, What time is it?', lessonId: 'a1-time' },
+  { id: 'a1.prep-time', kind: 'grammar', level: 'A1', title: 'Preposisi waktu: at, on, in', summary: 'at 7, on Monday, in May; tanpa preposisi sebelum next/last/every.', lessonId: 'a1-prep-time' },
+  { id: 'a1.there-is', kind: 'grammar', level: 'A1', title: 'There is / there are', summary: 'There is + tunggal, there are + jamak; bukan "have".', lessonId: 'a1-there-is' },
+  { id: 'a1.possessives', kind: 'grammar', level: 'A1', title: 'Kata kepemilikan', summary: "my, your, his, her; Rina's bag.", lessonId: 'a1-possessives' },
+  { id: 'a1.can', kind: 'grammar', level: 'A1', title: "Can dan can't", summary: 'can + bentuk dasar; Can you ...?', lessonId: 'a1-can' },
   { id: 'a2.past-be', kind: 'grammar', level: 'A2', title: 'Was dan were', summary: 'I/he/she/it was; you/we/they were.', lessonId: 'a2-past-be' },
   { id: 'a2.past-regular', kind: 'grammar', level: 'A2', title: 'Simple past beraturan (-ed)', summary: 'worked, lived, studied, stopped.', lessonId: 'a2-past-regular' },
   { id: 'a2.past-irregular', kind: 'grammar', level: 'A2', title: 'Simple past tak beraturan dan did', summary: "went, ate, bought; didn't + bentuk dasar.", lessonId: 'a2-past-irregular' },
+  { id: 'a2.present-continuous', kind: 'grammar', level: 'A2', title: 'Present continuous', summary: 'am/is/are + -ing untuk yang sedang terjadi.', lessonId: 'a2-present-continuous' },
+  { id: 'a2.future', kind: 'grammar', level: 'A2', title: 'Going to dan will', summary: 'Rencana: be going to. Keputusan spontan dan janji: will.', lessonId: 'a2-future' },
+  { id: 'a2.comparatives', kind: 'grammar', level: 'A2', title: 'Comparative dan superlative', summary: 'cheaper than, more expensive than, the best.', lessonId: 'a2-comparatives' },
   { id: 'b1.present-perfect', kind: 'grammar', level: 'B1', title: 'Present perfect vs simple past', summary: 'have/has + bentuk ketiga; for dan since.', lessonId: 'b1-present-perfect' },
   { id: 'b2.passive', kind: 'grammar', level: 'B2', title: 'Passive voice', summary: 'be + past participle di berbagai tense.', lessonId: 'b2-passive' },
   { id: 'c1.inversion', kind: 'grammar', level: 'C1', title: 'Inversi untuk penekanan', summary: 'Never have I ..., Not only does she ...', lessonId: 'c1-inversion' },
@@ -98,11 +108,32 @@ const tags: MisconceptionTag[] = [
   { id: 'third-person-s', topic: 'a1.simple-present', title: 'Akhiran -s untuk he / she / it', tip: 'He/she/it + kata kerja ber-s. I/you/we/they + bentuk dasar.' },
   { id: 'do-does', topic: 'a1.do-does', title: 'Tertukar do / does', tip: "I/you/we/they: do, don't. He/she/it: does, doesn't." },
   { id: 'does-base', topic: 'a1.do-does', title: 'Kata kerja setelah does', tip: 'Setelah does/doesn\'t, kata kerja kembali ke bentuk dasar: "doesn\'t like", bukan "doesn\'t likes".' },
+  { id: 'teen-ty', topic: 'a1.time', title: 'Belasan dan puluhan', tip: 'Belasan -teen, tekanan di belakang (thirTEEN). Puluhan -ty, tekanan di depan (THIRty). forty ditulis tanpa u.' },
+  { id: 'half-past', topic: 'a1.time', title: 'Menyebut setengah jam', tip: '"Setengah delapan" (07.30) = half past SEVEN. Bahasa Inggris menghitung dari jam sebelumnya.' },
+  { id: 'clock-past-to', topic: 'a1.time', title: 'Past dan to pada jam', tip: "past = lewat (09.15 = a quarter past nine); to = kurang (08.45 = a quarter to nine). o'clock hanya untuk jam tepat." },
+  { id: 'in-on-at', topic: 'a1.prep-time', title: 'Tertukar at / on / in', tip: 'at + jam (at 7, at night); on + hari/tanggal (on Monday, on 17 August); in + bulan/tahun/bagian hari (in May, in 2025, in the morning).' },
+  { id: 'no-prep-time', topic: 'a1.prep-time', title: 'Preposisi yang tidak perlu', tip: 'Tanpa at/on/in sebelum next, last, this, every, tomorrow, dan yesterday.' },
+  { id: 'there-is-are', topic: 'a1.there-is', title: 'Tertukar there is / there are', tip: 'Lihat benda sesudahnya: satu atau tak terhitung → there is; lebih dari satu → there are.' },
+  { id: 'there-have', topic: 'a1.there-is', title: '"Ada" diterjemahkan dengan have', tip: '"Ada" untuk keberadaan = there is/are, bukan have/has: There is a market in my village.' },
+  { id: 'his-her', topic: 'a1.possessives', title: 'Tertukar his / her', tip: 'Lihat pemiliknya: laki-laki → his, perempuan → her. Bukan menurut bendanya.' },
+  { id: 'subject-possessive', topic: 'a1.possessives', title: 'Subjek dipakai sebagai kepemilikan', tip: 'Subjek (I, he, they) untuk pelaku; kepemilikan (my, his, their) sebelum benda. its tanpa tanda petik.' },
+  { id: 'possessive-s', topic: 'a1.possessives', title: "Urutan dan tanda 's", tip: "Pemilik + 's di depan benda: Rina's bag (bukan bag Rina), my parents' house." },
+  { id: 'can-base', topic: 'a1.can', title: 'Kata kerja setelah can', tip: 'can + bentuk dasar untuk semua subjek: she can swim (tanpa -s, tanpa to, tanpa -ing).' },
+  { id: 'can-do', topic: 'a1.can', title: 'Memakai do bersama can', tip: "Can tidak butuh do: Can you ...? / I can't ..., bukan Do you can ...?" },
   { id: 'was-were', topic: 'a2.past-be', title: 'Tertukar was / were', tip: 'I/he/she/it: was. You/we/they: were. Ingat: "I was", bukan "I were".' },
   { id: 'past-marker', topic: 'a2.past-regular', title: 'Melewatkan penanda waktu lampau', tip: 'yesterday, last ..., ... ago, in 2020 menuntut bentuk lampau.' },
   { id: 'ed-spelling', topic: 'a2.past-regular', title: 'Ejaan akhiran -ed', tip: 'live→lived, study→studied, stop→stopped, play→played.' },
   { id: 'irregular-form', topic: 'a2.past-irregular', title: 'Bentuk lampau tak beraturan', tip: 'go→went, eat→ate, buy→bought, see→saw. Harus dihafal.' },
   { id: 'did-base', topic: 'a2.past-irregular', title: 'Kata kerja setelah did', tip: 'Setelah did/didn\'t pakai bentuk dasar: "didn\'t go", bukan "didn\'t went".' },
+  { id: 'be-ing-missing', topic: 'a2.present-continuous', title: 'Lupa to be dalam kalimat "sedang"', tip: '"Sedang" = am/is/are + -ing. Dua-duanya wajib: She is cooking.' },
+  { id: 'ing-spelling', topic: 'a2.present-continuous', title: 'Ejaan -ing', tip: 'make → making, swim → swimming, lie → lying, play → playing.' },
+  { id: 'continuous-vs-simple', topic: 'a2.present-continuous', title: 'Sedang atau kebiasaan?', tip: 'Kebiasaan (every day, usually) → simple present. Sekarang (now, Look!) → present continuous. like/know/want tanpa -ing.' },
+  { id: 'going-to-be', topic: 'a2.future', title: 'Bentuk be going to', tip: 'am/is/are + going to + bentuk dasar. Jangan lupa to be: I am going to ...' },
+  { id: 'will-base', topic: 'a2.future', title: 'Kata kerja setelah will', tip: 'will + bentuk dasar, tanpa to dan tanpa -s: She will call. Pertanyaan: Will you ...?' },
+  { id: 'will-vs-going-to', topic: 'a2.future', title: 'Will atau going to?', tip: 'Sudah direncanakan atau ada bukti → going to. Diputuskan saat bicara, janji, tawaran → will.' },
+  { id: 'more-er', topic: 'a2.comparatives', title: 'Bentuk comparative', tip: 'Pendek: -er (cheaper). Panjang: more (more expensive). Jangan keduanya (more cheaper). good → better, bad → worse.' },
+  { id: 'than-from', topic: 'a2.comparatives', title: '"Daripada" = than', tip: '"Lebih ... dari/daripada" = ... than, bukan from atau then.' },
+  { id: 'superlative-the', topic: 'a2.comparatives', title: 'The pada superlative', tip: 'Paling: the + -est / the most. Comparative (lebih) tidak memakai the.' },
   { id: 'perfect-vs-past', topic: 'b1.present-perfect', title: 'Present perfect vs simple past', tip: 'Ada waktu selesai (yesterday, in 2015, ago)? Simple past. Tidak ada atau masih berlanjut? Present perfect.' },
   { id: 'since-for', topic: 'b1.present-perfect', title: 'Tertukar for / since', tip: 'for + lamanya (for two years); since + titik awal (since 2020).' },
   { id: 'participle', topic: 'b1.present-perfect', title: 'Bentuk ketiga (past participle)', tip: 'Setelah have/has pakai bentuk ketiga: seen, eaten, gone, written.' },
@@ -118,6 +149,8 @@ const tags: MisconceptionTag[] = [
 const HOMEWORK_KIND: Record<string, HomeworkDef['kind']> = {
   'a1-greetings': 'construction', 'a1-to-be-neg-q': 'translation', 'a1-simple-present': 'construction', 'a1-do-does': 'translation',
   'a2-past-irregular': 'reading', 'b2-passive': 'translation',
+  'a1-time': 'reading', 'a1-there-is': 'reading', 'a1-possessives': 'reading', 'a1-can': 'construction',
+  'a2-present-continuous': 'reading', 'a2-future': 'reading', 'a2-comparatives': 'reading',
 };
 
 export function buildPack(): ContentPack {

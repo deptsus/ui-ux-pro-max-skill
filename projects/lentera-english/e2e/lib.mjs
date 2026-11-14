@@ -34,15 +34,18 @@ export async function answerCurrent(page, pack, correct = true) {
     await card.getByLabel('Jawabanmu').fill(correct ? ex.answers[0] : Object.keys(ex.errors ?? {})[0] ?? 'zzz');
   } else if (ex.type === 'arrange') {
     const words = correct ? ex.answers[0].split(' ') : ex.answers[0].split(' ').reverse();
-    for (const w of words) await card.locator('div.flex.flex-wrap.gap-2 > button:not(.invisible)', { hasText: new RegExp(`^${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }).first().click();
+    // Only tiles still in the pool: the drop zone ("Kalimatmu") holds the same words once placed,
+    // and a sentence can use a word twice ("going to come to").
+    for (const w of words) await card.locator('div.flex.flex-wrap.gap-2:not([aria-label]) > button:enabled', { hasText: new RegExp(`^${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }).first().click();
   } else if (ex.type === 'match') {
     if (!correct) {
       await card.getByRole('button', { name: ex.pairs[0][0], exact: true }).click();
       await card.getByRole('button', { name: ex.pairs[1][1], exact: true }).click();
     }
+    // Two pairs can share an answer ("I → was", "It → was"): take the first one still open.
     for (const [l, r] of ex.pairs) {
-      await card.getByRole('button', { name: l, exact: true }).click();
-      await card.getByRole('button', { name: r, exact: true }).click();
+      await card.getByRole('button', { name: l, exact: true, disabled: false }).first().click();
+      await card.getByRole('button', { name: r, exact: true, disabled: false }).first().click();
     }
   } else if (ex.type === 'spot') {
     const words = ex.text.split(' ');
