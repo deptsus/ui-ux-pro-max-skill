@@ -29,7 +29,7 @@ const FEATURES = [
 ] as const;
 const LEVELS = [['A1', 'Pemula'], ['A2', 'Dasar'], ['B1', 'Menengah'], ['B2', 'Menengah Atas'], ['C1', 'Mahir'], ['C2', 'Sangat Mahir']];
 const FAQ = [
-  ['Benarkah tanpa AI?', 'Ya. Semua pelajaran, soal, pembahasan, dan dialog ditulis oleh pengajar. Rekomendasi belajar dihitung dengan aturan dan skor yang bisa dijelaskan, bukan model bahasa. Tidak ada jawabanmu yang dikirim ke layanan AI.'],
+  ['Apakah aplikasi ini memakai AI saat aku belajar?', 'Tidak. Semua materi diperiksa dan dikembangkan sebelum terbit. Penilaian jawaban dan rekomendasi belajar dihitung dengan aturan dan skor yang bisa dijelaskan, bukan model bahasa, dan tidak ada jawabanmu yang dikirim ke layanan AI.'],
   ['Apakah pelafalanku dinilai otomatis?', 'Tidak. Kami tidak mengklaim penilaian pelafalan otomatis. Kamu mendapat contoh audio, panduan posisi mulut, dan perekam untuk membandingkan sendiri.'],
   ['Apakah Premium diperpanjang otomatis?', 'Tidak ada auto-debit. Kamu memperpanjang sendiri. Saat masa aktif habis, akun kembali ke Free dan seluruh progresmu tetap tersimpan.'],
   ['Metode pembayaran apa yang tersedia?', 'QRIS, yang bisa dibayar dari aplikasi mobile banking atau e-wallet apa pun (DANA, GoPay, OVO, ShopeePay, BCA, dan lainnya). Setelah membayar, laporkan pembayaranmu di aplikasi; Premium aktif setelah kami mengonfirmasinya. Kami tidak menyimpan data rekening atau e-wallet.'],
@@ -52,7 +52,7 @@ export default function Landing() {
       <main>
         <section className="mx-auto grid max-w-6xl items-center gap-8 px-5 pb-14 pt-8 lg:grid-cols-[1.2fr_1fr] lg:pt-16">
           <div>
-            <Badge tone="accent"><ShieldCheck size={14} aria-hidden />100% disusun pengajar, tanpa AI</Badge>
+            <Badge tone="accent"><ShieldCheck size={14} aria-hidden />Semua materi diperiksa dan dikembangkan</Badge>
             <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">Belajar bahasa Inggris sampai <span className="text-brand">benar-benar paham</span>.</h1>
             <p className="mt-4 max-w-xl text-lg text-muted">Lentera English adalah sekolah bahasa Inggris digital untuk pelajar Indonesia: kurikulum CEFR dari A1 sampai C2, penjelasan berbahasa Indonesia, PR, ujian, dan ulangan terjadwal yang menyesuaikan diri dengan kesalahanmu.</p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">

@@ -4,7 +4,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: { default: 'Lentera English — Sekolah Bahasa Inggris Digital', template: '%s · Lentera English' },
-  description: 'Belajar bahasa Inggris dari nol sampai mahir dengan kurikulum CEFR, latihan interaktif, dan ulangan terjadwal. Tanpa AI: semua materi disusun oleh pengajar.',
+  description: 'Belajar bahasa Inggris dari nol sampai mahir dengan kurikulum CEFR, latihan interaktif, dan ulangan terjadwal. Semua materi diperiksa dan dikembangkan.',
   manifest: '/manifest.webmanifest',
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: [{ media: '(prefers-color-scheme: light)', color: '#f6f5fb' }, { media: '(prefers-color-scheme: dark)', color: '#121022' }] };

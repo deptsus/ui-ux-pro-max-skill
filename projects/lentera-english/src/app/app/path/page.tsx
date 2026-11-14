@@ -82,7 +82,7 @@ export default function PathPage() {
                               {(u.plannedLessons ?? []).map((t) => (
                                 <li key={t} className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3 opacity-60">
                                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><Hourglass size={18} aria-hidden /></span>
-                                  <span><span className="block font-bold">{t}</span><span className="block text-sm text-muted">Ada di silabus. Materinya sedang disusun tim pengajar.</span></span>
+                                  <span><span className="block font-bold">{t}</span><span className="block text-sm text-muted">Ada di silabus. Materinya sedang disiapkan.</span></span>
                                 </li>
                               ))}
                               {ue && (
