@@ -8,7 +8,7 @@ langsung terlihat di aplikasi tanpa perlu membuat APK baru.
 | | |
 |---|---|
 | Nama paket | `id.lenteraenglish.app` (permanen setelah terbit di Play Store) |
-| Versi | 1.1.0 (versionCode 2): notifikasi web tampil sebagai notifikasi aplikasi Lentera (notification delegation, izin `POST_NOTIFICATIONS`). 1.0.0 (versionCode 1) tanpa notifikasi. |
+| Versi | 1.2.0 (versionCode 3): membuka `/app?apk=3` agar situs tahu versi yang terpasang (pemberitahuan update). 1.1.0 (2): notifikasi tampil sebagai notifikasi aplikasi Lentera (izin `POST_NOTIFICATIONS`). 1.0.0 (1): versi pertama. |
 | Android minimum | 7.0 (API 24); target API 36 |
 | Unduhan | `/download/lentera-english.apk` (tombol di halaman depan) |
 | Verifikasi situs | `public/.well-known/assetlinks.json` |
@@ -21,6 +21,33 @@ Notifikasi pembayaran untuk admin dikirim lewat Web Push dari situs (`/api/push`
 sebagai notifikasi aplikasi Lentera. Admin mengaktifkannya sekali per HP di
 `/admin` → panel "Notifikasi HP" → "Aktifkan notifikasi". Memasang APK baru di
 atas versi lama tidak menghapus data maupun login.
+
+## Pemberitahuan versi baru
+
+APK yang dipasang di luar Play Store tidak diperbarui otomatis. Sebagai gantinya,
+situs menampilkan ajakan "Versi baru aplikasi Lentera tersedia" (tombol
+Perbarui → unduh APK) **hanya di dalam aplikasi Android yang lebih lama** dari
+versi di `src/lib/android.ts`, tidak pernah di browser biasa:
+
+- 1.2.0 ke atas membuka `/app?apk=<versionCode>`.
+- 1.0.0 dan 1.1.0 tidak mengirim versi; Chrome menandai halamannya dengan
+  referrer `android-app://id.lenteraenglish.app/`, sehingga tetap dikenali
+  sebagai versi lama. (Bila HP memakai browser lain sebagai pembuka aplikasi,
+  referrer itu bisa kosong dan ajakan tidak muncul.)
+- "Nanti saja" menyembunyikan ajakan sampai ada versi yang lebih baru lagi.
+
+Hampir semua perubahan (materi, tampilan, fitur) **tidak** butuh APK baru,
+karena aplikasi membuka situs live. APK baru hanya untuk perubahan di
+aplikasinya sendiri (izin, ikon, nama, layar pembuka).
+
+### Merilis versi APK berikutnya
+
+1. `android/generate.cjs`: naikkan `appVersionCode`, `appVersion`, dan angka di
+   `startUrl: '/app?apk=N'` (N = versionCode baru).
+2. `src/lib/android.ts`: samakan `versionCode` dan `versionName`.
+   `tests/android.test.ts` gagal bila keduanya tidak sama.
+3. Build dan tanda tangani (langkah di bawah), salin APK ke `public/download/`,
+   deploy. Semua pengguna versi lama melihat ajakan Perbarui.
 
 ## Kunci tanda tangan
 

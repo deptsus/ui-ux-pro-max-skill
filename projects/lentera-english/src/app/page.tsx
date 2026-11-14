@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { BookOpen, Brain, CalendarClock, Check, ClipboardList, GraduationCap, Headphones, MessagesSquare, ShieldCheck, Smartphone, Target, WifiOff, Wrench } from 'lucide-react';
 import { Logo, Mascot } from '@/components/Mascot';
 import { Badge, Card, LinkButton } from '@/components/ui';
+import { ANDROID_APP } from '@/lib/android';
 import { rupiah } from '@/lib/format';
 import { BENCHMARK_MONTHLY, FREE_FEATURES, PLANS, PREMIUM_FEATURES } from '@/lib/plans';
 
 /** Android app (Trusted Web Activity around this site), served from public/download. */
-const ANDROID_APK = '/download/lentera-english.apk';
+const ANDROID_APK = ANDROID_APP.url;
 
 const STEPS = [
   ['Pengantar', 'Kamu tahu persis apa yang akan dipelajari.'],
@@ -60,7 +61,7 @@ export default function Landing() {
             </div>
             <p className="mt-3 text-sm text-muted">Tanpa kartu kredit. Bisa langsung dicoba sebagai tamu.</p>
             {/* A plain <a>: the APK is a static file, not a route. */}
-            <a href={ANDROID_APK} download className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand underline underline-offset-4 hover:text-ink"><Smartphone size={18} aria-hidden />Unduh aplikasi Android (APK)</a>
+            <a href={ANDROID_APK} download className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand underline underline-offset-4 hover:text-ink"><Smartphone size={18} aria-hidden />Unduh aplikasi Android (APK {ANDROID_APP.versionName})</a>
           </div>
           <Card className="relative mx-auto w-full max-w-sm">
             <Mascot mood="cheer" size={120} className="mx-auto" />

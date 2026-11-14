@@ -12,6 +12,7 @@ import { useNow } from '@/lib/client/hooks';
 import { initSession, useSession } from '@/lib/client/session';
 import { dismissPendingAlert, useAdminPending } from '@/lib/client/admin';
 import { loadLearner, onPremiumChange, useEntitlement, useLearner, useRole, useSyncStatus } from '@/lib/client/store';
+import { AppUpdateBanner } from '@/components/AppUpdateBanner';
 import { Logo, Mascot } from '@/components/Mascot';
 import { Button, cx } from '@/components/ui';
 
@@ -119,6 +120,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 pb-28 pt-5 lg:pb-12">
+        <AppUpdateBanner />
         {admin && alert && (
           <div role="status" className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-bad bg-bad-soft p-3 text-sm">
             <BellRing size={20} className="shrink-0 text-bad" aria-hidden />

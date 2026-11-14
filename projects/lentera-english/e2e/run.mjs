@@ -349,6 +349,34 @@ scenario('placement: tes penempatan berhenti di level yang belum dikuasai', asyn
   await ctx.close();
 });
 
+scenario('android: pemberitahuan versi baru hanya di aplikasi Android versi lama', async () => {
+  // The APK opens /app?apk=<versionCode>; versions without it are recognised by the
+  // android-app:// referrer (covered by tests/android.test.ts).
+  const ctx = await newContext();
+  const banner = (page) => page.getByRole('status').filter({ hasText: 'Versi baru aplikasi Lentera' });
+  const page = await open(ctx, '/app?apk=2');
+  check('aplikasi Android lama melihat ajakan memperbarui', await seen(banner(page), 20000));
+  check('tombol Perbarui mengunduh APK dari situs', (await banner(page).getByRole('link', { name: 'Perbarui' }).getAttribute('href')) === '/download/lentera-english.apk');
+  await page.goto(`${BASE}/app/review`);
+  await page.locator('main').first().waitFor();
+  check('ajakan tetap muncul di halaman lain pada sesi aplikasi yang sama', await seen(banner(page), 15000));
+  await banner(page).getByRole('button', { name: 'Nanti saja' }).click();
+  await page.goto(`${BASE}/app`);
+  await page.locator('main').first().waitFor();
+  await page.waitForTimeout(1500);
+  check('"Nanti saja" menyembunyikan ajakan untuk versi ini', (await banner(page).count()) === 0);
+  await ctx.close();
+
+  const fresh = await newContext();
+  const current = await open(fresh, '/app?apk=3');
+  const browser = await fresh.newPage();
+  await browser.goto(`${BASE}/app`);
+  await browser.locator('main').first().waitFor({ timeout: 45000 });
+  await current.waitForTimeout(1500);
+  check('aplikasi versi terbaru dan browser biasa tidak melihat ajakan', (await banner(current).count()) === 0 && (await banner(browser).count()) === 0);
+  await fresh.close();
+});
+
 scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif', async () => {
   const ctx = await newContext();
   const page = await open(ctx, '/daftar');
