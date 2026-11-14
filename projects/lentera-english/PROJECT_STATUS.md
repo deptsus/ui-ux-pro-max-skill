@@ -1,6 +1,7 @@
 # PROJECT_STATUS — Lentera English
 
-Terakhir diperbarui: 14 November 2026, setelah sesi keempat (pembayaran QRIS manual, harga tahunan diskon, persiapan Supabase).
+Terakhir diperbarui: 14 November 2026, setelah sesi kelima (Supabase terisi, aplikasi live di Netlify).
+Alamat live: https://lentera-english-app.netlify.app (backend Supabase, pembayaran QRIS manual).
 Branch kerja: `ccr-17d3d5e4-jx43zs` di repo `deptsus/ui-ux-pro-max-skill` (melanjutkan `ccr-33e68053-ob8ny7`).
 Lokasi proyek: `projects/lentera-english/` (lihat bagian "Konteks repo" di bawah).
 
@@ -191,11 +192,11 @@ Belum tercakup: tes ulang penguasaan (butuh jeda 20 jam dan dua hari berbeda), u
 
 - Rekaman audio penutur asli. Tabel `audio_resources` kosong; saat ini audio dibacakan oleh suara bawaan perangkat (`speechSynthesis`) dan UI menyatakannya terang-terangan. Pemutar sudah siap memakai rekaman bila diunggah.
 - 24 pelajaran yang masih "Sedang disusun", serta ujian level B1 sampai C2.
-- Koneksi ke Supabase sungguhan: migrasi belum pernah diterapkan ke proyek Supabase mana pun; jalur Supabase Auth dan PostgREST belum pernah dijalankan.
+- Uji alur lengkap di server live dengan akun pelajar sungguhan (daftar, sinkronisasi, papan peringkat, bayar, konfirmasi). Tertahan oleh konfirmasi email Supabase (lihat bagian 8).
 - Pembayaran nyata ke kedua QR lalu konfirmasi di server produksi (lihat 2d-1).
 - Admin belum bisa mengganti QR dari dashboard; QR baru dipasang lewat migrasi atau SQL (`subscription_plans.qris_payload`).
 - Pemberitahuan ke admin saat ada pembayaran baru dilaporkan (sekarang admin harus membuka dashboard).
-- Deploy/hosting, domain HTTPS, monitoring.
+- Domain sendiri dan monitoring/peringatan error. (Hosting HTTPS di Netlify sudah jalan, lihat bagian 8.)
 - Batas paket Free di sisi server (nyawa, 10 ulangan per hari): saat ini hanya ditegakkan di klien. Pembatasan **konten** Premium sudah di server.
 - README khusus proyek.
 
@@ -209,6 +210,7 @@ Belum tercakup: tes ulang penguasaan (butuh jeda 20 jam dan dua hari berbeda), u
 | 5 | ~~Sedang~~ **Selesai** | Nama yang diketik di form daftar tidak pernah dipakai: profil memakai nama bawaan tamu atau awalan email, lalu sinkronisasi menimpa nama di server. | Ditemukan oleh `e2e/run.mjs`. Diperbaiki di `loadLearner()` (`src/lib/client/store.ts`): nama diambil dari profil server. | — |
 | 6 | ~~Sedang~~ **Selesai** | XP yang didapat sebagai tamu tidak sampai ke ledger server saat mendaftar (event yang belum terkirim dibuang), sehingga papan peringkat kosong untuk akun itu. | Ditemukan oleh `e2e/run.mjs`. Diperbaiki: event tamu ikut dikirim (idempoten, batas XP server tetap berlaku). Lihat DECISIONS B5. | — |
 | 7 | Rendah (lingkungan dev) | Cache dev Turbopack di `.next/dev` dua kali menjadi basi: semua halaman memuat ulang tanpa henti ("HMR hash mismatch") dan aplikasi tertahan di layar pembuka tanpa pesan error. Pemicunya tidak berhasil direproduksi. | Menghapus `.next/dev` menyembuhkan 3 dari 3 kali. | Cache dev di disk dimatikan di `next.config.ts`. Bila masih terjadi: hentikan server, hapus `.next/dev`, jalankan lagi. |
+| 8 | ~~Sedang~~ **Selesai** | Di Netlify setiap halaman memunculkan React error #418 (hydration gagal) dan dirender ulang penuh di browser. Penyebab: edge Netlify menyisipkan baris baru dan komentar HTML ("This site is hosted on Netlify ...") ke dalam `<head>`. Skrip HUD Netlify setelah `</html>` tidak berpengaruh. | Dibuktikan dengan mengubah respons live di browser: hanya membuang komentar itu yang menghilangkan error. Diperbaiki di `src/instrumentation-client.ts` (berjalan sebelum hydrate, membuang komentar dan teks kosong di `<head>`); diuji lokal dengan sisipan yang sama di 4 halaman, dan uji kontrol tanpa perbaikan tetap memunculkan #418. | — |
 | 4 | ~~Rendah~~ **Tidak muncul lagi** | Peringatan React "Encountered a script tag" dari skrip tema. | Setelah Bug #1 diperbaiki, `/`, `/masuk`, `/daftar`, `/admin`, `/app`, `/app/analytics`, `/app/subscription` dibuka di dev tanpa error maupun peringatan konsol. | — |
 
 Catatan: satu cek otomatis sempat gagal ("riwayat transaksi tampil"), tetapi setelah diulang dengan menunggu data selesai dimuat, fitur itu terbukti berfungsi. Itu masalah waktu tunggu di skrip uji, bukan bug.
@@ -235,12 +237,20 @@ Sesi ketiga:
 8. `scripts/export-content.ts` (`npm run content:export`), perluasan `e2e/admin.mjs` ke editor lain, tes ekspor-impor di `tests/admin.test.ts`.
 9. Editor CMS: JSON yang belum valid dihitung sebagai perubahan belum disimpan (`CmsPanel.tsx`). Cache dev Turbopack dimatikan (`next.config.ts`).
 
+Sesi keempat dan kelima:
+
+10. `9b1d192` dukungan kunci API Supabase baru (`sb_publishable_`/`sb_secret_`). `b5b13ba` pembayaran QRIS manual milik pemilik + konfirmasi admin; Xendit disimpan tetapi nonaktif. `6506129` `LENTERA_BACKEND=embedded` selalu menang.
+11. `7e21185`..`dd59ec1` Supabase: migrasi 0001–0006, kurikulum terbit, admin pertama.
+12. `efce061`, `468e48f` konfigurasi Netlify (`netlify.toml`, adapter `@netlify/plugin-nextjs` wajib ditulis; tanpanya semua rute 404). `ae39e72` perbaikan hydration di Netlify (Bug #8).
+
 ## 7. File terakhir yang diubah
 
-1. `e2e/run.mjs`, `e2e/admin.mjs`, `scripts/export-content.ts`, `tests/admin.test.ts`.
-2. `src/lib/client/store.ts` (serah terima tamu → akun), `src/components/admin/CmsPanel.tsx`, `next.config.ts`.
-3. Sesi kedua: `src/app/admin/page.tsx`, `src/components/admin/*`, `src/components/Charts.tsx`, `src/lib/format.ts`, `src/components/ui.tsx`, `src/app/page.tsx`.
-4. Dokumen: `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `TODO.md`, `DECISIONS.md`.
+1. Sesi kelima: `src/instrumentation-client.ts`, `netlify.toml`, `.gitignore`.
+2. Sesi keempat: `src/lib/qris.ts`, `src/lib/server/manual-payments.ts`, `src/components/ManualQrisCheckout.tsx`, `supabase/migrations/0005_manual_qris.sql`, `0006_lint_fixes.sql`, `src/lib/server/db.ts`, `src/lib/server/api.ts`.
+3. Sesi ketiga: `e2e/run.mjs`, `e2e/admin.mjs`, `scripts/export-content.ts`, `tests/admin.test.ts`.
+4. `src/lib/client/store.ts` (serah terima tamu → akun), `src/components/admin/CmsPanel.tsx`, `next.config.ts`.
+5. Sesi kedua: `src/app/admin/page.tsx`, `src/components/admin/*`, `src/components/Charts.tsx`, `src/lib/format.ts`, `src/components/ui.tsx`, `src/app/page.tsx`.
+6. Dokumen: `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `TODO.md`, `DECISIONS.md`.
 
 ## 8. Langkah persis berikutnya
 
@@ -253,8 +263,11 @@ Sesi ketiga:
    - Environment cloud `ui-ux-pro-max-skill` berisi `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` dan izin host proyek ini. **Belum**: `SUPABASE_SECRET_KEY` (rahasia; diisi pemilik sendiri sebagai environment variable, bukan network secret, karena browser di container juga lewat proxy dan Supabase menolak kunci rahasia dari browser).
    - Auth: periksa "Confirm email" (Authentication → Sign In / Providers). Pengirim email bawaan Supabase hanya mengirim ke anggota tim proyek, jadi sebelum dibuka ke publik pilih: matikan konfirmasi email, atau pasang SMTP sendiri.
    - **Admin pertama**: akun pemilik dibuat lewat Authentication → Users (auto confirm); trigger `on_auth_user_created` terbukti membuat profil dan baris `streaks` di Supabase sungguhan; peran dinaikkan ke `admin` dan fungsi admin (`list_curriculum_versions`, `admin_payment_overview`) menerimanya.
-   - **Belum**: uji daftar/sinkronisasi/papan peringkat/pembayaran lewat server aplikasi terhadap Supabase sungguhan (butuh `SUPABASE_SECRET_KEY`).
-4. Deploy: proyek Netlify **`lentera-english`** (id `584512cc-55c5-463f-bc4a-384f79c03fb0`, https://lentera-english.netlify.app) sudah dibuat dengan variabel `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `APP_URL`; konfigurasi build di `netlify.toml`. **Belum ada deploy.** Perintah unggah dari konektor Netlify (`npx @netlify/mcp ... --proxy-path`) ditolak sistem izin sesi. Jalan yang disarankan: hubungkan repo GitHub di Netlify (Project configuration → Build & deploy → Link repository; branch `ccr-17d3d5e4-jx43zs`, base directory `projects/lentera-english`, build `npm run build`, publish `projects/lentera-english/.next`), sehingga setiap push otomatis dideploy. `SUPABASE_SECRET_KEY` diisi pemilik di Netlify (Environment variables, ditandai secret, scope Builds + Functions). Render ditolak karena meminta kartu pembayaran walau paket gratis; Vercel belum diotorisasi.
+   - **Belum**: uji daftar/sinkronisasi/papan peringkat/pembayaran dengan akun pelajar di server live (menunggu keputusan konfirmasi email, butir 4b).
+4. **Live di Netlify**: proyek `lentera-english-app` (id `7ac1ecfe-43de-428e-8dc4-8a7f54524227`), https://lentera-english-app.netlify.app. Repo GitHub tersambung (branch `ccr-17d3d5e4-jx43zs`, base directory `projects/lentera-english`), jadi setiap push ke branch itu otomatis dideploy. Variabel di Netlify: `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `APP_URL`, dan `SUPABASE_SECRET_KEY` (diisi pemilik, ditandai secret). Tanpa baris `[[plugins]] package = "@netlify/plugin-nextjs"` di `netlify.toml` semua rute 404.
+   - **Diperiksa di server live** (Playwright, ukuran Pixel 7, 11/11 lolos): landing dengan harga coret, aplikasi tamu, pelajaran pertama berjalan, pelajaran Premium terkunci, halaman paket (diskon 15%, hanya QRIS), `/masuk` tersambung ke Supabase Auth (sandi salah ditolak dengan pesan berbahasa Indonesia), `/admin` meminta masuk, **nol error di konsol** setelah Bug #8 diperbaiki.
+   - **Tugas pemilik yang belum**: (a) kunci `sb_secret_` pertama sempat terlihat di tangkapan layar: buat kunci rahasia baru di Supabase (Project Settings → API Keys), ganti nilai `SUPABASE_SECRET_KEY` di Netlify, deploy ulang, lalu hapus kunci lama. (b) "Confirm email" masih aktif (`mailer_autoconfirm: false`) dan pengirim email bawaan Supabase hanya mengirim ke anggota tim: matikan konfirmasi email, atau pasang SMTP sendiri. (c) Authentication → URL Configuration: Site URL = `https://lentera-english-app.netlify.app` (tautan konfirmasi/reset kata sandi mengarah ke situ). (d) Proyek Netlify kosong lama `lentera-english` (id `584512cc-…`) boleh dihapus. (e) Uji bayar sungguhan kedua QR, lalu konfirmasi di `/admin` live.
+   - Render ditolak karena meminta kartu pembayaran walau paket gratis; Vercel belum diotorisasi.
    - `LENTERA_BACKEND=embedded` selalu memakai basis data lokal walaupun variabel Supabase ada (tes dan e2e tidak pernah menyentuh proyek sungguhan).
    - Konektor Supabase meminta konfirmasi pemilik untuk perintah yang dianggap merusak (`drop`, trigger pada `auth.users`, isi fungsi dengan `delete`); di aplikasi pemilik, pertanyaan itu tidak tampil sehingga selalu habis waktu. Jalur yang terbukti: SQL Editor.
 5. Tanpa kredensial, pekerjaan berikutnya yang paling bernilai: menulis 24 pelajaran yang masih "Sedang disusun", ujian level B1 sampai C2, dan batas paket Free di server (TODO P1).
