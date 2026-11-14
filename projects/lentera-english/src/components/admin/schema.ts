@@ -243,6 +243,8 @@ export const TABLES: TableDef[] = [
       { key: 'sample_size', label: 'Jumlah soal yang diambil otomatis', kind: 'number', min: 0, max: 60, required: true, hint: 'Diambil dari soal pelajaran dalam cakupan ujian, di luar soal tetap di bawah.' },
       { key: 'is_premium', label: 'Hanya untuk Premium', kind: 'bool' },
       { key: 'question_ids', label: 'Soal tetap', kind: 'lines', linesRef: 'questions', hint: 'Satu ID soal per baris. Boleh kosong.' },
+      { key: 'sections', label: 'Bagian ujian level (JSON)', kind: 'json', rows: 16, nullable: true, when: (r) => r.scope === 'level' || !!r.sections,
+        hint: 'Hanya untuk ujian level bergaya CEFR. Daftar { "id", "kind": grammar|reading|listening|writing, "title", "passScore", "take", "pool": [["id soal", ...], ...], "writing": [{ "prompt", "minWords", "checklist": ["label::kata1|kata2"] }] }. Soal di "pool" memakai tahap "exam" (bank soal khusus ujian, tidak pernah dikirim ke perangkat). Kosongkan untuk ujian acak gaya lama.' },
     ],
     blank: () => ({ scope: 'unit', passing_score: 80, time_limit_sec: 900, sample_size: 10, is_premium: false, question_ids: [] }),
   },

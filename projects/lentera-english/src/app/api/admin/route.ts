@@ -10,10 +10,18 @@ export const dynamic = 'force-dynamic';
 
 interface Body { action?: string; table?: string; row?: Record<string, unknown>; id?: string; label?: string; notes?: string; version?: number; note?: string; reason?: string; target?: string; all?: boolean; noteId?: number; resolution?: string }
 const NEEDS_0008 = 'Basis data belum diperbarui untuk Rilis 1. Jalankan supabase/manual/apply-0008.sql di Supabase SQL Editor, lalu ulangi.';
+const NEEDS_0009 = 'Basis data belum diperbarui untuk Rilis 3 (ujian level dan sertifikat). Jalankan supabase/manual/apply-0009.sql di Supabase SQL Editor, lalu ulangi.';
+type Rpc = { rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> };
 /** Stories and review notes need migration 0008; say so instead of failing halfway. */
-async function require0008(db: { rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> }) {
+async function require0008(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
   if (!Array.isArray(features) || !features.includes('stories')) throw new HttpError(409, NEEDS_0008);
+}
+/** The bundled curriculum carries level-exam sections, stored in a column 0009 adds. */
+async function require0009(db: Rpc) {
+  await require0008(db);
+  const features = await db.rpc<string[]>('content_features').catch(() => null);
+  if (!Array.isArray(features) || !features.includes('level_exams')) throw new HttpError(409, NEEDS_0009);
 }
 const isUuid = (s: unknown) => typeof s === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
@@ -40,7 +48,7 @@ export const POST = route(async (req) => {
       return json(result);
     }
     case 'import-bundled':
-      await require0008(db);
+      await require0009(db);
       return json(await db.rpc('import_content', { p_actor: userId, p_rows: packToRows(buildPack()) }));
     // Review notes: the owner flags content in the CMS; the next release works through them.
     case 'notes':

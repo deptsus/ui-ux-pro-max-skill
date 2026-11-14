@@ -21,8 +21,9 @@ import { scenariosUpper } from './conversations-upper';
 import { listening, phonemes, placement } from './listening';
 import { listeningUpper } from './listening-upper';
 import { stories } from './stories';
+import { EXAM_BANK, EXAM_MINUTES } from './exam-bank';
 
-export const CONTENT_VERSION = '2026.12.2';
+export const CONTENT_VERSION = '2027.1.0';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -140,6 +141,7 @@ const topics: Topic[] = [
   { id: 'c2.understatement', kind: 'skill', level: 'C2', title: 'Ironi dan understatement', summary: 'not bad, a bit of a problem, not uncommon.', lessonId: 'c2-understatement' },
   { id: 'c2.modality', kind: 'grammar', level: 'C2', title: 'Modalitas lanjut', summary: "must/might/can't/should have; needn't have.", lessonId: 'c2-modality' },
   { id: 'skill.listening', kind: 'skill', level: 'A1', title: 'Menyimak', summary: 'Menangkap kata, angka, dan informasi dari audio.' },
+  { id: 'skill.reading', kind: 'skill', level: 'A1', title: 'Membaca', summary: 'Menangkap gagasan utama, detail, dan maksud penulis dari teks.' },
   { id: 'skill.story', kind: 'skill', level: 'A1', title: 'Cerita bergambar', summary: 'Memahami alur, tokoh, dan detail dari cerita pendek beranimasi.' },
 ];
 
@@ -412,14 +414,27 @@ export function buildPack(): ContentPack {
 
   // Placement test and level exams.
   exercises.push(...stamp(placement, 'placement', 'placement', 'a1.to-be', null));
-  exams.push(
-    { id: 'exam.level.A1', scope: 'level', ref: 'A1', title: 'Ujian Level A1', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 16 },
-    { id: 'exam.level.A2', scope: 'level', ref: 'A2', title: 'Ujian Level A2', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 18 },
-    { id: 'exam.level.B1', scope: 'level', ref: 'B1', title: 'Ujian Level B1', passScore: 80, timeLimitSec: 25 * 60, premium: true, exerciseIds: [], sampleSize: 18 },
-    { id: 'exam.level.B2', scope: 'level', ref: 'B2', title: 'Ujian Level B2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
-    { id: 'exam.level.C1', scope: 'level', ref: 'C1', title: 'Ujian Level C1', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
-    { id: 'exam.level.C2', scope: 'level', ref: 'C2', title: 'Ujian Level C2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
-  );
+  // Level exams (Rilis 3): four parts drawn from the exam-only bank, graded on the server.
+  const sampleSizes: Record<Cefr, number> = { A1: 16, A2: 18, B1: 18, B2: 15, C1: 15, C2: 15 };
+  for (const level of ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const) {
+    const bank = EXAM_BANK[level];
+    const prefix = `exam.level.${level}`;
+    const grammar = stamp(bank.grammar, `${prefix}.grammar`, 'exam', 'skill.reading', null);
+    const reading = bank.reading.map((p, i) => stamp(p, `${prefix}.read${i + 1}`, 'exam', 'skill.reading', null));
+    const heard = bank.listening.map((p, i) => stamp(p, `${prefix}.listen${i + 1}`, 'exam', 'skill.listening', null));
+    exercises.push(...grammar, ...reading.flat(), ...heard.flat());
+    exams.push({
+      id: prefix, scope: 'level', ref: level, title: `Ujian Level ${level}`, passScore: 80, timeLimitSec: EXAM_MINUTES[level] * 60, premium: true,
+      // Older clients (before Rilis 3) still run the lesson-pool format with these two fields.
+      exerciseIds: [], sampleSize: sampleSizes[level],
+      sections: [
+        { id: 'grammar', kind: 'grammar', title: 'Tata Bahasa & Kosakata', passScore: 60, take: 8, pool: grammar.map((e) => [e.id]) },
+        { id: 'reading', kind: 'reading', title: 'Membaca', passScore: 60, take: 1, pool: reading.map((p) => p.map((e) => e.id)) },
+        { id: 'listening', kind: 'listening', title: 'Menyimak', passScore: 60, take: 1, pool: heard.map((p) => p.map((e) => e.id)) },
+        { id: 'writing', kind: 'writing', title: 'Menulis', passScore: 60, take: 1, pool: [], writing: bank.writing },
+      ],
+    });
+  }
 
   return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios: [...scenarios, ...scenariosUpper], listening: listeningItems, stories: storyItems, phonemes, homework, exams, audio: [] };
 }

@@ -1,7 +1,7 @@
 // Learner state transitions. Each function mutates a draft copy of the state
 // (the store clones before calling), so every rule here is testable in Node.
 import type { ContentIndex, Exercise, ExamDef, HomeworkDef, Cefr } from '@/lib/content/types';
-import { GAME, LIMITS } from './config';
+import { DRILL, GAME, LIMITS } from './config';
 import type { Grade } from './grading';
 import { applyRetest, dayKey, demote, recordTopicAttempt } from './mastery';
 import { applyReview, firstSchedule } from './srs';
@@ -204,11 +204,12 @@ function checkChapterReward(s: LearnerState, ix: ContentIndex, unitId: string, a
   }
 }
 
-export function recordExam(s: LearnerState, ix: ContentIndex, exam: ExamDef, scorePct: number, at: number): boolean {
+/** `passed` overrides the score rule for sectioned level exams, where every part has its own minimum. */
+export function recordExam(s: LearnerState, ix: ContentIndex, exam: ExamDef, scorePct: number, at: number, passedOverride?: boolean, weak?: string[]): boolean {
   const rec = (s.exams[exam.id] ??= { attempts: [] });
-  const passed = scorePct >= exam.passScore;
+  const passed = passedOverride ?? scorePct >= exam.passScore;
   const firstPass = passed && !rec.attempts.some((a) => a.passed);
-  rec.attempts.push({ at, score: scorePct, passed });
+  rec.attempts.push({ at, score: scorePct, passed, ...(!passed && weak?.length ? { weak } : {}) });
   s.streak = nextStreak(s.streak, at);
   if (firstPass) {
     addXp(s, exam.scope === 'level' ? GAME.xp.levelExamPass : GAME.xp.unitExamPass, 'exam', at, exam.id);
@@ -228,6 +229,14 @@ export function reviewResult(s: LearnerState, key: string, ok: boolean, at: numb
     if (s.topics[id]) s.topics[id] = demote(s.topics[id]);
   }
   emit(s, 'review', at, { key, ok, before, after: s.reviews[key].intervalDays, dueAt: s.reviews[key].dueAt });
+}
+
+/** Topic practice passed (Latihan: topik). The last pass time unlocks a level-exam retake that asked for it. */
+export function finishTopicPractice(s: LearnerState, topicId: string, scorePct: number, at: number): boolean {
+  today(s, at).drills += 1;
+  const passed = scorePct >= DRILL.passScore;
+  if (passed) s.rewards[`practice:${topicId}`] = at;
+  return passed;
 }
 
 export function finishDrill(s: LearnerState, tag: string, scorePct: number, at: number): boolean {

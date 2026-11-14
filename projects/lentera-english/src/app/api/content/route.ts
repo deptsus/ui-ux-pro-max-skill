@@ -19,5 +19,5 @@ export const GET = route(async (req) => {
   const tier = premium ? 'premium' : 'free';
   const url = new URL(req.url);
   if (url.searchParams.get('v') === content.version && url.searchParams.get('tier') === tier) return json({ unchanged: true, version: content.version, tier });
-  return json({ version: content.version, tier, pack: premium ? content.full : content.free });
+  return json({ version: content.version, tier, pack: premium ? content.premium : content.free });
 });

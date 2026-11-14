@@ -30,7 +30,8 @@ export interface LessonProgress {
 }
 
 export interface ExamRecord {
-  attempts: { at: number; score: number; passed: boolean }[];
+  /** `weak`: topics a failed sectioned level exam asks the learner to practise before the next attempt. */
+  attempts: { at: number; score: number; passed: boolean; weak?: string[] }[];
 }
 
 export interface HomeworkRecord {

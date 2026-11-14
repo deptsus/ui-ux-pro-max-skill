@@ -1,7 +1,8 @@
 // Content quality gate. Used by `npm run content:check`, by the test suite and
 // by the CMS before a curriculum version is published.
-import { STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise } from './types';
+import { EXAM_BANK_TYPES, STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise } from './types';
 import { grade, normalize } from '@/lib/engine/grading';
+import { checkWriting } from '@/lib/engine/writing';
 
 export function validateExercise(e: Exercise): string[] {
   const errs: string[] = [];
@@ -106,6 +107,58 @@ export function validatePack(pack: ContentPack): string[] {
     if (!h.exerciseIds.length && !h.writing) errs.push(`PR ${h.id}: kosong`);
   }
   for (const x of pack.exams) for (const id of x.exerciseIds) if (!ids.has(id)) errs.push(`ujian ${x.id}: soal ${id} tidak ada`);
+  // Sectioned level exams (Rilis 3): the bank is exam-only, keyed and answerable on the server.
+  const bankOwner = new Map<string, string>();
+  for (const x of pack.exams) {
+    if (!x.sections?.length) continue;
+    const p = `ujian ${x.id}`;
+    if (x.scope !== 'level') errs.push(`${p}: bagian ujian hanya untuk ujian level`);
+    const kinds = x.sections.map((s) => s.kind);
+    for (const k of ['grammar', 'reading', 'listening', 'writing'] as const) if (!kinds.includes(k)) errs.push(`${p}: bagian ${k} tidak ada`);
+    if (new Set(x.sections.map((s) => s.id)).size !== x.sections.length) errs.push(`${p}: ID bagian ganda`);
+    for (const sec of x.sections) {
+      const q = `${p}/${sec.id}`;
+      // Packs sent to devices carry only the size of each part (packForClient); nothing to check there.
+      if (sec.hidden) continue;
+      if (!(sec.passScore >= 1 && sec.passScore <= 100)) errs.push(`${q}: batas lulus bagian harus 1–100`);
+      if (!sec.title?.trim()) errs.push(`${q}: judul kosong`);
+      if (sec.kind === 'writing') {
+        if (!sec.writing?.length) errs.push(`${q}: belum ada tugas menulis`);
+        for (const w of sec.writing ?? []) {
+          if (!w.prompt?.trim() || !(w.minWords > 0) || !w.mustInclude?.length || !w.model?.trim()) errs.push(`${q}: tugas menulis belum lengkap`);
+          // The model answer must meet its own checklist, or no learner could.
+          else if (checkWriting(w.model, w).score < 100) errs.push(`${q}: contoh jawaban tidak memenuhi daftar periksanya sendiri`);
+          for (const rule of w.mustInclude ?? []) if (!rule.includes('::')) errs.push(`${q}: aturan "${rule}" harus berbentuk "label::kata1|kata2"`);
+        }
+        continue;
+      }
+      if (!(sec.take >= 1) || sec.take > sec.pool.length) errs.push(`${q}: jumlah yang diambil (${sec.take}) harus 1–${sec.pool.length}`);
+      if (sec.pool.length < sec.take + 1) errs.push(`${q}: bank perlu minimal satu kelompok cadangan agar percobaan ulang tidak selalu sama`);
+      const sizes = new Set(sec.pool.map((g) => g.length));
+      if (sizes.size > 1) errs.push(`${q}: semua kelompok soal harus sama besar agar skor setara antarpercobaan`);
+      for (const g of sec.pool) {
+        if (!g.length) errs.push(`${q}: kelompok soal kosong`);
+        for (const id of g) {
+          const e = ids.has(id) ? pack.exercises.find((y) => y.id === id) : undefined;
+          if (!e) { errs.push(`${q}: soal ${id} tidak ada`); continue; }
+          const other = bankOwner.get(id);
+          if (other && other !== x.id) errs.push(`${q}: soal ${id} sudah dipakai ujian ${other}`);
+          bankOwner.set(id, x.id);
+          if (e.stage !== 'exam' || e.lessonId) errs.push(`${q}: soal ${id} harus bertahap "exam" tanpa pelajaran`);
+          if (!(EXAM_BANK_TYPES as readonly string[]).includes(e.type)) errs.push(`${q}: jenis soal ${e.type} (${id}) tidak dipakai di ujian level`);
+          if (e.type === 'fill' && e.audioText) errs.push(`${q}: dikte tidak dipakai di ujian level (${id})`);
+          if (sec.kind === 'reading' && e.type !== 'read') errs.push(`${q}: bagian membaca hanya memuat soal "read" (${id})`);
+          if (sec.kind === 'listening' && e.type !== 'listen') errs.push(`${q}: bagian menyimak hanya memuat soal "listen" (${id})`);
+          if (sec.kind === 'grammar' && (e.type === 'read' || e.type === 'listen')) errs.push(`${q}: bagian tata bahasa tidak memuat soal bacaan/simakan (${id})`);
+        }
+      }
+    }
+  }
+  // Bank questions must not leak into lessons, homework, stories or older exams.
+  for (const h of pack.homework) for (const id of h.exerciseIds) if (bankOwner.has(id)) errs.push(`PR ${h.id}: soal ${id} milik bank ujian level`);
+  for (const x of pack.exams) for (const id of x.exerciseIds) if (bankOwner.has(id)) errs.push(`ujian ${x.id}: soal ${id} milik bank ujian level`);
+  for (const st of pack.stories ?? []) for (const id of st.questionIds) if (bankOwner.has(id)) errs.push(`cerita ${st.id}: soal ${id} milik bank ujian level`);
+  for (const e of pack.exercises) if (e.stage === 'exam' && !e.lessonId && !bankOwner.has(e.id) && e.id.startsWith('exam.level.')) errs.push(`soal ${e.id}: bank ujian level tetapi tidak dipakai bagian mana pun`);
   for (const s of pack.scenarios) {
     if (s.locked) continue;
     const nodeIds = new Set(s.nodes.map((n) => n.id));

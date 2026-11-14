@@ -170,3 +170,15 @@ button:not(:disabled), [role="button"] { cursor: pointer; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   .pijar *, .story-stage * { animation: none !important; }
 }
+
+/* Certificate print (Rilis 3): always light, A4 landscape, colours kept. */
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  .dark {
+    --bg: #ffffff; --surface: #ffffff; --surface-2: #eeedf7; --ink: #1e1b3a; --muted: #5b5878; --line: #dddaee;
+    --brand: #4b3fd6; --brand-strong: #362aa8; --brand-soft: #e8e6fb; --accent-strong: #92400e;
+    color-scheme: light;
+  }
+  body { background: #ffffff; }
+  .certificate { -webkit-print-color-adjust: exact; print-color-adjust: exact; break-inside: avoid; }
+}

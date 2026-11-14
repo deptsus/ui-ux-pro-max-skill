@@ -13,6 +13,8 @@ interface Props {
   grade?: Grade | null;
   onChange: (answer: Answer | null) => void;
   onSubmit?: () => void;
+  /** Restores a saved choice or typed answer (level exams keep a draft across reloads). */
+  initial?: Answer | null;
 }
 
 const TYPE_LABEL: Record<Exercise['type'], string> = {
@@ -57,7 +59,7 @@ function Context({ ex }: { ex: Exercise }) {
   return <div className="en rounded-2xl bg-surface-2 p-4 leading-relaxed">{ex.context}</div>;
 }
 
-export function ExerciseCard({ ex, seed, grade, onChange, onSubmit }: Props) {
+export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: Props) {
   const locked = !!grade;
   const [choice, setChoice] = useState<number | null>(null);
   const [text, setText] = useState('');
@@ -80,12 +82,13 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit }: Props) {
   const rights = useMemo(() => shuffle((ex.pairs ?? []).map((_, i) => i), seed + ex.id + 'r'), [ex, seed]);
 
   useEffect(() => {
-    setChoice(null);
-    setText('');
+    const restore = initial && (initial.choice !== undefined || initial.text !== undefined) ? initial : null;
+    setChoice(restore?.choice ?? null);
+    setText(restore?.text ?? '');
     setPicked([]);
     setWordIndex(null);
     setMatchState({ left: null, doneL: [], doneR: [], mistakes: 0, flash: null });
-    onChange(null);
+    onChange(restore);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ex.id, seed]);
 

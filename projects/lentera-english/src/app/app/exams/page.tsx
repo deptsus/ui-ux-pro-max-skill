@@ -10,6 +10,8 @@ import type { Cefr } from '@/lib/content/types';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
+import { LevelExam } from '@/components/exam/LevelExam';
+import { CertificatesCard } from '@/components/exam/Certificates';
 import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, Progress, dateTimeId } from '@/components/ui';
 
 function Exams() {
@@ -24,6 +26,8 @@ function Exams() {
   const status = (e: ExamDef) => (e.scope === 'unit' ? unitExamStatus(learner, ix, e.ref) : levelExamStatus(learner, ix, e.ref as Cefr, ent, now));
 
   if (id && !exam) return <Empty title="Ujian tidak ditemukan" action={<LinkButton href="/app/exams">Pusat Ujian</LinkButton>} />;
+  // Rilis 3: sectioned level exams are drawn and graded on the server.
+  if (exam?.sections?.length) return <LevelExam key={exam.id} exam={exam} />;
   if (exam && running) {
     return <SessionRunner key={attempt} title={exam.title} ctx="exam" exercises={questions} feedback="deferred" timeLimitSec={exam.timeLimitSec} seed={`${exam.id}:${attempt}`} exitHref="/app/exams"
       onFinish={(r) => {
@@ -68,6 +72,7 @@ function Exams() {
         <div className="min-w-0 flex-1"><h2 className="font-extrabold">Tes penempatan</h2><p className="text-sm text-muted">{learner.profile.placementDone ? `Hasil terakhir: level ${learner.profile.placementLevel} (${dateTimeId(learner.profile.placementAt ?? now)}).` : 'Belum pernah diikuti. Tes ini menentukan level awalmu.'}</p></div>
         <LinkButton href="/app/placement" size="sm" variant={learner.profile.placementDone ? 'secondary' : 'primary'}>{learner.profile.placementDone ? 'Ulangi' : 'Mulai'}</LinkButton>
       </Card>
+      <CertificatesCard />
       {groups.map(([title, list]) => (
         <section key={title} className="mb-6">
           <h2 className="mb-2 text-lg font-extrabold">{title}</h2>

@@ -290,6 +290,33 @@ export interface HomeworkDef {
   writing?: { prompt: string; minWords: number; mustInclude: string[]; model: string };
 }
 
+export type ExamSectionKind = 'grammar' | 'reading' | 'listening' | 'writing';
+/** Question types allowed in the server-graded exam bank: none of them gives its answer away in the question itself. */
+export const EXAM_BANK_TYPES = ['mc', 'tf', 'fill', 'read', 'listen', 'dialogue', 'translate', 'fix', 'construct'] as const;
+
+/**
+ * One part of a CEFR-style level exam (Rilis 3). Questions come from an
+ * exam-only bank that never reaches the learner's device with its keys: the
+ * server draws them, sends them without answers, and grades the submission.
+ */
+export interface ExamSection {
+  id: string;
+  kind: ExamSectionKind;
+  title: string;
+  /** Groups of question ids shown together (a passage and its questions); grammar groups hold one question. */
+  pool: string[][];
+  /** Groups drawn per attempt. */
+  take: number;
+  /** Writing prompts; one is drawn per attempt. */
+  writing?: NonNullable<HomeworkDef['writing']>[];
+  /** Minimum score for this part. */
+  passScore: number;
+  /** Set in packs sent to devices: pool and prompts were removed, only `count` remains. */
+  hidden?: boolean;
+  /** Questions (or writing tasks) per attempt, for the exam intro. */
+  count?: number;
+}
+
 export interface ExamDef {
   id: string;
   scope: 'unit' | 'level' | 'placement';
@@ -301,6 +328,8 @@ export interface ExamDef {
   /** Fixed questions. Unit and level exams also sample lesson pools. */
   exerciseIds: string[];
   sampleSize: number;
+  /** Sectioned, server-graded level exam (Rilis 3). Without it the exam runs the older lesson-pool format. */
+  sections?: ExamSection[];
 }
 
 export interface AudioResource {

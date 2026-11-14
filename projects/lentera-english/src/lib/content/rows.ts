@@ -1,6 +1,7 @@
 // Mapping between the runtime ContentPack and the database rows
 // (see supabase/migrations/0001_schema.sql and content_rows()).
 import { ACHIEVEMENTS } from '@/lib/engine/gamification';
+import { packForClient } from '@/lib/engine/levelExam';
 import type { ContentPack, Exercise, Lesson, ListeningItem, Story } from './types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -38,7 +39,7 @@ export function packToRows(pack: ContentPack): Rows {
     conversation_scenarios: pack.scenarios.map((s) => ({ id: s.id, title: s.title, level_code: s.level, setting: s.setting, goal: s.goal, closing: s.closing, is_premium: s.premium, start_node: s.start, nodes: s.nodes })),
     pronunciation_guides: pack.phonemes.map((p) => ({ id: p.id, ipa: p.ipa, label: p.label, examples: p.examples, how_to: p.howTo, common_error: p.commonError, mouth: p.mouth })),
     homework: pack.homework.map((h) => clean({ id: h.id, chapter_id: h.chapterId, lesson_id: h.lessonId, title: h.title, kind: h.kind, due_days: h.dueDays, writing: h.writing, question_ids: h.exerciseIds })),
-    exams: pack.exams.map((x) => ({ id: x.id, scope: x.scope, ref: x.ref, title: x.title, passing_score: x.passScore, time_limit_sec: x.timeLimitSec, is_premium: x.premium, sample_size: x.sampleSize, question_ids: x.exerciseIds })),
+    exams: pack.exams.map((x) => clean({ id: x.id, scope: x.scope, ref: x.ref, title: x.title, passing_score: x.passScore, time_limit_sec: x.timeLimitSec, is_premium: x.premium, sample_size: x.sampleSize, question_ids: x.exerciseIds, sections: x.sections })),
     achievements: ACHIEVEMENTS.map((a) => ({ id: a.id, title: a.title, description: a.desc, icon: a.icon })),
   };
 }
@@ -95,7 +96,7 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
     stories: (rows.stories ?? []).map((s): Story => ({ id: s.id, level: s.level_code, title: s.title, summary: s.summary ?? '', premium: s.is_premium, characters: s.characters ?? [], scenes: s.scenes ?? [], questionIds: storyQuestions(s.id) })),
     phonemes: (rows.pronunciation_guides ?? []).map((p) => ({ id: p.id, ipa: p.ipa, label: p.label, examples: p.examples, howTo: p.how_to, commonError: p.common_error, mouth: p.mouth })),
     homework: (rows.homework ?? []).map((h) => clean({ id: h.id, chapterId: h.chapter_id, lessonId: opt(h.lesson_id), title: h.title, kind: h.kind, dueDays: h.due_days, exerciseIds: h.question_ids ?? [], writing: opt(h.writing) })),
-    exams: (rows.exams ?? []).map((x) => ({ id: x.id, scope: x.scope, ref: x.ref, title: x.title, passScore: x.passing_score, timeLimitSec: x.time_limit_sec, premium: x.is_premium, exerciseIds: x.question_ids ?? [], sampleSize: x.sample_size })),
+    exams: (rows.exams ?? []).map((x) => clean({ id: x.id, scope: x.scope, ref: x.ref, title: x.title, passScore: x.passing_score, timeLimitSec: x.time_limit_sec, premium: x.is_premium, exerciseIds: x.question_ids ?? [], sampleSize: x.sample_size, sections: x.sections?.length ? x.sections : undefined })),
     audio: (rows.audio_resources ?? []).map((a) => clean({ key: a.key, accent: a.accent, url: a.url, speaker: opt(a.speaker), transcript: opt(a.transcript) })),
   };
 }
@@ -105,7 +106,8 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
  * and objectives (so the path can show them) but lose their body and all of
  * their exercises. This runs on the server; locked content never leaves it.
  */
-export function packForFree(pack: ContentPack): ContentPack {
+export function packForFree(full: ContentPack): ContentPack {
+  const pack = packForClient(full);
   const lockedLessons = new Set(pack.lessons.filter((l) => l.premium).map((l) => l.id));
   const lockedChapters = new Set(pack.chapters.filter((c) => c.premium).map((c) => c.id));
   const lockedListening = new Set(pack.listening.filter((l) => l.premium).map((l) => l.id));

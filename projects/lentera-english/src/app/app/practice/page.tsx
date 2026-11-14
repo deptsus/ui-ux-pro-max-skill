@@ -6,7 +6,7 @@ import { Suspense, useCallback, useMemo, useState } from 'react';
 import { DRILL, MASTERY } from '@/lib/engine/config';
 import { retestReady } from '@/lib/engine/mastery';
 import { buildRetest, buildTimedRound, nextLadderItem, tagPool, topicPool } from '@/lib/engine/sessions';
-import { addXp, finishDrill, finishRetest } from '@/lib/engine/state';
+import { addXp, finishDrill, finishRetest, finishTopicPractice } from '@/lib/engine/state';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
 import { Mascot } from '@/components/Mascot';
@@ -18,6 +18,8 @@ function Practice() {
   const mode = params.get('mode') ?? 'drill';
   const tagId = params.get('tag') ?? '';
   const topicId = params.get('topic') ?? '';
+  /** Set when a failed level exam sent the learner here (required practice before a retake). */
+  const examId = params.get('exam') ?? '';
   const { ix, learner, now } = useApp();
   const [round, setRound] = useState(1);
   const [running, setRunning] = useState(false);
@@ -43,6 +45,7 @@ function Practice() {
         feedback={mode === 'retest' ? 'deferred' : 'immediate'}
         onFinish={(r) => {
           if (mode === 'drill') act((d, at) => setOutcome(finishDrill(d, tagId, r.score, at)));
+          else if (mode === 'topic') act((d, at) => setOutcome(finishTopicPractice(d, topicId, r.score, at)));
           else if (mode === 'retest') act((d, at) => setOutcome(finishRetest(d, topicId, r.score, at)));
           else if (mode === 'timed' && r.score === 100) act((d, at) => addXp(d, 10, 'timed-perfect', at));
           setResult(r);
@@ -57,6 +60,9 @@ function Practice() {
         {mode === 'drill' && (outcome ? <Notice tone="ok" title="Pola kesalahan ini teratasi">Rekomendasi perbaikan dicabut. Kalau kesalahan yang sama muncul lagi, latihan ini akan ditawarkan kembali.</Notice> : <Notice tone="bad" title={`Butuh ${DRILL.passScore}% untuk lulus latihan perbaikan`}>Baca lagi materinya, lalu ulangi. Soal mulai dari yang mudah dan naik bertahap.</Notice>)}
         {mode === 'drill' && !outcome && <LinkButton href={lessonHref} variant="secondary" full>Buka materi</LinkButton>}
         {mode === 'retest' && (outcome ? <Notice tone="ok" title="Topik resmi dikuasai">Kamu membuktikannya dua kali di hari berbeda. Topik ini sekarang masuk ulangan berjangka panjang.</Notice> : <Notice tone="bad" title="Belum terkonfirmasi">Butuh {MASTERY.retestPassScore}% pada tes ulang. Status topik kembali ke &ldquo;berlatih&rdquo;; kumpulkan lagi bukti penguasaan lalu coba tes ulang berikutnya.</Notice>)}
+        {mode === 'topic' && examId && (outcome
+          ? <Notice tone="ok" title="Latihan wajib tuntas">Latihan untuk topik ini sudah memenuhi syarat mengulang ujian level.<LinkButton href={`/app/exams?id=${examId}`} size="sm" className="mt-2">Kembali ke ujian</LinkButton></Notice>
+          : <Notice tone="bad" title={`Butuh ${DRILL.passScore}% agar latihan ini dihitung`}>Ulangi latihan ini sebelum mengulang ujian level.</Notice>)}
         {mode === 'timed' && result.score === 100 && <Notice tone="accent" title="Sempurna!">Bonus 10 XP untuk ronde tanpa salah.</Notice>}
       </SessionSummary>
     );

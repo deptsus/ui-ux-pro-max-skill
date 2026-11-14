@@ -121,7 +121,19 @@ async function chapterWriting(l) {
   }
 }
 const unitExam = (unitId) => { const x = pack.exams.find((e) => e.scope === 'unit' && e.ref === unitId); return x ? takeExam(x) : null; };
-const levelExam = (level) => { const x = pack.exams.find((e) => e.scope === 'level' && e.ref === level); return x ? takeExam(x) : null; };
+// Level exams are drawn and graded on the server (Rilis 3; full run in e2e/level-exams.mjs).
+// Here: finishing the level must open its exam.
+async function levelExam(level) {
+  const x = pack.exams.find((e) => e.scope === 'level' && e.ref === level);
+  if (!x) return;
+  try {
+    await page.goto(`${BASE}/app/exams?id=${x.id}`);
+    await page.getByRole('heading', { name: 'Isi ujian' }).waitFor({ timeout: 30000 });
+    check(`${x.id}: terbuka setelah semua pelajaran dan ujian unit level ${level}`, await button('Mulai ujian').isEnabled());
+  } catch (e) {
+    check(`${x.id}: gagal`, false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+}
 
 const started = Date.now();
 for (const l of lessons) {
