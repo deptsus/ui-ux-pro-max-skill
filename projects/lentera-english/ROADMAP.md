@@ -31,7 +31,7 @@ Tanggal di bawah adalah perkiraan, bukan janji. Urutan rilis boleh diubah pemili
 ### Aturan `[deploy]`
 
 - Push biasa: tersimpan di GitHub, situs **tidak** dibangun ulang.
-- Commit yang pesannya memuat `[deploy]`: Netlify membangun dan menerbitkan
+- Commit yang baris judulnya memuat `[deploy]`: Netlify membangun dan menerbitkan
   semua perubahan sejak deploy terakhir.
 - Saklar darurat: variabel Netlify `LENTERA_ALWAYS_BUILD=1` membuat setiap push
   dibangun lagi. Tombol "Trigger deploy" di Netlify juga tunduk pada aturan ini.
