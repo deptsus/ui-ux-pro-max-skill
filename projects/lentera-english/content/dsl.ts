@@ -69,6 +69,11 @@ const typed = (type: ExerciseType, defaultPrompt: string) =>
     return { ...base(type, d, prompt ?? defaultPrompt, exp, rest), text, answers, ...(e ? { errors: errs(e) } : {}) };
   };
 export const fill = typed('fill', 'Lengkapi kalimat dengan kata yang tepat.');
+/** Dictation: a fill-in item whose missing word is only heard, never shown. */
+export const dictation = (d: D, audioText: string, text: string, answers: string[], exp: string, e?: Errs, x?: Extra): Draft => ({
+  ...fill(d, text, answers, exp, e, { prompt: 'Dengarkan kalimatnya, lalu tulis kata yang hilang.', ...x }),
+  audioText,
+});
 export const construct = typed('construct', 'Susun kalimat bahasa Inggris yang benar dari kata kunci berikut.');
 export const tr = typed('translate', 'Terjemahkan ke dalam bahasa Inggris.');
 export const fix = typed('fix', 'Kalimat ini mengandung kesalahan. Tulis ulang dengan benar.');

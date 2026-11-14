@@ -192,7 +192,7 @@ export const TABLES: TableDef[] = [
       { key: 'status', label: 'Status', kind: 'select', choices: STATUS, required: true, filter: true },
       { key: 'prompt', label: 'Instruksi soal', kind: 'textarea', rows: 2, required: true },
       { key: 'context', label: 'Bacaan atau dialog', kind: 'textarea', rows: 5, payload: true, en: true, when: forTypes(['read', 'dialogue'], 'context'), hint: 'Untuk dialog, tulis satu giliran per baris (Nama: kalimat). Pakai ___ untuk bagian yang dilengkapi.' },
-      { key: 'audioText', label: 'Teks yang dibacakan', kind: 'textarea', rows: 3, payload: true, en: true, when: forTypes(['listen'], 'audioText'), hint: 'Dibacakan oleh rekaman (bila ada) atau suara perangkat.' },
+      { key: 'audioText', label: 'Teks yang dibacakan', kind: 'textarea', rows: 3, payload: true, en: true, when: forTypes(['listen'], 'audioText'), hint: 'Dibacakan oleh rekaman (bila ada) atau suara perangkat. Pada soal isi bagian kosong, teks ini menjadikannya dikte: kalimat dengan kunci jawaban harus sama persis dengan yang dibacakan.' },
       { key: 'text', label: 'Teks soal', kind: 'textarea', rows: 2, payload: true, when: forTypes(usesText, 'text'), hint: 'Teks utama soal. Arti tepatnya bergantung pada jenis soal.' },
       { key: 'options', label: 'Pilihan jawaban', kind: 'options', when: (r) => OPTION_TYPES.includes(r.type) || (r.options?.length ?? 0) > 0 },
       { key: 'answers', label: 'Kunci jawaban', kind: 'lines', payload: true, en: true, when: forTypes(TYPED_TYPES, 'answers'), hint: 'Satu jawaban yang diterima per baris. Baris pertama menjadi jawaban model.' },

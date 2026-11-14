@@ -15,9 +15,11 @@ import { advancedModality, collocations, ellipsis, understatement } from './c2-2
 import { inversion, passive, presentPerfect, subjunctive } from './upper';
 import { vocabulary } from './vocabulary';
 import { scenarios } from './conversations';
+import { scenariosUpper } from './conversations-upper';
 import { listening, phonemes, placement } from './listening';
+import { listeningUpper } from './listening-upper';
 
-export const CONTENT_VERSION = '2026.11.3';
+export const CONTENT_VERSION = '2026.11.4';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -210,6 +212,7 @@ const tags: MisconceptionTag[] = [
   { id: 'neednt-didnt-need', topic: 'c2.modality', title: "Needn't have atau didn't need to?", tip: "needn't have done = sudah dilakukan, ternyata tidak perlu. didn't need to do = tidak perlu." },
   { id: 'modal-past-meaning', topic: 'c2.modality', title: 'Makna modal masa lalu', tip: "must have = hampir pasti; might have = mungkin; can't have = tidak mungkin; should have = kritik." },
   { id: 'short-long-i', topic: 'skill.listening', title: 'Vokal /ɪ/ pendek dan /iː/ panjang', tip: 'ship /ɪ/ pendek dan kendur; sheep /iː/ panjang dengan bibir tersenyum.' },
+  { id: 'weak-forms', topic: 'skill.listening', title: 'Kontraksi dan bentuk lemah', tip: "Dengarkan bunyi kecil setelah subjek: I'd = I would/had, we'll = we will, she's + bentuk ketiga = she has. 'can' positif lemah /kən/, 'can't' bertekanan." },
 ];
 
 const HOMEWORK_KIND: Record<string, HomeworkDef['kind']> = {
@@ -273,13 +276,28 @@ export function buildPack(): ContentPack {
   );
 
   // Listening.
-  const listeningItems: ListeningItem[] = listening.map((l) => {
+  const listeningItems: ListeningItem[] = [...listening, ...listeningUpper].map((l) => {
     const qs = stamp(l.questions, l.id, 'listening', 'skill.listening', null);
     exercises.push(...qs);
     return { id: l.id, level: l.level, title: l.title, kind: l.kind, transcript: l.transcript, translation: l.translation, premium: l.premium, questionIds: qs.map((q) => q.id) };
   });
   const hwListen = listeningItems.find((l) => l.id === 'listen-anna')!;
   homework.push({ id: 'hw.a1-c1.listen', chapterId: 'a1-c1', title: 'Menyimak: Perkenalan Anna', kind: 'listening', dueDays: 5, exerciseIds: hwListen.questionIds });
+  // One listening assignment per B1–C2 chapter, chosen to echo its grammar.
+  const LISTENING_HOMEWORK: [chapterId: string, listeningId: string][] = [
+    ['b1-c1', 'listen-b1-contractions'], // she's finished = she has finished
+    ['b1-c2', 'listen-b1-voicemail'],
+    ['b2-c1', 'listen-b2-news'], // will be reviewed, was tested
+    ['b2-c2', 'listen-b2-meeting'],
+    ['c1-c1', 'listen-c1-remote'], // "What I would say is that ..." (cleft)
+    ['c1-c2', 'listen-c1-lecture'], // hedging and discourse markers
+    ['c2-c1', 'listen-c2-tax'],
+    ['c2-c2', 'listen-c2-app'], // understatement and irony
+  ];
+  for (const [chapterId, listeningId] of LISTENING_HOMEWORK) {
+    const item = listeningItems.find((l) => l.id === listeningId)!;
+    homework.push({ id: `hw.${chapterId}.listen`, chapterId, title: `Menyimak: ${item.title}`, kind: 'listening', dueDays: 5, exerciseIds: item.questionIds });
+  }
 
   // Placement test and level exams.
   exercises.push(...stamp(placement, 'placement', 'placement', 'a1.to-be', null));
@@ -292,5 +310,5 @@ export function buildPack(): ContentPack {
     { id: 'exam.level.C2', scope: 'level', ref: 'C2', title: 'Ujian Level C2', passScore: 80, timeLimitSec: 30 * 60, premium: true, exerciseIds: [], sampleSize: 15 },
   );
 
-  return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios, listening: listeningItems, phonemes, homework, exams, audio: [] };
+  return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios: [...scenarios, ...scenariosUpper], listening: listeningItems, phonemes, homework, exams, audio: [] };
 }

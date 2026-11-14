@@ -95,11 +95,11 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit }: Props) {
   return (
     <div className="space-y-5" data-ex={ex.id} data-type={ex.type}>
       <div>
-        <p className="text-xs font-bold uppercase tracking-wide text-brand">{TYPE_LABEL[ex.type]}</p>
+        <p className="text-xs font-bold uppercase tracking-wide text-brand">{ex.type === 'fill' && ex.audioText ? 'Dikte' : TYPE_LABEL[ex.type]}</p>
         <h2 className="mt-1 text-lg font-bold sm:text-xl">{ex.prompt}</h2>
       </div>
 
-      {ex.type === 'listen' && ex.audioText && (
+      {(ex.type === 'listen' || ex.type === 'fill') && ex.audioText && (
         <div className="flex flex-col items-start gap-2 rounded-2xl bg-surface-2 p-4">
           <AudioButton text={ex.audioText} audioKey={ex.audioKey} size="lg" showSource />
           {locked && <p className="en text-sm text-muted">Transkrip: {ex.audioText}</p>}

@@ -2,7 +2,7 @@
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Crown, Eye, EyeOff, Mic, Square } from 'lucide-react';
-import type { Exercise } from '@/lib/content/types';
+import { CEFR_ORDER, type Exercise } from '@/lib/content/types';
 import { audioSource } from '@/lib/client/audio';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
@@ -88,15 +88,26 @@ function Listening() {
       </div>
 
       {tab === 'menyimak' ? (
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {ix.pack.listening.map((l) => (
-            <Card as="li" key={l.id} className={cx('flex flex-col gap-2', l.locked && 'opacity-80')}>
-              <div className="flex flex-wrap items-center gap-2"><Badge>{l.level}</Badge><Badge tone="muted">{l.kind === 'word' ? 'Pengenalan kata' : l.kind === 'sentence' ? 'Kalimat' : 'Pemahaman'}</Badge>{l.locked && <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge>}</div>
-              <p className="font-extrabold">{l.title}</p>
-              <LinkButton href={l.locked ? '/app/subscription' : `/app/listening?id=${l.id}`} size="sm" variant={l.locked ? 'accent' : 'secondary'} className="mt-auto">{l.locked ? 'Buka dengan Premium' : 'Buka latihan'}</LinkButton>
-            </Card>
-          ))}
-        </ul>
+        <div>
+          {CEFR_ORDER.map((level) => {
+            const list = ix.pack.listening.filter((l) => l.level === level);
+            if (!list.length) return null;
+            return (
+              <section key={level} className="mb-6" aria-labelledby={`level-${level}`}>
+                <h2 id={`level-${level}`} className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Level {level} · {ix.pack.levels.find((x) => x.code === level)?.title}</h2>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {list.map((l) => (
+                    <Card as="li" key={l.id} className={cx('flex flex-col gap-2', l.locked && 'opacity-80')}>
+                      <div className="flex flex-wrap items-center gap-2"><Badge>{l.level}</Badge><Badge tone="muted">{l.kind === 'word' ? 'Pengenalan kata' : l.kind === 'sentence' ? 'Kalimat' : 'Pemahaman'}</Badge>{l.locked && <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge>}</div>
+                      <h3 className="font-extrabold">{l.title}</h3>
+                      <LinkButton href={l.locked ? '/app/subscription' : `/app/listening?id=${l.id}`} size="sm" variant={l.locked ? 'accent' : 'secondary'} className="mt-auto">{l.locked ? 'Buka dengan Premium' : 'Buka latihan'}</LinkButton>
+                    </Card>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
+        </div>
       ) : (
         <div className="space-y-4">
           <Notice tone="brand" title="Cara berlatih">Dengarkan contoh (normal lalu lambat), lihat ilustrasi posisi mulut, rekam suaramu, dan bandingkan sendiri.</Notice>

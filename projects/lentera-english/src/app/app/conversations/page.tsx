@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Check, Crown, Languages, Star, X } from 'lucide-react';
-import type { ScenarioOption } from '@/lib/content/types';
+import { CEFR_ORDER, type ScenarioOption } from '@/lib/content/types';
 import { shuffle } from '@/lib/engine/grading';
 import { completeConversation } from '@/lib/engine/state';
 import { useApp } from '@/lib/client/hooks';
@@ -116,19 +116,28 @@ function Conversations() {
   return (
     <div>
       <PageHeader title="Simulator Percakapan" subtitle="Latihan situasi nyata dengan dialog bercabang. Tiap pilihanmu dinilai dari sisi tata bahasa dan kewajaran, lengkap dengan ungkapan alternatif." />
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {ix.pack.scenarios.map((s) => {
-          const rec = learner.conversations[s.id];
-          return (
-            <Card as="li" key={s.id} className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-center gap-2"><Badge>{s.level}</Badge>{s.locked ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : rec ? <Badge tone="ok">Terbaik {rec.best}%</Badge> : null}</div>
-              <h2 className="text-lg font-extrabold">{s.title}</h2>
-              <p className="text-sm text-muted">{s.goal}</p>
-              <LinkButton href={s.locked ? '/app/subscription' : `/app/conversations?id=${s.id}`} size="sm" variant={s.locked ? 'accent' : rec ? 'secondary' : 'primary'} className="mt-auto">{s.locked ? 'Buka dengan Premium' : rec ? 'Main lagi' : 'Mulai percakapan'}</LinkButton>
-            </Card>
-          );
-        })}
-      </ul>
+      {CEFR_ORDER.map((level) => {
+        const list = ix.pack.scenarios.filter((s) => s.level === level);
+        if (!list.length) return null;
+        return (
+          <section key={level} className="mb-6" aria-labelledby={`level-${level}`}>
+            <h2 id={`level-${level}`} className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Level {level} · {ix.pack.levels.find((l) => l.code === level)?.title}</h2>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {list.map((s) => {
+                const rec = learner.conversations[s.id];
+                return (
+                  <Card as="li" key={s.id} className="flex flex-col gap-2">
+                    <div className="flex flex-wrap items-center gap-2"><Badge>{s.level}</Badge>{s.locked ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : rec ? <Badge tone="ok">Terbaik {rec.best}%</Badge> : null}</div>
+                    <h3 className="text-lg font-extrabold">{s.title}</h3>
+                    <p className="text-sm text-muted">{s.goal}</p>
+                    <LinkButton href={s.locked ? '/app/subscription' : `/app/conversations?id=${s.id}`} size="sm" variant={s.locked ? 'accent' : rec ? 'secondary' : 'primary'} className="mt-auto">{s.locked ? 'Buka dengan Premium' : rec ? 'Main lagi' : 'Mulai percakapan'}</LinkButton>
+                  </Card>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }

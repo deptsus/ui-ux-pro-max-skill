@@ -1,10 +1,10 @@
 // Listening items, placement test and the pronunciation guide.
 import type { Phoneme } from '@/lib/content/types';
-import { listen, mc, type Draft } from './dsl';
+import { dictation, listen, mc, type Draft } from './dsl';
 
 export interface ListeningDraft {
   id: string;
-  level: 'A1' | 'A2' | 'B1';
+  level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
   title: string;
   kind: 'sentence' | 'word' | 'passage';
   transcript: string;
@@ -98,6 +98,9 @@ export const listening: ListeningDraft[] = [
         ['Platform two', 'Peron dua adalah peron semula: "platform four, not platform two".'],
         ['Platform ten', 'Angka "ten" hanya muncul pada jam keberangkatan (10:15).'],
       ], '"It will now leave from platform four, not platform two."', { topic: 'skill.listening' }),
+      dictation(3, 'The 10:15 train to Yogyakarta has been delayed by thirty minutes because of heavy rain.', 'The 10:15 train to Yogyakarta has been delayed by ___ minutes because of heavy rain.', ['thirty', '30'],
+        '"thirty" bertekanan di suku kata pertama: THIR-ty. Angka belasan bertekanan di akhir: thir-TEEN.',
+        { thirteen: ['"thirteen" bertekanan di akhir (thir-TEEN) dan berakhiran bunyi /n/. Yang terdengar "THIR-ty", dengan tekanan di depan.'] }, { topic: 'skill.listening' }),
     ],
   },
 ];

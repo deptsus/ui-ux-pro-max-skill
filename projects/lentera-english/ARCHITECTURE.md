@@ -27,13 +27,16 @@ Tidak ada dependency AI atau LLM.
 ```
 projects/lentera-english/
 ├── content/                  Kurikulum yang ditulis tangan (TypeScript)
-│   ├── dsl.ts                Helper penulisan soal: mc, fill, tr, fix, arrange, spot, match, para, ...
-│   ├── a1-1.ts a1-2.ts a1-3.ts   Pelajaran A1
-│   ├── a2.ts                 Pelajaran A2 + bank latihan was/were
-│   ├── upper.ts              Satu pelajaran untuk B1, B2, C1, C2
-│   ├── vocabulary.ts         74 kosakata
-│   ├── conversations.ts      11 skenario dialog bercabang
-│   ├── listening.ts          Materi menyimak, fonem, soal tes penempatan
+│   ├── dsl.ts                Helper penulisan soal: mc, fill, dictation, tr, fix, arrange, spot, match, para, ...
+│   ├── a1-1.ts … a1-4.ts     Pelajaran A1
+│   ├── a2.ts a2-2.ts         Pelajaran A2 + bank latihan was/were
+│   ├── upper.ts              Pelajaran pertama B1, B2, C1, C2
+│   ├── b1-2.ts b2-2.ts c1-2.ts c2-2.ts   Pelajaran B1–C2 lainnya (tahap 2)
+│   ├── vocabulary.ts         148 kosakata
+│   ├── conversations.ts      11 skenario dialog bercabang A1–B2 + helper scenario()
+│   ├── conversations-upper.ts 5 skenario B2–C2 (tahap 3)
+│   ├── listening.ts          Materi menyimak A1–B1, fonem, soal tes penempatan
+│   ├── listening-upper.ts    11 materi menyimak B1–C2 dengan dikte (tahap 3)
 │   └── index.ts              Silabus, topik, pola kesalahan, buildPack() → ContentPack
 ├── scripts/check-content.ts  Gerbang kualitas konten (npm run content:check)
 ├── scripts/export-content.ts Cadangkan kurikulum dari basis data ke backups/*.json (npm run content:export)

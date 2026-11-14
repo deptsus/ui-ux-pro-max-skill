@@ -1,7 +1,7 @@
 // Content quality gate. Used by `npm run content:check`, by the test suite and
 // by the CMS before a curriculum version is published.
 import type { ContentPack, Exercise } from './types';
-import { grade } from '@/lib/engine/grading';
+import { grade, normalize } from '@/lib/engine/grading';
 
 export function validateExercise(e: Exercise): string[] {
   const errs: string[] = [];
@@ -38,6 +38,11 @@ export function validateExercise(e: Exercise): string[] {
     if (e.type === 'arrange' && (e.answers?.[0] ?? '').split(' ').length < 3) bad('arrange butuh minimal tiga kata');
   }
   if (e.type === 'listen' && !e.audioText && !e.audioKey) bad('listen butuh audioText atau audioKey');
+  // Dictation: the model answer, put back into the gap, must be exactly what the audio says.
+  if (e.type === 'fill' && e.audioText && e.answers?.length && (e.text ?? '').includes('___')) {
+    const heard = ` ${normalize(e.audioText)} `;
+    if (!heard.includes(` ${normalize((e.text ?? '').replace('___', e.answers[0]))} `)) bad('dikte: kalimat dengan kunci jawaban tidak sama dengan audionya');
+  }
   // A hint must point the way, not give the answer away. Naming the answer
   // among the alternatives ("am / is / are") is fine; naming it alone is not.
   const hint = (e.hint ?? '').toLowerCase();
@@ -112,7 +117,22 @@ export function validatePack(pack: ContentPack): string[] {
         if (o.next !== 'end' && !nodeIds.has(o.next)) errs.push(`skenario ${s.id}/${n.id}: tujuan "${o.next}" tidak ada`);
         if (!o.grammar.trim() || !o.alternatives.length) errs.push(`skenario ${s.id}/${n.id}: umpan balik belum lengkap`);
       }
+      if (new Set(n.options.map((o) => o.text)).size !== n.options.length) errs.push(`skenario ${s.id}/${n.id}: pilihan duplikat`);
     }
+    // Every node must be reachable from the start, and no path may loop forever.
+    const byId = new Map(s.nodes.map((n) => [n.id, n]));
+    const seen = new Set<string>();
+    const onPath = new Set<string>();
+    const walk = (id: string): void => {
+      if (onPath.has(id)) { errs.push(`skenario ${s.id}: jalur berputar di "${id}"`); return; }
+      if (seen.has(id) || !byId.has(id)) return;
+      seen.add(id);
+      onPath.add(id);
+      for (const o of byId.get(id)!.options) if (o.next !== 'end') walk(o.next);
+      onPath.delete(id);
+    };
+    walk(s.start);
+    for (const n of s.nodes) if (!seen.has(n.id)) errs.push(`skenario ${s.id}/${n.id}: tidak bisa dicapai dari awal`);
   }
   for (const l of pack.listening) for (const id of l.questionIds) if (!ids.has(id)) errs.push(`listening ${l.id}: soal ${id} tidak ada`);
   return errs;

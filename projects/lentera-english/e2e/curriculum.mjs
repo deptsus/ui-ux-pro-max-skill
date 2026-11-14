@@ -85,6 +85,25 @@ async function takeExam(exam) {
     check(`${exam.id}: gagal`, false, String(e.message).split('\n')[0].slice(0, 200));
   }
 }
+// A chapter's listening assignment shows up once a lesson of that chapter is done.
+const doneChapterHw = new Set();
+async function chapterListening(l) {
+  const hw = pack.homework.find((h) => h.id === `hw.${unitOf.get(l.unitId).chapterId}.listen`);
+  if (!hw || doneChapterHw.has(hw.id)) return;
+  doneChapterHw.add(hw.id);
+  try {
+    await page.goto(`${BASE}/app/homework`);
+    await page.getByText(hw.title, { exact: true }).waitFor({ timeout: 30000 });
+    await page.goto(`${BASE}/app/homework?id=${hw.id}`);
+    await button('Kerjakan PR').click({ timeout: 30000 });
+    const answered = await runSession(page, pack);
+    await page.getByRole('heading', { name: 'PR dikumpulkan' }).waitFor({ timeout: 15000 });
+    check(`${hw.id}: PR menyimak bab muncul dan ${answered.length} soal diterima`, answered.length === hw.exerciseIds.length);
+  } catch (e) {
+    await page.screenshot({ path: path.join(SHOTS, `kurikulum-gagal-${hw.id}.png`), fullPage: true }).catch(() => {});
+    check(`${hw.id}: gagal`, false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+}
 const unitExam = (unitId) => { const x = pack.exams.find((e) => e.scope === 'unit' && e.ref === unitId); return x ? takeExam(x) : null; };
 const levelExam = (level) => { const x = pack.exams.find((e) => e.scope === 'level' && e.ref === level); return x ? takeExam(x) : null; };
 
@@ -122,6 +141,7 @@ for (const l of lessons) {
     await page.screenshot({ path: path.join(SHOTS, `kurikulum-gagal-${l.id}.png`), fullPage: true }).catch(() => {});
     check(`${l.id}: macet setelah ${answered} soal`, false, String(e.message).split('\n')[0].slice(0, 200));
   }
+  await chapterListening(l);
   if (lastOfUnit.get(l.unitId) === l.id) await unitExam(l.unitId);
   if (!only.length && lastOfLevel.get(levelOf(l)) === l.id) await levelExam(levelOf(l));
 }

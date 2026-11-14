@@ -97,23 +97,27 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
  */
 export function packForFree(pack: ContentPack): ContentPack {
   const lockedLessons = new Set(pack.lessons.filter((l) => l.premium).map((l) => l.id));
+  const lockedChapters = new Set(pack.chapters.filter((c) => c.premium).map((c) => c.id));
   const lockedListening = new Set(pack.listening.filter((l) => l.premium).map((l) => l.id));
   const lockedQuestions = new Set(pack.listening.filter((l) => l.premium).flatMap((l) => l.questionIds));
   const freeTopics = new Set(pack.lessons.filter((l) => !l.premium).map((l) => l.topic));
   freeTopics.add('skill.listening');
+  const exercises = pack.exercises.filter((e) => {
+    if (e.lessonId && lockedLessons.has(e.lessonId)) return false;
+    if (lockedQuestions.has(e.id)) return false;
+    if (e.stage === 'placement') return true;
+    // Drill banks and exam extras follow their topic.
+    return e.lessonId ? true : freeTopics.has(e.topic);
+  });
+  const kept = new Set(exercises.map((e) => e.id));
   return {
     ...pack,
     lessons: pack.lessons.map((l) => (l.premium ? { ...l, locked: true, intro: '', teaching: [], demo: [], vocab: undefined } : l)),
-    exercises: pack.exercises.filter((e) => {
-      if (e.lessonId && lockedLessons.has(e.lessonId)) return false;
-      if (lockedQuestions.has(e.id)) return false;
-      if (e.stage === 'placement') return true;
-      // Drill banks and exam extras follow their topic.
-      return e.lessonId ? true : freeTopics.has(e.topic);
-    }),
+    exercises,
     vocabulary: pack.vocabulary.filter((v) => !v.premium),
     scenarios: pack.scenarios.map((s) => (s.premium ? { ...s, locked: true, nodes: [], closing: '' } : s)),
     listening: pack.listening.map((l) => (lockedListening.has(l.id) ? { ...l, locked: true, transcript: '', translation: '', questionIds: [] } : l)),
-    homework: pack.homework.filter((h) => !h.lessonId || !lockedLessons.has(h.lessonId)),
+    // Homework of a Premium lesson or chapter, or pointing at a stripped question, stays on the server.
+    homework: pack.homework.filter((h) => (!h.lessonId || !lockedLessons.has(h.lessonId)) && !lockedChapters.has(h.chapterId) && h.exerciseIds.every((id) => kept.has(id))),
   };
 }

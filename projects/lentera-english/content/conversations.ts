@@ -2,10 +2,10 @@
 // by hand; the app only walks the dialogue tree.
 import type { Cefr, Scenario, ScenarioNode } from '@/lib/content/types';
 
-type O = [text: string, correct: boolean, natural: 1 | 2 | 3, grammar: string, alternatives: string[], next: string];
-type N = [id: string, speaker: string, line: string, lineId: string, options: O[]];
+export type O = [text: string, correct: boolean, natural: 1 | 2 | 3, grammar: string, alternatives: string[], next: string];
+export type N = [id: string, speaker: string, line: string, lineId: string, options: O[]];
 
-const scenario = (id: string, title: string, level: Cefr, premium: boolean, setting: string, goal: string, closing: string, nodes: N[]): Scenario => ({
+export const scenario = (id: string, title: string, level: Cefr, premium: boolean, setting: string, goal: string, closing: string, nodes: N[]): Scenario => ({
   id, title, level, premium, setting, goal, closing,
   start: nodes[0][0],
   nodes: nodes.map(([nid, speaker, line, lineId, options]): ScenarioNode => ({
