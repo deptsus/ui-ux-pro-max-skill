@@ -46,10 +46,12 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Tahap 3: 11 materi menyimak B1–C2 (dengan dikte) dan 5 skenario percakapan B2–C2, PR menyimak per bab B1–C2 (`content/listening-upper.ts`, `content/conversations-upper.ts`; `npm run e2e:skills`). Menunggu pemeriksaan pemilik sebelum diterbitkan.
 - [x] Rilis 1 dari `ROADMAP.md`: Pijar bergerak, 6 cerita bergambar A1–A2, Catatan Pemeriksaan (migrasi 0008). Pemilik: jalankan `apply-0008.sql`, lalu impor dan terbitkan.
 - [x] Rilis 2 dari `ROADMAP.md`: 10 pelajaran A2–B1, 4 cerita, 2 percakapan, 2 materi menyimak, PR menulis tiap bab A2–B1.
-- [ ] Rilis 3–6 dari `ROADMAP.md` (dikerjakan per rilis, satu deploy per rilis).
-- [ ] Ikut deploy Rilis 3: perbaikan urutan cerita di rencana mingguan (commit `ca64712`), lalu periksa di situs live.
+- [x] Rilis 3 dari `ROADMAP.md`: ujian level bergaya CEFR dinilai di server, bank soal khusus ujian A1–C2, pembahasan + latihan perbaikan, jeda dan latihan wajib, sertifikat dengan kode verifikasi (`tests/rilis3.test.ts`, `e2e/level-exams.mjs`). Pemilik: jalankan `apply-0009.sql`, lalu impor ulang + terbitkan.
+- [x] Ikut deploy Rilis 3: perbaikan urutan cerita di rencana mingguan (commit `ca64712`).
+- [ ] Rilis 4–6 dari `ROADMAP.md` (dikerjakan per rilis, satu deploy per rilis).
+- [ ] Perbesar bank soal ujian level (sekarang 12 + 8 + 8 soal per level); batas waktu ujian level belum dicek server (hanya di perangkat).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).
-- [ ] Ujian level B1, B2, C1, C2 (baru ada A1 dan A2).
+- [x] Ujian level B1, B2, C1, C2 (Rilis 3: semua level A1–C2 punya ujian empat bagian).
 - [ ] Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Sekarang hanya di klien; konten Premium sudah dipangkas di server.
 - [ ] Deploy (hosting Next.js + Supabase), domain HTTPS, env produksi.
 

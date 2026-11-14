@@ -130,9 +130,13 @@ Rencana awal:
 - Semua materi mengikuti aturan mutu yang sama: kesalahan khas penutur bahasa
   Indonesia, semua jawaban alternatif yang benar diterima, gerbang mutu lolos.
 
-### Rilis 3 — "Ujian yang Sungguhan" (perkiraan Januari 2027)
+### Rilis 3 — "Ujian yang Sungguhan" — **SELESAI 14 November 2026** (versi konten 2027.1.0, migrasi 0009)
 
-- **Sudah menunggu di GitHub, ikut deploy rilis ini**: perbaikan urutan cerita di rencana mingguan (commit `ca64712`). Periksa di situs live setelah deploy (lihat PROJECT_STATUS, "MENUNGGU DEPLOY").
+Isi akhirnya: bank soal khusus ujian per level (12 soal tata bahasa & kosakata, 2 teks bacaan × 4 soal, 2 rekaman × 4 soal, 2 tugas menulis), ujian empat bagian yang diambil dan dinilai di server (8 + 4 + 4 soal + 1 tugas per percobaan; waktu 30–45 menit), pembahasan per bagian dan per topik dengan tautan perbaikan, jeda 20 jam (dicek server) + latihan wajib untuk maksimal dua topik terlemah, sertifikat dengan kode verifikasi di `/sertifikat`. Ikut terbit: perbaikan urutan cerita di rencana mingguan (commit `ca64712`).
+
+Catatan untuk rilis berikutnya: bank soal masih kecil (percobaan ulang sering memunculkan soal yang sama dalam urutan lain). Tambahkan soal ke bank lewat CMS (tahap soal "exam", lalu daftarkan ID-nya di kolom "Bagian ujian level") atau di `content/exam-bank.ts`.
+
+Rencana awal:
 
 - **Bank soal khusus ujian** yang tidak muncul di pelajaran, supaya ujian
   menguji pemahaman, bukan hafalan soal.
