@@ -1,5 +1,8 @@
-# Netlify build for Lentera English (Next.js, built with the OpenNext adapter
-# that Netlify applies automatically; do not pin @netlify/plugin-nextjs).
+# Netlify build for Lentera English (Next.js on the OpenNext adapter,
+# @netlify/plugin-nextjs). The adapter is declared below because the first
+# deploy published the raw .next folder without it (plugin_state "none", no
+# functions, every route 404). It is not added to package.json, so Netlify
+# keeps it on the current version.
 # Runtime variables (Supabase URL and keys) are set in the Netlify project,
 # not here: this file is committed. SUPABASE_SECRET_KEY must never be added here.
 [build]
@@ -9,3 +12,6 @@
 [build.environment]
   NODE_VERSION = "22"
   NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
