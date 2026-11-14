@@ -132,6 +132,8 @@ Rencana awal:
 
 ### Rilis 3 — "Ujian yang Sungguhan" (perkiraan Januari 2027)
 
+- **Sudah menunggu di GitHub, ikut deploy rilis ini**: perbaikan urutan cerita di rencana mingguan (commit `ca64712`). Periksa di situs live setelah deploy (lihat PROJECT_STATUS, "MENUNGGU DEPLOY").
+
 - **Bank soal khusus ujian** yang tidak muncul di pelajaran, supaya ujian
   menguji pemahaman, bukan hafalan soal.
 - **Ujian level bergaya CEFR** dengan bagian terpisah: tata bahasa & kosakata,

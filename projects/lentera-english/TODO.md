@@ -47,6 +47,7 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 1 dari `ROADMAP.md`: Pijar bergerak, 6 cerita bergambar A1–A2, Catatan Pemeriksaan (migrasi 0008). Pemilik: jalankan `apply-0008.sql`, lalu impor dan terbitkan.
 - [x] Rilis 2 dari `ROADMAP.md`: 10 pelajaran A2–B1, 4 cerita, 2 percakapan, 2 materi menyimak, PR menulis tiap bab A2–B1.
 - [ ] Rilis 3–6 dari `ROADMAP.md` (dikerjakan per rilis, satu deploy per rilis).
+- [ ] Ikut deploy Rilis 3: perbaikan urutan cerita di rencana mingguan (commit `ca64712`), lalu periksa di situs live.
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).
 - [ ] Ujian level B1, B2, C1, C2 (baru ada A1 dan A2).
 - [ ] Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Sekarang hanya di klien; konten Premium sudah dipangkas di server.
