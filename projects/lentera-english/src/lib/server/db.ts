@@ -18,8 +18,26 @@ export class DbError extends Error {
 
 export type BackendMode = 'supabase' | 'embedded' | 'none';
 
+// ───────────────────────── Supabase keys ─────────────────────────
+// Two key formats exist. New projects issue opaque keys (sb_secret_...,
+// sb_publishable_...) that go ONLY in the `apikey` header: sending one as
+// `Authorization: Bearer` makes the platform parse it as a JWT and answer
+// "Invalid JWT". The legacy JWT keys (service_role, anon) go in both headers
+// and stop working at the end of 2026, so the new names are read first.
+
+/** Server-only key that bypasses RLS. Never sent to the browser. */
+export const supabaseSecretKey = () => process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+/** Public key (safe in the browser; RLS applies). */
+export const supabasePublicKey = () => process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const isOpaqueKey = (key: string) => key.startsWith('sb_');
+
+/** Headers that authenticate a server request with `key` (no user session). */
+export function supabaseKeyHeaders(key: string): Record<string, string> {
+  return isOpaqueKey(key) ? { apikey: key } : { apikey: key, Authorization: `Bearer ${key}` };
+}
+
 export function backendMode(): BackendMode {
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) return 'supabase';
+  if (process.env.SUPABASE_URL && supabaseSecretKey()) return 'supabase';
   const wantsEmbedded = process.env.LENTERA_BACKEND === 'embedded';
   // The embedded database is a development tool. It never starts in a
   // production build unless explicitly allowed (used by the e2e suite).
@@ -30,13 +48,13 @@ export function backendMode(): BackendMode {
 // ───────────────────────── Supabase ─────────────────────────
 function supabaseDb(): ServerDb {
   const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const key = supabaseSecretKey();
   return {
     async rpc<T>(fn: string, args: Record<string, unknown> = {}) {
-      // PostgREST RPC endpoint; the service role key never reaches the browser.
+      // PostgREST RPC endpoint; the secret key never reaches the browser.
       const res = await fetch(`${url}/rest/v1/rpc/${fn}`, {
         method: 'POST',
-        headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        headers: { ...supabaseKeyHeaders(key), 'Content-Type': 'application/json' },
         body: JSON.stringify(args),
         cache: 'no-store',
       });

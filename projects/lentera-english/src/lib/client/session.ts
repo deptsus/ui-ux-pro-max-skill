@@ -18,7 +18,8 @@ export interface ServerInfo {
 
 const SESSION_KEY = 'lentera.session';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Publishable key (sb_publishable_...) or, for older projects, the legacy anon key.
+const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 let session: Session | null = null;
 let info: ServerInfo = { backend: SUPABASE_URL ? 'supabase' : 'none', payments: 'off' };

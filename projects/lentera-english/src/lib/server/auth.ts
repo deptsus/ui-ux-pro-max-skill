@@ -3,7 +3,7 @@
 // database): a minimal local account system so the full product can run and
 // be tested without any external service. It is refused in production builds.
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import { backendMode, embeddedDb } from './db';
+import { backendMode, embeddedDb, supabasePublicKey, supabaseSecretKey } from './db';
 
 const DEV_SECRET = process.env.LENTERA_DEV_SECRET ?? 'lentera-dev-only-secret';
 const WEEK = 7 * 86_400_000;
@@ -32,7 +32,8 @@ export async function userIdFromRequest(req: Request): Promise<string | null> {
   if (mode === 'embedded') return verifyDevToken(token);
   if (mode === 'supabase') {
     const res = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
-      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY!, Authorization: `Bearer ${token}` },
+      // The user's own access token is the bearer; the key only identifies the project.
+      headers: { apikey: supabasePublicKey() || supabaseSecretKey(), Authorization: `Bearer ${token}` },
       cache: 'no-store',
     });
     if (!res.ok) return null;

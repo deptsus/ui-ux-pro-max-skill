@@ -102,9 +102,9 @@ projects/lentera-english/
 ## 4. Arsitektur backend
 
 - **Satu pintu ke database**: `ServerDb.rpc(fn, args)` (`src/lib/server/db.ts`). Semua logika data ada di fungsi SQL `SECURITY DEFINER`.
-  - Produksi: `fetch(SUPABASE_URL/rest/v1/rpc/<fn>)` dengan service role key (hanya di server).
+  - Produksi: `fetch(SUPABASE_URL/rest/v1/rpc/<fn>)` dengan kunci rahasia (hanya di server). Kunci baru `sb_...` hanya di header `apikey`; kunci JWT lama di `apikey` + `Authorization` (`supabaseKeyHeaders()` di `db.ts`).
   - Dev/tes: PGlite memuat `test-shim.sql` + semua migrasi; data di `.data/pglite` (diabaikan git). Pada start pertama, kurikulum bawaan diimpor dan diterbitkan otomatis.
-- **Mode backend** (`backendMode()`): `supabase` bila `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` ada; `embedded` bila `LENTERA_BACKEND=embedded` dan bukan build produksi (kecuali `LENTERA_ALLOW_EMBEDDED=1`); selain itu `none` (aplikasi tetap jalan sebagai mode perangkat, tanpa akun/pembayaran).
+- **Mode backend** (`backendMode()`): `supabase` bila `SUPABASE_URL` + `SUPABASE_SECRET_KEY` (atau `SUPABASE_SERVICE_ROLE_KEY` lama) ada; `embedded` bila `LENTERA_BACKEND=embedded` dan bukan build produksi (kecuali `LENTERA_ALLOW_EMBEDDED=1`); selain itu `none` (aplikasi tetap jalan sebagai mode perangkat, tanpa akun/pembayaran).
 - **Route helper** `src/lib/server/api.ts`: `route()` memetakan error ke JSON berbahasa Indonesia, `requireUser()`, `paymentMode()` (`live`/`test`/`mock`/`off`), `paymentDeps()`.
 - **Cache konten** `src/lib/server/content.ts`: cek versi terbit setiap 30 detik; `invalidateContent()` dipanggil setelah publish/restore.
 
@@ -209,9 +209,11 @@ Jangan pernah commit nilainya. `.env*` sudah di-ignore.
 | Variabel | Sisi | Wajib | Fungsi |
 |---|---|---|---|
 | `SUPABASE_URL` | server | produksi | URL proyek Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | server (rahasia) | produksi | Memanggil fungsi SQL. Jangan pernah ke klien |
+| `SUPABASE_SECRET_KEY` | server (rahasia) | produksi | Kunci rahasia baru (`sb_secret_...`) untuk memanggil fungsi SQL. Dikirim hanya di header `apikey`. Jangan pernah ke klien |
+| `SUPABASE_SERVICE_ROLE_KEY` | server (rahasia) | produksi, lama | Alternatif untuk proyek lama (kunci JWT `service_role`, berlaku sampai akhir 2026). Dipakai bila `SUPABASE_SECRET_KEY` kosong |
 | `NEXT_PUBLIC_SUPABASE_URL` | klien | produksi | Supabase Auth di browser |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | klien | produksi | Kunci publik Supabase Auth |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | klien | produksi | Kunci publik baru (`sb_publishable_...`) untuk Supabase Auth di browser |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | klien | produksi, lama | Alternatif untuk proyek lama (kunci JWT `anon`). Dipakai bila kunci publishable kosong |
 | `XENDIT_SECRET_KEY` | server (rahasia) | untuk pembayaran | Kunci Xendit; prefiks produksi → mode `live`, lainnya → `test` |
 | `XENDIT_WEBHOOK_TOKEN` | server (rahasia) | untuk pembayaran | Token verifikasi webhook dari dashboard Xendit |
 | `XENDIT_CHANNEL_PROPERTIES_JSON` | server | opsional | Override `channel_properties` per kanal; mendukung `{RETURN_URL}`, `{EXPIRES_AT}` |
