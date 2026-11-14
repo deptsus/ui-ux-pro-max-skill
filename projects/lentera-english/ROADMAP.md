@@ -71,8 +71,8 @@ Tanggal di bawah adalah perkiraan, bukan janji. Urutan rilis boleh diubah pemili
 | Ujian | 21 | 15 ujian unit, 6 ujian level; soal ujian diambil dari soal pelajaran |
 | Kosakata | 148 | |
 | Rencana mingguan | ada | Untuk paket tahunan |
-| Maskot Pijar | gambar SVG | 4 ekspresi diam, efek cahaya; belum bergerak |
-| Soal cerita | belum ada | |
+| Maskot Pijar | bergerak (Rilis 1) | 7 ekspresi beranimasi, bereaksi saat menjawab |
+| Soal cerita | 6 cerita A1–A2 (Rilis 1) | 30 soal, adegan beranimasi |
 
 Celah terbesar untuk paket tahunan: A2–C2 masih tipis (5–6 pelajaran per level),
 ujian memakai soal yang sudah dilihat di pelajaran, tugas menulis hampir tidak
@@ -82,7 +82,7 @@ ada di atas A1, dan aplikasi belum terasa "hidup" (maskot dan cerita).
 
 ## 3. Rencana rilis
 
-### Rilis 1 — "Pijar Hidup dan Cerita Bergambar" (perkiraan awal Desember 2026)
+### Rilis 1 — "Pijar Hidup dan Cerita Bergambar" — **SELESAI 14 November 2026** (versi konten 2026.12.1)
 
 **Maskot Pijar bergerak**
 - Animasi SVG + CSS saja (tanpa pustaka tambahan, ringan untuk HP):

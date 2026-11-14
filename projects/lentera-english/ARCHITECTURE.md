@@ -37,6 +37,7 @@ projects/lentera-english/
 │   ├── conversations-upper.ts 5 skenario B2–C2 (tahap 3)
 │   ├── listening.ts          Materi menyimak A1–B1, fonem, soal tes penempatan
 │   ├── listening-upper.ts    11 materi menyimak B1–C2 dengan dikte (tahap 3)
+│   ├── stories.ts            6 cerita bergambar A1–A2 + soalnya (Rilis 1)
 │   └── index.ts              Silabus, topik, pola kesalahan, buildPack() → ContentPack
 ├── scripts/check-content.ts  Gerbang kualitas konten (npm run content:check)
 ├── scripts/export-content.ts Cadangkan kurikulum dari basis data ke backups/*.json (npm run content:export)
@@ -65,7 +66,9 @@ projects/lentera-english/
 │   │       ├── admin/        POST aksi CMS & dashboard (cek admin di SQL)
 │   │       └── dev-auth/     Akun lokal (hanya mode embedded)
 │   ├── components/           UI: ui.tsx (primitif), ExerciseCard, SessionRunner, LessonContent,
-│   │                         AudioButton, Charts, Mouth, Mascot, AuthForm, nav.ts
+│   │                         AudioButton, Charts, Mouth, Mascot (Pijar, animasi CSS), AuthForm, nav.ts,
+│   │                         WeekPlan (rencana mingguan)
+│   │   ├── story/            StoryStage.tsx: adegan cerita SVG (latar, tokoh, pose) beranimasi CSS
 │   │   └── admin/            Dashboard admin: schema.ts (definisi form tiap tabel CMS + validasi),
 │   │                         fields.tsx (kontrol form), CmsPanel, PaymentsPanel, PublishPanel, Confirm, api.ts
 │   └── lib/

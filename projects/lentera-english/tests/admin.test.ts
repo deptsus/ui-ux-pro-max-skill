@@ -88,3 +88,34 @@ describe('admin CMS schema', () => {
     expect(validateRow(TABLE.homework, { ...data.homework[0], question_ids: ['tidak-ada'] }, data, false).join(' ')).toContain('ID tidak ditemukan: tidak-ada');
   });
 });
+
+describe('catatan pemeriksaan (content_notes, migrasi 0008)', () => {
+  it('admin menandai konten, melihatnya di daftar, lalu menandai selesai', async () => {
+    const q = (await content()).questions[0];
+    const added = await db.rpc<{ id: number }>('admin_add_note', { p_actor: admin, p_table: 'questions', p_target: q.id, p_note: '  Pilihan B juga benar.  ' });
+    expect(added.id).toBeGreaterThan(0);
+    const open = await db.rpc<{ id: number; table: string; target: string; note: string; status: string; author: string }[]>('admin_list_notes', { p_actor: admin, p_all: false });
+    expect(open).toEqual([expect.objectContaining({ id: added.id, table: 'questions', target: q.id, note: 'Pilihan B juga benar.', status: 'open', author: 'cms-admin' })]);
+    expect(await db.rpc('admin_resolve_note', { p_actor: admin, p_id: added.id, p_resolution: 'Kunci diperbaiki.' })).toEqual({ resolved: 1 });
+    expect(await db.rpc('admin_resolve_note', { p_actor: admin, p_id: added.id, p_resolution: '' })).toEqual({ resolved: 0 });
+    expect(await db.rpc('admin_list_notes', { p_actor: admin, p_all: false })).toEqual([]);
+    const all = await db.rpc<{ status: string; resolution: string }[]>('admin_list_notes', { p_actor: admin, p_all: true });
+    expect(all).toEqual([expect.objectContaining({ status: 'resolved', resolution: 'Kunci diperbaiki.' })]);
+  });
+
+  it('menolak pelajar, tabel yang bukan tabel CMS, dan catatan kosong', async () => {
+    const student = await newUser(db, 'pelajar-catatan');
+    await expect(db.rpc('admin_add_note', { p_actor: student, p_table: 'questions', p_target: 'x', p_note: 'hai' })).rejects.toThrow(/forbidden/);
+    await expect(db.rpc('admin_list_notes', { p_actor: student, p_all: true })).rejects.toThrow(/forbidden/);
+    await expect(db.rpc('admin_add_note', { p_actor: admin, p_table: 'profiles', p_target: 'x', p_note: 'hai' })).rejects.toThrow(/unknown_table/);
+    await expect(db.rpc('admin_add_note', { p_actor: admin, p_table: 'questions', p_target: 'x', p_note: '   ' })).rejects.toThrow();
+  });
+
+  it('tabel catatan dan cerita tertutup bagi klien publik', async () => {
+    for (const table of ['content_notes', 'stories']) {
+      const r = await db.query<{ ok: boolean }>(`select has_table_privilege('anon', 'public.${table}', 'select') or has_table_privilege('authenticated', 'public.${table}', 'select') as ok`);
+      expect(r[0].ok, table).toBe(false);
+    }
+    expect(await db.rpc('content_features')).toEqual(['stories', 'content_notes']);
+  });
+});

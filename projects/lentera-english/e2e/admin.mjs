@@ -40,7 +40,7 @@ async function open(session, viewport = { width: 1366, height: 900 }) {
   return page;
 }
 // Inactive panels stay mounted (hidden), so every locator is scoped to the open one.
-const PANEL = { Pembayaran: '#panel-payments', Konten: '#panel-content', Terbitkan: '#panel-publish' };
+const PANEL = { Pembayaran: '#panel-payments', Konten: '#panel-content', Terbitkan: '#panel-publish', Catatan: '#panel-notes' };
 let page;
 let ui;
 const tab = async (name) => {
@@ -376,6 +376,33 @@ check('impor ulang tidak mengubah versi yang diterima pelajar', (await get('/api
   check('editor soal tidak melebar di layar ponsel', (await overflow()) <= 1, String(await overflow()));
   await phone.screenshot({ path: path.join(SHOTS, 'admin-question-phone.png'), fullPage: true });
   await phone.context().close();
+}
+
+// ───────────── 9. Review notes (Catatan Pemeriksaan) ─────────────
+{
+  await tab('Konten');
+  await ui.getByRole('navigation', { name: 'Jenis konten' }).getByRole('button', { name: /^Soal/ }).click();
+  await ui.getByLabel('Cari soal').fill(mc.id);
+  await ui.locator('ul > li > button', { hasText: mc.id }).first().click();
+  await ui.getByRole('heading', { name: 'Edit soal' }).waitFor();
+  const noteText = `Catatan uji ${stamp}: pilihan kedua juga benar.`;
+  await ui.getByLabel('Tandai yang perlu diperbaiki').fill(noteText);
+  await ui.getByRole('button', { name: 'Simpan catatan' }).click();
+  const saved = await ui.getByText(/Catatan tersimpan/).waitFor({ timeout: 15000 }).then(() => true).catch(() => false);
+  check('catatan pemeriksaan tersimpan dari formulir soal dan tampil di formulirnya', saved && await ui.getByText(noteText).count() === 1);
+  check('tab Catatan menampilkan jumlah catatan terbuka', /Catatan\s*1/.test(await page.getByRole('tab', { name: /Catatan/ }).innerText()));
+  await tab('Catatan');
+  await ui.getByText(noteText).waitFor({ timeout: 15000 });
+  check('daftar catatan memuat catatan itu beserta jenis kontennya', await ui.getByText(noteText).count() === 1 && await ui.getByText('soal', { exact: true }).count() >= 1);
+  await page.screenshot({ path: path.join(SHOTS, 'admin-notes.png'), fullPage: true });
+  await ui.getByRole('button', { name: /^Buka/ }).first().click();
+  check('tombol Buka membuka soal yang dicatat', await page.locator('#panel-content').getByRole('heading', { name: 'Edit soal' }).isVisible());
+  await tab('Catatan');
+  await ui.getByRole('button', { name: 'Tandai selesai' }).first().click();
+  await ui.getByText('Tidak ada catatan terbuka').waitFor({ timeout: 15000 });
+  const all = (await post('/api/admin', { action: 'notes', all: true }, adminUser.token)).data;
+  check('catatan ditandai selesai, tetap tersimpan di riwayat', all.length === 1 && all[0].status === 'resolved');
+  check('pelajar tidak bisa membaca catatan', (await post('/api/admin', { action: 'notes' }, learner.token)).status === 403);
 }
 
 check('tidak ada error di konsol browser', issues.length === 0, issues.slice(0, 5).join(' | '));

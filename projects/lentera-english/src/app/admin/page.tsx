@@ -4,9 +4,10 @@
 // every database function behind POST /api/admin.
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BellRing, BookOpen, LogOut, Send, ShieldCheck, Wallet, X } from 'lucide-react';
+import { BellRing, BookOpen, LogOut, MessageSquareWarning, Send, ShieldCheck, Wallet, X } from 'lucide-react';
 import { admin } from '@/components/admin/api';
 import { CmsPanel, type CmsTarget } from '@/components/admin/CmsPanel';
+import { NotesPanel, openNoteCount, useNotes } from '@/components/admin/NotesPanel';
 import { NotifyPanel } from '@/components/admin/NotifyPanel';
 import { PaymentsPanel, type Overview } from '@/components/admin/PaymentsPanel';
 import { PublishPanel } from '@/components/admin/PublishPanel';
@@ -17,11 +18,12 @@ import { api } from '@/lib/client/api';
 import { initSession, signOut, useServerInfo, useSession } from '@/lib/client/session';
 
 type Gate = 'loading' | 'no-backend' | 'signed-out' | 'forbidden' | 'error' | 'admin';
-type Tab = 'payments' | 'content' | 'publish';
+type Tab = 'payments' | 'content' | 'publish' | 'notes';
 const TABS: { id: Tab; label: string; icon: typeof Wallet }[] = [
   { id: 'payments', label: 'Pembayaran', icon: Wallet },
   { id: 'content', label: 'Konten', icon: BookOpen },
   { id: 'publish', label: 'Terbitkan', icon: Send },
+  { id: 'notes', label: 'Catatan', icon: MessageSquareWarning },
 ];
 
 function Gatekeeper({ gate, email, onRetry }: { gate: Exclude<Gate, 'admin'>; email?: string; onRetry: () => void }) {
@@ -38,6 +40,12 @@ function Gatekeeper({ gate, email, onRetry }: { gate: Exclude<Gate, 'admin'>; em
       <Card className="space-y-4"><Mascot mood={gate === 'forbidden' || gate === 'error' ? 'sad' : 'think'} size={88} className="mx-auto" />{body}</Card>
     </main>
   );
+}
+
+/** Open review notes, shown on the "Catatan" tab. */
+function NotesCount() {
+  const n = openNoteCount(useNotes().notes);
+  return n ? <Badge tone="accent">{n}</Badge> : null;
 }
 
 export default function AdminPage() {
@@ -144,7 +152,7 @@ export default function AdminPage() {
           <div role="tablist" aria-label="Bagian dashboard" className="flex gap-1 overflow-x-auto">
             {TABS.map(({ id, label, icon: Icon }) => (
               <button key={id} role="tab" id={`tab-${id}`} aria-selected={tab === id} aria-controls={`panel-${id}`} onClick={() => setTab(id)} className={cx('flex flex-1 shrink-0 items-center justify-center gap-2 border-b-[3px] px-2 py-2.5 text-sm font-extrabold transition sm:flex-none sm:px-4', tab === id ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink')}>
-                <Icon size={18} aria-hidden />{label}
+                <Icon size={18} aria-hidden />{label}{id === 'notes' && <NotesCount />}
               </button>
             ))}
           </div>
@@ -171,6 +179,9 @@ export default function AdminPage() {
         </div>
         <div role="tabpanel" id="panel-publish" aria-labelledby="tab-publish" hidden={tab !== 'publish'}>
           {content ? <PublishPanel data={content} reload={loadContent} onOpen={openInCms} active={tab === 'publish'} /> : contentState}
+        </div>
+        <div role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden={tab !== 'notes'}>
+          <NotesPanel data={content} onOpen={(t) => openInCms(t)} />
         </div>
       </main>
     </div>

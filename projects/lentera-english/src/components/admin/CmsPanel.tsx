@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronRight, Plus, Search, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, Empty, Notice, cx } from '@/components/ui';
 import { admin, unpublished } from './api';
 import { Confirm } from './Confirm';
+import { RowNotes } from './NotesPanel';
 import { FieldControl, input } from './fields';
 import { TABLE, TABLES, pkOf, readField, refLabel, toPayload, validateRow, type Data, type Field, type Row, type TableDef, type TableId } from './schema';
 
@@ -116,6 +117,8 @@ function RowEditor({ def, initial, isNew, data, reload, onClose, onJump }: { def
           </div>
         </Card>
       )}
+
+      {created && id !== undefined && id !== null && String(id) !== '' && <RowNotes table={def.id} target={String(id)} />}
 
       <div className="sticky bottom-0 z-10 -mx-1 space-y-2 rounded-2xl border border-line bg-surface p-3 shadow-card">
         {problems.length > 0 && (

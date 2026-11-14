@@ -116,7 +116,7 @@ scenario('routes: semua halaman terbuka tanpa error', async () => {
   const ctx = await newContext();
   const page = await open(ctx, '/app');
   const pack = await fetchPack(page);
-  const routes = ['/', '/masuk', '/daftar', '/admin', '/app', '/app/path', '/app/plan', '/app/review', '/app/homework', '/app/exams', `/app/exams?id=${pack.exams[0].id}`, '/app/vocabulary', '/app/grammar', `/app/grammar?topic=${encodeURIComponent(pack.topics[0].id)}`, '/app/listening', '/app/listening?tab=pelafalan', `/app/listening?id=${pack.listening[0].id}`, '/app/conversations', '/app/analytics', '/app/achievements', '/app/leaderboard', '/app/profile', '/app/subscription', '/app/settings', '/app/more', '/app/placement', '/app/practice?mode=timed', `/app/practice?mode=drill&tag=${encodeURIComponent(pack.tags[0].id)}`, '/app/checkout', `/app/lesson?id=${pack.lessons.find((l) => l.locked).id}`];
+  const routes = ['/', '/masuk', '/daftar', '/admin', '/app', '/app/path', '/app/plan', '/app/review', '/app/homework', '/app/exams', `/app/exams?id=${pack.exams[0].id}`, '/app/vocabulary', '/app/grammar', `/app/grammar?topic=${encodeURIComponent(pack.topics[0].id)}`, '/app/stories', '/app/stories?id=story-first-day', '/app/listening', '/app/listening?tab=pelafalan', `/app/listening?id=${pack.listening[0].id}`, '/app/conversations', '/app/analytics', '/app/achievements', '/app/leaderboard', '/app/profile', '/app/subscription', '/app/settings', '/app/more', '/app/placement', '/app/practice?mode=timed', `/app/practice?mode=drill&tag=${encodeURIComponent(pack.tags[0].id)}`, '/app/checkout', `/app/lesson?id=${pack.lessons.find((l) => l.locked).id}`];
   const bad = [];
   for (const r of routes) {
     const before = issues.length;

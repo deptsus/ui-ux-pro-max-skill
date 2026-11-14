@@ -11,7 +11,7 @@
 //   npm run e2e:skills -- c2 bad-news   # only ids containing a word
 import fs from 'node:fs';
 import path from 'node:path';
-import { BASE, check, chromium, fetchPack, runSession } from './lib.mjs';
+import { BASE, answerCurrent, check, chromium, fetchPack, runSession } from './lib.mjs';
 
 const SHOTS = process.env.E2E_SHOTS ?? path.join(import.meta.dirname, 'shots');
 fs.mkdirSync(SHOTS, { recursive: true });
@@ -31,7 +31,10 @@ const session = r.data;
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true });
-await ctx.addInitScript((s) => { if (!localStorage.getItem('lentera.session')) localStorage.setItem('lentera.session', JSON.stringify(s)); }, session);
+await ctx.addInitScript((s) => {
+  if (!localStorage.getItem('lentera.session')) localStorage.setItem('lentera.session', JSON.stringify(s));
+  localStorage.setItem('lentera.story.sound', '0');
+}, session);
 const page = await ctx.newPage();
 const issues = [];
 page.on('console', (m) => { if (m.type() === 'error' && !/status of 40[13]/.test(m.text())) issues.push(`${new URL(page.url()).pathname}${new URL(page.url()).search}: ${m.text().slice(0, 200)}`); });
@@ -110,7 +113,68 @@ for (const sc of pack.scenarios.filter((s) => wanted(s.id))) {
     check(`${sc.id}: macet`, false, String(e.message).split('\n')[0].slice(0, 200));
   }
 }
+// ---------------------------------------------------------------- stories
+const moodAfter = async (correct) => {
+  await answerCurrent(page, pack, correct);
+  await page.getByRole('button', { name: 'Periksa', exact: true }).click();
+  await page.getByText(correct ? 'Benar!' : 'Belum tepat', { exact: true }).waitFor({ timeout: 5000 });
+  const mood = await page.locator('footer svg[data-mood]').first().getAttribute('data-mood');
+  await page.getByRole('button', { name: 'Lanjut', exact: true }).click();
+  return mood;
+};
+const moods = [];
+for (const st of (pack.stories ?? []).filter((x) => wanted(x.id))) {
+  const before = issues.length;
+  try {
+    await page.goto(`${BASE}/app/stories?id=${st.id}`);
+    await page.getByRole('button', { name: 'Mulai cerita' }).click({ timeout: 30000 });
+    const total = st.scenes.reduce((n, sc) => n + sc.lines.length, 0);
+    let shown = 0;
+    let matches = 0;
+    const scenes = new Set();
+    for (let k = 0; k < total + 2; k++) {
+      const text = await page.locator('[data-line]').innerText();
+      const idx = Number(await page.locator('[data-line]').getAttribute('data-line'));
+      const expected = st.scenes.flatMap((sc) => sc.lines)[idx]?.en;
+      if (text === expected) matches++;
+      scenes.add(/Adegan (\d+)/.exec(await page.locator('svg.story-stage').getAttribute('aria-label'))[1]);
+      shown++;
+      if (await page.getByRole('button', { name: /Jawab \d+ pertanyaan/ }).count()) break;
+      await page.getByRole('button', { name: 'Lanjut', exact: true }).click();
+    }
+    await page.getByRole('button', { name: /Jawab \d+ pertanyaan/ }).click();
+    // First two stories also check Pijar's reaction: cheering when right, encouraging when wrong.
+    const manual = moods.length < 2 ? 1 : 0;
+    if (manual) moods.push(await moodAfter(moods.length === 0));
+    const answered = await runSession(page, pack);
+    await page.getByRole('heading', { name: 'Cerita selesai' }).waitFor({ timeout: 15000 });
+    const stamped = await page.evaluate(([uid, id]) => !!JSON.parse(localStorage.getItem(`lentera.state.${uid}`)).rewards[`story:${id}`], [session.userId, st.id]);
+    check(`${st.id} (${st.level}): ${shown}/${total} kalimat tampil sesuai naskah, ${scenes.size}/${st.scenes.length} adegan, ${answered.length + manual}/${st.questionIds.length} soal, tercatat selesai`,
+      shown === total && matches === total && scenes.size === st.scenes.length && answered.length + manual === st.questionIds.length && stamped && issues.length === before, `${shown}/${matches}/${total} ${issues.slice(before, before + 2).join(' | ')}`);
+  } catch (e) {
+    await page.screenshot({ path: path.join(SHOTS, `skills-gagal-${st.id}.png`), fullPage: true }).catch(() => {});
+    check(`${st.id}: macet`, false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+}
+if (moods.length === 2) check(`Pijar bereaksi: ${moods[0]} saat benar, ${moods[1]} saat salah`, moods[0] === 'cheer' && moods[1] === 'encourage');
+{
+  await page.goto(`${BASE}/app/stories?id=story-first-day`);
+  await page.getByRole('button', { name: 'Mulai cerita' }).click({ timeout: 30000 });
+  const anim = await page.locator('.story-stage .st-blink').first().evaluate((el) => getComputedStyle(el).animationName);
+  check('adegan cerita beranimasi (tokoh berkedip)', anim === 'pj-blink', anim);
+  await page.screenshot({ path: path.join(SHOTS, 'skills-story.png') });
+}
 await ctx.close();
+{
+  const still = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+  await still.addInitScript((s) => { localStorage.setItem('lentera.session', JSON.stringify(s)); localStorage.setItem('lentera.story.sound', '0'); }, session);
+  const sp = await still.newPage();
+  await sp.goto(`${BASE}/app/stories?id=story-first-day`);
+  await sp.getByRole('button', { name: 'Mulai cerita' }).click({ timeout: 45000 });
+  const names = await sp.evaluate(() => [...document.querySelectorAll('.story-stage *, .pijar *')].map((el) => getComputedStyle(el).animationName).filter((n) => n !== 'none'));
+  check('mode "kurangi gerakan": tidak ada animasi di adegan cerita', names.length === 0, names.slice(0, 3).join(','));
+  await still.close();
+}
 
 // ---------------------------------------------------------------- guest
 const guest = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
@@ -122,9 +186,12 @@ const upperListening = freePack.listening.filter((l) => ['B1', 'B2', 'C1', 'C2']
 const upperScenarios = freePack.scenarios.filter((s) => ['B2', 'C1', 'C2'].includes(s.level));
 check('tamu: materi menyimak B1–C2 terkunci tanpa transkrip dan tanpa soal', upperListening.length >= 12 && upperListening.every((l) => l.locked && !l.transcript && !l.questionIds.length));
 check('tamu: skenario B2–C2 terkunci tanpa isi dialog', upperScenarios.length >= 7 && upperScenarios.every((s) => s.locked && !s.nodes.length));
+const freeStories = freePack.stories ?? [];
+check('tamu: cerita pertama gratis lengkap, cerita lain terkunci tanpa adegan dan soal', freeStories.find((x) => x.id === 'story-first-day')?.scenes.length > 0 && freeStories.filter((x) => x.premium).length >= 5 && freeStories.filter((x) => x.premium).every((x) => x.locked && !x.scenes.length && !x.questionIds.length));
+check('tamu: soal cerita Premium tidak dikirim', !freePack.exercises.some((e) => e.stage === 'story' && !e.id.startsWith('story-first-day')) && freePack.exercises.some((e) => e.id.startsWith('story-first-day')));
 check('tamu: PR menyimak bab Premium tidak dikirim', !freePack.homework.some((h) => /^hw\.(b1|b2|c1|c2)-c\d\.listen$/.test(h.id)));
 const raw = await gp.evaluate(async () => (await fetch('/api/content')).text());
-check('tamu: teks rekaman Premium tidak ada di respons server', !raw.includes('won over') && !raw.includes('negligible') && !raw.includes('Bright Smile'));
+check('tamu: teks rekaman dan cerita Premium tidak ada di respons server', !raw.includes('won over') && !raw.includes('negligible') && !raw.includes('Bright Smile') && !raw.includes('banana pancakes') && !raw.includes("It's huge"));
 await gp.goto(`${BASE}/app/listening?id=listen-c2-app`);
 check('tamu: membuka materi C2 menampilkan ajakan Premium', await gp.getByText('Audio Premium').waitFor({ timeout: 15000 }).then(() => true).catch(() => false));
 await gp.goto(`${BASE}/app/conversations?id=press`);
