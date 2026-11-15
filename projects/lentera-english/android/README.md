@@ -8,7 +8,7 @@ langsung terlihat di aplikasi tanpa perlu membuat APK baru.
 | | |
 |---|---|
 | Nama paket | `id.lenteraenglish.app` (permanen setelah terbit di Play Store) |
-| Versi | 1.2.0 (versionCode 3): membuka `/app?apk=3` agar situs tahu versi yang terpasang (pemberitahuan update). 1.1.0 (2): notifikasi tampil sebagai notifikasi aplikasi Lentera (izin `POST_NOTIFICATIONS`). 1.0.0 (1): versi pertama. |
+| Versi | 1.3.0 (versionCode 4): ikon lentera baru (sama dengan logo di situs), membuka `/app?apk=4`. 1.2.0 (3): membuka `/app?apk=3` agar situs tahu versi yang terpasang (pemberitahuan update). 1.1.0 (2): notifikasi tampil sebagai notifikasi aplikasi Lentera (izin `POST_NOTIFICATIONS`). 1.0.0 (1): versi pertama. |
 | Android minimum | 7.0 (API 24); target API 36 |
 | Unduhan | `/download/lentera-english.apk` (tombol di halaman depan) |
 | Verifikasi situs | `public/.well-known/assetlinks.json` |

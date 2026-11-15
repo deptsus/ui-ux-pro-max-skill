@@ -113,6 +113,7 @@ projects/lentera-english/
 - **Sesi latihan**: `SessionRunner` menjalankan daftar soal tetap atau adaptif (`next()`), umpan balik langsung atau ditunda, nyawa, timer ujian, timer per soal. `ExerciseCard` merender 14 jenis soal dan memasang `data-ex`/`data-type` untuk e2e.
 - **Tema**: token di `globals.css` (`--brand`, `--surface`, `--chart`, dll.), kelas `.dark` di `<html>`; pilihan tersimpan di `localStorage['lentera.theme']`.
 - **Audio**: `src/lib/client/audio.ts` memutar rekaman dari `audio_resources` bila ada untuk teks yang diputar (dicocokkan lewat `spokenKey` di `src/lib/content/spoken.ts`, atau lewat `audioKey`), dengan aksen pelajar lebih dulu; bila tidak ada, memakai `speechSynthesis` perangkat dan UI memberitahukannya. Rekaman diunggah dari tab Rekaman di `/admin` ke Supabase Storage (bucket `audio`, `src/lib/server/audio-store.ts`); setiap paket hanya membawa rekaman untuk teks yang ada di paket itu (`audioForPack`).
+- **Kebiasaan belajar (Rilis 8)**: `src/lib/client/habits.ts` (API pengingat/liga/teman, nama divisi, zona waktu HP), `src/components/ReminderSettings.tsx`, `src/components/social/{League,Friends,DivisionBadge}.tsx` di `/app/leaderboard` (tab Liga, Teman, Semua). **Shadowing** (`/app/shadowing`): kalimat dipilih dari paket konten oleh `src/lib/engine/shadowing.ts`; `src/lib/client/recorder.ts` merekam mikrofon (MediaRecorder) dan mengukur bagian yang diucapkan serta garis kerasnya suara dengan Web Audio (pengukuran sinyal biasa, tanpa pengenalan ucapan); rekaman hanya berupa blob URL di memori.
 
 ## 4. Arsitektur backend
 
@@ -121,6 +122,7 @@ projects/lentera-english/
   - Dev/tes: PGlite memuat `test-shim.sql` + semua migrasi; data di `.data/pglite` (diabaikan git). Pada start pertama, kurikulum bawaan diimpor dan diterbitkan otomatis.
 - **Mode backend** (`backendMode()`): `supabase` bila `SUPABASE_URL` + `SUPABASE_SECRET_KEY` (atau `SUPABASE_SERVICE_ROLE_KEY` lama) ada; `embedded` bila `LENTERA_BACKEND=embedded` dan bukan build produksi (kecuali `LENTERA_ALLOW_EMBEDDED=1`); selain itu `none` (aplikasi tetap jalan sebagai mode perangkat, tanpa akun/pembayaran).
 - **Route helper** `src/lib/server/api.ts`: `route()` memetakan error ke JSON berbahasa Indonesia, `requireUser()`, `paymentMode()` (`live`/`test`/`mock`/`off`), `paymentDeps()`.
+- **Tugas per jam** (`netlify/functions/homework-reminders.mjs` → `/api/cron/reminders`): pengingat PR (Rilis 4) dan pengingat belajar harian (Rilis 8, `runDailyReminders`); masing-masing diklaim lewat `claim_job` agar panggilan ganda tidak mengirim dua kali.
 - **Cache konten** `src/lib/server/content.ts`: cek versi terbit setiap 30 detik; `invalidateContent()` dipanggil setelah publish/restore. `contentVersion()` menjawab versi tanpa memuat kurikulum.
 - **Paket materi di perangkat** (`src/lib/client/content.ts`): setiap perangkat menyimpan paket terakhir di IndexedDB. `/api/me` membawa `contentVersion`; bila sama dengan yang dipegang perangkat (untuk tier-nya), tidak ada permintaan materi. Bila berbeda, perangkat mengirim `?v=&tier=` dan server menjawab paket baru (atau `{unchanged:true}`). Pemuatan materi berjalan antre (`loadContent`). Paket Premium yang tersimpan dipangkas dengan `packForFree` bila perangkat tidak Premium lagi.
 
@@ -154,6 +156,8 @@ Batasan penting: tepat satu jawaban benar per soal (unique partial index), setia
 `payment_webhook_events` (`event_key` unique, `duplicate_count`, `outcome`).
 
 Status Premium **tidak disimpan sebagai flag**: `get_entitlement()` menghitungnya dari periode `subscriptions` yang belum berakhir.
+
+**Kebiasaan belajar (Rilis 8, migrasi 0013)**: `reminder_prefs` (jam pengingat harian, zona waktu HP, pengingat PR nyala/mati, tanggal pengingat terakhir) melengkapi `reminder_subscriptions` (0010); `league_members` (minggu, divisi 1–5, grup ≤30, hasil minggu lalu); `friend_codes`, `friendships` (`user_a < user_b`, saling), `friend_code_attempts` (batas tebakan); `friend_challenges` (3/7 hari, pending → active → finished, skor akhir dibekukan). XP liga dan tantangan dihitung dari `xp_transactions`, bukan dari perangkat. Fungsi: `get_reminder_prefs`, `set_reminder_prefs`, `daily_reminder_targets`, `record_daily_reminder`, `get_league`, `league_fill` (penempatan malas per minggu, dikunci `pg_advisory_xact_lock`), `league_next_division`, `league_standings`, `get_social`, `add_friend`, `remove_friend`, `create_challenge`, `respond_challenge`, `cancel_challenge`, `settle_challenges`. Shadowing tidak punya tabel: rekaman tetap di HP, XP lewat `sync_learner`.
 
 **Fungsi SQL** (semua hanya bisa dieksekusi `service_role`):
 akun `get_account`, `get_entitlement`, `update_profile`; progres `sync_learner`, `get_snapshot`, `get_leaderboard`;

@@ -20,13 +20,13 @@ const out = process.argv[2];
     // Web notifications (admin payment alerts) show as Lentera app notifications.
     enableNotifications: true,
     // ?apk= tells the site which app version is installed (update notice, src/lib/android.ts).
-    startUrl: '/app?apk=3',
+    startUrl: '/app?apk=4',
     iconUrl: `https://${HOST}/icon-512.png`,
     maskableIconUrl: `https://${HOST}/icon-maskable-512.png`,
     splashScreenFadeOutDuration: 300,
     signingKey: { path: path.resolve(process.argv[3]), alias: 'lentera' },
-    appVersionCode: 3,
-    appVersion: '1.2.0',
+    appVersionCode: 4,
+    appVersion: '1.3.0',
     webManifestUrl: `https://${HOST}/manifest.webmanifest`,
     fallbackType: 'customtabs',
     enableSiteSettingsShortcut: true,

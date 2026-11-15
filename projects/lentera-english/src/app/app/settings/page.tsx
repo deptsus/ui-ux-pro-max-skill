@@ -7,6 +7,7 @@ import { getTheme, setTheme, useApp } from '@/lib/client/hooks';
 import { act, resetLearner } from '@/lib/client/store';
 import { buzz, getFontScale, hapticsOn, hapticsSupported, setFontScale, setHaptics, type FontScale } from '@/lib/client/prefs';
 import { Badge, Button, Card, LinkButton, Notice, PageHeader } from '@/components/ui';
+import { ReminderSettings } from '@/components/ReminderSettings';
 
 export default function SettingsPage() {
   const { ix, learner, premium } = useApp();
@@ -62,6 +63,7 @@ export default function SettingsPage() {
           {GAME.dailyGoalOptions.map((g, i) => <Button key={g} role="radio" aria-checked={learner.profile.dailyGoalXp === g} variant={learner.profile.dailyGoalXp === g ? 'primary' : 'secondary'} size="sm" onClick={() => act((d) => { d.profile.dailyGoalXp = g; })}>{g} XP · {['Santai', 'Rutin', 'Serius', 'Intensif'][i]}</Button>)}
         </div>
       </Card>
+      <section id="pengingat" className="scroll-mt-24"><ReminderSettings /></section>
       <Card className="space-y-3">
         <h2 className="font-extrabold">Aksen audio</h2>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Aksen">

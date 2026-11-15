@@ -106,6 +106,8 @@ export interface LearnerState {
   rewards: Record<string, number>;
   conversations: Record<string, { best: number; plays: number; lastAt: number }>;
   vocabLearned: Record<string, number>;
+  /** Shadowing practice (Rilis 8): totals and the sentences practised recently (spoken keys, newest last). */
+  shadowing?: { total: number; sessions: number; recent: string[]; lastAt?: number };
   outbox: SyncEvent[];
   seq: number;
 }

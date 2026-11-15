@@ -1,4 +1,4 @@
-import { Award, BarChart3, BookHeart, BookOpen, CalendarCheck, ClipboardList, Crown, GraduationCap, Headphones, Home, LayoutGrid, Library, Map, MessagesSquare, Repeat, Settings, User, Users } from 'lucide-react';
+import { AudioLines, Award, BarChart3, BookHeart, BookOpen, CalendarCheck, ClipboardList, Crown, GraduationCap, Headphones, Home, LayoutGrid, Library, Map, MessagesSquare, Repeat, Settings, User, Users } from 'lucide-react';
 
 export const NAV = [
   { href: '/app', label: 'Beranda', icon: Home },
@@ -11,10 +11,11 @@ export const NAV = [
   { href: '/app/grammar', label: 'Tata Bahasa', icon: BookOpen },
   { href: '/app/stories', label: 'Cerita', icon: BookHeart },
   { href: '/app/listening', label: 'Menyimak', icon: Headphones },
+  { href: '/app/shadowing', label: 'Shadowing', icon: AudioLines },
   { href: '/app/conversations', label: 'Percakapan', icon: MessagesSquare },
   { href: '/app/analytics', label: 'Analitik', icon: BarChart3 },
   { href: '/app/achievements', label: 'Pencapaian', icon: Award },
-  { href: '/app/leaderboard', label: 'Papan Peringkat', icon: Users },
+  { href: '/app/leaderboard', label: 'Liga & Teman', icon: Users },
   { href: '/app/profile', label: 'Profil', icon: User },
   { href: '/app/subscription', label: 'Premium', icon: Crown },
   { href: '/app/settings', label: 'Pengaturan', icon: Settings },

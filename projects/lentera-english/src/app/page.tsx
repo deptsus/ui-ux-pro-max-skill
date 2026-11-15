@@ -24,15 +24,15 @@ const STEPS = [
 const FEATURES = [
   [Wrench, 'Mengenali pola kesalahanmu', 'Sering tertukar was dan were? Sistem mendeteksinya, memberi latihan khusus dari mudah ke sulit, lalu mengujimu lagi.'],
   [Target, 'Dikuasai, bukan sekadar selesai', 'Satu kuis bagus tidak cukup. Topik baru dianggap dikuasai setelah skor 85% yang konsisten dan lulus tes ulang di hari lain.'],
-  [CalendarClock, 'Ulangan tepat sebelum lupa', 'Jawaban salah memendekkan jarak ulangan, jawaban benar memanjangkannya.'],
+  [CalendarClock, 'Ulangan tepat sebelum lupa', 'Jawaban salah memendekkan jarak ulangan, jawaban benar memanjangkannya. Pengingat harian di HP menjaga beruntunmu.'],
   [MessagesSquare, 'Simulasi percakapan nyata', 'Restoran, bandara, wawancara kerja. Tiap pilihan dinilai dari tata bahasa dan kewajarannya.'],
-  [Headphones, 'Menyimak dan pelafalan', 'Putar normal atau lambat, lihat posisi lidah dan bibir, rekam suaramu sendiri.'],
+  [Headphones, 'Menyimak, pelafalan, dan shadowing', 'Putar normal atau lambat, lihat posisi lidah dan bibir, lalu rekam suaramu dan bandingkan berdampingan dengan contohnya.'],
   [GraduationCap, 'PR dan ujian sungguhan', 'Tes penempatan, ujian unit, dan ujian level CEFR dengan pembahasan lengkap.'],
 ] as const;
 const LEVELS = [['A1', 'Pemula'], ['A2', 'Dasar'], ['B1', 'Menengah'], ['B2', 'Menengah Atas'], ['C1', 'Mahir'], ['C2', 'Sangat Mahir']];
 const FAQ = [
   ['Apakah aplikasi ini memakai AI saat aku belajar?', 'Tidak. Semua materi diperiksa dan dikembangkan sebelum terbit. Penilaian jawaban dan rekomendasi belajar dihitung dengan aturan dan skor yang bisa dijelaskan, bukan model bahasa, dan tidak ada jawabanmu yang dikirim ke layanan AI.'],
-  ['Apakah pelafalanku dinilai otomatis?', 'Tidak. Kami tidak mengklaim penilaian pelafalan otomatis. Kamu mendapat contoh audio, panduan posisi mulut, dan perekam untuk membandingkan sendiri.'],
+  ['Apakah pelafalanku dinilai otomatis?', 'Tidak. Kami tidak mengklaim penilaian pelafalan otomatis. Kamu mendapat contoh audio, panduan posisi mulut, dan latihan shadowing untuk membandingkan suaramu sendiri berdampingan dengan contohnya.'],
   ['Apakah Premium diperpanjang otomatis?', 'Tidak ada auto-debit. Kamu memperpanjang sendiri. Saat masa aktif habis, akun kembali ke Free dan seluruh progresmu tetap tersimpan.'],
   ['Metode pembayaran apa yang tersedia?', 'QRIS, yang bisa dibayar dari aplikasi mobile banking atau e-wallet apa pun (DANA, GoPay, OVO, ShopeePay, BCA, dan lainnya). Setelah membayar, laporkan pembayaranmu di aplikasi; Premium aktif setelah kami mengonfirmasinya. Kami tidak menyimpan data rekening atau e-wallet.'],
   ['Apakah semua level sudah lengkap?', 'Kurikulum A1 sampai C2 sudah dipetakan dan setiap level punya pelajaran yang bisa dikerjakan. Unit yang masih disusun ditandai jelas di jalur belajar.'],

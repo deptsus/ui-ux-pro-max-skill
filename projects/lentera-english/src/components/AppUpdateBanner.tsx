@@ -39,7 +39,7 @@ export function AppUpdateBanner() {
         <span className="font-extrabold">Versi baru aplikasi Lentera ({ANDROID_APP.versionName}) tersedia.</span>{' '}
         {tapped
           ? 'Buka file yang terunduh, lalu pilih Perbarui. Login dan progresmu tetap aman.'
-          : 'Perbarui agar fitur terbaru di HP berjalan dengan baik.'}
+          : `${ANDROID_APP.news} Perbarui agar fitur terbaru di HP berjalan dengan baik.`}
       </p>
       <a href={ANDROID_APP.url} download onClick={() => setTapped(true)} className="rounded-full bg-brand px-3 py-1.5 font-extrabold text-on-brand">Perbarui</a>
       <button type="button" onClick={later} className="text-muted" aria-label="Nanti saja"><X size={18} aria-hidden /></button>

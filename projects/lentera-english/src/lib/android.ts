@@ -10,8 +10,10 @@
 export const ANDROID_APP = {
   packageId: 'id.lenteraenglish.app',
   /** Must match appVersionCode / appVersion of the APK in public/download. */
-  versionCode: 3,
-  versionName: '1.2.0',
+  versionCode: 4,
+  versionName: '1.3.0',
+  /** One line for the update notice: what the new APK brings. */
+  news: 'Ikon lentera baru di layar HP-mu.',
   url: '/download/lentera-english.apk',
 } as const;
 

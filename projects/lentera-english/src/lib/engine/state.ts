@@ -6,6 +6,7 @@ import type { Grade } from './grading';
 import { applyRetest, dayKey, demote, recordTopicAttempt } from './mastery';
 import { applyReview, firstSchedule } from './srs';
 import { currentHearts, emptyDay, newAchievements, nextStreak } from './gamification';
+import { SHADOW } from './shadowing';
 import type { AttemptContext, DailyStat, LearnerState, SyncEvent } from './types';
 
 export const LESSON_STEPS = ['intro', 'teaching', 'demo', 'guided', 'independent', 'homework', 'mastery', 'review'] as const;
@@ -281,6 +282,22 @@ export function completeStory(s: LearnerState, id: string, at: number) {
 /** First time a listening item was played to the end (the weekly plan counts it as done). */
 export function completeListening(s: LearnerState, id: string, at: number) {
   s.rewards[`listening:${id}`] ??= at;
+}
+
+/**
+ * A finished shadowing round (Rilis 8): counts as studying today (streak) and
+ * gives XP per sentence the learner listened to, said and rated.
+ */
+export function completeShadowing(s: LearnerState, keys: string[], at: number) {
+  const n = Math.min(keys.length, SHADOW.perSession);
+  if (n === 0) return;
+  s.streak = nextStreak(s.streak, at);
+  const sh = (s.shadowing ??= { total: 0, sessions: 0, recent: [] });
+  sh.total += n;
+  sh.sessions += 1;
+  sh.lastAt = at;
+  sh.recent = [...sh.recent.filter((k) => !keys.includes(k)), ...keys].slice(-SHADOW.recentKept);
+  addXp(s, n * SHADOW.xpPerSentence, 'shadowing', at);
 }
 
 export function learnVocab(s: LearnerState, id: string, at: number) {

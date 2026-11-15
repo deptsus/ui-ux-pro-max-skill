@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, Flame, Heart, Repeat, Target, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
+import { AlarmClock, ArrowRight, AudioLines, CheckCircle2, Flame, Heart, Repeat, Target, Users, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
 import { GAME } from '@/lib/engine/config';
 import { activeMissions, currentHearts, liveStreak, nextMilestone, playerLevel } from '@/lib/engine/gamification';
 import { dayKey } from '@/lib/engine/mastery';
@@ -134,6 +134,19 @@ export default function Dashboard() {
         <Card className="p-4"><p className="flex items-center gap-1.5 text-sm font-bold text-muted"><Repeat size={16} className="text-brand" aria-hidden />Ulangan</p><p className="mt-1 text-2xl font-extrabold">{due}</p><p className="text-xs text-muted">menunggu hari ini</p></Card>
         <Card className="p-4"><p className="flex items-center gap-1.5 text-sm font-bold text-muted"><Heart size={16} className="text-bad" aria-hidden />Nyawa</p><p className="mt-1 text-2xl font-extrabold">{premium ? 'Tak terbatas' : `${hearts.count} / ${GAME.hearts.max}`}</p><p className="text-xs text-muted">{premium ? 'Manfaat Premium' : hearts.nextAt ? `+1 pukul ${new Date(hearts.nextAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` : 'Penuh'}</p></Card>
       </section>
+
+      <nav aria-label="Kebiasaan belajar" className="grid gap-3 sm:grid-cols-3">
+        {([
+          ['/app/leaderboard', Users, 'Liga & Teman', 'Naik divisi dan tantang temanmu.'],
+          ['/app/shadowing', AudioLines, 'Shadowing', 'Tirukan 5 kalimat, bandingkan suaramu.'],
+          ['/app/settings#pengingat', AlarmClock, 'Pengingat harian', 'Pilih jam agar beruntunmu terjaga.'],
+        ] as const).map(([href, Icon, title, desc]) => (
+          <Link key={href} href={href} className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 transition hover:border-brand">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand"><Icon size={20} aria-hidden /></span>
+            <span className="min-w-0"><span className="block font-bold">{title}</span><span className="block text-sm text-muted">{desc}</span></span>
+          </Link>
+        ))}
+      </nav>
 
       <section aria-labelledby="mission-title">
         <h2 id="mission-title" className="mb-2 text-lg font-extrabold">Misi</h2>

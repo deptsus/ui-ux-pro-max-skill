@@ -11,12 +11,13 @@ const DESC: Record<string, string> = {
   '/app/grammar': 'Rujukan semua topik tata bahasa.',
   '/app/stories': 'Cerita pendek beranimasi, lalu pertanyaan tentang ceritanya.',
   '/app/listening': 'Latihan menyimak dan panduan pelafalan.',
+  '/app/shadowing': 'Dengar, rekam suaramu, lalu bandingkan sendiri.',
   '/app/conversations': 'Simulasi situasi nyata dengan dialog bercabang.',
   '/app/analytics': 'Ketepatan, waktu belajar, dan pola kesalahanmu.',
   '/app/achievements': 'Lencana, tonggak XP, dan hadiah bab.',
-  '/app/leaderboard': 'Peringkat XP mingguan.',
+  '/app/leaderboard': 'Liga mingguan, teman, dan tantangan XP.',
   '/app/subscription': 'Paket Free dan Premium, riwayat transaksi.',
-  '/app/settings': 'Tema, target harian, aksen, dan mode offline.',
+  '/app/settings': 'Tema, pengingat harian, aksen, dan mode offline.',
 };
 
 export default function MorePage() {

@@ -39,7 +39,7 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Pusat Ulangan, Pusat PR (termasuk PR menulis), Pusat Ujian (ujian unit), Pusat Menyimak, latihan perbaikan, Tantangan Kilat: sesinya dijalankan sampai selesai di browser oleh `e2e/run.mjs`.
 - [~] Tes ulang penguasaan (jeda 20 jam, dua hari berbeda), latihan per topik, dan ujian level: logikanya teruji di unit test, sesinya belum dijalankan di browser.
 - [~] Pustaka kosakata, pustaka tata bahasa, pencapaian, profil: tampil tanpa error. Analitik dengan data, tema, dan aksen sudah diuji; target harian dan reset data belum.
-- [~] Papan peringkat: SQL teruji; UI diuji dengan satu akun (muncul dengan XP yang benar). Belum diuji dengan beberapa akun sekaligus.
+- [x] Papan peringkat: SQL teruji; sejak Rilis 8 liga dan teman diuji dengan beberapa akun sekaligus (`e2e:habits`).
 - [ ] Rekaman audio penutur asli (aksen US dan UK) untuk contoh, kosakata, menyimak, fonem. Daftarkan di `audio_resources`; pemutar sudah mendukung. Saat ini fallback ke suara perangkat.
 - [x] Tahap 1: 8 pelajaran A1–A2 (`content/a1-4.ts`, `content/a2-2.ts`). Sudah terbit (db-2).
 - [x] Tahap 2: 16 pelajaran B1–C2 + ujian level B1–C2 (`content/b1-2.ts`, `b2-2.ts`, `c1-2.ts`, `c2-2.ts`). Sudah terbit (db-4).
@@ -53,7 +53,8 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 6 dari `ROADMAP.md`: tab Rekaman (rekam/unggah, Supabase Storage), audit UI/UX dengan `ui-ux-pro-max` (kontras, target 44 px, layar 320 px, sambutan), ukuran huruf, getaran, label "Bercabang" untuk tamu (`tests/rilis6.test.ts`, `e2e:recordings`, `e2e:ui`). Pemilik: jalankan `apply-0012.sql`, lalu rekam di tab Rekaman dan terbitkan.
 - [x] Keputusan pemilik (15 Nov 2026): audio tetap memakai suara bawaan perangkat; tab Rekaman tidak diisi. Fiturnya tetap tersedia bila suatu saat ada rekaman (pemilik atau pengisi suara).
 - [x] Perbaikan simpan profil (avatar saja bisa disimpan; avatar sampai ke papan peringkat), 8 avatar karakter (satu pink #E89EB8), logo baru (`tests/profil.test.ts`, `e2e:ui`).
-- [ ] Pilih pekerjaan "Setelah Rilis 6" atau "Usulan update besar" di `ROADMAP.md`.
+- [x] Rilis 8 "Kebiasaan Belajar": pengingat belajar harian pada jam pilihan pelajar, liga mingguan 5 divisi, teman lewat kode/tautan undangan, tantangan XP 3/7 hari, latihan shadowing, APK 1.3.0 dengan ikon lentera (`tests/rilis8.test.ts`, `e2e:habits`). Pemilik: jalankan `apply-0013.sql` (sebelum itu, liga/teman/pengingat harian menjawab "sedang disiapkan"; shadowing sudah jalan).
+- [ ] Pilih pekerjaan berikutnya di `ROADMAP.md` bagian "Usulan update besar" (Rilis 7 Siap Tumbuh, Rilis 9 Kelas, dll.).
 - [x] Pengingat PR terbukti sampai di HP sungguhan (15 Nov 2026, HP Android pemilik). Fungsi terjadwal Netlify `homework-reminders` terdaftar (`@hourly`).
 - [ ] Perbesar bank soal ujian level (sekarang 12 + 8 + 8 soal per level); batas waktu ujian level belum dicek server (hanya di perangkat).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).

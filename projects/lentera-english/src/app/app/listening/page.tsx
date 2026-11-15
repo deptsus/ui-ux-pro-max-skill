@@ -90,6 +90,7 @@ function Listening() {
       <div className="mb-4 flex gap-2" role="tablist">
         <LinkButton href="/app/listening" size="sm" variant={tab === 'menyimak' ? 'primary' : 'secondary'}>Menyimak</LinkButton>
         <LinkButton href="/app/listening?tab=pelafalan" size="sm" variant={tab === 'pelafalan' ? 'primary' : 'secondary'}>Pelafalan</LinkButton>
+        <LinkButton href="/app/shadowing" size="sm" variant="secondary">Shadowing</LinkButton>
       </div>
 
       {tab === 'menyimak' ? (

@@ -368,7 +368,9 @@ scenario('android: pemberitahuan versi baru hanya di aplikasi Android versi lama
   await ctx.close();
 
   const fresh = await newContext();
-  const current = await open(fresh, '/app?apk=3');
+  // The newest version is whatever src/lib/android.ts announces.
+  const latest = Number(fs.readFileSync(path.join(import.meta.dirname, '..', 'src', 'lib', 'android.ts'), 'utf8').match(/versionCode: (\d+),/)[1]);
+  const current = await open(fresh, `/app?apk=${latest}`);
   const browser = await fresh.newPage();
   await browser.goto(`${BASE}/app`);
   await browser.locator('main').first().waitFor({ timeout: 45000 });

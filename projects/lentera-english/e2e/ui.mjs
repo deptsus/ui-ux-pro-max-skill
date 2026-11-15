@@ -54,7 +54,7 @@ const measure = (p) => p.evaluate(() => {
   }
   return { over, small };
 });
-const PAGES = ['/app', '/app/path', '/app/lesson?id=a1-to-be', '/app/practice', '/app/review', '/app/stories', '/app/stories?id=story-first-day', '/app/listening', '/app/listening?id=listen-a1-intro', '/app/conversations', '/app/homework', '/app/exams', '/app/vocabulary', '/app/plan', '/app/profile', '/app/settings', '/app/subscription', '/app/placement', '/'];
+const PAGES = ['/app', '/app/path', '/app/lesson?id=a1-to-be', '/app/practice', '/app/review', '/app/stories', '/app/stories?id=story-first-day', '/app/listening', '/app/listening?id=listen-a1-intro', '/app/conversations', '/app/homework', '/app/exams', '/app/vocabulary', '/app/plan', '/app/shadowing', '/app/leaderboard', '/app/profile', '/app/settings', '/app/subscription', '/app/placement', '/'];
 
 // ───────────── 1. 320 px phone, normal and largest text ─────────────
 for (const scale of ['normal', 'xlarge']) {

@@ -210,7 +210,7 @@ Rencana awal:
 
 ### Setelah Rilis 6 (Mei–Juni 2027, untuk dipilih pemilik)
 
-- Liga mingguan dan tantangan antarteman.
+- ~~Liga mingguan dan tantangan antarteman.~~ Selesai di Rilis 8.
 - Dasbor guru/orang tua (melihat progres beberapa pelajar).
 - Mode belajar luring penuh untuk materi Premium yang sudah dibuka.
 - Rilis Play Store (butuh akun Play Console).
@@ -222,7 +222,7 @@ Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, 
 1. **Rilis 7 "Siap Tumbuh"** (paling berdampak):
    - **Play Store**: aplikasi resmi (dipercaya, mudah dicari, update otomatis). Butuh akun Play Console (biaya sekali sekitar US$25), AAB dari kunci tanda tangan yang dipegang pemilik, halaman kebijakan privasi, dan formulir keamanan data.
    - **Pembayaran QRIS otomatis** (Xendit atau Midtrans): Premium aktif detik itu juga tanpa konfirmasi manual. Kode Xendit sudah ada tetapi nonaktif; butuh verifikasi usaha di penyedia dan kunci API yang sah. Potongan QRIS sekitar 0,7% per transaksi.
-2. **Rilis 8 "Kebiasaan Belajar"** (retensi):
+2. **Rilis 8 "Kebiasaan Belajar"** (retensi) — **SELESAI 15 November 2026** (migrasi 0013, APK 1.3.0; rincian di PROJECT_STATUS bagian 2c):
    - **Pengingat harian beruntun** di HP pada jam pilihan pelajar (memakai jalur pengingat PR yang sudah terbukti).
    - **Liga mingguan** (naik/turun divisi) dan **tantangan antarteman** dengan kode undangan.
    - **Latihan "shadowing"**: dengar, rekam diri sendiri, bandingkan berdampingan (tanpa penilaian AI, sesuai klaim situs).

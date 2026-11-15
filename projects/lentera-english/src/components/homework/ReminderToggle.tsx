@@ -51,6 +51,7 @@ export function ReminderToggle() {
         {status === 'busy' && <Button size="sm" disabled>Memproses…</Button>}
       </div>
       {msg && <Notice tone={msg.tone}>{msg.text}</Notice>}
+      <p className="text-sm"><a href="/app/settings#pengingat" className="font-bold text-brand underline underline-offset-4">Atur pengingat belajar harian</a> <span className="text-muted">atau matikan pengingat PR di Pengaturan.</span></p>
     </Card>
   );
 }

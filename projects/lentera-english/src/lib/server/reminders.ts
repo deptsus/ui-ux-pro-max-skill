@@ -62,3 +62,45 @@ export async function runHomeworkReminders(db: ServerDb, opts: { now?: number; o
   }
   return report;
 }
+
+// ───────────────────────── Daily study reminder (Rilis 8) ─────────────────────────
+// Learners pick an hour (05.00–22.00 in their phone's time zone). In that hour
+// (or up to two hours later, if a run was missed) the same hourly job sends one
+// reminder, only if the learner has not studied yet that day. At most one a day
+// (reminder_prefs.last_daily_on); nothing at all on days they already studied.
+export const DAILY = { minIntervalSec: 50 * 60, maxLearners: 2000, firstHour: 5, lastHour: 22 } as const;
+
+interface DailyTarget { user_id: string; local_day: string; streak: number; freeze: boolean; subs: { endpoint: string; p256dh: string; auth: string }[] }
+
+/** The daily reminder: it names the streak at stake, or invites a fresh start. */
+export function dailyMessage(t: { streak: number; freeze: boolean }): PushMessage {
+  const base = { url: '/app', tag: 'lentera-daily' };
+  if (t.freeze && t.streak > 0) return { ...base, title: `Selamatkan ${t.streak} hari beruntunmu`, body: 'Kemarin terlewat, tapi pelindung beruntun masih ada. Belajar hari ini agar beruntunmu tetap menyala.' };
+  if (t.streak > 0) return { ...base, title: `Jaga ${t.streak} hari beruntunmu`, body: 'Kamu belum belajar hari ini. Satu pelajaran singkat atau ulangan 5 menit sudah cukup agar beruntunmu tidak putus.' };
+  return { ...base, title: 'Waktunya belajar bahasa Inggris', body: 'Mulai beruntun baru hari ini: satu pelajaran singkat sudah cukup.' };
+}
+
+export async function runDailyReminders(db: ServerDb, opts: { now?: number; origin?: string } = {}): Promise<ReminderReport> {
+  const now = opts.now ?? Date.now();
+  let targets: DailyTarget[];
+  try {
+    if (!(await db.rpc<boolean>('claim_job', { p_job: 'daily-reminders', p_min_seconds: DAILY.minIntervalSec }))) return { skipped: 'ran-recently' };
+    targets = await db.rpc<DailyTarget[]>('daily_reminder_targets', { p_now: new Date(now).toISOString() });
+  } catch {
+    // Migration 0013 not applied yet.
+    return { skipped: 'not-ready' };
+  }
+  targets = targets.slice(0, DAILY.maxLearners);
+  const report: ReminderReport = { learners: targets.length, reminded: 0, sent: 0, failed: 0, removed: 0 };
+  for (const t of targets) {
+    const r = await notifyLearner(db, t.user_id, dailyMessage(t), { origin: opts.origin, targets: t.subs });
+    report.sent! += r.sent;
+    report.failed! += r.failed;
+    report.removed! += r.removed;
+    if (r.sent > 0) {
+      await db.rpc('record_daily_reminder', { p_user: t.user_id, p_day: t.local_day });
+      report.reminded!++;
+    }
+  }
+  return report;
+}
