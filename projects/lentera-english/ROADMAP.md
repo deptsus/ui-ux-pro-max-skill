@@ -230,7 +230,7 @@ Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, 
 4. **Jalur khusus** (segmen baru): persiapan TOEFL ITP/IELTS, Bahasa Inggris untuk kerja (wawancara, email, rapat), dan jalur anak.
 5. **Analitik pemilik di `/admin`**: corong daftar → tes penempatan → pelajaran pertama → hari ke-7, retensi per minggu, dan konversi ke Premium, untuk dasar keputusan berikutnya.
 6. **Halaman materi publik untuk SEO**: ringkasan tata bahasa dan contoh gratis yang bisa ditemukan di Google, mengarah ke aplikasi.
-7. **Ketahanan**: pemantauan error, cadangan otomatis kurikulum dan data pelajar, dan rencana naik paket Supabase/Netlify saat pengguna bertambah.
+7. **Ketahanan**: (ikutkan di rilis berikutnya mana pun: penghematan Liga & Teman di `TODO.md`, satu migrasi kecil 0014 + perubahan klien) pemantauan error, cadangan otomatis kurikulum dan data pelajar, dan rencana naik paket Supabase/Netlify saat pengguna bertambah.
 
 ---
 
