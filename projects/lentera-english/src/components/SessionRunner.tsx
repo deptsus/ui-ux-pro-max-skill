@@ -10,6 +10,7 @@ import { recordAttempt } from '@/lib/engine/state';
 import { isPremium, type AttemptContext } from '@/lib/engine/types';
 import { useContent } from '@/lib/client/content';
 import { act, getLearner, useEntitlement, useLearner } from '@/lib/client/store';
+import { buzz } from '@/lib/client/prefs';
 import { ExerciseCard } from './ExerciseCard';
 import { Mascot } from './Mascot';
 import { Badge, Button, Card, LinkButton, Progress, Ring, cx } from './ui';
@@ -99,6 +100,7 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
       if (useHearts && heartsAfter <= 0) return finish(list, true);
       return advance(list);
     }
+    buzz(g.correct ? 'ok' : 'bad');
     setResult(g);
   }, [current, result, answer, items, hintShown, ctx, premium, useHearts, feedback, advance, finish]);
 

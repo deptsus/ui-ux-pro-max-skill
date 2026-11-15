@@ -204,7 +204,7 @@ function Stories() {
   const story = id ? ix.pack.stories?.find((s) => s.id === id) : undefined;
 
   if (id && !story) return <Empty title="Cerita tidak ditemukan" action={<LinkButton href="/app/stories">Semua cerita</LinkButton>} />;
-  if (story?.locked) return <Empty title="Cerita Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat Premium</LinkButton>}>{story.title}: {story.summary}</Empty>;
+  if (story?.locked) return <Empty title={story.decisions ? 'Cerita bercabang Premium' : 'Cerita Premium'} action={<LinkButton href="/app/subscription" variant="accent">Lihat Premium</LinkButton>}>{story.title}: {story.summary}{story.decisions ? ` Kamu yang menentukan jalannya lewat ${story.decisions} keputusan, dan setiap pilihan dijelaskan.` : ''}</Empty>;
   if (story) return <StoryView key={story.id} story={story} />;
 
   const list = ix.pack.stories ?? [];
@@ -226,7 +226,7 @@ function Stories() {
                 const done = learner.rewards[`story:${s.id}`];
                 return (
                   <Card as="li" key={s.id} className={cx('flex flex-col gap-2', s.locked && 'opacity-80')}>
-                    <div className="flex flex-wrap items-center gap-2"><Badge>{s.level}</Badge><Badge tone="muted">{s.branch ? <GitBranch size={12} aria-hidden /> : <BookHeart size={12} aria-hidden />}{s.branch ? 'Bercabang' : 'Cerita'}</Badge>{s.locked ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : done ? <Badge tone="ok"><Check size={12} aria-hidden />Selesai</Badge> : null}</div>
+                    <div className="flex flex-wrap items-center gap-2"><Badge>{s.level}</Badge><Badge tone="muted">{s.branch || s.decisions ? <GitBranch size={12} aria-hidden /> : <BookHeart size={12} aria-hidden />}{s.branch || s.decisions ? 'Bercabang' : 'Cerita'}</Badge>{s.locked ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : done ? <Badge tone="ok"><Check size={12} aria-hidden />Selesai</Badge> : null}</div>
                     <h3 className="font-extrabold">{s.title}</h3>
                     <p className="text-sm text-muted">{s.summary}</p>
                     <LinkButton href={s.locked ? '/app/subscription' : `/app/stories?id=${s.id}`} size="sm" variant={s.locked ? 'accent' : done ? 'secondary' : 'primary'} className="mt-auto">{s.locked ? 'Buka dengan Premium' : done ? 'Baca lagi' : 'Mulai cerita'}</LinkButton>

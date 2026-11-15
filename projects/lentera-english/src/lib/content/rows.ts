@@ -131,7 +131,7 @@ export function packForFree(full: ContentPack): ContentPack {
     vocabulary: pack.vocabulary.filter((v) => !v.premium),
     scenarios: pack.scenarios.map((s) => (s.premium ? { ...s, locked: true, nodes: [], closing: '' } : s)),
     listening: pack.listening.map((l) => (lockedListening.has(l.id) ? { ...l, locked: true, transcript: '', translation: '', questionIds: [] } : l)),
-    stories: pack.stories.map((s) => (s.premium ? { ...s, locked: true, characters: [], scenes: [], questionIds: [], branch: undefined } : s)),
+    stories: pack.stories.map((s) => (s.premium ? { ...s, locked: true, characters: [], scenes: [], questionIds: [], branch: undefined, ...(s.branch ? { decisions: s.branch.nodes.filter((n) => n.choices?.length).length } : {}) } : s)),
     // Homework of a Premium lesson or chapter, or pointing at a stripped question, stays on the server.
     homework: pack.homework.filter((h) => (!h.lessonId || !lockedLessons.has(h.lessonId)) && !lockedChapters.has(h.chapterId) && h.exerciseIds.every((id) => kept.has(id))),
   };

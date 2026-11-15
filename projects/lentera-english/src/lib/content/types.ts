@@ -295,6 +295,8 @@ export interface Story {
   /** Exercise ids (stage "story") answered after the story. Branching stories are scored by their choices instead. */
   questionIds: string[];
   branch?: StoryBranch;
+  /** Guest packs only (Rilis 6): a locked branching story keeps its number of decisions, never the branch itself. */
+  decisions?: number;
 }
 
 export interface Phoneme {

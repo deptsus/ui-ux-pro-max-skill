@@ -7,6 +7,7 @@ import { CEFR_ORDER, type ScenarioOption } from '@/lib/content/types';
 import { shuffle } from '@/lib/engine/grading';
 import { completeConversation } from '@/lib/engine/state';
 import { useApp } from '@/lib/client/hooks';
+import { buzz } from '@/lib/client/prefs';
 import { act } from '@/lib/client/store';
 import { AudioButton } from '@/components/AudioButton';
 import { Mascot } from '@/components/Mascot';
@@ -40,7 +41,7 @@ function Conversations() {
     const points = answered.reduce((n, t) => n + (t.choice!.correct ? t.choice!.natural : 0), 0);
     const score = max ? Math.round((points / max) * 100) : 0;
     const options = node ? shuffle(node.options, `${scenario.id}:${node.id}:${play}`) : [];
-    const choose = (o: ScenarioOption) => { if (!picked) setPicked(o); };
+    const choose = (o: ScenarioOption) => { if (picked) return; buzz(o.correct && o.natural === 3 ? 'ok' : 'bad'); setPicked(o); };
     const proceed = () => {
       if (!node || !picked) return;
       const list = [...turns, { speaker: node.speaker, line: node.line, lineId: node.lineId, choice: picked }];

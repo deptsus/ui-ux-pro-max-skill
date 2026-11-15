@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Check, Languages, MessageCircle, Volume2, Volume
 import type { Story, StoryChoice, StoryLine, StoryNode, StoryScene } from '@/lib/content/types';
 import { play, stopAudio } from '@/lib/client/audio';
 import { useApp } from '@/lib/client/hooks';
+import { buzz } from '@/lib/client/prefs';
 import { shuffle } from '@/lib/engine/grading';
 import { branchScore, type BranchPick, type BranchResult } from '@/lib/engine/branch';
 import { AudioButton } from '@/components/AudioButton';
@@ -62,6 +63,7 @@ export function BranchPlayer({ story, onDone }: { story: Story; onDone: (r: Bran
   }, [atEnd, node, branch.start]);
 
   function choose(c: StoryChoice) {
+    buzz(c.correct && c.natural === 3 ? 'ok' : 'bad');
     setPicked(c);
     setPicks((p) => [...p, { node: node!, choice: c }]);
   }

@@ -1,10 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Crown, Download, Monitor, Moon, Sun } from 'lucide-react';
+import { Crown, Download, Monitor, Moon, Sun, Type, Vibrate } from 'lucide-react';
 import { GAME } from '@/lib/engine/config';
 import { setOffline, useOffline } from '@/lib/client/content';
 import { getTheme, setTheme, useApp } from '@/lib/client/hooks';
 import { act, resetLearner } from '@/lib/client/store';
+import { buzz, getFontScale, hapticsOn, hapticsSupported, setFontScale, setHaptics, type FontScale } from '@/lib/client/prefs';
 import { Badge, Button, Card, LinkButton, Notice, PageHeader } from '@/components/ui';
 
 export default function SettingsPage() {
@@ -14,7 +15,13 @@ export default function SettingsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
-  useEffect(() => setThemeState(getTheme()), []);
+  const [font, setFont] = useState<FontScale>('normal');
+  const [haptics, setHapticsState] = useState<{ supported: boolean; on: boolean }>({ supported: false, on: true });
+  useEffect(() => {
+    setThemeState(getTheme());
+    setFont(getFontScale());
+    setHapticsState({ supported: hapticsSupported(), on: hapticsOn() });
+  }, []);
   const pick = (t: 'light' | 'dark' | 'system') => { setTheme(t); setThemeState(t); };
   const toggleOffline = async (on: boolean) => {
     setError(null);
@@ -33,6 +40,20 @@ export default function SettingsPage() {
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Tema">
           {([['light', 'Terang', Sun], ['dark', 'Gelap', Moon], ['system', 'Ikuti perangkat', Monitor]] as const).map(([t, label, Icon]) => <Button key={t} role="radio" aria-checked={theme === t} variant={theme === t ? 'primary' : 'secondary'} size="sm" onClick={() => pick(t)}><Icon size={16} aria-hidden />{label}</Button>)}
         </div>
+        <h3 className="flex items-center gap-2 pt-2 font-bold" id="ukuran-huruf"><Type size={16} aria-hidden />Ukuran huruf</h3>
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="ukuran-huruf">
+          {([['normal', 'Normal'], ['large', 'Besar'], ['xlarge', 'Sangat besar']] as const).map(([f, label]) => <Button key={f} role="radio" aria-checked={font === f} variant={font === f ? 'primary' : 'secondary'} size="sm" onClick={() => { setFontScale(f); setFont(f); }}>{label}</Button>)}
+        </div>
+        <p className="text-sm text-muted">Mengubah ukuran seluruh tampilan di perangkat ini, termasuk tombol.</p>
+        <h3 className="flex items-center gap-2 pt-2 font-bold" id="getaran"><Vibrate size={16} aria-hidden />Getaran saat menjawab</h3>
+        {haptics.supported ? (
+          <>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="getaran">
+              {([[true, 'Nyala'], [false, 'Mati']] as const).map(([on, label]) => <Button key={label} role="radio" aria-checked={haptics.on === on} variant={haptics.on === on ? 'primary' : 'secondary'} size="sm" onClick={() => { setHaptics(on); setHapticsState((h) => ({ ...h, on })); if (on) buzz('ok'); }}>{label}</Button>)}
+            </div>
+            <p className="text-sm text-muted">Getar singkat saat jawaban benar, dua kali saat belum tepat.</p>
+          </>
+        ) : <p className="text-sm text-muted">Perangkat atau browser ini tidak mendukung getaran (misalnya iPhone dan komputer). Di HP Android, getaran menyala otomatis.</p>}
       </Card>
       <Card className="space-y-3">
         <h2 className="font-extrabold">Target harian</h2>

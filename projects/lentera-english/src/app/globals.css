@@ -85,6 +85,9 @@
 }
 
 html { background: var(--bg); }
+/* Text size setting (Rilis 6): everything is sized in rem, so the whole interface scales with it. */
+html.fs-lg { font-size: 112.5%; }
+html.fs-xl { font-size: 125%; }
 body {
   background: var(--bg);
   color: var(--ink);
