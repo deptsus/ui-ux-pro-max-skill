@@ -104,7 +104,8 @@ export function Mascot({ mood = 'happy', size = 96, className, decorative = fals
   );
 }
 
-export function Logo({ size = 28 }: { size?: number }) {
+/** `compact`: on phones narrower than 420 px only the mark shows (the name stays for screen readers). */
+export function Logo({ size = 28, compact = false }: { size?: number; compact?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2 font-extrabold tracking-tight">
       <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden>
@@ -113,7 +114,7 @@ export function Logo({ size = 28 }: { size?: number }) {
         <path d="M13 13 H19 M13 17 H19" stroke="#b45309" strokeWidth="1.6" strokeLinecap="round" />
         <rect x="12" y="24" width="8" height="3" rx="1.5" fill="#c7d2fe" />
       </svg>
-      <span>
+      <span className={compact ? 'sr-only min-[420px]:not-sr-only' : undefined}>
         Lentera <span className="text-brand">English</span>
       </span>
     </span>

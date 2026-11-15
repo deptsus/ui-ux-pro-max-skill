@@ -83,6 +83,37 @@ for (const scale of ['normal', 'xlarge']) {
   await ctx.close();
 }
 
+// ───────────── 1b. A busy admin: long numbers in the header must not widen the page ─────────────
+for (const width of [320, 390]) {
+  const { ctx, p } = await phone({ width });
+  try {
+    await p.goto(`${BASE}/app`);
+    await p.locator('main').first().waitFor({ timeout: 30000 });
+    await p.evaluate((uid) => {
+      const k = `lentera.state.${uid}`;
+      const st = JSON.parse(localStorage.getItem(k));
+      st.xp = 123456;
+      st.streak.current = 365;
+      st.updatedAt = Date.now();
+      localStorage.setItem(k, JSON.stringify(st));
+    }, session.userId);
+    const bad = [];
+    for (const url of ['/app', '/app/homework', '/app/homework?id=hw.b2-c1.write', '/app/settings']) {
+      await p.goto(BASE + url);
+      await p.locator('main').first().waitFor({ timeout: 30000 });
+      await p.waitForTimeout(1200);
+      const m = await measure(p);
+      if (m.over > 0 || m.small.length) bad.push(`${url}: geser ${m.over}px ${m.small.slice(0, 3).join(' | ')}`);
+    }
+    const names = await p.getByRole('link', { name: 'Premium' }).count() > 0 && await p.getByRole('link', { name: /Lentera English/ }).count() > 0;
+    check(`header ${width} px dengan admin, XP 123456 dan beruntun 365: tidak melebar, nama Premium dan logo tetap terbaca pembaca layar`, bad.length === 0 && names, bad.join(' || '));
+    if (width === 320) await p.screenshot({ path: path.join(SHOTS, 'ui-320-header-admin.png') });
+  } catch (e) {
+    check(`header ${width} px: macet`, false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+  await ctx.close();
+}
+
 // ───────────── 2. First open as a new guest ─────────────
 {
   const { ctx, p } = await phone({ width: 360, signedIn: false });

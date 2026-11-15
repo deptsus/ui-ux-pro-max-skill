@@ -109,21 +109,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2.5">
-          <Link href="/app" className="mr-auto lg:hidden"><Logo size={24} /></Link>
+          <Link href="/app" className="mr-auto flex min-h-11 min-w-11 items-center lg:hidden"><Logo size={24} compact /></Link>
           <span className="mr-auto hidden text-sm font-bold text-muted lg:block">{session ? session.email : 'Mode tamu · progres tersimpan di perangkat ini'}</span>
           {admin && (
-            <Link href="/admin" className="relative flex min-w-11 items-center justify-center gap-1 rounded-full bg-ink before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] px-2.5 py-1 text-sm font-extrabold text-bg lg:hidden" aria-label={pending ? `Dashboard admin, ${pending} pembayaran menunggu konfirmasi` : 'Dashboard admin'}>
+            <Link href="/admin" className="relative flex min-w-11 shrink-0 items-center justify-center gap-1 rounded-full bg-ink before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] px-2.5 py-1 text-sm font-extrabold text-bg lg:hidden" aria-label={pending ? `Dashboard admin, ${pending} pembayaran menunggu konfirmasi` : 'Dashboard admin'}>
               <ShieldCheck size={16} aria-hidden /><span className="hidden min-[400px]:inline">Admin</span>
               {!!pending && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-bad px-1 text-[11px] text-on-brand" aria-hidden>{pending}</span>}
             </Link>
           )}
           {sync === 'offline' && <span title="Sedang offline. Progres disimpan di perangkat dan dikirim saat tersambung." className="text-muted"><CloudOff size={18} aria-label="Offline" /></span>}
-          <Link href="/app/profile" className="relative flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 text-sm font-extrabold text-accent-strong before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Hari belajar beruntun"><Flame size={16} aria-hidden /><span aria-label={`Beruntun ${streak} hari`}>{streak}</span></Link>
-          <Link href="/app/achievements" className="relative flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-sm font-extrabold text-brand before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Total XP"><Zap size={16} aria-hidden /><span aria-label={`${learner.xp} XP`}>{learner.xp}</span></Link>
+          <Link href="/app/profile" className="relative flex shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 text-sm font-extrabold text-accent-strong before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Hari belajar beruntun"><Flame size={16} aria-hidden /><span aria-label={`Beruntun ${streak} hari`}>{streak}</span></Link>
+          <Link href="/app/achievements" className="relative flex shrink-0 items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-sm font-extrabold text-brand before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Total XP"><Zap size={16} aria-hidden /><span aria-label={`${learner.xp} XP`}>{learner.xp}</span></Link>
           {premium ? (
-            <Link href="/app/subscription" className="relative flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-sm font-extrabold before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] text-[#1e1b3a]"><Crown size={16} aria-hidden />Premium</Link>
+            <Link href="/app/subscription" className="relative flex min-w-11 shrink-0 items-center justify-center gap-1 rounded-full bg-accent px-2.5 py-1 text-sm font-extrabold before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] text-[#1e1b3a]"><Crown size={16} aria-hidden /><span className="sr-only min-[420px]:not-sr-only">Premium</span></Link>
           ) : (
-            <Link href="/app/subscription" className="relative flex items-center gap-1 rounded-full bg-bad-soft px-2.5 py-1 text-sm font-extrabold text-bad before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Nyawa. Berkurang saat salah di latihan mandiri dan tes."><Heart size={16} fill="currentColor" aria-hidden /><span aria-label={`${hearts} nyawa`}>{hearts}</span></Link>
+            <Link href="/app/subscription" className="relative flex shrink-0 items-center gap-1 rounded-full bg-bad-soft px-2.5 py-1 text-sm font-extrabold text-bad before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Nyawa. Berkurang saat salah di latihan mandiri dan tes."><Heart size={16} fill="currentColor" aria-hidden /><span aria-label={`${hearts} nyawa`}>{hearts}</span></Link>
           )}
         </div>
       </header>
