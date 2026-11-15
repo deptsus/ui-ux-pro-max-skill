@@ -225,14 +225,42 @@ function DemoEditor({ value, onChange }: { value: Row[]; onChange: (v: Row[]) =>
 function WritingEditor({ value, onChange }: { value: Row | null | undefined; onChange: (v: Row | null) => void }) {
   const id = useId();
   if (!value) return <Button type="button" size="sm" variant="secondary" onClick={() => onChange({ prompt: '', minWords: 20, mustInclude: [], model: '' })}><Plus size={16} aria-hidden />Tambah tugas menulis</Button>;
+  const levels: { label: string; text: string; note: string }[] = Array.isArray(value.levels) ? value.levels : [];
+  // The best example is the model answer; keep the two in step.
+  const setLevels = (next: typeof levels) => onChange({ ...value, levels: next.length ? next : undefined, ...(next.length ? { model: next.at(-1)!.text } : {}) });
+  const optionalNumber = (v: string) => (v === '' ? undefined : Number(v));
   return (
     <div className="space-y-3 rounded-2xl border border-line bg-bg p-3">
       <p className="text-xs text-muted">Tulisan pelajar diperiksa dengan daftar periksa yang pasti (jumlah kata dan unsur wajib), lalu dibandingkan dengan contoh jawaban. Mutu tulisan tidak dinilai otomatis.</p>
       <Labeled label="Instruksi" htmlFor={`${id}-p`} required><textarea id={`${id}-p`} rows={3} value={value.prompt ?? ''} onChange={(e) => onChange({ ...value, prompt: e.target.value })} className={input} /></Labeled>
-      <Labeled label="Jumlah kata minimal" htmlFor={`${id}-n`} required><input id={`${id}-n`} type="number" min={1} value={value.minWords ?? ''} onChange={(e) => onChange({ ...value, minWords: e.target.value === '' ? null : Number(e.target.value) })} className={cx(input, 'max-w-40')} /></Labeled>
+      <Labeled label="Teks sumber (opsional)" htmlFor={`${id}-s`} hint="Untuk tugas meringkas atau membalas: teks yang dibaca pelajar di atas kotak tulisan."><textarea id={`${id}-s`} rows={4} lang="en" value={value.source ?? ''} onChange={(e) => onChange({ ...value, source: e.target.value || undefined })} className={input} /></Labeled>
+      <div className="flex flex-wrap gap-3">
+        <Labeled label="Jumlah kata minimal" htmlFor={`${id}-n`} required><input id={`${id}-n`} type="number" min={1} value={value.minWords ?? ''} onChange={(e) => onChange({ ...value, minWords: e.target.value === '' ? null : Number(e.target.value) })} className={cx(input, 'max-w-40')} /></Labeled>
+        <Labeled label="Jumlah kata maksimal (opsional)" htmlFor={`${id}-mx`} hint="Isi untuk ringkasan."><input id={`${id}-mx`} type="number" min={1} value={value.maxWords ?? ''} onChange={(e) => onChange({ ...value, maxWords: optionalNumber(e.target.value) })} className={cx(input, 'max-w-40')} /></Labeled>
+      </div>
       <Labeled label="Unsur wajib" htmlFor={`${id}-m`} hint='Satu unsur per baris, dengan format "Label yang dilihat pelajar::frasa1|frasa2". Unsur terpenuhi bila salah satu frasa muncul di tulisan.'><LinesInput id={`${id}-m`} value={value.mustInclude} onChange={(v) => onChange({ ...value, mustInclude: v })} /></Labeled>
-      <Labeled label="Contoh jawaban" htmlFor={`${id}-x`} required><textarea id={`${id}-x`} rows={3} lang="en" value={value.model ?? ''} onChange={(e) => onChange({ ...value, model: e.target.value })} className={input} /></Labeled>
-      <Button type="button" size="sm" variant="ghost" onClick={() => onChange(null)}><Trash2 size={16} aria-hidden />Hapus tugas menulis</Button>
+      {levels.length === 0 ? (
+        <Labeled label="Contoh jawaban" htmlFor={`${id}-x`} required><textarea id={`${id}-x`} rows={3} lang="en" value={value.model ?? ''} onChange={(e) => onChange({ ...value, model: e.target.value })} className={input} /></Labeled>
+      ) : (
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-bold">Contoh jawaban bertingkat</legend>
+          <p className="text-xs text-muted">Dari yang sekadar memenuhi syarat sampai yang terbaik. Contoh terakhir dipakai sebagai contoh jawaban utama. Setiap contoh harus lolos daftar periksa.</p>
+          {levels.map((l, i) => (
+            <div key={i} className="space-y-2 rounded-xl border border-line bg-surface p-3">
+              <div className="flex items-end gap-2">
+                <Labeled label={`Tingkat ${i + 1}`} htmlFor={`${id}-l${i}`}><input id={`${id}-l${i}`} value={l.label} onChange={(e) => setLevels(levels.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} className={input} /></Labeled>
+                <Button type="button" size="sm" variant="ghost" aria-label={`Hapus tingkat ${i + 1}`} onClick={() => setLevels(levels.filter((_, j) => j !== i))}><Trash2 size={16} aria-hidden /></Button>
+              </div>
+              <Labeled label="Teks contoh" htmlFor={`${id}-t${i}`}><textarea id={`${id}-t${i}`} rows={4} lang="en" value={l.text} onChange={(e) => setLevels(levels.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} className={input} /></Labeled>
+              <Labeled label="Catatan: apa yang membuatnya lebih baik" htmlFor={`${id}-c${i}`}><textarea id={`${id}-c${i}`} rows={2} value={l.note} onChange={(e) => setLevels(levels.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} className={input} /></Labeled>
+            </div>
+          ))}
+        </fieldset>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" size="sm" variant="secondary" onClick={() => setLevels([...(levels.length ? levels : [{ label: 'Sangat baik', text: value.model ?? '', note: '' }]), ...(levels.length ? [{ label: '', text: '', note: '' }] : [])])}><Plus size={16} aria-hidden />{levels.length ? 'Tambah tingkat' : 'Jadikan contoh bertingkat'}</Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => onChange(null)}><Trash2 size={16} aria-hidden />Hapus tugas menulis</Button>
+      </div>
     </div>
   );
 }

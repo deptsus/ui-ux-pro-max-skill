@@ -60,9 +60,9 @@ const SW_SCOPE = '/admin/';
 
 export type PushStatus = 'unsupported' | 'denied' | 'off' | 'on' | 'busy';
 
-const supported = () => typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+export const pushSupported = () => typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 
-function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
+export function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padded = (base64 + '='.repeat((4 - (base64.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
   const raw = atob(padded);
   const out = new Uint8Array(new ArrayBuffer(raw.length));
@@ -75,7 +75,7 @@ function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
  * cannot be used: it only settles for a worker whose scope covers the current
  * page, and /admin (no trailing slash) is outside the /admin/ scope.
  */
-async function activated(reg: ServiceWorkerRegistration, timeoutMs = 15_000): Promise<void> {
+export async function activated(reg: ServiceWorkerRegistration, timeoutMs = 15_000): Promise<void> {
   if (reg.active) return;
   const worker = reg.installing ?? reg.waiting;
   if (!worker) throw new Error('Layanan notifikasi gagal dipasang. Muat ulang halaman, lalu coba lagi.');
@@ -102,7 +102,7 @@ async function currentSubscription(): Promise<PushSubscription | null> {
 
 /** Turns phone notifications on for this device and stores the subscription on the server. */
 export async function enablePush(): Promise<void> {
-  if (!supported()) throw new Error('Perangkat atau browser ini belum mendukung notifikasi.');
+  if (!pushSupported()) throw new Error('Perangkat atau browser ini belum mendukung notifikasi.');
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') throw new Error('Izin notifikasi ditolak. Izinkan notifikasi untuk Lentera di pengaturan HP, lalu coba lagi.');
   const { publicKey } = await api<{ publicKey: string }>('/api/push');
@@ -124,7 +124,7 @@ export async function enablePush(): Promise<void> {
 }
 
 export async function disablePush(): Promise<void> {
-  if (!supported()) return;
+  if (!pushSupported()) return;
   const sub = await currentSubscription();
   if (!sub) return;
   await api('/api/push', { body: { action: 'unsubscribe', endpoint: sub.endpoint } }).catch(() => {});
@@ -141,7 +141,7 @@ export function usePushStatus(): { status: PushStatus; refresh: () => Promise<vo
   const mounted = useRef(true);
   const refresh = async () => {
     let next: PushStatus;
-    if (!supported()) next = 'unsupported';
+    if (!pushSupported()) next = 'unsupported';
     else if (Notification.permission === 'denied') next = 'denied';
     else next = (await currentSubscription().catch(() => null)) ? 'on' : 'off';
     if (mounted.current) setStatus(next);

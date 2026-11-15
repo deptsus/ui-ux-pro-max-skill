@@ -4,9 +4,10 @@
 // every database function behind POST /api/admin.
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BellRing, BookOpen, LogOut, MessageSquareWarning, Send, ShieldCheck, Wallet, X } from 'lucide-react';
+import { BellRing, BookOpen, ClipboardList, LogOut, MessageSquareWarning, Send, ShieldCheck, Wallet, X } from 'lucide-react';
 import { admin } from '@/components/admin/api';
 import { CmsPanel, type CmsTarget } from '@/components/admin/CmsPanel';
+import { HomeworkPanel } from '@/components/admin/HomeworkPanel';
 import { NotesPanel, openNoteCount, useNotes } from '@/components/admin/NotesPanel';
 import { NotifyPanel } from '@/components/admin/NotifyPanel';
 import { PaymentsPanel, type Overview } from '@/components/admin/PaymentsPanel';
@@ -18,9 +19,10 @@ import { api } from '@/lib/client/api';
 import { initSession, signOut, useServerInfo, useSession } from '@/lib/client/session';
 
 type Gate = 'loading' | 'no-backend' | 'signed-out' | 'forbidden' | 'error' | 'admin';
-type Tab = 'payments' | 'content' | 'publish' | 'notes';
+type Tab = 'payments' | 'homework' | 'content' | 'publish' | 'notes';
 const TABS: { id: Tab; label: string; icon: typeof Wallet }[] = [
   { id: 'payments', label: 'Pembayaran', icon: Wallet },
+  { id: 'homework', label: 'PR', icon: ClipboardList },
   { id: 'content', label: 'Konten', icon: BookOpen },
   { id: 'publish', label: 'Terbitkan', icon: Send },
   { id: 'notes', label: 'Catatan', icon: MessageSquareWarning },
@@ -173,6 +175,9 @@ export default function AdminPage() {
         <div role="tabpanel" id="panel-payments" aria-labelledby="tab-payments" hidden={tab !== 'payments'}>
           <div className="mb-5"><NotifyPanel /></div>
           <PaymentsPanel data={overview} loadedAt={overviewAt} loading={overviewLoading} error={overviewError} reload={() => void loadOverview()} payments={info.payments} />
+        </div>
+        <div role="tabpanel" id="panel-homework" aria-labelledby="tab-homework" hidden={tab !== 'homework'}>
+          <HomeworkPanel data={content} active={tab === 'homework'} />
         </div>
         <div role="tabpanel" id="panel-content" aria-labelledby="tab-content" hidden={tab !== 'content'}>
           {content ? <CmsPanel data={content} reload={loadContent} target={target} onPublish={() => setTab('publish')} /> : contentState}

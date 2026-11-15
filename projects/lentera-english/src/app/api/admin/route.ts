@@ -17,6 +17,11 @@ async function require0008(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
   if (!Array.isArray(features) || !features.includes('stories')) throw new HttpError(409, NEEDS_0008);
 }
+const NEEDS_0010 = 'Basis data belum diperbarui untuk Rilis 4 (ringkasan dan pengingat PR). Jalankan supabase/manual/apply-0010.sql di Supabase SQL Editor, lalu muat ulang.';
+async function require0010(db: Rpc) {
+  const features = await db.rpc<string[]>('content_features').catch(() => null);
+  if (!Array.isArray(features) || !features.includes('homework_reminders')) throw new HttpError(409, NEEDS_0010);
+}
 /** The bundled curriculum carries level-exam sections, stored in a column 0009 adds. */
 async function require0009(db: Rpc) {
   await require0008(db);
@@ -66,6 +71,10 @@ export const POST = route(async (req) => {
       return json(await db.rpc('admin_resolve_note', { p_actor: userId, p_id: Number(b.noteId), p_resolution: String(b.resolution ?? '').slice(0, 1000) }));
     case 'payments':
       return json(await db.rpc('admin_payment_overview', { p_actor: userId }));
+    // Homework across all learners (Rilis 4, migration 0010).
+    case 'homework':
+      await require0010(db);
+      return json(await db.rpc('admin_homework_overview', { p_actor: userId }));
     // Cheap number for the admin badge inside the learner app.
     case 'pending-count':
       return json({ pending: await db.rpc<number>('admin_pending_count', { p_actor: userId }) });

@@ -38,6 +38,11 @@ export interface HomeworkRecord {
   assignedAt: number;
   dueAt: number;
   submissions: { at: number; score: number; late: boolean; text?: string }[];
+  /** Generated homework (weekly PR, Rilis 4) has no row in the content pack: its questions live here. */
+  title?: string;
+  exerciseIds?: string[];
+  /** How a weekly PR was put together, shown to the learner. */
+  parts?: { topics: string[]; fromTopics: number; fromMistakes: number };
 }
 
 export interface DailyStat {

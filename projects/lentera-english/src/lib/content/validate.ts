@@ -1,6 +1,6 @@
 // Content quality gate. Used by `npm run content:check`, by the test suite and
 // by the CMS before a curriculum version is published.
-import { EXAM_BANK_TYPES, STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise } from './types';
+import { EXAM_BANK_TYPES, STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise, type WritingTask } from './types';
 import { grade, normalize } from '@/lib/engine/grading';
 import { checkWriting } from '@/lib/engine/writing';
 
@@ -51,6 +51,26 @@ export function validateExercise(e: Exercise): string[] {
   const others = e.type === 'fill' ? Object.keys(e.errors ?? {}) : (e.options ?? []).filter((o) => !o.correct).map((o) => o.text);
   const mentions = (w: string) => w.length > 1 && new RegExp(`(^|[^a-z'])${w.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z']|$)`).test(hint);
   if (hint && key && mentions(key) && !others.some(mentions)) bad(`petunjuk membocorkan jawaban "${key}"`);
+  return errs;
+}
+
+/** A writing task: complete, rules well-formed, and every example answer meets its own checklist. */
+export function validateWriting(p: string, w: WritingTask): string[] {
+  const errs: string[] = [];
+  if (!w.prompt?.trim() || !(w.minWords > 0) || !w.mustInclude?.length || !w.model?.trim()) return [`${p}: tugas menulis belum lengkap`];
+  for (const rule of w.mustInclude) if (!rule.includes('::')) errs.push(`${p}: aturan "${rule}" harus berbentuk "label::kata1|kata2"`);
+  if (w.maxWords !== undefined && w.maxWords !== null && !(w.maxWords >= w.minWords)) errs.push(`${p}: jumlah kata maksimal harus sama dengan atau lebih dari minimal`);
+  if (w.source !== undefined && w.source !== null && !w.source.trim()) errs.push(`${p}: teks sumber kosong`);
+  // The model answer must meet its own checklist, or no learner could.
+  if (checkWriting(w.model, w).score < 100) errs.push(`${p}: contoh jawaban tidak memenuhi daftar periksanya sendiri`);
+  if (w.levels?.length) {
+    if (w.levels.length < 2) errs.push(`${p}: contoh bertingkat minimal dua`);
+    if (w.levels.at(-1)!.text !== w.model) errs.push(`${p}: contoh bertingkat terakhir harus sama dengan contoh jawaban`);
+    for (const l of w.levels) {
+      if (!l.label?.trim() || !l.note?.trim() || !l.text?.trim()) errs.push(`${p}: contoh bertingkat "${l.label ?? ''}" belum lengkap (label, catatan, teks)`);
+      else if (checkWriting(l.text, w).score < 100) errs.push(`${p}: contoh "${l.label}" tidak memenuhi daftar periksa`);
+    }
+  }
   return errs;
 }
 
@@ -105,6 +125,7 @@ export function validatePack(pack: ContentPack): string[] {
   for (const h of pack.homework) {
     for (const id of h.exerciseIds) if (!ids.has(id)) errs.push(`PR ${h.id}: soal ${id} tidak ada`);
     if (!h.exerciseIds.length && !h.writing) errs.push(`PR ${h.id}: kosong`);
+    if (h.writing) errs.push(...validateWriting(`PR ${h.id}`, h.writing));
   }
   for (const x of pack.exams) for (const id of x.exerciseIds) if (!ids.has(id)) errs.push(`ujian ${x.id}: soal ${id} tidak ada`);
   // Sectioned level exams (Rilis 3): the bank is exam-only, keyed and answerable on the server.
@@ -124,12 +145,7 @@ export function validatePack(pack: ContentPack): string[] {
       if (!sec.title?.trim()) errs.push(`${q}: judul kosong`);
       if (sec.kind === 'writing') {
         if (!sec.writing?.length) errs.push(`${q}: belum ada tugas menulis`);
-        for (const w of sec.writing ?? []) {
-          if (!w.prompt?.trim() || !(w.minWords > 0) || !w.mustInclude?.length || !w.model?.trim()) errs.push(`${q}: tugas menulis belum lengkap`);
-          // The model answer must meet its own checklist, or no learner could.
-          else if (checkWriting(w.model, w).score < 100) errs.push(`${q}: contoh jawaban tidak memenuhi daftar periksanya sendiri`);
-          for (const rule of w.mustInclude ?? []) if (!rule.includes('::')) errs.push(`${q}: aturan "${rule}" harus berbentuk "label::kata1|kata2"`);
-        }
+        for (const w of sec.writing ?? []) errs.push(...validateWriting(q, w));
         continue;
       }
       if (!(sec.take >= 1) || sec.take > sec.pool.length) errs.push(`${q}: jumlah yang diambil (${sec.take}) harus 1–${sec.pool.length}`);

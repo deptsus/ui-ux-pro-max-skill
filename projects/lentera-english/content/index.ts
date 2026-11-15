@@ -22,8 +22,9 @@ import { listening, phonemes, placement } from './listening';
 import { listeningUpper } from './listening-upper';
 import { stories } from './stories';
 import { EXAM_BANK, EXAM_MINUTES } from './exam-bank';
+import { WRITING_UPPER } from './writing-upper';
 
-export const CONTENT_VERSION = '2027.1.0';
+export const CONTENT_VERSION = '2027.2.0';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -397,7 +398,7 @@ export function buildPack(): ContentPack {
     ['c2-c2', 'listen-c2-app'], // understatement and irony
   ];
   // One short writing task per A2–B1 chapter (Rilis 2), checked by a deterministic checklist.
-  for (const [chapterId, title, writing] of WRITING_HOMEWORK) {
+  for (const [chapterId, title, writing] of [...WRITING_HOMEWORK, ...WRITING_UPPER]) {
     homework.push({ id: `hw.${chapterId}.write`, chapterId, title: `Menulis: ${title}`, kind: 'writing', dueDays: 7, exerciseIds: [], writing });
   }
   for (const [chapterId, listeningId] of LISTENING_HOMEWORK) {

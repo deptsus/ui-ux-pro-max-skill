@@ -7,6 +7,7 @@ import { evidenceScore, retestReady } from './mastery';
 import { dueItems } from './srs';
 import { lessonLock, nextLesson, unitExamStatus, unitExam } from './unlock';
 import type { Entitlement, LearnerState } from './types';
+import { allHomework } from './weekly';
 
 export interface Recommendation {
   id: string;
@@ -83,7 +84,7 @@ export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, n
   }
 
   // 4. Homework.
-  for (const def of ix.pack.homework) {
+  for (const def of allHomework(ix, s)) {
     const rec = s.homework[def.id];
     if (!rec || rec.submissions.length) continue;
     const overdue = now > rec.dueAt;

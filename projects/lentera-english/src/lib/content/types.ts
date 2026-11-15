@@ -287,7 +287,21 @@ export interface HomeworkDef {
   dueDays: number;
   exerciseIds: string[];
   /** Short writing task: checked against a deterministic checklist. */
-  writing?: { prompt: string; minWords: number; mustInclude: string[]; model: string };
+  writing?: WritingTask;
+}
+
+/** A writing task. `model` is the best example; `levels` (Rilis 4) shows the same task answered at rising quality. */
+export interface WritingTask {
+  prompt: string;
+  minWords: number;
+  /** Upper limit, for summaries (Rilis 4). */
+  maxWords?: number;
+  mustInclude: string[];
+  model: string;
+  /** Text to summarise or reply to, shown above the writing box (Rilis 4). */
+  source?: string;
+  /** Example answers from "meets the checklist" to "excellent", each with a note on what makes it better. The last one is `model`. */
+  levels?: { label: string; text: string; note: string }[];
 }
 
 export type ExamSectionKind = 'grammar' | 'reading' | 'listening' | 'writing';
@@ -308,7 +322,7 @@ export interface ExamSection {
   /** Groups drawn per attempt. */
   take: number;
   /** Writing prompts; one is drawn per attempt. */
-  writing?: NonNullable<HomeworkDef['writing']>[];
+  writing?: WritingTask[];
   /** Minimum score for this part. */
   passScore: number;
   /** Set in packs sent to devices: pool and prompts were removed, only `count` remains. */

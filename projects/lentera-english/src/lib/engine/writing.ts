@@ -2,15 +2,19 @@
 // quality: length, required elements (each rule is "label::alt1|alt2", matched
 // as lowercase text), and a final full stop. The learner compares their text
 // with the model answer to judge quality themselves.
-import type { HomeworkDef } from '@/lib/content/types';
+import type { WritingTask } from '@/lib/content/types';
 
-export type WritingTask = NonNullable<HomeworkDef['writing']>;
+export type { WritingTask };
+
+export const countWords = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 
 export function checkWriting(text: string, w: WritingTask) {
   const lower = ` ${text.toLowerCase().replace(/[‘’]/g, "'")} `;
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const words = countWords(text);
   const items = [
-    { label: `Minimal ${w.minWords} kata (kamu menulis ${words})`, ok: words >= w.minWords },
+    w.maxWords
+      ? { label: `${w.minWords}–${w.maxWords} kata (kamu menulis ${words})`, ok: words >= w.minWords && words <= w.maxWords }
+      : { label: `Minimal ${w.minWords} kata (kamu menulis ${words})`, ok: words >= w.minWords },
     ...w.mustInclude.map((rule) => {
       const [label, alts] = rule.split('::');
       return { label, ok: alts.split('|').some((a) => lower.includes(a)) };

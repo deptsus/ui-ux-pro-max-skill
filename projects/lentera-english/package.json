@@ -16,7 +16,8 @@
     "e2e:admin-app": "node e2e/admin-app.mjs",
     "e2e:curriculum": "node e2e/curriculum.mjs",
     "e2e:skills": "node e2e/skills.mjs",
-    "e2e:level-exams": "node e2e/level-exams.mjs"
+    "e2e:level-exams": "node e2e/level-exams.mjs",
+    "e2e:homework": "node e2e/homework.mjs"
   },
   "engines": {
     "node": ">=20"

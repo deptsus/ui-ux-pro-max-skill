@@ -11,7 +11,9 @@ import { loadContent, useContent, useContentError } from '@/lib/client/content';
 import { useNow } from '@/lib/client/hooks';
 import { initSession, useSession } from '@/lib/client/session';
 import { dismissPendingAlert, useAdminPending } from '@/lib/client/admin';
-import { loadLearner, onPremiumChange, useEntitlement, useLearner, useRole, useSyncStatus } from '@/lib/client/store';
+import { act, loadLearner, onPremiumChange, useEntitlement, useLearner, useRole, useSyncStatus } from '@/lib/client/store';
+import { weekStart } from '@/lib/engine/plan';
+import { buildWeekly, ensureWeekly, weeklyId } from '@/lib/engine/weekly';
 import { AppUpdateBanner } from '@/components/AppUpdateBanner';
 import { Logo, Mascot } from '@/components/Mascot';
 import { Button, cx } from '@/components/ui';
@@ -62,6 +64,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       off();
     };
   }, []);
+  // Weekly PR (Rilis 4): put together once per week, as soon as there is recent work to build it from.
+  const weekId = weeklyId(weekStart(now));
+  const hasWeekly = !!learner.homework[weekId];
+  useEffect(() => {
+    if (!booted || !ix || hasWeekly) return;
+    if (buildWeekly(ix, learner, Date.now())) act((d, at) => void ensureWeekly(ix, d, at));
+  }, [booted, ix, hasWeekly, weekId, learner]);
   // Switch local state when the account changes.
   useEffect(() => {
     if (booted) void loadLearner().then(() => loadContent(true));

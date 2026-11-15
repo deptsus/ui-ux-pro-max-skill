@@ -2,6 +2,8 @@
 // labelled in lists, and what is validated before a row is sent to the server.
 // The database re-validates everything (constraints + publish quality gate).
 
+import { validateWriting } from '@/lib/content/validate';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type Row = Record<string, any>;
 export type Data = Record<string, Row[]>;
@@ -444,7 +446,9 @@ export function validateRow(def: TableDef, row: Row, data: Data, isNew: boolean)
   if (def.id === 'homework' && row.writing) {
     const w = row.writing;
     if (blank(w.prompt) || blank(w.model)) out.push('Tugas menulis wajib punya instruksi dan contoh jawaban.');
-    if (!Number.isInteger(w.minWords) || w.minWords < 1) out.push('Jumlah kata minimal tugas menulis harus bilangan bulat positif.');
+    else if (!Number.isInteger(w.minWords) || w.minWords < 1) out.push('Jumlah kata minimal tugas menulis harus bilangan bulat positif.');
+    // Same quality gate as publishing: every example must pass its own checklist.
+    else out.push(...validateWriting('Tugas menulis', { ...w, mustInclude: w.mustInclude ?? [] }).filter((m) => !m.endsWith('belum lengkap')));
   }
   if (def.id === 'audio_resources' && !blank(row.url) && !/^(https:\/\/|\/)/.test(row.url)) out.push('URL audio harus diawali https:// atau /.');
   return out;
