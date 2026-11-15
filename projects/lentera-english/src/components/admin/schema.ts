@@ -364,13 +364,13 @@ export const TABLES: TableDef[] = [
   },
   {
     id: 'audio_resources', label: 'Audio', singular: 'rekaman audio', group: 'Pustaka', pk: 'key', idHint: 'Kunci unik, misalnya vocab.breakfast.us',
-    title: (r) => r.key,
-    subtitle: (r) => `${r.accent === 'uk' ? 'Aksen Inggris' : 'Aksen Amerika'}${r.speaker ? ` · ${r.speaker}` : ''} · ${r.url}`,
+    title: (r) => (r.transcript ? String(r.transcript).slice(0, 80) : r.key),
+    subtitle: (r) => `${r.accent === 'uk' ? 'Aksen Inggris' : 'Aksen Amerika'}${r.speaker ? ` · ${r.speaker}` : ''} · ${r.key}`,
     fields: [
       { key: 'accent', label: 'Aksen', kind: 'select', choices: [['us', 'Amerika (US)'], ['uk', 'Inggris (UK)']], required: true, filter: true },
-      { key: 'url', label: 'URL berkas audio', kind: 'text', required: true, hint: 'Harus diawali https:// atau / (berkas di folder public). Unggah berkasnya dulu ke penyimpanan; dashboard ini belum bisa mengunggah.' },
+      { key: 'url', label: 'URL berkas audio', kind: 'text', required: true, hint: 'Paling mudah lewat tab Rekaman (rekam atau unggah, URL terisi sendiri). Di sini hanya untuk berkas yang sudah ada di tempat lain: harus diawali https:// atau /.' },
       { key: 'speaker', label: 'Penutur', kind: 'text', nullable: true },
-      { key: 'transcript', label: 'Transkrip', kind: 'textarea', rows: 2, nullable: true, en: true },
+      { key: 'transcript', label: 'Teks yang dibacakan', kind: 'textarea', rows: 2, nullable: true, en: true, hint: 'Rekaman dipakai di mana pun teks yang sama diputar (huruf besar dan tanda baca tidak berpengaruh).' },
     ],
     blank: () => ({ accent: 'us' }),
   },

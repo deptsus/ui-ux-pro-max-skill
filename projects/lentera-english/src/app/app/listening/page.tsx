@@ -81,7 +81,7 @@ function Listening() {
       <Card className="mb-4 flex flex-wrap items-center gap-3 p-4">
         <p className="text-sm font-bold">Aksen audio</p>
         {(['us', 'uk'] as const).map((a) => <Button key={a} size="sm" variant={accent === a ? 'primary' : 'secondary'} aria-pressed={accent === a} onClick={() => act((d) => { d.profile.accent = a; })}>{a === 'us' ? 'Amerika' : 'Inggris (British)'}</Button>)}
-        <p className="w-full text-xs text-muted">{audioSource(ix) === 'none' ? 'Perangkat ini tidak punya pemutar suara.' : ix.pack.audio.length ? 'Rekaman penutur asli dipakai bila tersedia untuk aksen pilihanmu.' : 'Rekaman penutur asli belum diunggah untuk materi ini. Sementara itu audio dibacakan oleh suara bawaan perangkatmu (tanpa internet, tanpa AI generatif) sesuai aksen yang kamu pilih.'}</p>
+        <p className="w-full text-xs text-muted">{audioSource(ix) === 'none' ? 'Perangkat ini tidak punya pemutar suara.' : ix.pack.audio.length ? 'Rekaman suara dipakai bila sudah ada untuk teksnya, sebaiknya dalam aksen pilihanmu. Teks yang belum direkam dibacakan suara bawaan perangkatmu (tanpa AI generatif).' : 'Rekaman suara belum diunggah. Sementara itu audio dibacakan oleh suara bawaan perangkatmu (tanpa internet, tanpa AI generatif) sesuai aksen yang kamu pilih.'}</p>
       </Card>
       <div className="mb-4 flex gap-2" role="tablist">
         <LinkButton href="/app/listening" size="sm" variant={tab === 'menyimak' ? 'primary' : 'secondary'}>Menyimak</LinkButton>

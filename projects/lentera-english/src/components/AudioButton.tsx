@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Snail, Volume2 } from 'lucide-react';
-import { audioSource, play } from '@/lib/client/audio';
+import { audioSource, play, recordingFor } from '@/lib/client/audio';
 import { useContent } from '@/lib/client/content';
 import { useLearner } from '@/lib/client/store';
 import { cx } from './ui';
@@ -12,7 +12,9 @@ export function AudioButton({ text, audioKey, size = 'md', label = 'Putar audio'
   const accent = useLearner().profile.accent;
   const [busy, setBusy] = useState<'normal' | 'slow' | null>(null);
   const [failed, setFailed] = useState(false);
-  const source = audioSource(ix, audioKey);
+  const source = audioSource(ix, audioKey, text, accent);
+  const rec = source === 'recording' ? recordingFor(ix, text, accent, audioKey) : undefined;
+  const accentName = (a: 'us' | 'uk') => (a === 'uk' ? 'Inggris' : 'Amerika');
   const run = async (slow: boolean) => {
     setBusy(slow ? 'slow' : 'normal');
     const result = await play(ix, text, { accent, slow, audioKey });
@@ -31,7 +33,9 @@ export function AudioButton({ text, audioKey, size = 'md', label = 'Putar audio'
       </button>
       {showSource && (
         <span className="text-xs text-muted">
-          {source === 'recording' ? `Rekaman penutur asli · aksen ${accent === 'uk' ? 'Inggris' : 'Amerika'}` : source === 'device' ? `Suara bawaan perangkat · aksen ${accent === 'uk' ? 'Inggris' : 'Amerika'} (rekaman penutur asli belum diunggah)` : 'Perangkat ini tidak punya pemutar suara.'}
+          {rec
+            ? `Rekaman suara · aksen ${accentName(rec.accent)}${rec.speaker ? ` · ${rec.speaker}` : ''}${rec.accent !== accent ? ` (aksen ${accentName(accent)} belum direkam)` : ''}`
+            : source === 'device' ? `Suara bawaan perangkat · aksen ${accentName(accent)} (belum ada rekaman untuk teks ini)` : 'Perangkat ini tidak punya pemutar suara.'}
         </span>
       )}
       {failed && <span className="text-xs text-bad">Audio tidak dapat diputar di perangkat ini.</span>}

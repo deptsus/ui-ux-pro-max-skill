@@ -4,7 +4,7 @@
 // every database function behind POST /api/admin.
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BellRing, BookOpen, ClipboardList, LogOut, MessageSquareWarning, Send, ShieldCheck, Wallet, X } from 'lucide-react';
+import { BellRing, BookOpen, ClipboardList, LogOut, MessageSquareWarning, Mic, Send, ShieldCheck, Wallet, X } from 'lucide-react';
 import { admin } from '@/components/admin/api';
 import { CmsPanel, type CmsTarget } from '@/components/admin/CmsPanel';
 import { HomeworkPanel } from '@/components/admin/HomeworkPanel';
@@ -12,6 +12,7 @@ import { NotesPanel, openNoteCount, useNotes } from '@/components/admin/NotesPan
 import { NotifyPanel } from '@/components/admin/NotifyPanel';
 import { PaymentsPanel, type Overview } from '@/components/admin/PaymentsPanel';
 import { PublishPanel } from '@/components/admin/PublishPanel';
+import { RecordingsPanel } from '@/components/admin/RecordingsPanel';
 import type { Data } from '@/components/admin/schema';
 import { Logo, Mascot } from '@/components/Mascot';
 import { Badge, Button, Card, LinkButton, Notice, cx, rupiah } from '@/components/ui';
@@ -19,11 +20,12 @@ import { api } from '@/lib/client/api';
 import { initSession, signOut, useServerInfo, useSession } from '@/lib/client/session';
 
 type Gate = 'loading' | 'no-backend' | 'signed-out' | 'forbidden' | 'error' | 'admin';
-type Tab = 'payments' | 'homework' | 'content' | 'publish' | 'notes';
+type Tab = 'payments' | 'homework' | 'content' | 'recordings' | 'publish' | 'notes';
 const TABS: { id: Tab; label: string; icon: typeof Wallet }[] = [
   { id: 'payments', label: 'Pembayaran', icon: Wallet },
   { id: 'homework', label: 'PR', icon: ClipboardList },
   { id: 'content', label: 'Konten', icon: BookOpen },
+  { id: 'recordings', label: 'Rekaman', icon: Mic },
   { id: 'publish', label: 'Terbitkan', icon: Send },
   { id: 'notes', label: 'Catatan', icon: MessageSquareWarning },
 ];
@@ -181,6 +183,9 @@ export default function AdminPage() {
         </div>
         <div role="tabpanel" id="panel-content" aria-labelledby="tab-content" hidden={tab !== 'content'}>
           {content ? <CmsPanel data={content} reload={loadContent} target={target} onPublish={() => setTab('publish')} /> : contentState}
+        </div>
+        <div role="tabpanel" id="panel-recordings" aria-labelledby="tab-recordings" hidden={tab !== 'recordings'}>
+          {content ? <RecordingsPanel data={content} /> : contentState}
         </div>
         <div role="tabpanel" id="panel-publish" aria-labelledby="tab-publish" hidden={tab !== 'publish'}>
           {content ? <PublishPanel data={content} reload={loadContent} onOpen={openInCms} active={tab === 'publish'} /> : contentState}
