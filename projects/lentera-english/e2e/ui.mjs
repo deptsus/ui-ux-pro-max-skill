@@ -205,7 +205,8 @@ for (const width of [320, 390]) {
   const mp4 = await fetch(`${BASE}/promo/lentera-promo.mp4`, { headers: { Range: 'bytes=0-99' } });
   check('berkas sampul dan video tersedia (video bisa diputar sebagian/di-seek)', poster.status === 200 && (mp4.status === 206 || mp4.status === 200) && /video\/mp4/.test(mp4.headers.get('content-type') ?? ''), `${poster.status} ${mp4.status} ${mp4.headers.get('content-type')}`);
   const chapters = p.getByRole('list', { name: 'Bab video promosi' }).getByRole('button');
-  check('daftar isi video: 15 fitur dengan waktunya, bisa diketuk', (await chapters.count()) === 15 && (await chapters.first().innerText()).includes('0:03'));
+  const expected = (fs.readFileSync(path.join(import.meta.dirname, '..', 'src', 'components', 'promo-chapters.ts'), 'utf8').match(/"t":/g) ?? []).length;
+  check(`daftar isi video: ${expected} fitur dengan waktunya, bisa diketuk`, expected > 10 && (await chapters.count()) === expected && (await chapters.first().innerText()).includes('0:03'));
   const m = await measure(p);
   check('halaman depan dengan video di layar 320 px: tanpa geser ke samping, kontrol minimal 44 px', m.over === 0 && m.small.length === 0, `${m.over}px ${m.small.slice(0, 3).join(' | ')}`);
   await chapters.nth(4).click();

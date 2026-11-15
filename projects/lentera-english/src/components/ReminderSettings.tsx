@@ -17,7 +17,8 @@ export function ReminderSettings() {
   const [prefs, setPrefs] = useState<ReminderPrefs | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ tone: 'ok' | 'bad'; text: string } | null>(null);
+  // Feedback appears next to the control that caused it.
+  const [msg, setMsg] = useState<{ tone: 'ok' | 'bad'; text: string; where: 'daily' | 'homework' | 'device' } | null>(null);
   const zone = zoneLabel(prefs?.time_zone ?? deviceTimeZone());
 
   useEffect(() => {
@@ -36,13 +37,14 @@ export function ReminderSettings() {
   }
 
   async function save(patch: Partial<Pick<ReminderPrefs, 'daily_hour' | 'homework'>>, ok: string) {
+    const where = 'daily_hour' in patch ? 'daily' : 'homework';
     setSaving(true);
     setMsg(null);
     try {
       setPrefs(await saveReminderPrefs(patch));
-      setMsg({ tone: 'ok', text: ok });
+      setMsg({ tone: 'ok', text: ok, where });
     } catch (e) {
-      setMsg({ tone: 'bad', text: (e as Error).message });
+      setMsg({ tone: 'bad', text: (e as Error).message, where });
     }
     setSaving(false);
   }
@@ -51,9 +53,9 @@ export function ReminderSettings() {
     setMsg(null);
     try {
       await fn();
-      setMsg({ tone: 'ok', text: ok });
+      setMsg({ tone: 'ok', text: ok, where: 'device' });
     } catch (e) {
-      setMsg({ tone: 'bad', text: (e as Error).message });
+      setMsg({ tone: 'bad', text: (e as Error).message, where: 'device' });
     }
     await refresh();
     getReminderPrefs().then(setPrefs, () => {});
@@ -82,6 +84,7 @@ export function ReminderSettings() {
             </select>
           </label>
         )}
+        {msg?.where === 'daily' && <div role="status"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
         <p className="text-sm text-muted">Satu notifikasi pada jam itu, <strong>hanya di hari kamu belum belajar</strong>. Kalau beruntunmu sedang berjalan, kami sebutkan agar tidak putus.</p>
       </section>
 
@@ -93,6 +96,7 @@ export function ReminderSettings() {
               onClick={() => void save({ homework: on }, on ? 'Pengingat PR dinyalakan.' : 'Pengingat PR dimatikan.')}>{label}</Button>
           ))}
         </div>
+        {msg?.where === 'homework' && <div role="status"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
         <p className="text-sm text-muted">Sekali, sekitar sehari sebelum tenggat PR yang belum dikumpulkan (07.00–20.00 WIB).</p>
       </section>
 
@@ -112,10 +116,10 @@ export function ReminderSettings() {
           {status === 'on' && <Button size="sm" variant="secondary" onClick={() => void device(async () => { const r = await sendTestReminder(); if (!r.sent) throw new Error('Pengingat uji belum terkirim. Coba matikan lalu nyalakan lagi.'); }, 'Pengingat uji dikirim. Periksa notifikasi HP-mu.')}>Kirim pengingat uji</Button>}
           {status === 'on' && <Button size="sm" variant="ghost" onClick={() => void device(disableReminders, 'Notifikasi dimatikan di perangkat ini.')}>Matikan di HP ini</Button>}
         </div>
+        {msg?.where === 'device' && <div role="status"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
       </section>
 
       {wantsSome && status === 'off' && prefs && prefs.devices === 0 && <Notice tone="accent">Pengingat sudah diatur, tapi belum ada HP yang menerima notifikasi. Tekan <strong>Nyalakan notifikasi</strong> di atas.</Notice>}
-      {msg && <Notice tone={msg.tone}>{msg.text}</Notice>}
     </Card>
   );
 }

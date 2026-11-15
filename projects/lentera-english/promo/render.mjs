@@ -27,10 +27,16 @@ function src(name, scroll = 0) {
   return { file: crop, s };
 }
 const NAV = path.join(OUT, 'shots', byName.get('dashboard').file);
-/** One screen: `dur` seconds; a tap ring lands on the next tapped element; `scroll` = CSS px scrolled. */
+/**
+ * One screen: `dur` seconds; a tap ring lands on the next tapped element;
+ * `scroll` = CSS px scrolled, or 'mark' for the spot capture.mjs marked on that page.
+ */
 function beat(name, dur, { scroll = 0, tap = true, overlays = true } = {}) {
-  const { file, s } = src(name, scroll);
-  return { src: `file://${file}`, dur, tap: tap && !s.full ? s.tap ?? null : null, scroll: scroll || 0, overlays, navSrc: overlays ? `file://${NAV}` : null };
+  const shot = byName.get(name);
+  let px = scroll === 'mark' ? shot?.mark ?? 0 : scroll;
+  if (shot?.height) px = Math.min(px, Math.max(0, shot.height - 844));
+  const { file, s } = src(name, px);
+  return { src: `file://${file}`, dur, tap: tap && !s.full ? s.tap ?? null : null, scroll: px || 0, overlays, navSrc: overlays ? `file://${NAV}` : null };
 }
 
 const scenes = [
@@ -58,8 +64,16 @@ const scenes = [
     beats: [beat('exam-intro', 3.0, { scroll: 380, tap: false }), beat('exam-passed', 2.6), beat('certificate', 3.4, { scroll: 520, tap: false, overlays: false })] },
   { chip: 'Premium Tahunan', title: 'Rencana belajar mingguan', sub: 'Jalurmu sampai C2 dibagi menjadi target tiap minggu, lalu disesuaikan setiap Senin.',
     beats: [beat('plan', 3.2, { tap: false })] },
-  { chip: 'Profil', title: 'Avatar karakter dan papan peringkat', sub: 'Pilih satu dari 8 karakter Lentera, lalu bersaing sehat di papan peringkat mingguan.',
-    beats: [beat('profile-avatar', 2.8), beat('leaderboard', 3.0, { tap: false })] },
+  { chip: 'Profil', title: 'Pilih avatar karaktermu', sub: 'Delapan karakter Lentera. Avatarmu tampil di liga dan di daftar teman.',
+    beats: [beat('profile-avatar', 2.8)] },
+  { chip: 'Liga mingguan', title: 'Naik divisi setiap minggu', sub: 'Lima divisi, dari Lilin sampai Mercusuar. Satu grup berisi hingga 30 pelajar; yang teratas naik, yang terbawah turun.',
+    beats: [beat('league', 3.8, { scroll: 'mark', tap: false })] },
+  { chip: 'Teman & tantangan', title: 'Tantang temanmu adu XP', sub: 'Tambahkan teman dengan kode undangan, lalu adu XP selama 3 atau 7 hari. Hanya XP dari belajar yang dihitung.',
+    beats: [beat('friends-challenge', 2.6), beat('friends-duel', 3.4, { scroll: 'mark', tap: false })] },
+  { chip: 'Shadowing', title: 'Dengar, tirukan, bandingkan', sub: 'Rekam suaramu, lalu putar berdampingan dengan contohnya. Kamu sendiri yang menilai, dan rekaman tidak diunggah.',
+    beats: [beat('shadowing-intro', 2.2), beat('shadowing-step', 2.2), beat('shadowing-compare', 3.6, { scroll: 'mark', tap: false }), beat('shadowing-done', 2.4, { tap: false })] },
+  { chip: 'Pengingat harian', title: 'Diingatkan di jam pilihanmu', sub: 'Satu notifikasi sehari di HP, hanya bila kamu belum belajar hari itu, agar beruntunmu tidak putus.',
+    beats: [beat('reminder', 3.4, { scroll: 'mark', tap: false })] },
   { chip: 'Nyaman dipakai', title: 'Mode gelap dan huruf besar', sub: 'Tampilan terang atau gelap, tiga ukuran huruf, dan getaran saat menjawab di HP Android.',
     beats: [beat('settings', 2.4), beat('dashboard-dark', 2.8, { tap: false })] },
   { chip: 'Premium', title: 'Buka semua materi A1–C2', sub: 'Pilih paket, bayar dengan QRIS, dan Premium aktif setelah pembayaran dikonfirmasi.',

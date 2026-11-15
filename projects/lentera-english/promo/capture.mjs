@@ -34,29 +34,62 @@ const account = async (email, name) => {
 const admin = await account(ADMIN, 'Admin Lentera');
 // Classmates for the weekly leaderboard: real accounts with XP earned through the sync API.
 const classmates = [['Dimas', 7, 640], ['Nisa', 6, 520], ['Bayu', 1, 380], ['Putri', 2, 260], ['Fajar', 5, 150]];
+const mates = {};
 for (const [name, avatar, xp] of classmates) {
   const a = await account(`promo-${name.toLowerCase()}@lentera.test`, name);
+  mates[name] = a;
   await call('/api/me', { avatar, display_name: name }, a.token, 'PATCH');
   const events = [];
   for (let left = xp, i = 0; left > 0; i++, left -= 160) events.push({ id: `promo-${name}-${i}`, kind: 'xp', at: Date.now() - i * 60_000, data: { amount: Math.min(160, left), reason: 'lesson' } });
   await call('/api/sync', { events, snapshot: null, updatedAt: 1 }, a.token);
 }
 
-const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+// A speech-like voice for Chromium's fake microphone (shadowing): syllables of a
+// low voiced tone with a falling pitch, so the recording's outline looks like speech.
+const VOICE = path.join(OUT, 'fake-voice.wav');
+{
+  const rate = 16000;
+  const n = Math.round(rate * 3);
+  const b = Buffer.alloc(44 + n * 2);
+  b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVE', 8); b.write('fmt ', 12);
+  b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22); b.writeUInt32LE(rate, 24);
+  b.writeUInt32LE(rate * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(n * 2, 40);
+  const syllables = [[0.35, 0.58, 0.7], [0.64, 0.86, 1], [0.95, 1.3, 0.85], [1.4, 1.58, 0.6], [1.66, 2.05, 0.95], [2.15, 2.45, 0.55]];
+  let phase = 0;
+  for (let i = 0; i < n; i++) {
+    const t = i / rate;
+    const f0 = 175 - 35 * (t / 3);
+    phase += (2 * Math.PI * f0) / rate;
+    let env = 0;
+    for (const [a, z, g] of syllables) if (t >= a && t <= z) env = g * Math.sin((Math.PI * (t - a)) / (z - a)) ** 2;
+    let v = 0;
+    for (let h = 1; h <= 6; h++) v += Math.sin(h * phase) / h;
+    b.writeInt16LE(Math.round(Math.max(-1, Math.min(1, v * env * 0.45 + (Math.random() - 0.5) * 0.004)) * 32000), 44 + i * 2);
+  }
+  fs.mkdirSync(OUT, { recursive: true });
+  fs.writeFileSync(VOICE, b);
+}
+const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${VOICE}`] });
+const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, timezoneId: 'Asia/Jakarta', permissions: ['microphone', 'notifications'] });
 await ctx.addInitScript(() => localStorage.setItem('lentera.story.sound', '0'));
 const page = await ctx.newPage();
 const shots = [];
 let n = 0;
 
 /** Screenshot of the screen as it is; `tap` = where the finger goes next (recorded, then clicked). */
-async function shot(name, { tap, full = false, caption, wait = 700, scrollTo } = {}) {
+async function shot(name, { tap, full = false, caption, wait = 700, scrollTo, mark, markOffset = 0 } = {}) {
   if (scrollTo) await scrollTo.scrollIntoViewIfNeeded();
   await page.waitForTimeout(wait);
   const file = `${String(++n).padStart(2, '0')}-${name}.png`;
   const entry = { file, name, full };
   if (full) entry.height = await page.evaluate(() => document.scrollingElement.scrollHeight);
+  // Where a long page should scroll to in the video: the top of `mark`, below the sticky header.
+  if (mark) entry.mark = Math.max(0, (await mark.evaluate((el) => Math.round(el.getBoundingClientRect().top + window.scrollY - 76))) + markOffset);
+  // A full-page capture would freeze the fixed bottom nav in the middle of the page;
+  // the composer draws the nav itself (overlay), so hide it for that one capture.
+  if (full) await page.evaluate(() => document.querySelectorAll('body *').forEach((el) => { if (getComputedStyle(el).position === 'fixed') { el.setAttribute('data-promo-hidden', ''); el.style.visibility = 'hidden'; } }));
   await page.screenshot({ path: path.join(SHOTS, file), fullPage: full });
+  if (full) await page.evaluate(() => document.querySelectorAll('[data-promo-hidden]').forEach((el) => { el.removeAttribute('data-promo-hidden'); el.style.visibility = ''; }));
   if (tap) {
     await tap.scrollIntoViewIfNeeded();
     const box = await tap.boundingBox();
@@ -266,7 +299,7 @@ try {
   await page.getByText('Sertifikat ini asli').waitFor({ timeout: 30000 });
   await shot('certificate', { full: true, wait: 1200 });
 
-  // ── Weekly plan (Premium Tahunan), leaderboard, profile with avatars ──
+  // ── Weekly plan (Premium Tahunan), profile with avatars ──
   await page.goto(`${BASE}/app/plan`);
   await page.locator('main').first().waitFor({ timeout: 30000 });
   await shot('plan', { wait: 1500 });
@@ -276,9 +309,58 @@ try {
   await shot('profile-avatar', { tap: btn('Simpan perubahan'), scrollTo: page.getByRole('radio', { name: /^Momo/ }) });
   await page.getByText('Profil tersimpan.').waitFor({ timeout: 10000 });
   await page.waitForTimeout(1500);
+
+  // ── Weekly league, friends and a challenge (Rilis 8) ──
   await page.goto(`${BASE}/app/leaderboard`);
-  await page.getByText('Posisimu minggu ini').waitFor({ timeout: 30000 });
-  await shot('leaderboard', { wait: 1200 });
+  await page.getByRole('heading', { name: /^Liga Lilin$/ }).waitFor({ timeout: 30000 });
+  await shot('league', { full: true, wait: 1200, mark: page.getByRole('heading', { name: /^Liga Lilin$/ }) });
+  const rinaCode = (await call('/api/friends', null, session.token)).data.code;
+  for (const name of ['Dimas', 'Nisa', 'Putri']) await call('/api/friends', { action: 'add', code: rinaCode }, mates[name].token);
+  await call('/api/friends', { action: 'challenge', code: rinaCode, days: 7 }, mates.Dimas.token);
+  await page.goto(`${BASE}/app/leaderboard?tab=teman`);
+  await btn('Terima').waitFor({ timeout: 30000 });
+  await shot('friends-challenge', { tap: btn('Terima'), scrollTo: page.getByText('Dimas menantangmu') });
+  await page.getByText(/Tantangan dimulai!/).waitFor({ timeout: 15000 });
+  // Both earn XP after the start: the duel shows real server XP.
+  await page.waitForTimeout(1500);
+  const duelXp = async (who, amount, tag) => call('/api/sync', { events: [{ id: `promo-duel-${tag}`, kind: 'xp', at: Date.now(), data: { amount, reason: 'lesson' } }], snapshot: null, updatedAt: 1 }, who.token);
+  await duelXp(session, 85, 'rina');
+  await duelXp(mates.Dimas, 60, 'dimas');
+  await page.reload();
+  await page.getByText(/Berakhir dalam/).first().waitFor({ timeout: 30000 });
+  await shot('friends-duel', { full: true, wait: 1200, mark: page.getByRole('heading', { name: 'Tantangan' }) });
+
+  // ── Shadowing: listen, record (fake microphone), compare, rate ──
+  await page.goto(`${BASE}/app/shadowing`);
+  await page.getByRole('heading', { name: 'Latihan Shadowing' }).waitFor({ timeout: 30000 });
+  await btn(/Mulai 5 kalimat/, false).evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await shot('shadowing-intro', { tap: btn(/Mulai 5 kalimat/, false) });
+  for (let i = 1; i <= 5; i++) {
+    await page.getByText(`${i}/5`).waitFor({ timeout: 15000 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    if (i === 1) await shot('shadowing-step', { tap: btn(/Rekam suaraku/, false) });
+    else await btn(/Rekam suaraku/, false).click();
+    await page.getByText('Merekam... tekan Berhenti setelah selesai bicara.').waitFor({ timeout: 10000 });
+    await page.waitForTimeout(2600);
+    await btn(/Berhenti/, false).click();
+    await page.getByRole('heading', { name: /Bandingkan berdampingan/ }).waitFor({ timeout: 15000 });
+    if (i === 1) await shot('shadowing-compare', { full: true, wait: 1200, mark: page.getByRole('heading', { name: /Bandingkan berdampingan/ }) });
+    await btn(i === 3 ? 'Perlu diulang' : 'Sudah mirip').click();
+  }
+  await page.getByRole('heading', { name: '5 kalimat dilatih' }).waitFor({ timeout: 15000 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await shot('shadowing-done', { wait: 1000 });
+
+  // ── Daily reminder at the learner's hour ──
+  await call('/api/push', { action: 'subscribe-reminders', subscription: { endpoint: 'https://push.example.test/promo-rina', keys: { p256dh: 'B'.repeat(87), auth: 'A'.repeat(22) } } }, session.token);
+  await page.goto(`${BASE}/app/settings`);
+  const reminder = page.locator('#pengingat');
+  await reminder.getByLabel(/Jam pengingat/).waitFor({ timeout: 30000 });
+  await page.waitForFunction(() => !document.querySelector('#pengingat select')?.disabled, null, { timeout: 15000 });
+  await reminder.getByLabel(/Jam pengingat/).selectOption('19');
+  await reminder.getByText(/Pengingat harian diatur pukul 19\.00/).waitFor({ timeout: 15000 });
+  // Frame the hour and its confirmation; the device part below needs a real phone (headless Chromium cannot receive push).
+  await shot('reminder', { full: true, wait: 800, mark: reminder.locator('section[aria-labelledby="notif-perangkat"]'), markOffset: -(H - 76 - 30) });
 
   // ── Settings: dark mode and text size; the dashboard in dark mode ──
   await page.goto(`${BASE}/app/settings`);

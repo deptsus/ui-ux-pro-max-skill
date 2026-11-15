@@ -13,7 +13,8 @@ berubah banyak.
 2. `node promo/capture.mjs`: memainkan aplikasi dengan akun demo "Rina"
    (tes penempatan, Premium Tahunan lewat alur QRIS + konfirmasi admin,
    pelajaran, cerita bercabang, percakapan, menyimak, PR, ujian level A2 +
-   sertifikat, rencana, profil, papan peringkat, pengaturan) dan menyimpan
+   sertifikat, rencana, profil, liga, teman dan tantangan, shadowing dengan
+   mikrofon tiruan, pengingat harian, pengaturan) dan menyimpan
    tangkapan layar setiap langkah di `promo/out/shots/` (tidak di-commit).
 3. `node promo/render.mjs`: merangkai tangkapan layar menjadi animasi UI
    (`promo/composer.html`, 1280×720, 30 fps), menulis
