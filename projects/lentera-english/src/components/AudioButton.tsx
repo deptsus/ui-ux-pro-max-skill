@@ -35,7 +35,7 @@ export function AudioButton({ text, audioKey, size = 'md', label = 'Putar audio'
         <span className="text-xs text-muted">
           {rec
             ? `Rekaman suara · aksen ${accentName(rec.accent)}${rec.speaker ? ` · ${rec.speaker}` : ''}${rec.accent !== accent ? ` (aksen ${accentName(accent)} belum direkam)` : ''}`
-            : source === 'device' ? `Suara bawaan perangkat · aksen ${accentName(accent)} (belum ada rekaman untuk teks ini)` : 'Perangkat ini tidak punya pemutar suara.'}
+            : source === 'device' ? `Suara bawaan perangkat · aksen ${accentName(accent)}` : 'Perangkat ini tidak punya pemutar suara.'}
         </span>
       )}
       {failed && <span className="text-xs text-bad">Audio tidak dapat diputar di perangkat ini.</span>}
