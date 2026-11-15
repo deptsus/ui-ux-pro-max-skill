@@ -1,9 +1,14 @@
 'use client';
-// Loads the published curriculum. With "offline learning" on (Premium), the
-// pack is kept in IndexedDB so lessons open without a connection.
+// Loads the published curriculum. Every device keeps the pack it received in
+// IndexedDB and starts from it; the server is only asked whether a newer
+// version exists ("unchanged" costs a few bytes). The full pack is downloaded
+// on first use, after a new curriculum is published, or when the tier changes
+// (Free ↔ Premium). "Offline learning" (Premium) also caches the app pages.
 import { useSyncExternalStore } from 'react';
 import { indexContent, type ContentIndex, type ContentPack } from '@/lib/content/types';
+import { packForFree } from '@/lib/content/rows';
 import { api } from './api';
+import { premiumNow } from './store';
 
 interface Stored { version: string; tier: string; pack: ContentPack; savedAt: number }
 const OFFLINE_FLAG = 'lentera.offline';
@@ -53,11 +58,20 @@ export const offlineEnabled = () => typeof localStorage !== 'undefined' && local
 
 export async function loadContent(force = false): Promise<void> {
   if (ix && !force) return;
-  const offline = offlineEnabled();
-  const stored = offline ? await idbGet<Stored>('pack') : null;
-  if (stored && !ix) {
-    ix = indexContent(stored.pack);
-    meta = { version: stored.version, tier: stored.tier };
+  // A Premium pack is never shown to a device that is not Premium now (plan
+  // ended, signed out, another account): it is cut down to the Free pack right
+  // here, with the server's own rules, so Free lessons keep working even
+  // offline; the real Free pack is then fetched. A Free pack held by a new
+  // Premium learner is shown until the Premium pack arrives.
+  const want = premiumNow() ? 'premium' : 'free';
+  const stored = ix ? null : await idbGet<Stored>('pack');
+  if (stored?.pack) {
+    ix = indexContent(stored.tier === 'premium' && want === 'free' ? packForFree(stored.pack) : stored.pack);
+    meta = stored.tier === want ? { version: stored.version, tier: stored.tier } : null;
+    emit();
+  } else if (ix && meta && meta.tier !== want) {
+    if (meta.tier === 'premium') ix = indexContent(packForFree(ix.pack));
+    meta = null;
     emit();
   }
   try {
@@ -66,7 +80,7 @@ export async function loadContent(force = false): Promise<void> {
     if (!res.unchanged && res.pack) {
       ix = indexContent(res.pack);
       meta = { version: res.version, tier: res.tier };
-      if (offline) await idbSet('pack', { version: res.version, tier: res.tier, pack: res.pack, savedAt: Date.now() } satisfies Stored);
+      await idbSet('pack', { version: res.version, tier: res.tier, pack: res.pack, savedAt: Date.now() } satisfies Stored);
     }
     error = null;
   } catch (e) {
@@ -79,7 +93,7 @@ export async function loadContent(force = false): Promise<void> {
 export async function setOffline(on: boolean, onProgress?: (msg: string) => void): Promise<void> {
   if (!on) {
     localStorage.removeItem(OFFLINE_FLAG);
-    await idbSet('pack', null);
+    // The pack itself stays (every device keeps it); a Free pack replaces a Premium one when Premium ends.
     if ('caches' in window) await caches.delete('lentera-pages');
     // Only the offline worker: the admin notification worker (/admin-sw.js) stays.
     const regs = (await navigator.serviceWorker?.getRegistrations?.()) ?? [];

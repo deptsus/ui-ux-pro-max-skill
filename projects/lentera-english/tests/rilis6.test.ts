@@ -74,6 +74,12 @@ describe('Rilis 6: rekaman dicocokkan dengan teks', () => {
   });
 });
 
+describe('paket materi disimpan di HP', () => {
+  it('menurunkan paket Premium di HP menghasilkan paket gratis yang sama persis dengan dari server', () => {
+    expect(packForFree(packForClient(pack))).toEqual(packForFree(pack));
+  });
+});
+
 describe('Rilis 6: berkas rekaman', () => {
   const bytes = (...b: (number | string)[]) => {
     const out: number[] = [];

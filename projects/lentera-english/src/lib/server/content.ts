@@ -1,5 +1,5 @@
 // Serves the published curriculum. Free accounts get a stripped pack.
-import { buildPack } from '@content/index';
+import { CONTENT_VERSION, buildPack } from '@content/index';
 import { packForFree, rowsToPack, type Rows } from '@/lib/content/rows';
 import { packForClient } from '@/lib/engine/levelExam';
 import { audioForPack } from '@/lib/content/spoken';
@@ -15,6 +15,19 @@ const forPremium = (full: ContentPack): ContentPack => { const p = packForClient
 
 export function invalidateContent() {
   g.__lenteraPack = undefined;
+}
+
+/**
+ * The version devices would receive, without loading the curriculum: a device
+ * that already holds this version only needs "unchanged" (a few bytes), even
+ * on a server instance that has not loaded the curriculum yet.
+ */
+export async function contentVersion(db: ServerDb | null): Promise<string> {
+  const cached = g.__lenteraPack;
+  if (cached && Date.now() - cached.checkedAt < TTL) return cached.version;
+  if (!db) return `bundled-${CONTENT_VERSION}`;
+  const current = await db.rpc<{ version: number } | null>('get_content_version');
+  return current ? `db-${current.version}` : `bundled-${CONTENT_VERSION}`;
 }
 
 export async function loadContent(db: ServerDb | null): Promise<Cached> {

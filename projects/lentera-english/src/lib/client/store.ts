@@ -3,7 +3,7 @@
 // is signed in, an outbox of events and a snapshot are synced to the server.
 import { useSyncExternalStore } from 'react';
 import { createState, finalize } from '@/lib/engine/state';
-import { FREE, type Entitlement, type LearnerState } from '@/lib/engine/types';
+import { FREE, isPremium, type Entitlement, type LearnerState } from '@/lib/engine/types';
 import { api } from './api';
 import { currentSession } from './session';
 
@@ -24,6 +24,8 @@ const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 const subscribe = (l: () => void) => (listeners.add(l), () => void listeners.delete(l));
 const entListeners = new Set<(premium: boolean) => void>();
+/** Premium right now, from the last known entitlement (works offline). */
+export const premiumNow = () => isPremium(ent, Date.now());
 export const onPremiumChange = (l: (premium: boolean) => void) => (entListeners.add(l), () => void entListeners.delete(l));
 
 function read(uid: string): LearnerState | null {
