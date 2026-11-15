@@ -12,7 +12,7 @@ import { Mascot } from '@/components/Mascot';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
 import { BACKDROP_LABEL, StoryStage } from '@/components/story/StoryStage';
 import { BranchPlayer, type BranchResult } from '@/components/story/BranchPlayer';
-import { Badge, Button, Card, Empty, LinkButton, PageHeader, Progress, Ring, cx } from '@/components/ui';
+import { Badge, Button, Card, Empty, LinkButton, NameChip, PageHeader, Progress, Ring, cx } from '@/components/ui';
 import { CEFR_ORDER } from '@/lib/content/types';
 
 const TR_KEY = 'lentera.story.translation';
@@ -88,7 +88,7 @@ function Player({ story, onDone }: { story: Story; onDone: () => void }) {
       <Card className="space-y-2" aria-live="polite">
         <div className="flex items-center gap-2">
           {speaker ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-extrabold text-white" style={{ background: speaker.shirt }}>{speaker.name}</span>
+            <NameChip name={speaker.name} color={speaker.shirt} />
           ) : (
             <Badge tone="muted">Narator</Badge>
           )}
@@ -185,7 +185,7 @@ function StoryView({ story }: { story: Story }) {
       <Card className="space-y-3">
         <p>{story.summary}</p>
         <ul className="flex flex-wrap gap-2" aria-label="Tokoh">
-          {story.characters.map((c) => <li key={c.id} className="rounded-full px-2.5 py-0.5 text-xs font-extrabold text-white" style={{ background: c.shirt }}>{c.name}</li>)}
+          {story.characters.map((c) => <li key={c.id}><NameChip name={c.name} color={c.shirt} /></li>)}
         </ul>
         <p className="text-sm text-muted">{story.branch
           ? `Kamu berperan sebagai ${story.characters.find((c) => c.id === story.branch!.as)?.name ?? 'tokoh utama'}. Di setiap keputusan, pilih apa yang dikatakannya. Setiap pilihan dijelaskan, dan pilihanmu menentukan jalan serta akhir cerita.`

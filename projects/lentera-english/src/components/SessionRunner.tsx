@@ -133,7 +133,7 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
       <header className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 pb-2 pt-4">
-        <Link href={exitHref} aria-label="Keluar dari sesi" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-muted hover:bg-surface-2"><X size={22} /></Link>
+        <Link href={exitHref} aria-label="Keluar dari sesi" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-muted hover:bg-surface-2"><X size={22} aria-hidden /></Link>
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-muted">{title}</p>
           <Progress value={items.length + (result ? 0 : 0)} max={Math.max(count, items.length + 1)} tone="ok" label="Progres sesi" />

@@ -102,7 +102,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Link href="/admin" className="mt-3 flex items-center gap-3 rounded-xl bg-ink px-3 py-2.5 text-sm font-extrabold text-bg">
             <ShieldCheck size={18} aria-hidden />
             Dashboard admin
-            {!!pending && <span className="ml-auto rounded-full bg-bad px-2 text-xs text-white">{pending}</span>}
+            {!!pending && <span className="ml-auto rounded-full bg-bad px-2 text-xs text-on-brand">{pending}</span>}
           </Link>
         )}
       </aside>
@@ -112,9 +112,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Link href="/app" className="mr-auto lg:hidden"><Logo size={24} /></Link>
           <span className="mr-auto hidden text-sm font-bold text-muted lg:block">{session ? session.email : 'Mode tamu · progres tersimpan di perangkat ini'}</span>
           {admin && (
-            <Link href="/admin" className="relative flex items-center gap-1 rounded-full bg-ink before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] px-2.5 py-1 text-sm font-extrabold text-bg lg:hidden" aria-label={pending ? `Dashboard admin, ${pending} pembayaran menunggu konfirmasi` : 'Dashboard admin'}>
+            <Link href="/admin" className="relative flex min-w-11 items-center justify-center gap-1 rounded-full bg-ink before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] px-2.5 py-1 text-sm font-extrabold text-bg lg:hidden" aria-label={pending ? `Dashboard admin, ${pending} pembayaran menunggu konfirmasi` : 'Dashboard admin'}>
               <ShieldCheck size={16} aria-hidden /><span className="hidden min-[400px]:inline">Admin</span>
-              {!!pending && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-bad px-1 text-[11px] text-white" aria-hidden>{pending}</span>}
+              {!!pending && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-bad px-1 text-[11px] text-on-brand" aria-hidden>{pending}</span>}
             </Link>
           )}
           {sync === 'offline' && <span title="Sedang offline. Progres disimpan di perangkat dan dikirim saat tersambung." className="text-muted"><CloudOff size={18} aria-label="Offline" /></span>}
@@ -134,7 +134,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div role="status" className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-bad bg-bad-soft p-3 text-sm">
             <BellRing size={20} className="shrink-0 text-bad" aria-hidden />
             <p className="flex-1 font-bold">{alert}</p>
-            <Link href="/admin" onClick={dismissPendingAlert} className="rounded-full bg-bad px-3 py-1.5 font-extrabold text-white">Buka</Link>
+            <Link href="/admin" onClick={dismissPendingAlert} className="inline-flex min-h-11 items-center rounded-full bg-bad px-4 font-extrabold text-on-brand">Buka</Link>
             <button type="button" onClick={dismissPendingAlert} className="text-muted" aria-label="Tutup pemberitahuan"><X size={18} aria-hidden /></button>
           </div>
         )}

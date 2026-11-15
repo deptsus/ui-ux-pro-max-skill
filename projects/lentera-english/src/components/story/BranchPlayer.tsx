@@ -13,7 +13,7 @@ import { shuffle } from '@/lib/engine/grading';
 import { branchScore, type BranchPick, type BranchResult } from '@/lib/engine/branch';
 import { AudioButton } from '@/components/AudioButton';
 import { BACKDROP_LABEL, StoryStage } from './StoryStage';
-import { Badge, Button, Card, LinkButton, Progress, cx } from '@/components/ui';
+import { Badge, Button, Card, LinkButton, NameChip, Progress, cx } from '@/components/ui';
 
 export type { BranchPick, BranchResult };
 
@@ -110,7 +110,7 @@ export function BranchPlayer({ story, onDone }: { story: Story; onDone: (r: Bran
       {!picked && (
         <Card className="space-y-2" aria-live="polite">
           <div className="flex items-center gap-2">
-            {who ? <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-extrabold text-white" style={{ background: who.shirt }}>{who.name}</span> : <Badge tone="muted">Narator</Badge>}
+            {who ? <NameChip name={who.name} color={who.shirt} /> : <Badge tone="muted">Narator</Badge>}
           </div>
           <p className={cx('en text-xl font-bold leading-snug', !who && 'italic')} data-line={`${nodeId ?? 'intro'}-${i}`}>{cur.line.en}</p>
           {showTr && <p className="text-sm text-muted">{cur.line.tr}</p>}
@@ -137,7 +137,7 @@ export function BranchPlayer({ story, onDone }: { story: Story; onDone: (r: Bran
       {picked && (
         <Card className={cx('space-y-2 border-2', picked.correct ? (picked.natural === 3 ? 'border-ok/50' : 'border-accent/60') : 'border-bad/50')} aria-live="polite">
           <div className="flex flex-wrap items-center gap-2">
-            {me && <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-extrabold text-white" style={{ background: me.shirt }}>{me.name}</span>}
+            {me && <NameChip name={me.name} color={me.shirt} />}
             {!picked.correct ? <Badge tone="bad"><X size={12} aria-hidden />Salah tata bahasa</Badge> : picked.natural === 3 ? <Badge tone="ok"><Check size={12} aria-hidden />Tepat dan wajar</Badge> : <Badge tone="accent">Benar, tetapi kurang tepat</Badge>}
           </div>
           <p className="en text-xl font-bold leading-snug">{picked.text}</p>

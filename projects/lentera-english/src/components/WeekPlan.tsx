@@ -78,7 +78,7 @@ export function WeekPlanCard() {
     <section aria-labelledby="plan-title">
       <div className="mb-2 flex items-end justify-between gap-2">
         <h2 id="plan-title" className="text-lg font-extrabold">Rencana minggu ini</h2>
-        <Link href="/app/plan" className="flex items-center gap-1 text-sm font-bold text-brand">Rencana lengkap<ArrowRight size={16} aria-hidden /></Link>
+        <Link href="/app/plan" className="flex min-h-11 items-center gap-1 text-sm font-bold text-brand">Rencana lengkap<ArrowRight size={16} aria-hidden /></Link>
       </div>
       <Card>
         <div className="flex items-center gap-4">

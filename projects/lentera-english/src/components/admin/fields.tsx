@@ -21,7 +21,7 @@ function Labeled({ label, hint, required, htmlFor, children }: { label: string; 
 
 function IconButton({ label, onClick, disabled, children, tone = 'muted' }: { label: string; onClick: () => void; disabled?: boolean; children: ReactNode; tone?: 'muted' | 'bad' }) {
   return (
-    <button type="button" aria-label={label} title={label} onClick={onClick} disabled={disabled} className={cx('grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-line bg-surface transition hover:bg-surface-2 disabled:opacity-40', tone === 'bad' ? 'text-bad' : 'text-muted')}>
+    <button type="button" aria-label={label} title={label} onClick={onClick} disabled={disabled} className={cx('grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-surface transition hover:bg-surface-2 disabled:opacity-40', tone === 'bad' ? 'text-bad' : 'text-muted')}>
       {children}
     </button>
   );

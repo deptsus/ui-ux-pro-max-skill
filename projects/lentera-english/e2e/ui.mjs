@@ -27,7 +27,7 @@ async function phone({ width = 320, scale = 'normal', signedIn = true, vibrate =
   const ctx = await browser.newContext({ viewport: { width, height: 640 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
   await ctx.addInitScript(([s, f, v]) => {
     if (s && !localStorage.getItem('lentera.session')) localStorage.setItem('lentera.session', JSON.stringify(s));
-    localStorage.setItem('lentera.fontScale', f);
+    if (!sessionStorage.getItem('ui-e2e')) { localStorage.setItem('lentera.fontScale', f); sessionStorage.setItem('ui-e2e', '1'); }
     localStorage.setItem('lentera.story.sound', '0');
     window.__buzz = [];
     if (v) navigator.vibrate = (p) => { window.__buzz.push(p); return true; };
@@ -112,7 +112,7 @@ for (const scale of ['normal', 'xlarge']) {
 
 // ───────────── 3. Settings: text size and vibration ─────────────
 {
-  const { ctx, p } = await phone({ width: 390, vibrate: true });
+  const { ctx, p } = await phone({ width: 320, vibrate: true, signedIn: false });
   await p.goto(`${BASE}/app/settings`);
   await p.getByRole('radio', { name: 'Besar', exact: true }).click({ timeout: 45000 });
   const big = await p.evaluate(() => [getComputedStyle(document.documentElement).fontSize, localStorage.getItem('lentera.fontScale')]);
@@ -124,11 +124,8 @@ for (const scale of ['normal', 'xlarge']) {
   check('getaran: pilihan Nyala/Mati tampil di HP yang bisa bergetar', await p.getByRole('radio', { name: 'Mati', exact: true }).count() === 1);
 
   // Vibration on answers: a tap when right, a double tap when wrong.
-  await p.goto(`${BASE}/app/lesson?id=a1-to-be`);
+  await p.goto(`${BASE}/app`);
   const pack = await fetchPack(p);
-  await p.getByRole('button', { name: /Mulai latihan terbimbing/ }).click({ timeout: 45000 }).catch(async () => {
-    await p.getByRole('button', { name: /Lanjut|Mulai/ }).first().click();
-  });
   const answer = async (correct) => {
     await answerCurrent(p, pack, correct);
     await p.getByRole('button', { name: 'Periksa', exact: true }).click();
@@ -136,6 +133,12 @@ for (const scale of ['normal', 'xlarge']) {
     await p.getByRole('button', { name: 'Lanjut', exact: true }).click();
   };
   try {
+    await p.getByRole('link', { name: 'Lewati, mulai dari A1' }).click({ timeout: 45000 });
+    for (const name of ['Mulai belajar', 'Lihat contoh benar dan salah', 'Lanjut ke latihan', 'Mulai latihan']) await p.getByRole('button', { name, exact: true }).click({ timeout: 45000 });
+    await p.getByRole('button', { name: 'Periksa', exact: true }).waitFor({ timeout: 15000 });
+    const player = await measure(p);
+    check('pemutar pelajaran di layar 320 px: tanpa geser ke samping, kontrol minimal 44 px', player.over === 0 && player.small.length === 0, `${player.over}px ${player.small.slice(0, 4).join(' | ')}`);
+    await p.screenshot({ path: path.join(SHOTS, 'ui-320-pemutar.png'), fullPage: true });
     await answer(true);
     await answer(false);
     const buzz = await p.evaluate(() => window.__buzz);

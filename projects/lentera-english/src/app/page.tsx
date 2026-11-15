@@ -61,7 +61,7 @@ export default function Landing() {
             </div>
             <p className="mt-3 text-sm text-muted">Tanpa kartu kredit. Bisa langsung dicoba sebagai tamu.</p>
             {/* A plain <a>: the APK is a static file, not a route. */}
-            <a href={ANDROID_APK} download className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand underline underline-offset-4 hover:text-ink"><Smartphone size={18} aria-hidden />Unduh aplikasi Android (APK {ANDROID_APP.versionName})</a>
+            <a href={ANDROID_APK} download className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand underline underline-offset-4 hover:text-ink"><Smartphone size={18} aria-hidden />Unduh aplikasi Android (APK {ANDROID_APP.versionName})</a>
           </div>
           <Card className="relative mx-auto w-full max-w-sm">
             <Mascot mood="cheer" size={120} className="mx-auto" />
@@ -145,7 +145,7 @@ export default function Landing() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 text-sm text-muted">
           <Logo size={22} />
           <p>Seluruh mesin belajar berjalan tanpa layanan AI.</p>
-          <nav className="flex flex-wrap gap-x-4" aria-label="Tautan kaki"><a href={ANDROID_APK} download className="inline-flex min-h-11 items-center hover:text-ink">Aplikasi Android</a><Link href="/masuk" className="inline-flex min-h-11 items-center hover:text-ink">Masuk</Link><Link href="/daftar" className="inline-flex min-h-11 items-center hover:text-ink">Daftar</Link><Link href="/admin" className="inline-flex min-h-11 items-center hover:text-ink">Admin</Link></nav>
+          <nav className="flex flex-wrap gap-x-4" aria-label="Tautan kaki"><a href={ANDROID_APK} download className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Aplikasi Android</a><Link href="/masuk" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Masuk</Link><Link href="/daftar" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Daftar</Link><Link href="/admin" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Admin</Link></nav>
         </div>
       </footer>
     </div>

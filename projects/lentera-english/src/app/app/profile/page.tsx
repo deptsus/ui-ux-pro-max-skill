@@ -6,7 +6,7 @@ import { useApp } from '@/lib/client/hooks';
 import { signOut, useServerInfo, useSession } from '@/lib/client/session';
 import { isAdminPlan } from '@/lib/engine/types';
 import { act, syncNow, useRole, useSyncStatus } from '@/lib/client/store';
-import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
+import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass, textOn } from '@/components/ui';
 
 const COLORS = ['#4b3fd6', '#f59e0b', '#15803d', '#be123c', '#0e7490', '#7c3aed', '#c2410c', '#0f766e'];
 
@@ -27,7 +27,7 @@ export default function ProfilePage() {
     <div className="space-y-5">
       <PageHeader title="Profil" />
       <Card className="flex flex-wrap items-center gap-4">
-        <span className="grid h-20 w-20 place-items-center rounded-full text-3xl font-extrabold text-white" style={{ background: COLORS[learner.profile.avatar % COLORS.length] }} aria-hidden>{learner.profile.name.slice(0, 1).toUpperCase()}</span>
+        <span className="grid h-20 w-20 place-items-center rounded-full text-3xl font-extrabold" style={{ background: COLORS[learner.profile.avatar % COLORS.length], color: textOn(COLORS[learner.profile.avatar % COLORS.length]) }} aria-hidden>{learner.profile.name.slice(0, 1).toUpperCase()}</span>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-2xl font-extrabold">{learner.profile.name}</h2>
           <p className="text-sm text-muted">{session ? session.email : 'Tamu · progres hanya di perangkat ini'} · bergabung {dateId(learner.createdAt)}</p>
@@ -44,7 +44,7 @@ export default function ProfilePage() {
         <Field label="Nama tampilan" hint="Nama ini muncul di papan peringkat."><input value={name} maxLength={40} onChange={(e) => setName(e.target.value)} className={inputClass} /></Field>
         <div>
           <p className="mb-1 text-sm font-bold">Warna avatar</p>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Warna avatar">{COLORS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={learner.profile.avatar === i} aria-label={`Warna ${i + 1}`} onClick={() => act((d) => { d.profile.avatar = i; })} className={cx('h-10 w-10 rounded-full border-4', learner.profile.avatar === i ? 'border-ink' : 'border-transparent')} style={{ background: c }} />)}</div>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Warna avatar">{COLORS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={learner.profile.avatar === i} aria-label={`Warna ${i + 1}`} onClick={() => act((d) => { d.profile.avatar = i; })} className={cx('h-11 w-11 rounded-full border-4', learner.profile.avatar === i ? 'border-ink' : 'border-transparent')} style={{ background: c }} />)}</div>
         </div>
         <Button disabled={!name.trim() || name.trim() === learner.profile.name} onClick={() => { act((d) => { d.profile.name = name.trim().slice(0, 40); }); void syncNow(); }}>Simpan</Button>
       </Card>

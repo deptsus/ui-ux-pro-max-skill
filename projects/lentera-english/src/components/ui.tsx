@@ -4,6 +4,18 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 export const cx = (...parts: (string | false | null | undefined)[]) => parts.filter(Boolean).join(' ');
 
+const lum = (hex: string) => {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+};
+/** White or dark text, whichever reads better on this #rrggbb color (Rilis 6 contrast audit). */
+export const textOn = (bg: string) => ((1.05) / (lum(bg) + 0.05) >= (lum(bg) + 0.05) / (lum('#1e1b3a') + 0.05) ? '#ffffff' : '#1e1b3a');
+
+/** A character's name: neutral chip with a dot in their shirt color, readable in both themes. */
+export function NameChip({ name, color, className }: { name: string; color: string; className?: string }) {
+  return <span className={cx('inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-extrabold text-ink', className)}><span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: color }} aria-hidden />{name}</span>;
+}
+
 type Variant = 'primary' | 'secondary' | 'ghost' | 'success' | 'danger' | 'accent';
 const VARIANT: Record<Variant, string> = {
   primary: 'bg-brand text-on-brand border-brand-strong hover:brightness-110',
