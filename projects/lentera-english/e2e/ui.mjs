@@ -175,7 +175,7 @@ for (const width of [320, 390]) {
     const buzz = await p.evaluate(() => window.__buzz);
     check('getaran: singkat saat benar, dua kali saat belum tepat', buzz.length === 2 && typeof buzz[0] === 'number' && Array.isArray(buzz[1]), JSON.stringify(buzz));
     await p.goto(`${BASE}/app/settings`);
-    await p.getByRole('radio', { name: 'Mati', exact: true }).click({ timeout: 30000 });
+    await p.getByRole('radiogroup', { name: /Getaran saat menjawab/ }).getByRole('radio', { name: 'Mati', exact: true }).click({ timeout: 30000 });
     check('getaran bisa dimatikan', (await p.evaluate(() => localStorage.getItem('lentera.haptics'))) === '0');
   } catch (e) {
     await p.screenshot({ path: path.join(SHOTS, 'ui-gagal-getaran.png'), fullPage: true }).catch(() => {});
@@ -186,7 +186,7 @@ for (const width of [320, 390]) {
 {
   const { ctx, p } = await phone({ width: 390, vibrate: false });
   await p.goto(`${BASE}/app/settings`);
-  check('getaran: perangkat tanpa getaran (iPhone, komputer) mendapat penjelasan, bukan tombol', await p.getByText(/tidak mendukung getaran/).first().waitFor({ timeout: 45000 }).then(() => true, () => false) && await p.getByRole('radio', { name: 'Mati', exact: true }).count() === 0);
+  check('getaran: perangkat tanpa getaran (iPhone, komputer) mendapat penjelasan, bukan tombol', await p.getByText(/tidak mendukung getaran/).first().waitFor({ timeout: 45000 }).then(() => true, () => false) && await p.getByRole('radiogroup', { name: /Getaran saat menjawab/ }).count() === 0);
   await ctx.close();
 }
 
