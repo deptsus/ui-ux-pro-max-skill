@@ -441,7 +441,8 @@ scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif
   await page.getByRole('heading', { name: 'Rencana minggu ini' }).waitFor({ timeout: 20000 });
   const targets = page.getByRole('list', { name: 'Target minggu ini' });
   const firstLesson = full.lessons.find((l) => l.id === 'a1-greetings') ?? full.lessons[0];
-  check('pelanggan tahunan: Beranda menampilkan rencana minggu 1 yang dimulai dari pelajaran pertama', await page.getByText(/^Minggu 1 dari 5[23]$/).count() === 1 && await targets.getByText(firstLesson.title, { exact: true }).count() === 1, await page.locator('section[aria-labelledby=plan-title]').innerText().catch(() => ''));
+  // 365 days cover 53 Monday-to-Sunday weeks, or 54 when the year starts on a Sunday (week 1 is then a single day).
+  check('pelanggan tahunan: Beranda menampilkan rencana minggu 1 yang dimulai dari pelajaran pertama', await page.getByText(/^Minggu 1 dari 5[234]$/).count() === 1 && await targets.getByText(firstLesson.title, { exact: true }).count() === 1, await page.locator('section[aria-labelledby=plan-title]').innerText().catch(() => ''));
   await page.goto(`${BASE}/app/plan`);
   await page.getByRole('heading', { name: 'Minggu-minggu berikutnya' }).waitFor({ timeout: 20000 });
   check('pelanggan tahunan: halaman rencana menampilkan minggu ini, proyeksi, dan cara kerjanya', await page.getByText('Cara kerja rencana ini').count() === 1 && await page.getByText(/Tampilkan \d+ minggu lainnya/).count() === 1);
