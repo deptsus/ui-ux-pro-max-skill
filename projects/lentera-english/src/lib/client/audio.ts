@@ -1,8 +1,10 @@
 'use client';
-// Audio playback. Human recordings registered in the CMS (audio_resources)
-// are used when available. Otherwise the device's built-in speech engine
+// Audio playback. Recordings uploaded in /admin (audio_resources) are used
+// when one exists for the text being played, matched by audio key or by the
+// text itself. Otherwise the device's built-in speech engine
 // reads the text, and the UI says so. Nothing is sent to any service.
-import type { ContentIndex } from '@/lib/content/types';
+import type { AudioResource, ContentIndex } from '@/lib/content/types';
+import { spokenKey } from '@/lib/content/spoken';
 
 export interface PlayOptions {
   accent: 'us' | 'uk';
@@ -13,8 +15,32 @@ export interface PlayOptions {
 export type AudioSource = 'recording' | 'device' | 'none';
 let current: HTMLAudioElement | null = null;
 
-export function audioSource(ix: ContentIndex | null, audioKey?: string): AudioSource {
-  if (audioKey && ix?.pack.audio.some((a) => a.key === audioKey)) return 'recording';
+// Recordings by spoken text (Rilis 6), built once per content pack.
+const byText = new WeakMap<ContentIndex, Map<string, AudioResource[]>>();
+function recordingsOf(ix: ContentIndex, text: string): AudioResource[] {
+  let map = byText.get(ix);
+  if (!map) {
+    map = new Map();
+    for (const a of ix.pack.audio) {
+      if (!a.transcript) continue;
+      const k = spokenKey(a.transcript);
+      map.set(k, [...(map.get(k) ?? []), a]);
+    }
+    byText.set(ix, map);
+  }
+  return map.get(spokenKey(text)) ?? [];
+}
+
+/** The recording for this text (or audio key), in the learner's accent when there is one. */
+export function recordingFor(ix: ContentIndex | null, text: string, accent: 'us' | 'uk', audioKey?: string): AudioResource | undefined {
+  if (!ix?.pack.audio.length) return undefined;
+  const keyed = audioKey ? ix.pack.audio.filter((a) => a.key === audioKey) : [];
+  const list = keyed.length ? keyed : text ? recordingsOf(ix, text) : [];
+  return list.find((a) => a.accent === accent) ?? list[0];
+}
+
+export function audioSource(ix: ContentIndex | null, audioKey?: string, text = '', accent: 'us' | 'uk' = 'us'): AudioSource {
+  if (recordingFor(ix, text, accent, audioKey)) return 'recording';
   return typeof window !== 'undefined' && 'speechSynthesis' in window ? 'device' : 'none';
 }
 
@@ -26,8 +52,7 @@ export function stopAudio() {
 
 export function play(ix: ContentIndex | null, text: string, opts: PlayOptions): Promise<AudioSource> {
   stopAudio();
-  const recordings = opts.audioKey ? ix?.pack.audio.filter((a) => a.key === opts.audioKey) ?? [] : [];
-  const rec = recordings.find((a) => a.accent === opts.accent) ?? recordings[0];
+  const rec = recordingFor(ix, text, opts.accent, opts.audioKey);
   if (rec) {
     return new Promise((resolve) => {
       const el = new Audio(rec.url);

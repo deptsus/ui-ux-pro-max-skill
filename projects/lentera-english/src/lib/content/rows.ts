@@ -1,6 +1,7 @@
 // Mapping between the runtime ContentPack and the database rows
 // (see supabase/migrations/0001_schema.sql and content_rows()).
 import { ACHIEVEMENTS } from '@/lib/engine/gamification';
+import { audioForPack } from './spoken';
 import { packForClient } from '@/lib/engine/levelExam';
 import type { ContentPack, Exercise, Lesson, ListeningItem, Story } from './types';
 
@@ -123,7 +124,7 @@ export function packForFree(full: ContentPack): ContentPack {
     return e.lessonId ? true : freeTopics.has(e.topic);
   });
   const kept = new Set(exercises.map((e) => e.id));
-  return {
+  const free: ContentPack = {
     ...pack,
     lessons: pack.lessons.map((l) => (l.premium ? { ...l, locked: true, intro: '', teaching: [], demo: [], vocab: undefined } : l)),
     exercises,
@@ -134,4 +135,6 @@ export function packForFree(full: ContentPack): ContentPack {
     // Homework of a Premium lesson or chapter, or pointing at a stripped question, stays on the server.
     homework: pack.homework.filter((h) => (!h.lessonId || !lockedLessons.has(h.lessonId)) && !lockedChapters.has(h.chapterId) && h.exerciseIds.every((id) => kept.has(id))),
   };
+  // Recordings only for text left in the free pack (Rilis 6).
+  return { ...free, audio: audioForPack(free) };
 }
