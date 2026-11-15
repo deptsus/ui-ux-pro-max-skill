@@ -1,0 +1,181 @@
+<!doctype html>
+<!-- Promo video, step 2: lays the real app screenshots (promo/out/shots) out as a
+     UI animation. render.mjs calls window.setup(data) once, then window.render(t)
+     for every frame and takes a screenshot; nothing here runs on its own clock,
+     so every frame is exact. -->
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: 'Jakarta'; src: url('../node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; }
+  body { font-family: 'Jakarta', system-ui, sans-serif; color: #1e1b3a; background: #f6f5fb; position: relative; }
+  .bg { position: absolute; inset: 0; background: linear-gradient(135deg, #f6f5fb 0%, #ebe8fb 55%, #f3effe 100%); }
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .55; }
+  .b1 { width: 420px; height: 420px; background: #c7d2fe; left: -120px; top: -140px; }
+  .b2 { width: 360px; height: 360px; background: #fde68a; right: 120px; bottom: -180px; opacity: .45; }
+  .b3 { width: 300px; height: 300px; background: #e9d5ff; right: -80px; top: -60px; }
+
+  #copy { position: absolute; left: 92px; top: 0; height: 720px; width: 600px; display: flex; flex-direction: column; justify-content: center; }
+  .chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 2px solid #c9c4f5; color: #4b3fd6; font-weight: 800; font-size: 17px; padding: 7px 16px; border-radius: 999px; }
+  #title { margin-top: 18px; font-size: 50px; line-height: 1.08; font-weight: 800; letter-spacing: -0.02em; }
+  #sub { margin-top: 18px; font-size: 23px; line-height: 1.45; color: #5b5878; font-weight: 500; max-width: 560px; }
+  .brand { display: flex; align-items: center; gap: 10px; position: absolute; left: 92px; top: 40px; font-size: 22px; letter-spacing: -0.01em; }
+  .brand b { font-weight: 800; } .brand span { font-weight: 600; color: #4b3fd6; }
+
+  #phone { position: absolute; left: 852px; top: 46px; width: 309px; height: 628px; border-radius: 50px; background: #1e1b3a; padding: 14px 16px 14px 16px; box-shadow: 0 30px 60px rgba(30,27,58,.28), 0 8px 18px rgba(30,27,58,.18); }
+  #phone::before { content: ''; position: absolute; left: 50%; top: 5px; width: 64px; height: 5px; margin-left: -32px; border-radius: 4px; background: #3a3660; }
+  #screen { position: relative; width: 277px; height: 600px; border-radius: 36px; overflow: hidden; background: #f6f5fb; }
+  .layer { position: absolute; left: 0; top: 0; width: 277px; will-change: transform, opacity; }
+  .layer img { display: block; width: 277px; }
+  .strip { position: absolute; left: 0; width: 277px; overflow: hidden; display: none; }
+  .strip img { position: absolute; left: 0; width: 277px; display: block; }
+  #tap { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; pointer-events: none; opacity: 0; }
+  #tap .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid #4b3fd6; }
+  #tap .dot { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: rgba(75,63,214,.45); box-shadow: 0 0 0 4px rgba(255,255,255,.7); }
+
+  #progress { position: absolute; left: 92px; bottom: 44px; width: 600px; height: 6px; border-radius: 6px; background: rgba(75,63,214,.15); overflow: hidden; }
+  #progress i { display: block; height: 100%; width: 0; background: #4b3fd6; border-radius: 6px; }
+
+  #intro, #outro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; opacity: 0; }
+  #intro h1, #outro h1 { margin-top: 26px; font-size: 64px; font-weight: 800; letter-spacing: -0.03em; }
+  #intro h1 span, #outro h1 span { color: #4b3fd6; font-weight: 600; }
+  #intro p, #outro p { margin-top: 16px; font-size: 26px; color: #5b5878; font-weight: 500; max-width: 900px; line-height: 1.4; }
+  #outro .cta { margin-top: 30px; display: inline-flex; align-items: center; gap: 14px; background: #4b3fd6; color: #fff; font-size: 30px; font-weight: 800; padding: 18px 36px; border-radius: 22px; border-bottom: 6px solid #362aa8; }
+  #outro .url { margin-top: 22px; font-size: 26px; font-weight: 800; color: #1e1b3a; }
+  #outro small { margin-top: 26px; font-size: 17px; color: #5b5878; }
+</style>
+</head>
+<body>
+  <div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+  <div id="main">
+    <div class="brand"><svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true">{MARK}</svg><span><b>Lentera</b> <span>English</span></span></div>
+    <div id="copy"><span class="chip" id="chip"></span><h2 id="title"></h2><p id="sub"></p></div>
+    <div id="progress"><i id="bar"></i></div>
+    <div id="phone"><div id="screen">
+      <div class="layer" id="la"><img id="ia" /></div>
+      <div class="layer" id="lb"><img id="ib" /></div>
+      <div class="strip" id="head"><img id="ih" /></div>
+      <div class="strip" id="nav"><img id="in" /></div>
+      <div id="tap"><div class="ring"></div><div class="dot"></div></div>
+    </div></div>
+  </div>
+
+  <div id="intro">
+    <svg width="132" height="132" viewBox="0 0 48 48" id="introMark" aria-hidden="true">{MARK}</svg>
+    <h1>Lentera <span>English</span></h1>
+    <p>Belajar bahasa Inggris dari nol sampai C2, dijelaskan dalam bahasa Indonesia.</p>
+  </div>
+  <div id="outro">
+    <svg width="104" height="104" viewBox="0 0 48 48" aria-hidden="true">{MARK}</svg>
+    <h1>Lentera <span>English</span></h1>
+    <p>A1 sampai C2 · pelajaran 8 langkah · cerita · percakapan · menyimak · PR · ujian & sertifikat</p>
+    <div class="cta">Mulai belajar gratis →</div>
+    <div class="url">lentera-english-app.netlify.app</div>
+    <small>Semua cuplikan diambil dari aplikasi asli (akun demo).</small>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const out = (x) => 1 - Math.pow(1 - x, 3);
+const S = 277 / 390; // app CSS px → screen px
+let D = null;
+
+/** data: { intro, outro, scenes: [{ chip, title, sub, beats: [{ src, dur, tap?, scroll?, overlays?, headPx?, navSrc? }] }] } */
+window.setup = (data) => {
+  D = data;
+  let t = data.intro;
+  for (const sc of D.scenes) {
+    sc.start = t;
+    for (const b of sc.beats) { b.start = t; t += b.dur; }
+    sc.end = t;
+  }
+  D.mainEnd = t;
+  D.total = t + data.outro;
+  const imgs = [...new Set(D.scenes.flatMap((s) => s.beats.flatMap((b) => [b.src, b.navSrc].filter(Boolean))))];
+  return Promise.all(imgs.map((src) => new Promise((ok) => { const im = new Image(); im.onload = ok; im.onerror = ok; im.src = src; }))).then(() => D.total);
+};
+
+function show(layer, img, b, local) {
+  if (img.dataset.src !== b.src) { img.src = b.src; img.dataset.src = b.src; }
+  let y = 0;
+  if (b.scroll) {
+    const span = b.scroll * S; // how far to scroll, in screen px
+    const p = ease(clamp((local - 0.5) / Math.max(0.1, b.dur - 1.1)));
+    y = -span * p;
+  }
+  layer.style.transform = `translateY(${y}px)`;
+}
+
+window.render = (t) => {
+  const inIntro = t < D.intro;
+  const inOutro = t >= D.mainEnd;
+  $('intro').style.opacity = inIntro ? String(clamp((D.intro - t) / 0.5)) : '0';
+  if (inIntro) {
+    const p = out(clamp(t / 0.9));
+    $('introMark').style.transform = `scale(${0.6 + 0.4 * p}) rotate(${(1 - p) * -8}deg)`;
+    $('intro').style.opacity = String(Math.min(clamp(t / 0.4), clamp((D.intro - t) / 0.5)));
+  }
+  $('outro').style.opacity = inOutro ? String(clamp((t - D.mainEnd) / 0.6)) : '0';
+  $('main').style.opacity = inIntro ? String(clamp((t - (D.intro - 0.5)) / 0.5)) : inOutro ? String(1 - clamp((t - D.mainEnd) / 0.4)) : '1';
+  if (inIntro || inOutro) { if (inIntro) return; }
+
+  const tt = Math.min(t, D.mainEnd - 0.001);
+  const si = D.scenes.findIndex((s) => tt >= s.start && tt < s.end);
+  const sc = D.scenes[Math.max(0, si)];
+  const bi = sc.beats.findIndex((b) => tt >= b.start && tt < b.start + b.dur);
+  const b = sc.beats[Math.max(0, bi)];
+  const prev = bi > 0 ? sc.beats[bi - 1] : si > 0 ? D.scenes[si - 1].beats.at(-1) : null;
+  const local = tt - b.start;
+
+  // Copy: slides in at each scene, fades out at its end.
+  const sIn = out(clamp((tt - sc.start) / 0.55));
+  const sOut = clamp((sc.end - tt) / 0.35);
+  const op = Math.min(sIn, sOut);
+  $('chip').textContent = sc.chip; $('title').textContent = sc.title; $('sub').textContent = sc.sub;
+  $('copy').style.opacity = String(op);
+  $('copy').style.transform = `translateY(${(1 - sIn) * 26}px)`;
+  $('bar').style.width = `${(100 * (tt - D.intro)) / (D.mainEnd - D.intro)}%`;
+
+  // Screens: the new one fades over the old one.
+  const fade = clamp(local / 0.32);
+  show($('lb'), $('ib'), b, local);
+  $('lb').style.opacity = String(prev ? ease(fade) : 1);
+  if (prev) { show($('la'), $('ia'), prev, prev.dur); $('la').style.opacity = String(1 - ease(fade)); } else $('la').style.opacity = '0';
+  // Phone pops gently at each scene start.
+  const pop = out(clamp((tt - sc.start) / 0.5));
+  $('phone').style.transform = `translateY(${(1 - pop) * 18}px) scale(${0.97 + 0.03 * pop})`;
+
+  // Sticky header and bottom nav stay put while a long page scrolls.
+  const ov = b.scroll && b.overlays;
+  for (const [id, img, src, top, h] of [['head', 'ih', b.src, 0, (b.headPx ?? 65) * S], ['nav', 'in', b.navSrc, null, 56.5 * S]]) {
+    const el = $(id);
+    if (!ov || !src) { el.style.display = 'none'; continue; }
+    el.style.display = 'block'; el.style.height = `${h}px`;
+    if (top === null) { el.style.bottom = '0px'; el.style.top = 'auto'; } else { el.style.top = '0px'; }
+    const im = $(img);
+    if (im.dataset.src !== src) { im.src = src; im.dataset.src = src; }
+    im.style.top = top === null ? `${-(844 - 56.5) * S}px` : '0px';
+    el.style.opacity = $('lb').style.opacity;
+  }
+
+  // The finger: a ring that lands on what is tapped next, at the end of the beat.
+  const tap = $('tap');
+  if (b.tap) {
+    const k = local - (b.dur - 0.75);
+    const show = k >= 0;
+    tap.style.left = `${b.tap.x * S}px`; tap.style.top = `${b.tap.y * S}px`;
+    tap.style.opacity = show ? String(clamp(k / 0.15) * (1 - clamp((k - 0.55) / 0.2))) : '0';
+    const press = clamp((k - 0.25) / 0.2);
+    tap.querySelector('.ring').style.transform = `scale(${1 + press * 0.6})`;
+    tap.querySelector('.ring').style.opacity = String(1 - press * 0.8);
+    tap.querySelector('.dot').style.transform = `scale(${1 - press * 0.25})`;
+  } else tap.style.opacity = '0';
+};
+</script>
+</body>
+</html>

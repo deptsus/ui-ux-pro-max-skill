@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { BookOpen, Brain, CalendarClock, Check, ClipboardList, GraduationCap, Headphones, MessagesSquare, ShieldCheck, Smartphone, Target, WifiOff, Wrench } from 'lucide-react';
 import { Logo, Mascot } from '@/components/Mascot';
+import { PromoVideo } from '@/components/PromoVideo';
+import { PROMO_DURATION } from '@/components/promo-chapters';
 import { Badge, Card, LinkButton } from '@/components/ui';
 import { ANDROID_APP } from '@/lib/android';
 import { rupiah } from '@/lib/format';
@@ -73,6 +75,12 @@ export default function Landing() {
             </div>
             <div className="mt-2 rounded-2xl bg-brand-soft p-3 text-sm"><p className="font-extrabold text-brand">Langkah berikutnya untukmu</p><p className="mt-1">Latihan perbaikan: tertukar was / were. Kamu 3× keliru pada pola ini minggu ini.</p></div>
           </Card>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 pb-14" aria-labelledby="video-title" id="video">
+          <h2 id="video-title" className="text-3xl font-extrabold tracking-tight">Lihat Lentera beraksi</h2>
+          <p className="mt-2 max-w-2xl text-muted">Tur {Math.floor(PROMO_DURATION / 60)} menit {Math.round(PROMO_DURATION % 60)} detik dari tampilan asli aplikasi: tes penempatan, pelajaran, latihan dengan pembahasan, cerita, percakapan, PR, sampai ujian dan sertifikat.</p>
+          <div className="mt-6"><PromoVideo /></div>
         </section>
 
         <section className="bg-surface py-14">

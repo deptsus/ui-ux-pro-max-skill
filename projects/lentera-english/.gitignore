@@ -14,3 +14,4 @@ AGENTS.md
 *.jks
 *.keystore
 .storepass
+promo/out/
