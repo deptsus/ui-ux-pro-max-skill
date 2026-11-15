@@ -51,6 +51,7 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 4 dari `ROADMAP.md`: PR mingguan otomatis, tugas menulis B2–C2 dengan contoh bertingkat, kalender PR (.ics), pengingat PR di HP, tab PR di `/admin` (`tests/rilis4.test.ts`, `e2e/homework.mjs`). Pemilik: jalankan `apply-0010.sql`, lalu impor ulang + terbitkan.
 - [x] Rilis 5 dari `ROADMAP.md`: 12 pelajaran B2–C2 (9 per level), 4 cerita bercabang B1–C2, 4 skenario dan 4 materi menyimak C1–C2 (`tests/rilis5.test.ts`, `e2e:skills`). Pemilik: jalankan `apply-0011.sql`, lalu impor ulang + terbitkan.
 - [ ] Rilis 6 dari `ROADMAP.md` (suara asli dan poles UI/UX).
+  - [ ] Ikut Rilis 6 (permintaan pemilik): label "Bercabang" juga tampil untuk tamu di cerita bercabang yang terkunci, tanpa mengirim isi cabang (lihat ROADMAP Rilis 6).
 - [x] Pengingat PR terbukti sampai di HP sungguhan (15 Nov 2026, HP Android pemilik). Fungsi terjadwal Netlify `homework-reminders` terdaftar (`@hourly`).
 - [ ] Perbesar bank soal ujian level (sekarang 12 + 8 + 8 soal per level); batas waktu ujian level belum dicek server (hanya di perangkat).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).

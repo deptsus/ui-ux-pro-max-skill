@@ -196,6 +196,7 @@ Rencana awal:
   kontras, ukuran sentuh, alur pertama kali buka aplikasi (onboarding),
   pengaturan ukuran huruf, mode gelap, pemutar pelajaran di HP layar kecil.
 - **Getaran ringan** saat benar/salah di Android (bisa dimatikan).
+- **Label "Bercabang" untuk tamu** (diminta pemilik saat Rilis 5 terbit): cerita bercabang yang terkunci kini tampil sebagai "Cerita" biasa di paket tamu, karena isi cabangnya memang tidak dikirim. Kirim penanda kecil (misalnya `branching: true`, tanpa isi cabang) supaya tamu melihat label "Bercabang" dan jumlah keputusan sebagai daya tarik Premium, tanpa membuka isinya.
 - Bila perlu: APK 1.3.0 (ikon/splash baru, izin notifikasi pelajar).
 
 ### Setelah Rilis 6 (Mei–Juni 2027, untuk dipilih pemilik)
