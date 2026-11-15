@@ -1,7 +1,7 @@
 // Recordings (Rilis 6): upload one file for one text and accent, or delete it.
 // The admin role is checked in the database (assert_admin) before anything is stored.
 import { recordingKey } from '@/lib/content/spoken';
-import { HttpError, json, readJson, requireUser, route } from '@/lib/server/api';
+import { HttpError, json, readJson, requireAdmin, route } from '@/lib/server/api';
 import { MAX_AUDIO_BYTES, audioFileName, deleteAudio, putAudio, sniffAudio } from '@/lib/server/audio-store';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ async function ready(db: Rpc, userId: string) {
 }
 
 export const POST = route(async (req) => {
-  const { db, userId } = await requireUser(req);
+  const { db, userId } = await requireAdmin(req);
   await ready(db, userId);
   const declared = Number(req.headers.get('content-length') ?? 0);
   if (declared > MAX_AUDIO_BYTES + 64 * 1024) throw new HttpError(413, 'Berkas terlalu besar. Maksimal 4 MB per rekaman.', 'too_large');
@@ -47,7 +47,7 @@ export const POST = route(async (req) => {
 });
 
 export const DELETE = route(async (req) => {
-  const { db, userId } = await requireUser(req);
+  const { db, userId } = await requireAdmin(req);
   await ready(db, userId);
   const b = await readJson<{ key?: string }>(req);
   const r = await db.rpc<{ deleted: boolean; url: string | null }>('admin_delete_recording', { p_actor: userId, p_key: String(b.key ?? '') });

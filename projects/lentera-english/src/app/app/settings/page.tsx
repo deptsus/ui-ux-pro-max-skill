@@ -5,13 +5,34 @@ import { GAME } from '@/lib/engine/config';
 import { setOffline, useOffline } from '@/lib/client/content';
 import { getTheme, setTheme, useApp } from '@/lib/client/hooks';
 import { act, resetLearner } from '@/lib/client/store';
+import { api } from '@/lib/client/api';
+import { signOut, useSession } from '@/lib/client/session';
 import { buzz, getFontScale, hapticsOn, hapticsSupported, setFontScale, setHaptics, type FontScale } from '@/lib/client/prefs';
 import { Badge, Button, Card, LinkButton, Notice, PageHeader } from '@/components/ui';
 import { ReminderSettings } from '@/components/ReminderSettings';
 
 export default function SettingsPage() {
   const { ix, learner, premium } = useApp();
+  const session = useSession();
   const offline = useOffline();
+  const [deleting, setDeleting] = useState<'idle' | 'confirm' | 'busy'>('idle');
+  const [deleteText, setDeleteText] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const deleteAccount = async () => {
+    setDeleting('busy');
+    setDeleteError(null);
+    try {
+      await api('/api/me', { method: 'DELETE', body: { confirm: 'HAPUS' } });
+      const id = session?.userId;
+      resetLearner();
+      await signOut();
+      if (id) localStorage.removeItem(`lentera.state.${id}`);
+      window.location.href = '/?akun=dihapus';
+    } catch (e) {
+      setDeleteError((e as Error).message);
+      setDeleting('confirm');
+    }
+  };
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -81,8 +102,24 @@ export default function SettingsPage() {
         <h2 className="font-extrabold">Data belajar</h2>
         <p className="text-sm text-muted">Menghapus progres di perangkat ini: XP, beruntun, penguasaan topik, dan jadwal ulangan. Langganan tidak terpengaruh.</p>
         {confirm ? <div className="flex flex-wrap items-center gap-2"><span className="text-sm font-bold text-bad">Yakin? Tindakan ini tidak bisa dibatalkan.</span><Button size="sm" variant="danger" onClick={() => { resetLearner(); setConfirm(false); }}>Ya, hapus progres</Button><Button size="sm" variant="secondary" onClick={() => setConfirm(false)}>Batal</Button></div> : <Button size="sm" variant="secondary" onClick={() => setConfirm(true)}>Mulai dari nol</Button>}
+        {session && (
+          <section className="space-y-2 border-t border-line pt-3" aria-labelledby="hapus-akun">
+            <h3 id="hapus-akun" className="font-bold text-bad">Hapus akun</h3>
+            <p className="text-sm text-muted">Menghapus akun {session.email} beserta seluruh progres, teman, dan sertifikatnya dari server. Catatan pembayaran tetap disimpan untuk pembukuan, tanpa nama dan tanpa tautan ke akunmu. <a href="/privasi" className="font-bold text-brand underline">Kebijakan privasi</a></p>
+            {deleting === 'idle' ? <Button size="sm" variant="secondary" onClick={() => setDeleting('confirm')}>Hapus akun saya</Button> : (
+              <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); if (deleteText === 'HAPUS') void deleteAccount(); }}>
+                <label className="block"><span className="mb-1 block text-sm font-bold">Ketik HAPUS untuk mengonfirmasi</span>
+                  <input className="w-40 rounded-2xl border-2 border-line-strong bg-surface px-3 py-2 font-mono" value={deleteText} autoComplete="off" onChange={(e) => setDeleteText(e.target.value.toUpperCase())} />
+                </label>
+                <Button type="submit" size="sm" variant="danger" disabled={deleteText !== 'HAPUS' || deleting === 'busy'}>{deleting === 'busy' ? 'Menghapus...' : 'Hapus akun selamanya'}</Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setDeleting('idle'); setDeleteText(''); }}>Batal</Button>
+              </form>
+            )}
+            {deleteError && <Notice tone="bad">{deleteError}</Notice>}
+          </section>
+        )}
       </Card>
-      <p className="text-center text-xs text-muted">Lentera English · konten {ix.pack.version} · seluruh mesin belajar berjalan tanpa layanan AI.</p>
+      <p className="text-center text-xs text-muted">Lentera English · konten {ix.pack.version} · seluruh mesin belajar berjalan tanpa layanan AI · <a href="/privasi" className="underline">Privasi</a> · <a href="/kontak" className="underline">Hubungi kami</a></p>
     </div>
   );
 }

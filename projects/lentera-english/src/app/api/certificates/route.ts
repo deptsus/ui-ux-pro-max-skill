@@ -1,6 +1,7 @@
 // Certificates: GET ?code=XXXXXXXXXX verifies one publicly (no account
 // needed); GET without a code lists the signed-in learner's own.
 import { HttpError, json, requireDb, requireUser, route } from '@/lib/server/api';
+import { clientIp, rateLimit } from '@/lib/server/security';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,8 @@ export const GET = route(async (req) => {
   if (code !== null) {
     if (!/^[A-Za-z2-9]{10}$/.test(code.trim())) throw new HttpError(404, 'Sertifikat tidak ditemukan.', 'not_found');
     const db = await requireDb();
+    // Codes are 10 random characters; still, nobody needs to check 60 a minute.
+    await rateLimit(db, 'certificate', clientIp(req), 60, 600);
     const cert = await db.rpc<Record<string, unknown> | null>('get_certificate', { p_code: code }).catch(() => null);
     if (!cert) throw new HttpError(404, 'Sertifikat tidak ditemukan.', 'not_found');
     return json({ certificate: cert });

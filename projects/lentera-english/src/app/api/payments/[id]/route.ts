@@ -1,6 +1,7 @@
 import { HttpError, json, paymentDeps, paymentMode, readJson, requireUser, route } from '@/lib/server/api';
 import { claimManualPayment, claimNotification, getManualPayment } from '@/lib/server/manual-payments';
 import { notifyAdmins } from '@/lib/server/push';
+import { rateLimit } from '@/lib/server/security';
 import { refreshPayment, simulateCheckout } from '@/lib/server/payments';
 
 export const dynamic = 'force-dynamic';
@@ -23,6 +24,7 @@ export const POST = route(async (req: Request, ctx: Ctx) => {
   const { id } = await ctx.params;
   if (!isUuid(id)) throw new HttpError(404, 'Transaksi tidak ditemukan.');
   const { db, userId } = await requireUser(req);
+  await rateLimit(db, 'payment-action', userId, 30, 3600);
   const body = await readJson<{ action?: string; payerName?: string; note?: string }>(req, 2000);
   const mode = paymentMode();
   if (body.action === 'claim' && mode === 'manual') {

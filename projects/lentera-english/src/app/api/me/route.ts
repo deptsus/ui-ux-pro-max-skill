@@ -1,5 +1,6 @@
-import { userIdFromRequest } from '@/lib/server/auth';
-import { json, paymentMode, readJson, requireUser, route } from '@/lib/server/api';
+import { deleteAuthUser, userIdFromRequest } from '@/lib/server/auth';
+import { HttpError, json, paymentMode, readJson, requireUser, route } from '@/lib/server/api';
+import { rateLimit } from '@/lib/server/security';
 import { contentVersion } from '@/lib/server/content';
 import { backendMode, getDb } from '@/lib/server/db';
 
@@ -19,6 +20,23 @@ export const GET = route(async (req) => {
 
 export const PATCH = route(async (req) => {
   const { db, userId } = await requireUser(req);
+  await rateLimit(db, 'profile', userId, 60, 3600);
   const patch = await readJson<Record<string, unknown>>(req, 2000);
   return json({ profile: await db.rpc('update_profile', { p_user: userId, p_patch: patch }) });
+});
+
+// Deletes the account and everything learned with it (Rilis 9). Payments stay
+// as financial records, without the person. Admin accounts are refused.
+export const DELETE = route(async (req) => {
+  const { db, userId } = await requireUser(req);
+  await rateLimit(db, 'delete-account', userId, 5, 3600);
+  const b = await readJson<{ confirm?: string }>(req, 500);
+  if (b.confirm !== 'HAPUS') throw new HttpError(400, 'Ketik HAPUS untuk mengonfirmasi.');
+  await db.rpc('prepare_account_deletion', { p_user: userId }).catch((e: Error) => {
+    if (/admin_account/.test(e.message)) throw new HttpError(403, 'Akun admin tidak bisa dihapus dari aplikasi. Ubah perannya dulu di basis data.', 'admin_account');
+    if (/does not exist|could not find/i.test(e.message)) throw new HttpError(409, 'Fitur ini sedang disiapkan di server. Coba lagi nanti.', 'not_ready');
+    throw e;
+  });
+  await deleteAuthUser(userId);
+  return json({ deleted: true });
 });

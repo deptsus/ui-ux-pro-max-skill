@@ -3,7 +3,7 @@
 // database): a minimal local account system so the full product can run and
 // be tested without any external service. It is refused in production builds.
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import { backendMode, embeddedDb, supabasePublicKey, supabaseSecretKey } from './db';
+import { backendMode, embeddedDb, supabaseKeyHeaders, supabasePublicKey, supabaseSecretKey } from './db';
 
 const DEV_SECRET = process.env.LENTERA_DEV_SECRET ?? 'lentera-dev-only-secret';
 const WEEK = 7 * 86_400_000;
@@ -24,12 +24,35 @@ function verifyDevToken(token: string): string | null {
   return Number(exp) > Date.now() ? userId : null;
 }
 
-export async function userIdFromRequest(req: Request): Promise<string | null> {
+/**
+ * Who is calling, and how strongly they signed in (Rilis 9):
+ *   aal  : 'aal2' once a second factor (authenticator app code) was verified this session
+ *   mfa  : the account has a verified second factor, so admin work requires aal2
+ */
+export interface AuthInfo { userId: string; aal: 'aal1' | 'aal2'; mfa: boolean }
+
+/** Claims of a token Supabase has just accepted (only read after that check). */
+function claims(token: string): Record<string, unknown> {
+  try {
+    return JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8')) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+export async function authFromRequest(req: Request): Promise<AuthInfo | null> {
   const header = req.headers.get('authorization') ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
-  if (!token) return null;
+  if (!token || token.length > 8000) return null;
   const mode = backendMode();
-  if (mode === 'embedded') return verifyDevToken(token);
+  if (mode === 'embedded') {
+    const userId = verifyDevToken(token);
+    if (!userId) return null;
+    // A token outlives a deleted account; Supabase refuses those, so do the same here.
+    const db = await embeddedDb();
+    const [found] = await db.query('select 1 from auth.users where id = $1', [userId]);
+    return found ? { userId, aal: 'aal1', mfa: false } : null;
+  }
   if (mode === 'supabase') {
     const res = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
       // The user's own access token is the bearer; the key only identifies the project.
@@ -37,10 +60,34 @@ export async function userIdFromRequest(req: Request): Promise<string | null> {
       cache: 'no-store',
     });
     if (!res.ok) return null;
-    const user = (await res.json()) as { id?: string };
-    return typeof user.id === 'string' ? user.id : null;
+    const user = (await res.json()) as { id?: string; factors?: { status?: string }[] };
+    if (typeof user.id !== 'string') return null;
+    // Supabase validated the token's signature above; its aal claim can be trusted now.
+    const aal = claims(token).aal === 'aal2' ? 'aal2' : 'aal1';
+    const mfa = (user.factors ?? []).some((f) => f.status === 'verified');
+    return { userId: user.id, aal, mfa };
   }
   return null;
+}
+
+export async function userIdFromRequest(req: Request): Promise<string | null> {
+  return (await authFromRequest(req))?.userId ?? null;
+}
+
+/** Deletes the sign-in account; every learner table follows by cascade (payments keep, without the person). */
+export async function deleteAuthUser(userId: string): Promise<void> {
+  const mode = backendMode();
+  if (mode === 'embedded') {
+    const db = await embeddedDb();
+    await db.query('delete from auth.users where id = $1', [userId]);
+    return;
+  }
+  if (mode !== 'supabase') throw new Error('unavailable');
+  const res = await fetch(`${process.env.SUPABASE_URL}/auth/v1/admin/users/${encodeURIComponent(userId)}`, {
+    method: 'DELETE',
+    headers: supabaseKeyHeaders(supabaseSecretKey()),
+  });
+  if (!res.ok) throw new Error(`auth delete failed (${res.status}): ${(await res.text()).slice(0, 200)}`);
 }
 
 // ───────────── Development-only accounts (embedded database) ─────────────

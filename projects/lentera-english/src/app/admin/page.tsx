@@ -4,8 +4,10 @@
 // every database function behind POST /api/admin.
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BellRing, BookOpen, ClipboardList, LogOut, MessageSquareWarning, Mic, Send, ShieldCheck, Wallet, X } from 'lucide-react';
+import { Activity, BarChart3, BellRing, BookOpen, ClipboardList, KeyRound, LogOut, MessageSquareWarning, Mic, Send, ShieldCheck, Wallet, X } from 'lucide-react';
 import { admin } from '@/components/admin/api';
+import { AnalyticsPanel } from '@/components/admin/AnalyticsPanel';
+import { HealthPanel } from '@/components/admin/HealthPanel';
 import { CmsPanel, type CmsTarget } from '@/components/admin/CmsPanel';
 import { HomeworkPanel } from '@/components/admin/HomeworkPanel';
 import { NotesPanel, openNoteCount, useNotes } from '@/components/admin/NotesPanel';
@@ -15,20 +17,51 @@ import { PublishPanel } from '@/components/admin/PublishPanel';
 import { RecordingsPanel } from '@/components/admin/RecordingsPanel';
 import type { Data } from '@/components/admin/schema';
 import { Logo, Mascot } from '@/components/Mascot';
-import { Badge, Button, Card, LinkButton, Notice, cx, rupiah } from '@/components/ui';
+import { Badge, Button, Card, LinkButton, Notice, cx, inputClass, rupiah } from '@/components/ui';
 import { api } from '@/lib/client/api';
-import { initSession, signOut, useServerInfo, useSession } from '@/lib/client/session';
+import { initSession, mfaState, mfaVerify, signOut, useServerInfo, useSession } from '@/lib/client/session';
 
-type Gate = 'loading' | 'no-backend' | 'signed-out' | 'forbidden' | 'error' | 'admin';
-type Tab = 'payments' | 'homework' | 'content' | 'recordings' | 'publish' | 'notes';
+type Gate = 'loading' | 'no-backend' | 'signed-out' | 'forbidden' | 'error' | 'mfa' | 'admin';
+type Tab = 'payments' | 'analytics' | 'health' | 'homework' | 'content' | 'recordings' | 'publish' | 'notes';
 const TABS: { id: Tab; label: string; icon: typeof Wallet }[] = [
   { id: 'payments', label: 'Pembayaran', icon: Wallet },
+  { id: 'analytics', label: 'Analitik', icon: BarChart3 },
+  { id: 'health', label: 'Kesehatan', icon: Activity },
   { id: 'homework', label: 'PR', icon: ClipboardList },
   { id: 'content', label: 'Konten', icon: BookOpen },
   { id: 'recordings', label: 'Rekaman', icon: Mic },
   { id: 'publish', label: 'Terbitkan', icon: Send },
   { id: 'notes', label: 'Catatan', icon: MessageSquareWarning },
 ];
+
+/** Second step for admins with an authenticator app (Rilis 9). */
+function MfaStep({ onDone }: { onDone: () => void }) {
+  const [code, setCode] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const st = await mfaState();
+      await mfaVerify(st.factors[0].id, code);
+      onDone();
+    } catch (e) {
+      setError((e as Error).message);
+      setBusy(false);
+    }
+  };
+  return (
+    <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+      <h1 className="flex items-center justify-center gap-2 text-2xl font-extrabold"><KeyRound aria-hidden />Verifikasi 2 langkah</h1>
+      <p className="text-muted">Masukkan 6 angka dari aplikasi authenticator di HP-mu.</p>
+      <input className={cx(inputClass, 'text-center font-mono text-2xl tracking-[0.4em]')} aria-label="Kode verifikasi 6 angka" inputMode="numeric" autoComplete="one-time-code" autoFocus maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+      {error && <p className="text-sm text-bad">{error}</p>}
+      <Button type="submit" full disabled={busy || code.length !== 6}>{busy ? 'Memeriksa...' : 'Masuk ke dashboard'}</Button>
+      <Button type="button" variant="ghost" onClick={() => void signOut()}>Keluar</Button>
+    </form>
+  );
+}
 
 function Gatekeeper({ gate, email, onRetry }: { gate: Exclude<Gate, 'admin'>; email?: string; onRetry: () => void }) {
   const body = {
@@ -37,6 +70,7 @@ function Gatekeeper({ gate, email, onRetry }: { gate: Exclude<Gate, 'admin'>; em
     'signed-out': <><h1 className="text-2xl font-extrabold">Masuk sebagai admin</h1><p className="text-muted">Dashboard ini hanya untuk akun dengan peran admin. Setelah masuk, kamu langsung kembali ke sini.</p><LinkButton href="/masuk?next=/admin">Masuk</LinkButton></>,
     forbidden: <><h1 className="text-2xl font-extrabold">Akses ditolak</h1><p className="text-muted">Akun {email} tidak memiliki peran admin. Bila seharusnya punya, minta pemilik produk mengubah peranmu di basis data.</p><div className="flex flex-wrap justify-center gap-2"><LinkButton href="/app">Buka aplikasi belajar</LinkButton><Button variant="secondary" onClick={() => void signOut()}>Keluar</Button></div></>,
     error: <><h1 className="text-2xl font-extrabold">Akses belum bisa diperiksa</h1><p className="text-muted">Server tidak menjawab. Periksa koneksimu, lalu coba lagi.</p><Button onClick={onRetry}>Coba lagi</Button></>,
+    mfa: <MfaStep onDone={onRetry} />,
   }[gate];
   return (
     <main className="mx-auto grid min-h-dvh max-w-md content-center gap-5 p-5 text-center">
@@ -58,6 +92,11 @@ export default function AdminPage() {
   const [gate, setGate] = useState<Gate>('loading');
   const [attempt, setAttempt] = useState(0);
   const [tab, setTab] = useState<Tab>('payments');
+  // Notifications link straight to a tab (/admin?tab=health).
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tab');
+    if (t && TABS.some((x) => x.id === t)) setTab(t as Tab);
+  }, []);
   const [content, setContent] = useState<Data | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
   const [overview, setOverview] = useState<Overview | null>(null);
@@ -80,7 +119,8 @@ export default function AdminPage() {
         if (!alive) return;
         if (me.backend === 'none') setGate('no-backend');
         else if (!s || !me.user) setGate('signed-out');
-        else setGate(me.user.profile.role === 'admin' ? 'admin' : 'forbidden');
+        else if (me.user.profile.role !== 'admin') setGate('forbidden');
+        else setGate((await mfaState().catch(() => null))?.needsCode ? 'mfa' : 'admin');
       } catch {
         if (alive) setGate('error');
       }
@@ -177,6 +217,12 @@ export default function AdminPage() {
         <div role="tabpanel" id="panel-payments" aria-labelledby="tab-payments" hidden={tab !== 'payments'}>
           <div className="mb-5"><NotifyPanel /></div>
           <PaymentsPanel data={overview} loadedAt={overviewAt} loading={overviewLoading} error={overviewError} reload={() => void loadOverview()} payments={info.payments} />
+        </div>
+        <div role="tabpanel" id="panel-analytics" aria-labelledby="tab-analytics" hidden={tab !== 'analytics'}>
+          <AnalyticsPanel active={tab === 'analytics'} />
+        </div>
+        <div role="tabpanel" id="panel-health" aria-labelledby="tab-health" hidden={tab !== 'health'}>
+          <HealthPanel active={tab === 'health'} />
         </div>
         <div role="tabpanel" id="panel-homework" aria-labelledby="tab-homework" hidden={tab !== 'homework'}>
           <HomeworkPanel data={content} active={tab === 'homework'} />

@@ -6,7 +6,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { Crown, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/client/api';
 import { useServerInfo, useSession } from '@/lib/client/session';
-import { syncNow, useLearner } from '@/lib/client/store';
+import { syncIfPending, useLearner } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
 import { FriendsView } from '@/components/social/Friends';
 import { LeagueView } from '@/components/social/League';
@@ -23,7 +23,7 @@ function AllBoard() {
     setLoading(true);
     setError(null);
     try {
-      await syncNow();
+      await syncIfPending();
       setBoard(await api<Board>('/api/leaderboard'));
     } catch (e) {
       setError((e as Error).message);

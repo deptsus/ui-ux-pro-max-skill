@@ -147,3 +147,48 @@ export const useServerInfo = (): ServerInfo => useSyncExternalStore(subscribe, (
 export const currentSession = () => session;
 export const serverInfo = () => info;
 export const latestContentVersion = () => latestContent;
+
+// ───────────── Two-step verification for admins (Rilis 9) ─────────────
+// Supabase Auth's authenticator-app factor (TOTP). Once an admin has one,
+// /api/admin* only accepts sessions that passed it (aal2). Not available with
+// the embedded development backend.
+export interface MfaState { supported: boolean; factors: { id: string; name: string }[]; current: 'aal1' | 'aal2' | null; needsCode: boolean }
+
+export async function mfaState(): Promise<MfaState> {
+  if (info.backend !== 'supabase' || !SUPABASE_URL || !SUPABASE_ANON) return { supported: false, factors: [], current: null, needsCode: false };
+  const sb = await client();
+  const [{ data: list }, { data: level }] = await Promise.all([sb.auth.mfa.listFactors(), sb.auth.mfa.getAuthenticatorAssuranceLevel()]);
+  const factors = (list?.totp ?? []).filter((f) => f.status === 'verified').map((f) => ({ id: f.id, name: f.friendly_name ?? 'Aplikasi authenticator' }));
+  const current = (level?.currentLevel ?? null) as 'aal1' | 'aal2' | null;
+  return { supported: true, factors, current, needsCode: factors.length > 0 && current !== 'aal2' };
+}
+
+/** Starts adding an authenticator app: returns the QR code (SVG data URL) and the key to type by hand. */
+export async function mfaEnroll(): Promise<{ id: string; qr: string; secret: string }> {
+  const sb = await client();
+  // A previous attempt that was never confirmed would block a new one.
+  const { data: list } = await sb.auth.mfa.listFactors();
+  for (const f of list?.all ?? []) if (f.factor_type === 'totp' && f.status !== 'verified') await sb.auth.mfa.unenroll({ factorId: f.id });
+  const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: `Lentera admin ${new Date().toISOString().slice(0, 10)}` });
+  if (error || !data) throw new Error(error?.message ?? 'Gagal memulai verifikasi 2 langkah.');
+  return { id: data.id, qr: data.totp.qr_code, secret: data.totp.secret };
+}
+
+/** Checks a 6-digit code; on success this session becomes aal2. */
+export async function mfaVerify(factorId: string, code: string): Promise<void> {
+  const sb = await client();
+  const { error } = await sb.auth.mfa.challengeAndVerify({ factorId, code: code.replace(/\s/g, '') });
+  if (error) throw new Error(/invalid|expired/i.test(error.message) ? 'Kode salah atau sudah kedaluwarsa. Masukkan kode yang sedang tampil di aplikasi authenticator.' : error.message);
+  const { data } = await sb.auth.getSession();
+  if (data.session) {
+    session = { userId: data.session.user.id, email: data.session.user.email ?? '', token: data.session.access_token };
+    emit();
+  }
+}
+
+export async function mfaRemove(factorId: string): Promise<void> {
+  const sb = await client();
+  const { error } = await sb.auth.mfa.unenroll({ factorId });
+  if (error) throw new Error(error.message);
+  await sb.auth.refreshSession();
+}

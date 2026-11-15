@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowUp, Clock, Crown, RefreshCw, Users } from 'lucide-react';
 import { DIVISIONS, division, getLeague, timeLeft, zoneOf, type League } from '@/lib/client/habits';
-import { syncNow } from '@/lib/client/store';
+import { syncIfPending } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
 import { Badge, Button, Card, Empty, LinkButton, Notice, cx } from '@/components/ui';
 import { DivisionBadge } from './DivisionBadge';
@@ -31,7 +31,7 @@ export function LeagueView() {
     setLoading(true);
     setError(null);
     try {
-      await syncNow();
+      await syncIfPending();
       setLeague(await getLeague());
     } catch (e) {
       setError((e as Error).message);

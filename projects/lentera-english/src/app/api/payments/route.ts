@@ -1,5 +1,6 @@
 import { json, paymentDeps, paymentMode, readJson, requireUser, route } from '@/lib/server/api';
 import { createManualCheckout } from '@/lib/server/manual-payments';
+import { rateLimit } from '@/lib/server/security';
 import { createCheckout } from '@/lib/server/payments';
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,7 @@ export const GET = route(async (req) => {
 // decided by the database from subscription_plans.
 export const POST = route(async (req) => {
   const { db, userId } = await requireUser(req);
+  await rateLimit(db, 'checkout', userId, 20, 3600);
   const body = await readJson<{ planId?: string; channel?: string }>(req, 1000);
   const planId = String(body.planId ?? '');
   if (paymentMode() === 'manual') return json({ transaction: await createManualCheckout(db, userId, planId) });

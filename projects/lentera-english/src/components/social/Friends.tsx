@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { Check, Copy, Flame, Share2, Swords, Trophy, UserPlus, X } from 'lucide-react';
 import { getSocial, inviteUrl, socialAction, timeLeft, type Challenge, type Social } from '@/lib/client/habits';
-import { syncNow } from '@/lib/client/store';
+import { syncIfPending } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
 import { Button, Card, Empty, Notice, Progress, cx, inputClass } from '@/components/ui';
 
@@ -71,7 +71,7 @@ export function FriendsView({ initialCode = '' }: { initialCode?: string }) {
   const load = async () => {
     setError(null);
     try {
-      await syncNow();
+      await syncIfPending();
       setSocial(await getSocial());
     } catch (e) {
       setError((e as Error).message);

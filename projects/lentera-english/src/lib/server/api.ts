@@ -1,5 +1,6 @@
 // Shared plumbing for API routes.
-import { userIdFromRequest } from './auth';
+import { authFromRequest, userIdFromRequest } from './auth';
+import { reportServerError } from './errors';
 import { backendMode, DbError, getDb, type ServerDb } from './db';
 import { handleWebhook, PaymentError, type PaymentDeps } from './payments';
 import { isLiveKey } from './xendit';
@@ -27,6 +28,19 @@ export async function requireUser(req: Request): Promise<{ db: ServerDb; userId:
   return { db, userId };
 }
 
+/**
+ * For /api/admin*: a signed-in user, and if the account has two-step
+ * verification, a session that passed it (aal2). The admin role itself is
+ * checked again inside every database function (assert_admin).
+ */
+export async function requireAdmin(req: Request): Promise<{ db: ServerDb; userId: string }> {
+  const db = await requireDb();
+  const auth = await authFromRequest(req);
+  if (!auth) throw new HttpError(401, 'Sesi berakhir. Silakan masuk kembali.', 'unauthorized');
+  if (auth.mfa && auth.aal !== 'aal2') throw new HttpError(401, 'Masukkan kode verifikasi 2 langkah dari aplikasi authenticator untuk membuka dashboard admin.', 'mfa_required');
+  return { db, userId: auth.userId };
+}
+
 export async function readJson<T>(req: Request, maxBytes = 1_500_000): Promise<T> {
   const text = await req.text();
   if (text.length > maxBytes) throw new HttpError(413, 'Permintaan terlalu besar.', 'too_large');
@@ -49,6 +63,7 @@ export function route<A extends unknown[]>(fn: (req: Request, ...args: A) => Pro
       if (e instanceof DbError && e.code === '22023') return json({ error: 'Data tidak valid.', code: 'invalid' }, 400);
       if (e instanceof DbError && /^2[23]/.test(e.code ?? '')) return json({ error: `Data ditolak oleh aturan basis data: ${e.message}`, code: 'constraint' }, 400);
       console.error('[api]', e);
+      reportServerError(e, req);
       return json({ error: 'Terjadi kesalahan pada server.', code: 'server_error' }, 500);
     }
   };

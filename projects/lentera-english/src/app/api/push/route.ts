@@ -8,6 +8,7 @@
 //   POST { action: 'unsubscribe-reminders', endpoint }
 //   POST { action: 'test-reminder' } → sends a test reminder to this learner's devices
 import { HttpError, json, readJson, requireUser, route } from '@/lib/server/api';
+import { rateLimit } from '@/lib/server/security';
 import { notifyAdmins, notifyLearner, pushKeys } from '@/lib/server/push';
 
 const NOT_READY = 'Pengingat PR sedang disiapkan di server. Coba lagi nanti.';
@@ -34,6 +35,7 @@ export const GET = route(async (req) => {
 
 export const POST = route(async (req) => {
   const { db, userId } = await requireUser(req);
+  await rateLimit(db, 'push', userId, 30, 3600);
   const b = await readJson<Body>(req, 8000);
   switch (b.action) {
     case 'subscribe': {

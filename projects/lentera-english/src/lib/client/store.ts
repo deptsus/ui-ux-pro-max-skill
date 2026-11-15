@@ -137,6 +137,14 @@ export function scheduleSync(delay = 4000) {
   timer = setTimeout(() => void syncNow(), delay);
 }
 
+/** Events not yet on the server (the league and friends only need the XP events, not the snapshot). */
+export const pendingEvents = (): number => state?.outbox.length ?? 0;
+
+/** Sends unsent XP and results before reading server rankings; skips the snapshot upload when nothing is pending. */
+export async function syncIfPending(): Promise<void> {
+  if (pendingEvents() > 0) await syncNow();
+}
+
 export async function syncNow(): Promise<void> {
   const session = currentSession();
   if (!session || !state || state.userId !== session.userId || syncState === 'syncing') return;

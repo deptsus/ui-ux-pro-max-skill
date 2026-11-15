@@ -7,6 +7,7 @@
 //   POST { action: 'cancel', id }                   → withdraw a challenge not answered yet
 // Every POST answers { message, social } with the refreshed GET data.
 import { HttpError, json, readJson, requireUser, route } from '@/lib/server/api';
+import { rateLimit } from '@/lib/server/security';
 import { normalizeCode, notReady, socialError } from '@/lib/server/habits';
 import { notifyLearner } from '@/lib/server/push';
 import type { ServerDb } from '@/lib/server/db';
@@ -24,6 +25,7 @@ interface Body { action?: string; code?: unknown; days?: unknown; id?: unknown; 
 
 export const POST = route(async (req) => {
   const { db, userId } = await requireUser(req);
+  await rateLimit(db, 'friends', userId, 60, 3600);
   const origin = new URL(req.url).origin;
   const b = await readJson<Body>(req, 2000);
   const code = normalizeCode(b.code);

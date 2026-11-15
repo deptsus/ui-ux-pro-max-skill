@@ -215,6 +215,10 @@ Rencana awal:
 - Mode belajar luring penuh untuk materi Premium yang sudah dibuka.
 - Rilis Play Store (butuh akun Play Console).
 
+### Urutan yang dipilih pemilik (15 November 2026)
+
+Pemilik meminta semuanya, dirilis bertahap: **Rilis 9 "Aman & Terukur"** (keamanan, pemantauan error, cadangan, analitik, rencana naik paket) — SELESAI; **Rilis 10 "Kelas"** (guru, sekolah dengan lisensi yang diatur pemilik di /admin, orang tua) **+ aplikasi Android 2.0.0 tanpa Chrome** (WebView, menggantikan 1.3.0, paket dan kunci sama; pelajar masuk ulang sekali); **Rilis 11 "Jalur Khusus & SEO"** (TOEFL ITP/IELTS, Kerja, Anak; pelajaran pertama tiap jalur gratis; halaman materi publik).
+
 ### Usulan update besar (saran Claude, 15 November 2026, untuk dipilih pemilik)
 
 Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, jadi pertumbuhan berikutnya lebih ditentukan oleh **jangkauan, pembayaran, dan kebiasaan belajar** daripada jumlah materi.
@@ -228,9 +232,9 @@ Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, 
    - **Latihan "shadowing"**: dengar, rekam diri sendiri, bandingkan berdampingan (tanpa penilaian AI, sesuai klaim situs).
 3. **Rilis 9 "Kelas"** (pendapatan dari sekolah/kursus): guru membuat kelas dengan kode, memberi pelajaran/PR, melihat progres per siswa; lisensi per kelas. Termasuk dasbor orang tua.
 4. **Jalur khusus** (segmen baru): persiapan TOEFL ITP/IELTS, Bahasa Inggris untuk kerja (wawancara, email, rapat), dan jalur anak.
-5. **Analitik pemilik di `/admin`**: corong daftar → tes penempatan → pelajaran pertama → hari ke-7, retensi per minggu, dan konversi ke Premium, untuk dasar keputusan berikutnya.
+5. **Analitik pemilik di `/admin`** — **SELESAI di Rilis 9 (15 Nov 2026)**: corong daftar → tes penempatan → pelajaran pertama → hari ke-7, retensi per minggu, dan konversi ke Premium, untuk dasar keputusan berikutnya.
 6. **Halaman materi publik untuk SEO**: ringkasan tata bahasa dan contoh gratis yang bisa ditemukan di Google, mengarah ke aplikasi.
-7. **Ketahanan**: (ikutkan di rilis berikutnya mana pun: penghematan Liga & Teman di `TODO.md`, satu migrasi kecil 0014 + perubahan klien) pemantauan error, cadangan otomatis kurikulum dan data pelajar, dan rencana naik paket Supabase/Netlify saat pengguna bertambah.
+7. **Ketahanan** — **SELESAI di Rilis 9 (15 Nov 2026)** bersama keamanan tingkat tinggi dan penghematan Liga & Teman (lihat `SCALING.md`): pemantauan error, cadangan otomatis kurikulum dan data pelajar, dan rencana naik paket Supabase/Netlify saat pengguna bertambah.
 
 ---
 

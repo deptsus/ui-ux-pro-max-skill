@@ -2,13 +2,14 @@
 // database function (assert_admin), not just here.
 import { buildPack } from '@content/index';
 import { packToRows } from '@/lib/content/rows';
-import { HttpError, json, readJson, requireUser, route } from '@/lib/server/api';
+import { HttpError, json, readJson, requireAdmin, route } from '@/lib/server/api';
+import { backupStore, isBackupName, runBackup } from '@/lib/server/backup';
 import { invalidateContent } from '@/lib/server/content';
 import { mapManualError } from '@/lib/server/manual-payments';
 
 export const dynamic = 'force-dynamic';
 
-interface Body { action?: string; table?: string; row?: Record<string, unknown>; id?: string; label?: string; notes?: string; version?: number; note?: string; reason?: string; target?: string; all?: boolean; noteId?: number; resolution?: string }
+interface Body { action?: string; table?: string; row?: Record<string, unknown>; id?: string; label?: string; notes?: string; version?: number; note?: string; reason?: string; target?: string; all?: boolean; noteId?: number; resolution?: string; weeks?: number; errorId?: number; messageId?: number; name?: string }
 const NEEDS_0008 = 'Basis data belum diperbarui untuk Rilis 1. Jalankan supabase/manual/apply-0008.sql di Supabase SQL Editor, lalu ulangi.';
 const NEEDS_0009 = 'Basis data belum diperbarui untuk Rilis 3 (ujian level dan sertifikat). Jalankan supabase/manual/apply-0009.sql di Supabase SQL Editor, lalu ulangi.';
 type Rpc = { rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> };
@@ -35,10 +36,15 @@ async function require0009(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
   if (!Array.isArray(features) || !features.includes('level_exams')) throw new HttpError(409, NEEDS_0009);
 }
+const NEEDS_0014 = 'Basis data belum diperbarui untuk Rilis 9 (kesehatan, cadangan, analitik). Jalankan supabase/manual/apply-0014.sql di Supabase SQL Editor, lalu muat ulang.';
+async function require0014(db: Rpc) {
+  const features = await db.rpc<string[]>('content_features').catch(() => null);
+  if (!Array.isArray(features) || !features.includes('ops')) throw new HttpError(409, NEEDS_0014, 'not_ready');
+}
 const isUuid = (s: unknown) => typeof s === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
 export const POST = route(async (req) => {
-  const { db, userId } = await requireUser(req);
+  const { db, userId } = await requireAdmin(req);
   const b = await readJson<Body>(req);
   switch (b.action) {
     case 'content':
@@ -92,6 +98,40 @@ export const POST = route(async (req) => {
     case 'reject-payment':
       if (!isUuid(b.id)) throw new HttpError(400, 'Transaksi tidak valid.');
       return json(await db.rpc('admin_reject_payment', { p_actor: userId, p_tx: b.id, p_reason: String(b.reason ?? '').slice(0, 1000) }).catch(mapManualError));
+    // ── Rilis 9: health, errors, messages, backups, analytics (migration 0014) ──
+    case 'health': {
+      await require0014(db);
+      const [health, errors, messages] = await Promise.all([
+        db.rpc('admin_health', { p_actor: userId }),
+        db.rpc('admin_errors', { p_actor: userId, p_all: !!b.all }),
+        db.rpc('admin_contact_messages', { p_actor: userId, p_all: !!b.all }),
+      ]);
+      const files = await backupStore().list().catch(() => [] as string[]);
+      return json({ health, errors, messages, files: files.slice(-14).reverse() });
+    }
+    case 'resolve-error':
+      await require0014(db);
+      return json(await db.rpc('admin_resolve_error', { p_actor: userId, p_id: Number(b.errorId) }));
+    case 'close-message':
+      await require0014(db);
+      return json(await db.rpc('admin_close_contact', { p_actor: userId, p_id: Number(b.messageId) }));
+    case 'backup-now': {
+      await require0014(db);
+      // Only admins reach this line: the health check above ran assert_admin.
+      await db.rpc('admin_health', { p_actor: userId });
+      return json(await runBackup(db, { trigger: 'admin' }));
+    }
+    case 'backup-link': {
+      await require0014(db);
+      await db.rpc('admin_health', { p_actor: userId });
+      const name = String(b.name ?? '');
+      if (!isBackupName(name)) throw new HttpError(400, 'Nama cadangan tidak valid.');
+      const url = await backupStore().link(name);
+      return json(url ? { url } : { download: `/api/admin/backup?name=${encodeURIComponent(name)}` });
+    }
+    case 'analytics':
+      await require0014(db);
+      return json(await db.rpc('admin_analytics', { p_actor: userId, p_weeks: Number(b.weeks) || 12 }));
     default:
       throw new HttpError(400, 'Aksi tidak dikenal.');
   }

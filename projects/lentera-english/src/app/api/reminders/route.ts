@@ -3,6 +3,7 @@
 //   POST { daily_hour?: 5..22 | null, time_zone?: string, homework?: boolean } → same
 // Devices are registered through /api/push (subscribe-reminders).
 import { HttpError, json, readJson, requireUser, route } from '@/lib/server/api';
+import { rateLimit } from '@/lib/server/security';
 import { notReady } from '@/lib/server/habits';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,7 @@ export const GET = route(async (req) => {
 
 export const POST = route(async (req) => {
   const { db, userId } = await requireUser(req);
+  await rateLimit(db, 'reminders', userId, 60, 3600);
   const b = await readJson<Record<string, unknown>>(req, 2000);
   const patch: Record<string, unknown> = {};
   if ('daily_hour' in b) {

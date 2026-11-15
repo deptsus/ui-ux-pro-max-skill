@@ -225,7 +225,8 @@ scenario('lesson: tamu menuntaskan pelajaran, PR, ulangan, tantangan kilat, lalu
   await page.getByLabel('Kata sandi').fill(PASSWORD);
   await button(page, 'Daftar').click();
   await page.waitForURL(/\/app$/, { timeout: 30000 });
-  await page.waitForFunction(`(() => { const x = ${SESSION_JS}; return !!x && !!localStorage.getItem('lentera.state.' + x.userId); })()`, null, { timeout: 30000 });
+  // Polled with evaluate: waitForFunction with a string needs eval, which the CSP (Rilis 9) forbids.
+  for (let i = 0; i < 60 && !(await page.evaluate(`(() => { const x = ${SESSION_JS}; return !!x && !!localStorage.getItem('lentera.state.' + x.userId); })()`)); i++) await page.waitForTimeout(500);
   const sess = await session(page);
   s = await state(page);
   check('progres tamu pindah ke akun baru', s.userId === sess.userId && s.xp === guest.xp && !!s.lessons[lesson.id]?.completedAt && await page.evaluate(() => localStorage.getItem('lentera.state.guest') === null));
