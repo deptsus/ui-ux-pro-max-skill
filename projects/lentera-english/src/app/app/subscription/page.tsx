@@ -54,7 +54,7 @@ export default function SubscriptionPage() {
       ) : premium ? (
         <Card className="flex flex-wrap items-center gap-3 border-2 border-accent">
           <Crown className="text-accent" size={28} aria-hidden />
-          <div className="min-w-0 flex-1"><p className="text-lg font-extrabold">Premium aktif sampai {dateId(ent.expiresAt!)}</p><p className="text-sm text-muted">{daysLeft} hari lagi. Tidak ada tagihan otomatis: perpanjang sendiri kapan pun. Perpanjangan lebih awal ditambahkan setelah masa aktif sekarang berakhir.</p></div>
+          <div className="min-w-0 flex-1"><p className="text-lg font-extrabold">Premium aktif sampai {dateId(ent.expiresAt!)}</p><p className="text-sm text-muted">{ent.plan === 'class' || ent.plan === 'teacher' ? `${daysLeft} hari lagi, dari lisensi sekolah ${ent.plan === 'teacher' ? 'tempatmu mengajar' : 'untuk kelasmu'}. Setelah lisensi berakhir, kamu bisa melanjutkan dengan paket Premium sendiri.` : `${daysLeft} hari lagi. Tidak ada tagihan otomatis: perpanjang sendiri kapan pun. Perpanjangan lebih awal ditambahkan setelah masa aktif sekarang berakhir.`}</p></div>
           {daysLeft <= 7 && <Badge tone="bad">Segera berakhir</Badge>}
         </Card>
       ) : (

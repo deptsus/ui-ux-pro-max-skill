@@ -16,6 +16,9 @@ const DESC: Record<string, string> = {
   '/app/analytics': 'Ketepatan, waktu belajar, dan pola kesalahanmu.',
   '/app/achievements': 'Lencana, tonggak XP, dan hadiah bab.',
   '/app/leaderboard': 'Liga mingguan, teman, dan tantangan XP.',
+  '/app/kelas': 'Gabung ke kelas gurumu dengan kode, lihat tugas dan tenggatnya.',
+  '/app/guru': 'Untuk guru: buat kelas, beri tugas, pantau progres siswa.',
+  '/app/orang-tua': 'Untuk orang tua: pantau hari aktif, pelajaran, dan PR anak.',
   '/app/subscription': 'Paket Free dan Premium, riwayat transaksi.',
   '/app/settings': 'Tema, pengingat harian, aksen, dan mode offline.',
 };
@@ -23,7 +26,7 @@ const DESC: Record<string, string> = {
 export default function MorePage() {
   return (
     <div>
-      <PageHeader title="Kelas" subtitle="Semua ruang belajar di sekolah digitalmu." />
+      <PageHeader title="Lainnya" subtitle="Semua ruang belajar di sekolah digitalmu." />
       <ul className="grid gap-3 sm:grid-cols-2">
         {NAV.filter((n) => DESC[n.href]).map(({ href, label, icon: Icon }) => (
           <li key={href}>

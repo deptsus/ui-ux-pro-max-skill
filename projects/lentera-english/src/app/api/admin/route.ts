@@ -9,7 +9,7 @@ import { mapManualError } from '@/lib/server/manual-payments';
 
 export const dynamic = 'force-dynamic';
 
-interface Body { action?: string; table?: string; row?: Record<string, unknown>; id?: string; label?: string; notes?: string; version?: number; note?: string; reason?: string; target?: string; all?: boolean; noteId?: number; resolution?: string; weeks?: number; errorId?: number; messageId?: number; name?: string }
+interface Body { action?: string; table?: string; row?: Record<string, unknown>; id?: string; label?: string; notes?: string; version?: number; note?: string; reason?: string; target?: string; all?: boolean; noteId?: number; resolution?: string; weeks?: number; errorId?: number; messageId?: number; name?: string; license?: Record<string, unknown>; patch?: Record<string, unknown> }
 const NEEDS_0008 = 'Basis data belum diperbarui untuk Rilis 1. Jalankan supabase/manual/apply-0008.sql di Supabase SQL Editor, lalu ulangi.';
 const NEEDS_0009 = 'Basis data belum diperbarui untuk Rilis 3 (ujian level dan sertifikat). Jalankan supabase/manual/apply-0009.sql di Supabase SQL Editor, lalu ulangi.';
 type Rpc = { rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> };
@@ -41,6 +41,22 @@ async function require0014(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
   if (!Array.isArray(features) || !features.includes('ops')) throw new HttpError(409, NEEDS_0014, 'not_ready');
 }
+const NEEDS_0015 = 'Basis data belum diperbarui untuk Rilis 10 (kelas dan lisensi sekolah). Jalankan supabase/manual/apply-0015.sql di Supabase SQL Editor, lalu muat ulang.';
+async function require0015(db: Rpc) {
+  const features = await db.rpc<string[]>('content_features').catch(() => null);
+  if (!Array.isArray(features) || !features.includes('classes')) throw new HttpError(409, NEEDS_0015, 'not_ready');
+}
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const int = (v: unknown, min: number, max: number, what: string) => {
+  const n = Number(v);
+  if (!Number.isInteger(n) || n < min || n > max) throw new HttpError(400, `${what} harus angka ${min}–${max}.`);
+  return n;
+};
+const date = (v: unknown, what: string) => {
+  if (typeof v !== 'string' || !DATE.test(v) || Number.isNaN(Date.parse(v))) throw new HttpError(400, `Tanggal ${what} tidak valid.`);
+  return v;
+};
+const text = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const isUuid = (s: unknown) => typeof s === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
 export const POST = route(async (req) => {
@@ -132,6 +148,41 @@ export const POST = route(async (req) => {
     case 'analytics':
       await require0014(db);
       return json(await db.rpc('admin_analytics', { p_actor: userId, p_weeks: Number(b.weeks) || 12 }));
+    // ── Rilis 10: school licenses (migration 0015) ──
+    case 'licenses':
+      await require0015(db);
+      return json(await db.rpc('admin_licenses', { p_actor: userId }));
+    case 'create-license': {
+      await require0015(db);
+      const l = b.license ?? {};
+      const school = text(l.school, 120);
+      if (school.length < 2) throw new HttpError(400, 'Nama sekolah minimal 2 huruf.');
+      const starts = date(l.starts, 'mulai');
+      const ends = date(l.ends, 'berakhir');
+      if (ends < starts) throw new HttpError(400, 'Tanggal berakhir harus sesudah tanggal mulai.');
+      return json(await db.rpc('admin_create_license', {
+        p_actor: userId, p_school: school, p_contact: text(l.contact, 120), p_max_teachers: int(l.max_teachers, 1, 200, 'Jumlah guru'),
+        p_max_classes: int(l.max_classes, 1, 500, 'Jumlah kelas'), p_seats: int(l.seats, 1, 500, 'Siswa per kelas'), p_starts: starts, p_ends: ends, p_note: text(l.note, 500),
+      }));
+    }
+    case 'update-license': {
+      await require0015(db);
+      const p = b.patch ?? {};
+      const patch: Record<string, unknown> = {};
+      if (p.ends_on !== undefined) patch.ends_on = date(p.ends_on, 'berakhir');
+      if (p.max_teachers !== undefined) patch.max_teachers = int(p.max_teachers, 1, 200, 'Jumlah guru');
+      if (p.max_classes !== undefined) patch.max_classes = int(p.max_classes, 1, 500, 'Jumlah kelas');
+      if (p.seats_per_class !== undefined) patch.seats_per_class = int(p.seats_per_class, 1, 500, 'Siswa per kelas');
+      if (p.revoked !== undefined) patch.revoked = p.revoked === true;
+      if (p.note !== undefined) patch.note = text(p.note, 500);
+      const id = Number(b.id);
+      if (!Number.isSafeInteger(id) || id < 1) throw new HttpError(400, 'Lisensi tidak dikenal.');
+      return json(await db.rpc('admin_update_license', { p_actor: userId, p_id: id, p_patch: patch }).catch((e: Error) => {
+        if (/not_found/.test(e.message)) throw new HttpError(404, 'Lisensi tidak ditemukan.');
+        if (/check constraint|violates/.test(e.message)) throw new HttpError(400, 'Tanggal berakhir tidak boleh sebelum tanggal mulai.');
+        throw e;
+      }));
+    }
     default:
       throw new HttpError(400, 'Aksi tidak dikenal.');
   }

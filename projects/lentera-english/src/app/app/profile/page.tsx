@@ -8,6 +8,7 @@ import { isAdminPlan } from '@/lib/engine/types';
 import { act, pushProfile, syncNow, useRole, useSyncStatus } from '@/lib/client/store';
 import { AVATARS, Avatar } from '@/components/Avatar';
 import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
+import { ParentLinkCard } from '@/components/ParentLinkCard';
 
 export default function ProfilePage() {
   const { ix, learner, ent, now, premium } = useApp();
@@ -94,6 +95,7 @@ export default function ProfilePage() {
       {admin && (
         <Card className="flex flex-wrap items-center justify-between gap-3 border-2 border-ink"><div className="flex items-center gap-3"><ShieldCheck size={28} className="shrink-0" aria-hidden /><div><p className="font-extrabold">Kamu admin</p><p className="text-sm text-muted">Konfirmasi pembayaran, kelola materi, dan atur notifikasi HP. Semua fitur Premium aktif gratis untuk akun admin.</p></div></div><LinkButton href="/admin">Dashboard admin</LinkButton></Card>
       )}
+      <ParentLinkCard />
       {session ? (
         <Card className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-extrabold">Akun</p><p className="text-sm text-muted">{session.email}</p></div><Button variant="secondary" onClick={() => void syncNow().then(signOut)}><LogOut size={16} aria-hidden />Keluar</Button></Card>
       ) : info.backend === 'none' ? (

@@ -21,6 +21,7 @@ export function PublicPage({ title, intro, children }: { title: string; intro?: 
       <footer className="border-t border-line py-6">
         <nav className="mx-auto flex max-w-3xl flex-wrap gap-x-5 px-5 text-sm text-muted" aria-label="Tautan kaki">
           <Link href="/" className="inline-flex min-h-11 items-center hover:text-ink">Beranda</Link>
+          <Link href="/sekolah" className="inline-flex min-h-11 items-center hover:text-ink">Untuk sekolah</Link>
           <Link href="/privasi" className="inline-flex min-h-11 items-center hover:text-ink">Kebijakan privasi</Link>
           <Link href="/kontak" className="inline-flex min-h-11 items-center hover:text-ink">Hubungi kami</Link>
         </nav>

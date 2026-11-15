@@ -15,13 +15,20 @@ export const POST = route(async (req) => {
   const b = await readJson<Body>(req, 12_000);
   const message = str(b.message, 500)?.trim();
   if (!message) throw new HttpError(400, 'Laporan error kosong.');
-  await recordError(db, {
-    source: 'client',
-    message,
-    stack: str(b.stack, 4000),
-    path: str(b.path, 300),
-    release: str(b.release, 40),
-    userAgent: (req.headers.get('user-agent') ?? '').slice(0, 300),
-  }, new URL(req.url).origin);
+  try {
+    await recordError(db, {
+      source: 'client',
+      message,
+      stack: str(b.stack, 4000),
+      path: str(b.path, 300),
+      release: str(b.release, 40),
+      userAgent: (req.headers.get('user-agent') ?? '').slice(0, 300),
+    }, new URL(req.url).origin);
+  } catch (e) {
+    // Before migration 0014 there is nowhere to store reports: accept and drop
+    // them instead of answering 500 (which would itself look like an error).
+    if (/does not exist|could not find|not found/i.test(String((e as Error)?.message))) return json({ ok: false, stored: false }, 202);
+    throw e;
+  }
   return json({ ok: true });
 });

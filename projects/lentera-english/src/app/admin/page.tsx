@@ -4,7 +4,7 @@
 // every database function behind POST /api/admin.
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Activity, BarChart3, BellRing, BookOpen, ClipboardList, KeyRound, LogOut, MessageSquareWarning, Mic, Send, ShieldCheck, Wallet, X } from 'lucide-react';
+import { Activity, BarChart3, BellRing, BookOpen, ClipboardList, KeyRound, LogOut, MessageSquareWarning, Mic, School, Send, ShieldCheck, Wallet, X } from 'lucide-react';
 import { admin } from '@/components/admin/api';
 import { AnalyticsPanel } from '@/components/admin/AnalyticsPanel';
 import { HealthPanel } from '@/components/admin/HealthPanel';
@@ -15,6 +15,7 @@ import { NotifyPanel } from '@/components/admin/NotifyPanel';
 import { PaymentsPanel, type Overview } from '@/components/admin/PaymentsPanel';
 import { PublishPanel } from '@/components/admin/PublishPanel';
 import { RecordingsPanel } from '@/components/admin/RecordingsPanel';
+import { SchoolsPanel } from '@/components/admin/SchoolsPanel';
 import type { Data } from '@/components/admin/schema';
 import { Logo, Mascot } from '@/components/Mascot';
 import { Badge, Button, Card, LinkButton, Notice, cx, inputClass, rupiah } from '@/components/ui';
@@ -22,11 +23,12 @@ import { api } from '@/lib/client/api';
 import { initSession, mfaState, mfaVerify, signOut, useServerInfo, useSession } from '@/lib/client/session';
 
 type Gate = 'loading' | 'no-backend' | 'signed-out' | 'forbidden' | 'error' | 'mfa' | 'admin';
-type Tab = 'payments' | 'analytics' | 'health' | 'homework' | 'content' | 'recordings' | 'publish' | 'notes';
+type Tab = 'payments' | 'analytics' | 'health' | 'schools' | 'homework' | 'content' | 'recordings' | 'publish' | 'notes';
 const TABS: { id: Tab; label: string; icon: typeof Wallet }[] = [
   { id: 'payments', label: 'Pembayaran', icon: Wallet },
   { id: 'analytics', label: 'Analitik', icon: BarChart3 },
   { id: 'health', label: 'Kesehatan', icon: Activity },
+  { id: 'schools', label: 'Sekolah', icon: School },
   { id: 'homework', label: 'PR', icon: ClipboardList },
   { id: 'content', label: 'Konten', icon: BookOpen },
   { id: 'recordings', label: 'Rekaman', icon: Mic },
@@ -223,6 +225,9 @@ export default function AdminPage() {
         </div>
         <div role="tabpanel" id="panel-health" aria-labelledby="tab-health" hidden={tab !== 'health'}>
           <HealthPanel active={tab === 'health'} />
+        </div>
+        <div role="tabpanel" id="panel-schools" aria-labelledby="tab-schools" hidden={tab !== 'schools'}>
+          <SchoolsPanel active={tab === 'schools'} />
         </div>
         <div role="tabpanel" id="panel-homework" aria-labelledby="tab-homework" hidden={tab !== 'homework'}>
           <HomeworkPanel data={content} active={tab === 'homework'} />

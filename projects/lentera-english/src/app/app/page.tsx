@@ -12,6 +12,7 @@ import { useSession } from '@/lib/client/session';
 import { act } from '@/lib/client/store';
 import { Mascot } from '@/components/Mascot';
 import { WeekPlanCard } from '@/components/WeekPlan';
+import { ClassTasksCard } from '@/components/ClassTasksCard';
 import { Badge, Button, Card, LinkButton, Progress, Ring } from '@/components/ui';
 
 const REC_ICON: Record<Recommendation['kind'], typeof Wrench> = { placement: Compass, remediate: Wrench, revise: BookOpen, practice: Target, retest: CheckCircle2, review: Repeat, homework: ClipboardList, exam: GraduationCap, lesson: ArrowRight };
@@ -125,6 +126,8 @@ export default function Dashboard() {
           )}
         </section>
       )}
+
+      <ClassTasksCard plan={ent.plan} />
 
       <WeekPlanCard />
 

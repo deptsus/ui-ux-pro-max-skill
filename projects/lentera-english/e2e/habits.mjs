@@ -175,8 +175,8 @@ try {
   await nav.waitFor({ timeout: 30000 });
   check('beranda: pintasan Liga & Teman, Shadowing, dan Pengingat harian', (await nav.getByRole('link').count()) === 3);
   await g.goto(`${BASE}/app/more`);
-  await g.getByRole('heading', { name: 'Kelas' }).waitFor({ timeout: 30000 });
-  check('menu Kelas: Shadowing dan Liga & Teman', await g.locator('main').getByRole('link', { name: /Shadowing/ }).isVisible() && await g.locator('main').getByRole('link', { name: /Liga & Teman/ }).isVisible());
+  await g.getByRole('heading', { name: 'Lainnya' }).waitFor({ timeout: 30000 });
+  check('menu Lainnya: Shadowing dan Liga & Teman', await g.locator('main').getByRole('link', { name: /Shadowing/ }).isVisible() && await g.locator('main').getByRole('link', { name: /Liga & Teman/ }).isVisible());
   await g.goto(`${BASE}/app/leaderboard?tab=teman&kode=${rinaCode || 'ABC234'}`);
   await g.getByText(/Masuk untuk berteman dengan kode/).waitFor({ timeout: 30000 });
   check('tamu yang membuka tautan undangan diajak membuat akun', await g.getByRole('link', { name: 'Buat akun gratis' }).isVisible());
