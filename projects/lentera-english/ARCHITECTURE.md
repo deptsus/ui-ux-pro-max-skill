@@ -121,7 +121,8 @@ projects/lentera-english/
   - Dev/tes: PGlite memuat `test-shim.sql` + semua migrasi; data di `.data/pglite` (diabaikan git). Pada start pertama, kurikulum bawaan diimpor dan diterbitkan otomatis.
 - **Mode backend** (`backendMode()`): `supabase` bila `SUPABASE_URL` + `SUPABASE_SECRET_KEY` (atau `SUPABASE_SERVICE_ROLE_KEY` lama) ada; `embedded` bila `LENTERA_BACKEND=embedded` dan bukan build produksi (kecuali `LENTERA_ALLOW_EMBEDDED=1`); selain itu `none` (aplikasi tetap jalan sebagai mode perangkat, tanpa akun/pembayaran).
 - **Route helper** `src/lib/server/api.ts`: `route()` memetakan error ke JSON berbahasa Indonesia, `requireUser()`, `paymentMode()` (`live`/`test`/`mock`/`off`), `paymentDeps()`.
-- **Cache konten** `src/lib/server/content.ts`: cek versi terbit setiap 30 detik; `invalidateContent()` dipanggil setelah publish/restore.
+- **Cache konten** `src/lib/server/content.ts`: cek versi terbit setiap 30 detik; `invalidateContent()` dipanggil setelah publish/restore. `contentVersion()` menjawab versi tanpa memuat kurikulum.
+- **Paket materi di perangkat** (`src/lib/client/content.ts`): setiap perangkat menyimpan paket terakhir di IndexedDB dan mengirim `?v=&tier=`; server menjawab `{unchanged:true}` bila sama. Paket Premium yang tersimpan dipangkas dengan `packForFree` bila perangkat tidak Premium lagi.
 
 ## 5. Database dan relasi tabel
 
