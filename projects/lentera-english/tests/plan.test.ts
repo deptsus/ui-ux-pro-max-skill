@@ -145,7 +145,8 @@ describe('jatah mingguan', () => {
     expect(plan.week).toBe(21);
     expect(plan.pace).toBeLessThan(0);
     expect(plan.targets.length).toBe(Math.ceil(plan.total / (plan.totalWeeks - 20)));
-    expect(plan.targets.length).toBeLessThanOrEqual(4);
+    // A slightly fuller week, never a pile (the C2 path is longer since Rilis 5).
+    expect(plan.targets.length).toBeLessThanOrEqual(5);
   });
 
   it('proyeksi minggu depan membagi sisa langkah sampai paket berakhir', () => {

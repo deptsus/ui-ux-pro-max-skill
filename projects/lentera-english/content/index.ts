@@ -20,11 +20,15 @@ import { scenarios } from './conversations';
 import { scenariosUpper } from './conversations-upper';
 import { listening, phonemes, placement } from './listening';
 import { listeningUpper } from './listening-upper';
+import { listeningR5, scenariosR5 } from './skills-r5';
 import { stories } from './stories';
 import { EXAM_BANK, EXAM_MINUTES } from './exam-bank';
 import { WRITING_UPPER } from './writing-upper';
+import { futurePerfectLesson, participleLesson, verbPatternsLesson, wishLesson } from './b2-3';
+import { impersonalLesson, persuasionLesson, registerLesson, reportingVerbsLesson } from './c1-3';
+import { concessionLesson, inversionAdvLesson, wordFormationLesson, workIdiomsLesson } from './c2-3';
 
-export const CONTENT_VERSION = '2027.2.0';
+export const CONTENT_VERSION = '2027.3.0';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -78,17 +82,29 @@ const syllabus: ChapterSpec[] = [
   { id: 'b2-c2', level: 'B2', title: 'Melaporkan dan Berandai', description: 'Kalimat tidak langsung dan pengandaian lampau.', premium: true, units: [
     { id: 'b2-c2-u1', title: 'Reported Speech dan Conditionals', description: 'Kalimat tidak langsung, third conditional, dan mixed conditionals.', lessons: [reportedSpeech, thirdConditional, mixedConditionals] },
   ] },
+  { id: 'b2-c3', level: 'B2', title: 'Harapan dan Gaya Ringkas', description: 'Harapan dan penyesalan, masa depan yang presisi, dan kalimat yang lebih ringkas.', premium: true, units: [
+    { id: 'b2-c3-u1', title: 'Harapan dan Masa Depan', description: 'wish/if only, future continuous, dan future perfect.', lessons: [wishLesson, futurePerfectLesson] },
+    { id: 'b2-c3-u2', title: 'Kalimat Ringkas dan Pola Kata Kerja', description: 'Participle clauses dan kata kerja yang berubah makna.', lessons: [participleLesson, verbPatternsLesson] },
+  ] },
   { id: 'c1-c1', level: 'C1', title: 'Penekanan dan Gaya', description: 'Struktur penekanan dalam bahasa formal.', premium: true, units: [
     { id: 'c1-c1-u1', title: 'Inversi dan Cleft', description: 'Struktur penekanan dalam bahasa formal.', lessons: [inversion, cleft] },
   ] },
   { id: 'c1-c2', level: 'C1', title: 'Wacana Akademik', description: 'Menulis dan berbicara secara akademik.', premium: true, units: [
     { id: 'c1-c2-u1', title: 'Gaya Akademik', description: 'Hedging, nominalisasi, dan penghubung wacana.', lessons: [hedging, nominalisation, discourseMarkers] },
   ] },
+  { id: 'c1-c3', level: 'C1', title: 'Register dan Persuasi', description: 'Menyesuaikan gaya dengan pembaca, melaporkan, dan meyakinkan.', premium: true, units: [
+    { id: 'c1-c3-u1', title: 'Formal dan Impersonal', description: 'Register formal/informal dan pasif impersonal.', lessons: [registerLesson, impersonalLesson] },
+    { id: 'c1-c3-u2', title: 'Melaporkan dan Meyakinkan', description: 'Kata kerja pelapor dan bahasa persuasi.', lessons: [reportingVerbsLesson, persuasionLesson] },
+  ] },
   { id: 'c2-c1', level: 'C2', title: 'Presisi dan Register', description: 'Struktur langka yang menandai kemahiran penuh.', premium: true, units: [
     { id: 'c2-c1-u1', title: 'Subjunctive', description: 'Subjunctive, ellipsis, dan substitution.', lessons: [subjunctive, ellipsis] },
   ] },
   { id: 'c2-c2', level: 'C2', title: 'Nuansa dan Idiom', description: 'Kolokasi idiomatis, ironi, dan modalitas lanjut.', premium: true, units: [
     { id: 'c2-c2-u1', title: 'Nuansa Makna', description: 'Kolokasi, understatement, dan modalitas lanjut.', lessons: [collocations, understatement, advancedModality] },
+  ] },
+  { id: 'c2-c3', level: 'C2', title: 'Bahasa Profesional', description: 'Penekanan dan konsesi formal, idiom kantor, dan pembentukan kata.', premium: true, units: [
+    { id: 'c2-c3-u1', title: 'Penekanan dan Konsesi', description: 'Inversi lanjutan dan konsesi formal.', lessons: [inversionAdvLesson, concessionLesson] },
+    { id: 'c2-c3-u2', title: 'Bahasa Dunia Kerja', description: 'Idiom kantor dan pembentukan kata.', lessons: [workIdiomsLesson, wordFormationLesson] },
   ] },
 ];
 
@@ -141,6 +157,18 @@ const topics: Topic[] = [
   { id: 'c2.collocations', kind: 'vocabulary', level: 'C2', title: 'Kolokasi idiomatis', summary: 'make/do, heavy rain, pay attention.', lessonId: 'c2-collocations' },
   { id: 'c2.understatement', kind: 'skill', level: 'C2', title: 'Ironi dan understatement', summary: 'not bad, a bit of a problem, not uncommon.', lessonId: 'c2-understatement' },
   { id: 'c2.modality', kind: 'grammar', level: 'C2', title: 'Modalitas lanjut', summary: "must/might/can't/should have; needn't have.", lessonId: 'c2-modality' },
+  { id: 'b2.wish', kind: 'grammar', level: 'B2', title: 'Wish dan if only', summary: 'wish + past simple, + had + bentuk ketiga, + would.', lessonId: 'b2-wish' },
+  { id: 'b2.future-perfect', kind: 'grammar', level: 'B2', title: 'Future continuous dan future perfect', summary: 'will be + -ing; will have + bentuk ketiga; by dan at.', lessonId: 'b2-future-perfect' },
+  { id: 'b2.participle', kind: 'grammar', level: 'B2', title: 'Participle clauses', summary: '-ing aktif, bentuk ketiga pasif, having + bentuk ketiga; subjek harus cocok.', lessonId: 'b2-participle' },
+  { id: 'b2.verb-patterns', kind: 'grammar', level: 'B2', title: 'Stop, remember, try + -ing/to', summary: 'Makna berubah: stop doing / stop to do, remember doing / to do.', lessonId: 'b2-verb-patterns' },
+  { id: 'c1.register', kind: 'skill', level: 'C1', title: 'Register formal dan informal', summary: 'Pilihan kata dan susunan sesuai pembaca.', lessonId: 'c1-register' },
+  { id: 'c1.impersonal', kind: 'grammar', level: 'C1', title: 'Pasif impersonal', summary: 'It is said that ...; X is said to be / to have been ...', lessonId: 'c1-impersonal' },
+  { id: 'c1.reporting-verbs', kind: 'grammar', level: 'C1', title: 'Kata kerja pelapor', summary: 'deny -ing, accuse of, insist on, warn sb to, suggest -ing/that.', lessonId: 'c1-reporting-verbs' },
+  { id: 'c1.persuasion', kind: 'skill', level: 'C1', title: 'Bahasa persuasi', summary: 'do/does/did penekanan, pertanyaan retoris, pola tiga, klaim kredibel.', lessonId: 'c1-persuasion' },
+  { id: 'c2.inversion-adv', kind: 'grammar', level: 'C2', title: 'Inversi lanjutan', summary: 'So ... that, Such ... that, Not until, Only after/when.', lessonId: 'c2-inversion-adv' },
+  { id: 'c2.concession', kind: 'grammar', level: 'C2', title: 'Konsesi formal', summary: 'albeit, notwithstanding, much as, Tired as she was, However hard ...', lessonId: 'c2-concession' },
+  { id: 'c2.work-idioms', kind: 'vocabulary', level: 'C2', title: 'Idiom dunia kerja', summary: 'on the same page, back to square one, cut corners, a tall order.', lessonId: 'c2-work-idioms' },
+  { id: 'c2.word-formation', kind: 'vocabulary', level: 'C2', title: 'Pembentukan kata', summary: 'Prefiks under-/over-/mis-/counter-/out- dan sufiks kelas kata.', lessonId: 'c2-word-formation' },
   { id: 'skill.listening', kind: 'skill', level: 'A1', title: 'Menyimak', summary: 'Menangkap kata, angka, dan informasi dari audio.' },
   { id: 'skill.reading', kind: 'skill', level: 'A1', title: 'Membaca', summary: 'Menangkap gagasan utama, detail, dan maksud penulis dari teks.' },
   { id: 'skill.story', kind: 'skill', level: 'A1', title: 'Cerita bergambar', summary: 'Memahami alur, tokoh, dan detail dari cerita pendek beranimasi.' },
@@ -262,6 +290,30 @@ const tags: MisconceptionTag[] = [
   { id: 'modal-have-pp', topic: 'c2.modality', title: 'Modal + have + bentuk ketiga', tip: 'must/should/could have + bentuk ketiga: should have gone (bukan should have went).' },
   { id: 'neednt-didnt-need', topic: 'c2.modality', title: "Needn't have atau didn't need to?", tip: "needn't have done = sudah dilakukan, ternyata tidak perlu. didn't need to do = tidak perlu." },
   { id: 'modal-past-meaning', topic: 'c2.modality', title: 'Makna modal masa lalu', tip: "must have = hampir pasti; might have = mungkin; can't have = tidak mungkin; should have = kritik." },
+  { id: 'wish-tense', topic: 'b2.wish', title: 'Tense setelah wish', tip: 'Sekarang: wish + past simple (had, could, were). Masa lalu: wish + had + bentuk ketiga. Bukan wish + present atau will.' },
+  { id: 'wish-would', topic: 'b2.wish', title: 'Wish + would', tip: 'wish + would untuk orang lain atau keadaan yang ingin diubah (I wish you would stop). Untuk diri sendiri: I wish I could.' },
+  { id: 'future-perfect-form', topic: 'b2.future-perfect', title: 'Bentuk future perfect dan continuous', tip: 'will have + bentuk ketiga (will have finished); will be + -ing (will be flying).' },
+  { id: 'future-time-choice', topic: 'b2.future-perfect', title: 'by atau at?', tip: 'by + waktu = sudah selesai sebelumnya → will have + V3. at/this time + waktu = sedang berlangsung → will be + -ing.' },
+  { id: 'participle-active-passive', topic: 'b2.participle', title: 'Participle aktif atau pasif', tip: 'Subjek melakukan → -ing (Feeling tired). Subjek dikenai → bentuk ketiga (Built in 1890). Lebih dulu → Having + V3.' },
+  { id: 'participle-subject', topic: 'b2.participle', title: 'Subjek participle clause', tip: 'Pelaku klausa participle = subjek kalimat utama: Walking home, I saw ... (bukan Walking home, the rain started).' },
+  { id: 'stop-try-pattern', topic: 'b2.verb-patterns', title: 'stop dan try', tip: 'stop doing = berhenti; stop to do = berhenti untuk. try to do = berusaha; try doing = mencoba sebagai cara.' },
+  { id: 'remember-forget-pattern', topic: 'b2.verb-patterns', title: 'remember dan forget', tip: '+ -ing = kenangan (sudah terjadi). + to = tugas (belum dilakukan).' },
+  { id: 'register-too-informal', topic: 'c1.register', title: 'Terlalu santai untuk tulisan resmi', tip: 'Tanpa kontraksi dan slang; pakai obtain, purchase, postpone, require; permintaan: I would be grateful if you could ...' },
+  { id: 'register-too-formal', topic: 'c1.register', title: 'Terlalu kaku untuk obrolan', tip: 'Kepada teman, jawaban pendek dan ramah lebih wajar daripada bahasa surat resmi.' },
+  { id: 'impersonal-form', topic: 'c1.impersonal', title: 'Bentuk pasif impersonal', tip: 'It is said that + klausa, atau Subjek + is said + to + bentuk dasar. Bukan "is said that it ..." setelah subjek.' },
+  { id: 'impersonal-past', topic: 'c1.impersonal', title: 'Kejadian lampau dalam pasif impersonal', tip: 'Kejadian sebelum saat melapor: is said to have + bentuk ketiga (is thought to have left).' },
+  { id: 'reporting-pattern', topic: 'c1.reporting-verbs', title: 'Pola kata kerja pelapor', tip: 'deny/admit + -ing; accuse sb of, insist on, apologise for + -ing; warn/remind/advise sb (not) to + V1.' },
+  { id: 'suggest-pattern', topic: 'c1.reporting-verbs', title: 'suggest dan recommend', tip: 'suggest/recommend + -ing, atau + that + subjek + (should) + V1. Tidak ada "suggest someone to".' },
+  { id: 'emphatic-do', topic: 'c1.persuasion', title: 'Penekanan do/does/did', tip: 'do/does/did + bentuk dasar: We do need, She does work, He did try.' },
+  { id: 'persuasion-tone', topic: 'c1.persuasion', title: 'Persuasi yang kredibel', tip: 'Angka, contoh, dan modal (could) meyakinkan; klaim mutlak dan serangan membuat pembaca menolak.' },
+  { id: 'so-such-inversion', topic: 'c2.inversion-adv', title: 'So/Such dengan inversi', tip: 'So + kata sifat + be + subjek + that; Such + be + kata benda + that.' },
+  { id: 'not-until-inversion', topic: 'c2.inversion-adv', title: 'Not until dan Only after', tip: 'Klausa waktu tetap biasa; klausa utama dibalik: Not until I got home did I realise.' },
+  { id: 'albeit-pattern', topic: 'c2.concession', title: 'albeit', tip: 'albeit + kata sifat/keterangan/frasa (albeit slowly), bukan klausa lengkap.' },
+  { id: 'concession-clause', topic: 'c2.concession', title: 'Pola konsesi formal', tip: 'Tired as she was; Much as I admire him; However hard he tries; notwithstanding + kata benda.' },
+  { id: 'idiom-form', topic: 'c2.work-idioms', title: 'Bentuk idiom tetap', tip: 'Kata dalam idiom tidak diganti: on the same page, back to square one, a tall order, touch base.' },
+  { id: 'idiom-meaning', topic: 'c2.work-idioms', title: 'Makna dan register idiom', tip: 'Baca idiom sebagai satu kesatuan makna. Idiom wajar di rapat, terlalu santai untuk laporan resmi.' },
+  { id: 'prefix-meaning', topic: 'c2.word-formation', title: 'Makna prefiks', tip: 'under- terlalu rendah, over- berlebihan, mis- salah, counter- melawan, out- melebihi.' },
+  { id: 'suffix-class', topic: 'c2.word-formation', title: 'Sufiks dan kelas kata', tip: 'Kata benda -ity/-ment/-tion; kata sifat -ive/-able/-ous; kata kerja -ise/-ify. Posisi menentukan bentuk.' },
   { id: 'short-long-i', topic: 'skill.listening', title: 'Vokal /ɪ/ pendek dan /iː/ panjang', tip: 'ship /ɪ/ pendek dan kendur; sheep /iː/ panjang dengan bibir tersenyum.' },
   { id: 'weak-forms', topic: 'skill.listening', title: 'Kontraksi dan bentuk lemah', tip: "Dengarkan bunyi kecil setelah subjek: I'd = I would/had, we'll = we will, she's + bentuk ketiga = she has. 'can' positif lemah /kən/, 'can't' bertekanan." },
 ];
@@ -323,6 +375,9 @@ const HOMEWORK_KIND: Record<string, HomeworkDef['kind']> = {
   'b2-causative': 'reading', 'b2-reported': 'reading', 'b2-third-conditional': 'reading', 'b2-mixed-conditionals': 'reading',
   'c1-cleft': 'reading', 'c1-hedging': 'reading', 'c1-nominalisation': 'reading', 'c1-discourse': 'reading',
   'c2-ellipsis': 'reading', 'c2-collocations': 'reading', 'c2-understatement': 'reading', 'c2-modality': 'reading',
+  'b2-wish': 'reading', 'b2-future-perfect': 'reading', 'b2-participle': 'reading', 'b2-verb-patterns': 'reading',
+  'c1-register': 'reading', 'c1-impersonal': 'reading', 'c1-reporting-verbs': 'reading', 'c1-persuasion': 'reading',
+  'c2-inversion-adv': 'reading', 'c2-concession': 'reading', 'c2-work-idioms': 'reading', 'c2-word-formation': 'reading',
 };
 
 export function buildPack(): ContentPack {
@@ -375,7 +430,7 @@ export function buildPack(): ContentPack {
   );
 
   // Listening.
-  const listeningItems: ListeningItem[] = [...listening, ...listeningUpper].map((l) => {
+  const listeningItems: ListeningItem[] = [...listening, ...listeningUpper, ...listeningR5].map((l) => {
     const qs = stamp(l.questions, l.id, 'listening', 'skill.listening', null);
     exercises.push(...qs);
     return { id: l.id, level: l.level, title: l.title, kind: l.kind, transcript: l.transcript, translation: l.translation, premium: l.premium, questionIds: qs.map((q) => q.id) };
@@ -396,6 +451,9 @@ export function buildPack(): ContentPack {
     ['c1-c2', 'listen-c1-lecture'], // hedging and discourse markers
     ['c2-c1', 'listen-c2-tax'],
     ['c2-c2', 'listen-c2-app'], // understatement and irony
+    ['b2-c3', 'listen-b2-sleep'], // future and participle clauses in a podcast
+    ['c1-c3', 'listen-c1-ship'], // impersonal passive in the news
+    ['c2-c3', 'listen-c2-briefing'], // work idioms
   ];
   // One short writing task per A2–B1 chapter (Rilis 2), checked by a deterministic checklist.
   for (const [chapterId, title, writing] of [...WRITING_HOMEWORK, ...WRITING_UPPER]) {
@@ -437,5 +495,5 @@ export function buildPack(): ContentPack {
     });
   }
 
-  return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios: [...scenarios, ...scenariosUpper], listening: listeningItems, stories: storyItems, phonemes, homework, exams, audio: [] };
+  return { version: CONTENT_VERSION, levels, chapters, units, lessons, exercises, topics, tags, vocabulary, scenarios: [...scenarios, ...scenariosUpper, ...scenariosR5], listening: listeningItems, stories: storyItems, phonemes, homework, exams, audio: [] };
 }

@@ -225,4 +225,26 @@ export const vocabulary: VocabItem[] = [
     ['unprecedented', '/ʌnˈpresɪdentɪd/', 'adjective', 'belum pernah terjadi sebelumnya', 'The response was unprecedented.', 'Tanggapannya belum pernah terjadi sebelumnya.'],
     ['scrutiny', '/ˈskruːtəni/', 'noun', 'pengawasan cermat', 'The policy is under scrutiny.', 'Kebijakan itu sedang diawasi dengan cermat.'],
   ]),
+  ...set('B2', 'Harapan dan Gaya Ringkas', true, [
+    ['reliable', '/rɪˈlaɪəbl/', 'adjective', 'dapat diandalkan', 'I wish my old laptop were more reliable.', 'Seandainya laptop lamaku lebih bisa diandalkan.'],
+    ['founded', '/ˈfaʊndɪd/', 'verb', 'didirikan (founded in ...)', 'Founded in 1920, the school is the oldest in the city.', 'Didirikan pada 1920, sekolah itu yang tertua di kota.'],
+    ['concise', '/kənˈsaɪs/', 'adjective', 'ringkas dan padat', 'Participle clauses make your writing more concise.', 'Participle clause membuat tulisanmu lebih ringkas.'],
+    ['habit', '/ˈhæbɪt/', 'noun', 'kebiasaan', 'He stopped the habit of checking his phone at night.', 'Dia menghentikan kebiasaan memeriksa ponsel di malam hari.'],
+  ]),
+  ...set('C1', 'Register dan Persuasi', true, [
+    ['obtain', '/əbˈteɪn/', 'verb', 'memperoleh (formal)', 'Visitors must obtain a permit before entering.', 'Pengunjung harus memperoleh izin sebelum masuk.'],
+    ['postpone', '/pəˈspəʊn/', 'verb', 'menunda', 'The meeting has been postponed until Friday.', 'Rapat ditunda sampai Jumat.'],
+    ['allege', '/əˈledʒ/', 'verb', 'menuduh tanpa bukti; mendakwa', 'It is alleged that the money was stolen.', 'Diduga uang itu dicuri.'],
+    ['insist', '/ɪnˈsɪst/', 'verb', 'bersikeras', 'She insisted on paying for dinner.', 'Dia bersikeras membayar makan malam.'],
+    ['persuade', '/pəˈsweɪd/', 'verb', 'membujuk; meyakinkan', 'We persuaded the council to build a park.', 'Kami meyakinkan dewan kota untuk membangun taman.'],
+    ['compelling', '/kəmˈpelɪŋ/', 'adjective', 'meyakinkan; kuat (alasan)', 'She made a compelling case for change.', 'Dia mengajukan alasan yang meyakinkan untuk perubahan.'],
+  ]),
+  ...set('C2', 'Bahasa Profesional', true, [
+    ['scarcely', '/ˈskeəsli/', 'adverb', 'hampir tidak; baru saja', 'Scarcely had we arrived when it started to rain.', 'Baru saja kami tiba, hujan mulai turun.'],
+    ['notwithstanding', '/ˌnɒtwɪθˈstændɪŋ/', 'preposition', 'meskipun (sangat formal)', 'Notwithstanding the delay, the project was a success.', 'Meskipun terlambat, proyek itu berhasil.'],
+    ['stakeholder', '/ˈsteɪkhəʊldə/', 'noun', 'pihak berkepentingan', 'We need to keep all stakeholders on the same page.', 'Kita perlu membuat semua pihak berkepentingan sepaham.'],
+    ['workload', '/ˈwɜːkləʊd/', 'noun', 'beban kerja', 'Her workload doubled after the merger.', 'Beban kerjanya berlipat dua setelah merger.'],
+    ['counterproductive', '/ˌkaʊntəprəˈdʌktɪv/', 'adjective', 'malah merugikan', 'Working without breaks can be counterproductive.', 'Bekerja tanpa istirahat bisa malah merugikan.'],
+    ['underestimate', '/ˌʌndərˈestɪmeɪt/', 'verb', 'meremehkan; memperkirakan terlalu rendah', 'Never underestimate how long a project will take.', 'Jangan pernah meremehkan berapa lama sebuah proyek berlangsung.'],
+  ]),
 ];
