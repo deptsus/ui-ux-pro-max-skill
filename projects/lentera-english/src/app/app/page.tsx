@@ -27,8 +27,8 @@ function Welcome({ guest, firstLesson }: { guest: boolean; firstLesson?: string 
   return (
     <section aria-labelledby="welcome-title">
       <Card className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Mascot mood="happy" size={76} className="shrink-0" />
+        <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-4">
+          <Mascot mood="happy" size={68} className="shrink-0" />
           <div className="min-w-0">
             <h1 id="welcome-title" className="text-2xl font-extrabold tracking-tight">Selamat datang di Lentera English!</h1>
             <p className="mt-1 text-muted">Belajar bahasa Inggris dari nol sampai C2, dijelaskan dalam bahasa Indonesia.</p>

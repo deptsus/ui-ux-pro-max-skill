@@ -71,6 +71,7 @@ projects/lentera-english/
 │   ├── components/           UI: ui.tsx (primitif), ExerciseCard, SessionRunner, LessonContent,
 │   │                         AudioButton, Charts, Mouth, Mascot (Pijar, animasi CSS), AuthForm, nav.ts,
 │   │                         WeekPlan (rencana mingguan)
+│   │   ├── admin/RecordingsPanel.tsx  tab Rekaman: rekam/unggah per teks dan aksen (Rilis 6)
 │   │   ├── story/            StoryStage.tsx: adegan cerita SVG (latar, tokoh, pose) beranimasi CSS;
 │   │                         BranchPlayer.tsx: pemutar cerita bercabang (nilai di src/lib/engine/branch.ts)
 │   │   └── admin/            Dashboard admin: schema.ts (definisi form tiap tabel CMS + validasi),
@@ -81,7 +82,7 @@ projects/lentera-english/
 │       │                     recommend, unlock, sessions, placement, gamification, analytics, config,
 │       │                     plan (rencana belajar mingguan paket tahunan)
 │       ├── client/           session.ts, store.ts (state offline-first), content.ts (IndexedDB/offline),
-│       │                     api.ts, audio.ts, hooks.ts
+│       │                     api.ts, audio.ts, hooks.ts, prefs.ts (ukuran huruf, getaran)
 │       ├── server/           db.ts, auth.ts, api.ts, content.ts, manual-payments.ts (QRIS, aktif),
 │       │                     payments.ts + xendit.ts + xendit-mock.ts (Xendit, nonaktif)
 │       ├── format.ts         rupiah, dateId, dateTimeId, compactId. Tanpa 'use client', aman untuk server component
@@ -111,7 +112,7 @@ projects/lentera-english/
 - **Konten**: `/api/content` mengembalikan `ContentPack`. Untuk akun Free, server memangkas isi pelajaran Premium (`packForFree`). Klien membuat indeks (`indexContent`). Bila "belajar offline" aktif (Premium), pack disimpan di IndexedDB dan `public/sw.js` menyimpan halaman/aset.
 - **Sesi latihan**: `SessionRunner` menjalankan daftar soal tetap atau adaptif (`next()`), umpan balik langsung atau ditunda, nyawa, timer ujian, timer per soal. `ExerciseCard` merender 14 jenis soal dan memasang `data-ex`/`data-type` untuk e2e.
 - **Tema**: token di `globals.css` (`--brand`, `--surface`, `--chart`, dll.), kelas `.dark` di `<html>`; pilihan tersimpan di `localStorage['lentera.theme']`.
-- **Audio**: `src/lib/client/audio.ts` memutar rekaman dari `audio_resources` bila ada; bila tidak, memakai `speechSynthesis` perangkat dan UI memberitahukannya.
+- **Audio**: `src/lib/client/audio.ts` memutar rekaman dari `audio_resources` bila ada untuk teks yang diputar (dicocokkan lewat `spokenKey` di `src/lib/content/spoken.ts`, atau lewat `audioKey`), dengan aksen pelajar lebih dulu; bila tidak ada, memakai `speechSynthesis` perangkat dan UI memberitahukannya. Rekaman diunggah dari tab Rekaman di `/admin` ke Supabase Storage (bucket `audio`, `src/lib/server/audio-store.ts`); setiap paket hanya membawa rekaman untuk teks yang ada di paket itu (`audioForPack`).
 
 ## 4. Arsitektur backend
 

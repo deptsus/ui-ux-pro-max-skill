@@ -187,7 +187,16 @@ Rencana awal:
 - 4 skenario percakapan dan 4 materi menyimak tambahan untuk C1–C2.
 - Rencana mingguan ikut bertambah otomatis karena jalurnya lebih panjang.
 
-### Rilis 6 — "Suara Asli dan Poles UI/UX" (perkiraan April 2027)
+### Rilis 6 — "Suara Asli dan Poles UI/UX" — **SELESAI 15 November 2026** (migrasi 0012)
+
+Isi akhirnya:
+- **Tab "Rekaman" di `/admin`**: rekam langsung dari mikrofon HP atau unggah berkas, per teks dan per aksen (US/UK), untuk materi menyimak, kosakata, contoh kalimat, cerita, percakapan, dan teks lain. Berkas di Supabase Storage. Rekaman diputar di mana pun teks yang sama muncul; suara perangkat tetap jadi cadangan. Pemilik memilih mengisi rekamannya sendiri bertahap (tanpa suara AI).
+- **Audit UI/UX dengan skill `ui-ux-pro-max`**: kontras semua warna diuji otomatis di tema terang dan gelap (diperbaiki: batas kotak isian, label nama tokoh, huruf avatar, lencana merah di mode gelap); semua kontrol aplikasi pelajar minimal 44 px dan tanpa geser ke samping di layar 320 px, juga dengan huruf terbesar; sambutan untuk pengguna baru (tes penempatan atau lewati); label XP misi tidak lagi tampak seperti tombol mati.
+- **Ukuran huruf** (Normal/Besar/Sangat besar) dan **getaran saat menjawab** (Android, bisa dimatikan) di Pengaturan.
+- **Label "Bercabang" untuk tamu** (diminta pemilik saat Rilis 5 terbit).
+- APK 1.3.0 tidak diperlukan: semua perubahan berjalan di aplikasi Android yang sudah terpasang.
+
+Rencana awal:
 
 - **Unggah rekaman audio** dari `/admin` (Supabase Storage). Rekaman penutur
   asli (aksen US dan UK) dipakai bila ada; suara perangkat tetap jadi cadangan.
