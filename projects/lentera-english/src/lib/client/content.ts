@@ -8,6 +8,7 @@ import { useSyncExternalStore } from 'react';
 import { indexContent, type ContentIndex, type ContentPack } from '@/lib/content/types';
 import { packForFree } from '@/lib/content/rows';
 import { api } from './api';
+import { latestContentVersion } from './session';
 import { premiumNow } from './store';
 
 interface Stored { version: string; tier: string; pack: ContentPack; savedAt: number }
@@ -56,7 +57,19 @@ async function idbSet(key: string, value: unknown): Promise<void> {
 
 export const offlineEnabled = () => typeof localStorage !== 'undefined' && localStorage.getItem(OFFLINE_FLAG) === '1';
 
-export async function loadContent(force = false): Promise<void> {
+/**
+ * Loads run one after another: a sign-in that turns Premium on and the app's
+ * own start both ask at once, and the second then finds the pack already
+ * there instead of downloading it a second time.
+ */
+let queue: Promise<void> = Promise.resolve();
+export function loadContent(force = false): Promise<void> {
+  const next = queue.then(() => loadContentNow(force));
+  queue = next.catch(() => {});
+  return next;
+}
+
+async function loadContentNow(force: boolean): Promise<void> {
   if (ix && !force) return;
   // A Premium pack is never shown to a device that is not Premium now (plan
   // ended, signed out, another account): it is cut down to the Free pack right
@@ -73,6 +86,13 @@ export async function loadContent(force = false): Promise<void> {
     if (meta.tier === 'premium') ix = indexContent(packForFree(ix.pack));
     meta = null;
     emit();
+  }
+  // The server already told this page its curriculum version (with /api/me):
+  // when the device holds exactly that version for its tier, nothing to fetch.
+  if (ix && meta && meta.tier === want && latestContentVersion() === meta.version) {
+    error = null;
+    emit();
+    return;
   }
   try {
     const q = meta ? `?v=${encodeURIComponent(meta.version)}&tier=${meta.tier}` : '';

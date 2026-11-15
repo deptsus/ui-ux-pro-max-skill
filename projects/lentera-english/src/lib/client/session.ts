@@ -23,6 +23,8 @@ const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || proces
 
 let session: Session | null = null;
 let info: ServerInfo = { backend: SUPABASE_URL ? 'supabase' : 'none', payments: 'off' };
+/** Curriculum version the server reported when this page loaded (null offline or unknown). */
+let latestContent: string | null = null;
 let ready = false;
 let supabase: SupabaseClient | null = null;
 const listeners = new Set<() => void>();
@@ -45,6 +47,7 @@ export async function initSession(): Promise<Session | null> {
       const data = await res.json();
       info = { backend: data.backend, payments: data.payments };
       localStorage.setItem('lentera.info', JSON.stringify(info));
+      latestContent = typeof data.contentVersion === 'string' ? data.contentVersion : null;
     }
   } catch {
     // Offline: reuse what we learned last time.
@@ -143,3 +146,4 @@ export const useSession = (): Session | null => useSyncExternalStore(subscribe, 
 export const useServerInfo = (): ServerInfo => useSyncExternalStore(subscribe, () => info, () => info);
 export const currentSession = () => session;
 export const serverInfo = () => info;
+export const latestContentVersion = () => latestContent;

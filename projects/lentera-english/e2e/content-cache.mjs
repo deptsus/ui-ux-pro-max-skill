@@ -56,14 +56,14 @@ let guestRepeat = 0;
   check('tamu, pembukaan pertama: paket materi lengkap diunduh sekali', first.length === 1 && !first[0].url.includes('v=') && guestFull > 20000, JSON.stringify(first));
   const again = await open('/app/path');
   guestRepeat = again.reduce((n, c) => n + c.bytes, 0);
-  check(`tamu, pembukaan berikutnya: hanya tanya versi (${kb(guestRepeat)} vs ${kb(guestFull)})`, again.length === 1 && again[0].url.includes('v=') && again[0].url.includes('tier=free') && guestRepeat < 1024, JSON.stringify(again));
+  check(`tamu, pembukaan berikutnya: tanpa permintaan materi sama sekali (versi ikut di /api/me; ${kb(guestRepeat)} vs ${kb(guestFull)})`, again.length === 0, JSON.stringify(again));
   check('tamu: jalur belajar tetap tampil lengkap dari paket di HP (6 level)', await p.getByRole('heading', { name: 'Jalur Belajar' }).waitFor({ timeout: 15000 }).then(() => true, () => false) && (await p.locator('h2[id^="level-"]').count()) === 6);
 
-  // The server cannot be reached: the app still opens from the pack on the device.
-  await p.route('**/api/content*', (route) => route.abort());
+  // The server cannot be reached at all: the app still opens from the pack on the device.
+  await p.route('**/api/**', (route) => route.abort());
   await open('/app');
-  check('server materi tidak terjangkau: aplikasi tetap terbuka dari paket di HP (dulu layar galat)', await p.getByRole('navigation', { name: 'Navigasi bawah' }).count() === 1 && await p.getByText(/Konten gagal dimuat|Tidak ada koneksi/).count() === 0);
-  await p.unroute('**/api/content*');
+  check('server tidak terjangkau: aplikasi tetap terbuka dari paket di HP (dulu layar galat)', await p.getByRole('navigation', { name: 'Navigasi bawah' }).count() === 1 && await p.getByText(/Konten gagal dimuat|Tidak ada koneksi/).count() === 0);
+  await p.unroute('**/api/**');
 
   // A new curriculum is published: the next open downloads it.
   const before = await p.evaluate(() => new Promise((res) => { const q = indexedDB.open('lentera', 1); q.onsuccess = () => { const g = q.result.transaction('kv').objectStore('kv').get('pack'); g.onsuccess = () => res(g.result?.version); }; }));
@@ -73,7 +73,7 @@ let guestRepeat = 0;
   const after = await p.evaluate(() => new Promise((res) => { const q = indexedDB.open('lentera', 1); q.onsuccess = () => { const g = q.result.transaction('kv').objectStore('kv').get('pack'); g.onsuccess = () => res(g.result?.version); }; }));
   check(`kurikulum baru diterbitkan: pembukaan berikutnya mengunduh versi baru (${before} → ${after})`, pub.data.published === true && after !== before && fresh.reduce((n, c) => n + c.bytes, 0) > 20000, JSON.stringify({ before, after, fresh }));
   const settled = await open('/app/path');
-  check('setelah itu kembali hanya tanya versi', settled.length === 1 && settled[0].bytes < 1024 && settled[0].url.includes(`v=${encodeURIComponent(after)}`), JSON.stringify(settled));
+  check('setelah itu kembali tanpa permintaan materi', settled.length === 0, JSON.stringify(settled));
   await ctx.close();
 }
 
@@ -86,7 +86,7 @@ let premiumRepeat = 0;
   premiumFull = first.reduce((n, c) => n + c.bytes, 0);
   const again = await open('/app/path');
   premiumRepeat = again.reduce((n, c) => n + c.bytes, 0);
-  check(`Premium: paket lengkap sekali (${kb(premiumFull)}), lalu hanya tanya versi (${kb(premiumRepeat)})`, premiumFull > guestFull && again.length === 1 && again[0].url.includes('tier=premium') && premiumRepeat < 1024, JSON.stringify({ first, again }));
+  check(`Premium: paket lengkap sekali (${kb(premiumFull)}), lalu tanpa permintaan materi (${kb(premiumRepeat)})`, premiumFull > guestFull && first.length === 1 && again.length === 0, JSON.stringify({ first, again }));
   // A Premium branching story: whether it is locked comes from the pack itself.
   await p.goto(`${BASE}/app/stories?id=story-cafe-interview`);
   check('Premium: cerita Premium terbuka dari paket di HP', await p.getByRole('button', { name: 'Mulai cerita' }).waitFor({ timeout: 30000 }).then(() => true, () => false));
