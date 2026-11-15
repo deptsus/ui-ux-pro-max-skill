@@ -4,10 +4,10 @@ import { Crown, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/client/api';
 import { useServerInfo, useSession } from '@/lib/client/session';
 import { syncNow, useLearner } from '@/lib/client/store';
-import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId, textOn } from '@/components/ui';
+import { Avatar } from '@/components/Avatar';
+import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId } from '@/components/ui';
 
 interface Board { week_start: string; top: { rank: number; name: string; avatar: number; xp: number; me: boolean }[]; me: { rank: number; xp: number } | null }
-const AVATAR_COLORS = ['#4b3fd6', '#f59e0b', '#15803d', '#be123c', '#0e7490', '#7c3aed', '#c2410c', '#0f766e'];
 
 export default function LeaderboardPage() {
   const session = useSession();
@@ -48,7 +48,7 @@ export default function LeaderboardPage() {
               {board.top.map((r) => (
                 <li key={r.rank + r.name} className={cx('flex items-center gap-3 border-b border-line px-4 py-3 last:border-0', r.me && 'bg-brand-soft')}>
                   <span className={cx('grid h-8 w-8 place-items-center rounded-full text-sm font-extrabold', r.rank === 1 ? 'bg-accent text-[#1e1b3a]' : 'bg-surface-2')}>{r.rank === 1 ? <Crown size={16} aria-label="Peringkat 1" /> : r.rank}</span>
-                  <span className="grid h-9 w-9 place-items-center rounded-full text-sm font-extrabold" style={{ background: AVATAR_COLORS[r.avatar % AVATAR_COLORS.length], color: textOn(AVATAR_COLORS[r.avatar % AVATAR_COLORS.length]) }} aria-hidden>{r.name.slice(0, 1).toUpperCase()}</span>
+                  <Avatar index={r.avatar} size={36} decorative className="shrink-0" />
                   <span className="min-w-0 flex-1 truncate font-bold">{r.name}{r.me && <span className="ml-2 text-xs font-bold text-brand">kamu</span>}</span>
                   <span className="font-extrabold">{r.xp} XP</span>
                 </li>

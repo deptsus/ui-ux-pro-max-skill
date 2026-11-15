@@ -190,6 +190,50 @@ for (const width of [320, 390]) {
   await ctx.close();
 }
 
+// ───────────── 4. Profile: avatar or name alone can be saved, and reach the account ─────────────
+{
+  const email = `profil${Date.now()}@lentera.test`;
+  const acc = (await post('/api/dev-auth', { action: 'signup', email, password: PASSWORD, name: 'Siswa Profil' })).data;
+  const me = async () => (await (await fetch(`${BASE}/api/me`, { headers: { Authorization: `Bearer ${acc.token}` } })).json()).user.profile;
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 760 }, isMobile: true, hasTouch: true });
+  await ctx.addInitScript((sess) => { if (!localStorage.getItem('lentera.session')) localStorage.setItem('lentera.session', JSON.stringify(sess)); }, acc);
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => issues.push(`pageerror: ${e.message}`));
+  try {
+    await p.goto(`${BASE}/app/profile`);
+    const save = p.getByRole('button', { name: 'Simpan perubahan' });
+    await save.waitFor({ timeout: 45000 });
+    check('profil: 8 avatar karakter bisa dipilih', (await p.getByRole('radiogroup', { name: 'Avatar' }).getByRole('radio').count()) === 8);
+    check('profil: tanpa perubahan, tombol Simpan mati', !(await save.isEnabled()));
+    await p.getByRole('radio', { name: /^Momo, kelinci merah muda/ }).click();
+    check('profil: memilih avatar saja sudah mengaktifkan Simpan (bug lama: harus ganti nama dulu)', await save.isEnabled());
+    await p.getByRole('button', { name: 'Batal' }).click();
+    check('profil: Batal mengembalikan pilihan semula', !(await save.isEnabled()) && (await p.getByRole('radio', { name: /^Pijar/ }).getAttribute('aria-checked')) === 'true');
+    await p.getByRole('radio', { name: /^Momo, kelinci merah muda/ }).click();
+    await save.click();
+    await p.getByText('Profil tersimpan.', { exact: true }).waitFor({ timeout: 10000 });
+    await p.waitForFunction(() => true);
+    let server = await me();
+    for (let i = 0; i < 20 && server.avatar !== 3; i++) { await p.waitForTimeout(300); server = await me(); }
+    check('profil: avatar tersimpan, tampil di kartu profil, dan sampai ke akun (papan peringkat)', server.avatar === 3 && (await p.locator('svg[data-avatar="momo"][role="img"]').count()) === 1, JSON.stringify(server));
+    const nameInput = p.getByLabel('Nama tampilan');
+    await nameInput.fill('   ');
+    check('profil: nama kosong ditolak dengan pesan', (await p.getByText('Nama tampilan tidak boleh kosong.').count()) === 1 && !(await save.isEnabled()));
+    await nameInput.fill('Rina Baru');
+    await save.click();
+    await p.getByText('Profil tersimpan.', { exact: true }).waitFor({ timeout: 10000 });
+    for (let i = 0; i < 20 && server.display_name !== 'Rina Baru'; i++) { await p.waitForTimeout(300); server = await me(); }
+    await p.reload();
+    await p.getByRole('heading', { name: 'Rina Baru' }).waitFor({ timeout: 30000 });
+    check('profil: nama saja juga tersimpan; setelah dimuat ulang nama dan avatar tetap', server.display_name === 'Rina Baru' && (await p.locator('svg[data-avatar="momo"][role="img"]').count()) === 1 && (await p.getByRole('radio', { name: /^Momo/ }).getAttribute('aria-checked')) === 'true');
+    await p.screenshot({ path: path.join(SHOTS, 'ui-profil-avatar.png'), fullPage: true });
+  } catch (e) {
+    await p.screenshot({ path: path.join(SHOTS, 'ui-gagal-profil.png'), fullPage: true }).catch(() => {});
+    check('profil: macet', false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+  await ctx.close();
+}
+
 check('tanpa error di konsol', issues.length === 0, issues.slice(0, 3).join(' | '));
 await browser.close();
 console.log(process.exitCode ? '\nADA YANG GAGAL' : '\nSEMUA LOLOS');

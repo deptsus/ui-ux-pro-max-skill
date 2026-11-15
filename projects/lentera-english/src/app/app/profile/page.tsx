@@ -1,14 +1,13 @@
 'use client';
-import { useState } from 'react';
-import { Crown, LogOut, ShieldCheck } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, Crown, LogOut, ShieldCheck } from 'lucide-react';
 import { ACHIEVEMENTS, liveStreak, playerLevel } from '@/lib/engine/gamification';
 import { useApp } from '@/lib/client/hooks';
 import { signOut, useServerInfo, useSession } from '@/lib/client/session';
 import { isAdminPlan } from '@/lib/engine/types';
-import { act, syncNow, useRole, useSyncStatus } from '@/lib/client/store';
-import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass, textOn } from '@/components/ui';
-
-const COLORS = ['#4b3fd6', '#f59e0b', '#15803d', '#be123c', '#0e7490', '#7c3aed', '#c2410c', '#0f766e'];
+import { act, pushProfile, syncNow, useRole, useSyncStatus } from '@/lib/client/store';
+import { AVATARS, Avatar } from '@/components/Avatar';
+import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
 
 export default function ProfilePage() {
   const { ix, learner, ent, now, premium } = useApp();
@@ -16,7 +15,36 @@ export default function ProfilePage() {
   const info = useServerInfo();
   const sync = useSyncStatus();
   const admin = useRole() === 'admin' && !!session;
+  // Name and avatar are a draft until "Simpan"; either change enables it.
   const [name, setName] = useState(learner.profile.name);
+  const [avatar, setAvatar] = useState(learner.profile.avatar);
+  const [saved, setSaved] = useState(false);
+  const edited = useRef(false);
+  // Follow the saved profile (e.g. after sync from another device) until the learner starts editing.
+  useEffect(() => {
+    if (edited.current) return;
+    setName(learner.profile.name);
+    setAvatar(learner.profile.avatar);
+  }, [learner.profile.name, learner.profile.avatar]);
+  const cleanName = name.trim().slice(0, 40);
+  const nameChanged = !!cleanName && cleanName !== learner.profile.name;
+  const avatarChanged = avatar !== learner.profile.avatar;
+  const dirty = nameChanged || avatarChanged;
+  const save = () => {
+    act((d) => {
+      if (nameChanged) d.profile.name = cleanName;
+      d.profile.avatar = avatar;
+    });
+    edited.current = false;
+    setSaved(true);
+    void syncNow();
+    void pushProfile({ display_name: nameChanged ? cleanName : learner.profile.name, avatar });
+  };
+  useEffect(() => {
+    if (!saved) return;
+    const t = setTimeout(() => setSaved(false), 4000);
+    return () => clearTimeout(t);
+  }, [saved]);
   const level = playerLevel(learner.xp);
   const done = Object.values(learner.lessons).filter((l) => l.completedAt).length;
   const mastered = Object.values(learner.topics).filter((t) => t.stage === 'mastered').length;
@@ -27,10 +55,10 @@ export default function ProfilePage() {
     <div className="space-y-5">
       <PageHeader title="Profil" />
       <Card className="flex flex-wrap items-center gap-4">
-        <span className="grid h-20 w-20 place-items-center rounded-full text-3xl font-extrabold" style={{ background: COLORS[learner.profile.avatar % COLORS.length], color: textOn(COLORS[learner.profile.avatar % COLORS.length]) }} aria-hidden>{learner.profile.name.slice(0, 1).toUpperCase()}</span>
+        <Avatar index={learner.profile.avatar} size={80} className="shrink-0" />
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-2xl font-extrabold">{learner.profile.name}</h2>
-          <p className="text-sm text-muted">{session ? session.email : 'Tamu · progres hanya di perangkat ini'} · bergabung {dateId(learner.createdAt)}</p>
+          <p className="text-sm text-muted">{session ? <span className="break-all">{session.email}</span> : 'Tamu · progres hanya di perangkat ini'} · bergabung {dateId(learner.createdAt)}</p>
           <div className="mt-2 flex flex-wrap gap-2">{premium ? <Badge tone="accent"><Crown size={12} aria-hidden />{isAdminPlan(ent) ? 'Premium · Admin' : `Premium sampai ${dateId(ent.expiresAt!)}`}</Badge> : <Badge tone="muted">Paket Free</Badge>}{session && <Badge tone={sync === 'idle' ? 'ok' : sync === 'syncing' ? 'brand' : 'bad'}>{sync === 'idle' ? `Tersinkron${learner.outbox.length ? ` · ${learner.outbox.length} menunggu` : ''}` : sync === 'syncing' ? 'Menyinkronkan...' : sync === 'offline' ? 'Offline · disimpan di perangkat' : 'Sinkronisasi gagal'}</Badge>}</div>
         </div>
       </Card>
@@ -41,12 +69,26 @@ export default function ProfilePage() {
 
       <Card className="space-y-4">
         <h2 className="font-extrabold">Ubah profil</h2>
-        <Field label="Nama tampilan" hint="Nama ini muncul di papan peringkat."><input value={name} maxLength={40} onChange={(e) => setName(e.target.value)} className={inputClass} /></Field>
-        <div>
-          <p className="mb-1 text-sm font-bold">Warna avatar</p>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Warna avatar">{COLORS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={learner.profile.avatar === i} aria-label={`Warna ${i + 1}`} onClick={() => act((d) => { d.profile.avatar = i; })} className={cx('h-11 w-11 rounded-full border-4', learner.profile.avatar === i ? 'border-ink' : 'border-transparent')} style={{ background: c }} />)}</div>
+        <Field label="Nama tampilan" hint="Nama ini muncul di papan peringkat."><input value={name} maxLength={40} onChange={(e) => { edited.current = true; setSaved(false); setName(e.target.value); }} className={inputClass} /></Field>
+        {!cleanName && <p className="-mt-2 text-sm text-bad" role="alert">Nama tampilan tidak boleh kosong.</p>}
+        <fieldset>
+          <legend className="mb-2 text-sm font-bold">Avatar: <span className="font-extrabold text-brand">{AVATARS[avatar % AVATARS.length]?.name}</span></legend>
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-8" role="radiogroup" aria-label="Avatar">
+            {AVATARS.map((a, i) => (
+              <button key={a.id} type="button" role="radio" aria-checked={avatar === i} aria-label={`${a.name}, ${a.label}`} title={a.name}
+                onClick={() => { edited.current = true; setSaved(false); setAvatar(i); }}
+                className={cx('relative grid place-items-center rounded-full p-1 transition', avatar === i ? 'bg-brand ring-2 ring-brand ring-offset-2 ring-offset-surface' : 'hover:bg-surface-2')}>
+                <Avatar index={i} size={56} decorative />
+                {avatar === i && <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-brand text-on-brand" aria-hidden><Check size={12} strokeWidth={3} /></span>}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button disabled={!dirty || !cleanName} onClick={save}>Simpan perubahan</Button>
+          {dirty && <Button variant="ghost" onClick={() => { edited.current = false; setName(learner.profile.name); setAvatar(learner.profile.avatar); }}>Batal</Button>}
+          <span role="status" className="text-sm font-bold text-ok">{saved && !dirty ? 'Profil tersimpan.' : ''}</span>
         </div>
-        <Button disabled={!name.trim() || name.trim() === learner.profile.name} onClick={() => { act((d) => { d.profile.name = name.trim().slice(0, 40); }); void syncNow(); }}>Simpan</Button>
       </Card>
 
       {admin && (

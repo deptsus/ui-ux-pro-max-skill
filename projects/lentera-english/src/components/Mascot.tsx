@@ -1,6 +1,8 @@
 // Pijar, the Lentera firefly. Original mascot drawn as inline SVG and
 // animated with CSS only (see the .pijar rules in globals.css), so it costs no
 // extra JavaScript and stands still when the device asks for reduced motion.
+import { useId } from 'react';
+
 export type Mood = 'happy' | 'cheer' | 'think' | 'sad' | 'encourage' | 'sleep' | 'dance';
 
 const INK = '#1e1b3a';
@@ -104,18 +106,30 @@ export function Mascot({ mood = 'happy', size = 96, className, decorative = fals
   );
 }
 
+/** Lentera's mark: a speech bubble holding a flame (light for learning a language). */
+export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
+  const id = useId().replace(/:/g, '');
+  return (
+    <svg viewBox="0 0 48 48" width={size} height={size} className={className} aria-hidden>
+      <defs>
+        <linearGradient id={`lb-${id}`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6355f0" /><stop offset="1" stopColor="#3a2db5" /></linearGradient>
+        <linearGradient id={`lf-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fcd34d" /><stop offset="1" stopColor="#f97316" /></linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="12" fill={`url(#lb-${id})`} />
+      <path d="M20 10.5 H28 A9.5 9.5 0 0 1 37.5 20 V23.5 A9.5 9.5 0 0 1 28 33 H21.5 L15 38.5 V31.4 A9.5 9.5 0 0 1 10.5 23.5 V20 A9.5 9.5 0 0 1 20 10.5 Z" fill="#fff" />
+      <path d="M24 13.2 C28.6 17.6 30.2 20.6 30.2 23.4 A6.2 6.2 0 0 1 17.8 23.4 C17.8 21.3 18.8 19.3 20.5 17.6 C20.8 19.5 21.8 20.6 23 21 C22.2 18.5 22.7 15.8 24 13.2 Z" fill={`url(#lf-${id})`} />
+      <path d="M24 20.2 C25.9 22.2 26.6 23.6 26.6 24.8 A2.6 2.6 0 0 1 21.4 24.8 C21.4 23.6 22.2 22.2 24 20.2 Z" fill="#fff4cc" />
+    </svg>
+  );
+}
+
 /** `compact`: on phones narrower than 420 px only the mark shows (the name stays for screen readers). */
 export function Logo({ size = 28, compact = false }: { size?: number; compact?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2 font-extrabold tracking-tight">
-      <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden>
-        <rect width="32" height="32" rx="9" fill="#4b3fd6" />
-        <path d="M16 5 L21 10 V19 A5 5 0 0 1 11 19 V10 Z" fill="#fbbf24" />
-        <path d="M13 13 H19 M13 17 H19" stroke="#b45309" strokeWidth="1.6" strokeLinecap="round" />
-        <rect x="12" y="24" width="8" height="3" rx="1.5" fill="#c7d2fe" />
-      </svg>
+    <span className="inline-flex items-center gap-2 tracking-tight">
+      <LogoMark size={size} className="shrink-0" />
       <span className={compact ? 'sr-only min-[420px]:not-sr-only' : undefined}>
-        Lentera <span className="text-brand">English</span>
+        <span className="font-extrabold text-ink">Lentera</span> <span className="font-semibold text-brand">English</span>
       </span>
     </span>
   );

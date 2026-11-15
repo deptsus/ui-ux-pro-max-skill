@@ -87,14 +87,16 @@ export async function loadLearner(): Promise<void> {
   role = localStorage.getItem(roleKey(uid)) === 'admin' ? 'admin' : 'student';
   const guest = read('guest');
   let accountName: string | undefined;
+  let serverAvatar: number | undefined;
   try {
     const { snapshot } = await api<{ snapshot: { state: Partial<LearnerState>; client_updated_at: number } | null }>('/api/sync');
     if (snapshot && (!local || snapshot.client_updated_at > local.updatedAt)) local = hydrate({ ...snapshot.state, outbox: [] }, uid);
-    const me = await api<{ user: { profile?: { display_name?: string; role?: string }; entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
+    const me = await api<{ user: { profile?: { display_name?: string; role?: string; avatar?: number }; entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
     setEntitlement(me.user?.entitlement, uid);
     role = me.user?.profile?.role === 'admin' ? 'admin' : 'student';
     localStorage.setItem(roleKey(uid), role);
     accountName = me.user?.profile?.display_name || undefined;
+    serverAvatar = me.user?.profile?.avatar;
   } catch {
     syncState = 'offline';
   }
@@ -112,6 +114,19 @@ export async function loadLearner(): Promise<void> {
   persist();
   emit();
   scheduleSync(500);
+  // The leaderboard reads the avatar from the account profile, which sync does not copy.
+  if (serverAvatar !== undefined && state.profile.avatar !== serverAvatar) void pushProfile({ avatar: state.profile.avatar });
+}
+
+/** Saves name and avatar on the account (leaderboard); offline is fine, the next sign-in load retries the avatar. */
+export async function pushProfile(patch: { display_name?: string; avatar?: number }): Promise<boolean> {
+  if (!currentSession()) return false;
+  try {
+    await api('/api/me', { method: 'PATCH', body: patch });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function scheduleSync(delay = 4000) {
