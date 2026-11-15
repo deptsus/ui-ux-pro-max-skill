@@ -18,7 +18,8 @@
     "e2e:skills": "node e2e/skills.mjs",
     "e2e:level-exams": "node e2e/level-exams.mjs",
     "e2e:homework": "node e2e/homework.mjs",
-    "e2e:recordings": "node e2e/recordings.mjs"
+    "e2e:recordings": "node e2e/recordings.mjs",
+    "e2e:ui": "node e2e/ui.mjs"
   },
   "engines": {
     "node": ">=20"

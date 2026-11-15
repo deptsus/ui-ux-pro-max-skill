@@ -145,7 +145,7 @@ export default function Landing() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 text-sm text-muted">
           <Logo size={22} />
           <p>Seluruh mesin belajar berjalan tanpa layanan AI.</p>
-          <nav className="flex flex-wrap gap-4" aria-label="Tautan kaki"><a href={ANDROID_APK} download className="hover:text-ink">Aplikasi Android</a><Link href="/masuk" className="hover:text-ink">Masuk</Link><Link href="/daftar" className="hover:text-ink">Daftar</Link><Link href="/admin" className="hover:text-ink">Admin</Link></nav>
+          <nav className="flex flex-wrap gap-x-4" aria-label="Tautan kaki"><a href={ANDROID_APK} download className="inline-flex min-h-11 items-center hover:text-ink">Aplikasi Android</a><Link href="/masuk" className="inline-flex min-h-11 items-center hover:text-ink">Masuk</Link><Link href="/daftar" className="inline-flex min-h-11 items-center hover:text-ink">Daftar</Link><Link href="/admin" className="inline-flex min-h-11 items-center hover:text-ink">Admin</Link></nav>
         </div>
       </footer>
     </div>

@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { Button, cx } from '@/components/ui';
 import { pkOf, refLabel, type Data, type Field, type Row } from './schema';
 
-export const input = 'w-full rounded-xl border-2 border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none disabled:bg-surface-2 disabled:text-muted';
+export const input = 'w-full rounded-xl border-2 border-line-strong bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none disabled:bg-surface-2 disabled:text-muted';
 const small = 'text-xs font-bold text-muted';
 
 function Labeled({ label, hint, required, htmlFor, children }: { label: string; hint?: string; required?: boolean; htmlFor?: string; children: ReactNode }) {

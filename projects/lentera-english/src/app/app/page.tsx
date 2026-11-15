@@ -17,6 +17,41 @@ import { Badge, Button, Card, LinkButton, Progress, Ring } from '@/components/ui
 const REC_ICON: Record<Recommendation['kind'], typeof Wrench> = { placement: Compass, remediate: Wrench, revise: BookOpen, practice: Target, retest: CheckCircle2, review: Repeat, homework: ClipboardList, exam: GraduationCap, lesson: ArrowRight };
 const REC_LABEL: Record<Recommendation['kind'], string> = { placement: 'Mulai di sini', remediate: 'Perbaikan', revise: 'Ulangi materi', practice: 'Latihan tambahan', retest: 'Konfirmasi penguasaan', review: 'Ulangan terjadwal', homework: 'PR', exam: 'Ujian', lesson: 'Pelajaran' };
 
+/** First open (Rilis 6): what the app is and two equal ways in; nothing is forced and it disappears after the first answer. */
+function Welcome({ guest, firstLesson }: { guest: boolean; firstLesson?: string }) {
+  const steps = [
+    ['Tes penempatan', 'Paling banyak 20 soal; berhenti begitu levelmu ketemu.'],
+    ['Pelajaran singkat', 'Penjelasan dalam bahasa Indonesia, contoh, lalu latihan bertahap.'],
+    ['Ulangan terjadwal', 'Materi yang mulai lupa muncul lagi tepat waktu.'],
+  ];
+  return (
+    <section aria-labelledby="welcome-title">
+      <Card className="space-y-4">
+        <div className="flex items-center gap-4">
+          <Mascot mood="happy" size={76} className="shrink-0" />
+          <div className="min-w-0">
+            <h1 id="welcome-title" className="text-2xl font-extrabold tracking-tight">Selamat datang di Lentera English!</h1>
+            <p className="mt-1 text-muted">Belajar bahasa Inggris dari nol sampai C2, dijelaskan dalam bahasa Indonesia.</p>
+          </div>
+        </div>
+        <ol className="space-y-3">
+          {steps.map(([title, text], i) => (
+            <li key={title} className="flex gap-3">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-extrabold text-brand" aria-hidden>{i + 1}</span>
+              <span className="min-w-0"><span className="block font-bold">{title}</span><span className="block text-sm text-muted">{text}</span></span>
+            </li>
+          ))}
+        </ol>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <LinkButton href="/app/placement" size="lg" full>Ikuti tes penempatan<ArrowRight size={20} aria-hidden /></LinkButton>
+          {firstLesson && <LinkButton href={`/app/lesson?id=${firstLesson}`} size="lg" variant="secondary" full>Lewati, mulai dari A1</LinkButton>}
+        </div>
+        {guest && <p className="text-sm text-muted">Sudah punya akun? <Link href="/masuk?next=/app" className="inline-flex min-h-11 items-center font-bold text-brand underline">Masuk</Link></p>}
+      </Card>
+    </section>
+  );
+}
+
 export default function Dashboard() {
   const { ix, learner, ent, now, premium } = useApp();
   const session = useSession();
@@ -33,9 +68,12 @@ export default function Dashboard() {
   const streak = liveStreak(learner.streak, now);
   const hour = new Date(now).getHours();
   const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 19 ? 'Selamat sore' : 'Selamat malam';
+  // A learner who has not answered anything yet sees the welcome instead of empty counters.
+  const isNew = !learner.profile.placementDone && learner.attempts.length === 0 && learner.xp === 0 && !Object.keys(learner.lessons).length;
 
   return (
     <div className="space-y-5">
+      {isNew ? <Welcome guest={!session} firstLesson={ix.orderedLessons[0]?.id} /> : (
       <Card className="flex flex-col gap-5 sm:flex-row sm:items-center">
         <Mascot mood={xpToday >= goal ? 'cheer' : streak === 0 && learner.streak.longest > 0 && xpToday === 0 ? 'sleep' : 'happy'} size={92} className="shrink-0" />
         <div className="min-w-0 flex-1">
@@ -47,15 +85,16 @@ export default function Dashboard() {
           <span className="text-sm font-extrabold leading-tight">{xpToday}<span className="block text-[10px] font-bold text-muted">/ {goal} XP</span></span>
         </Ring>
       </Card>
+      )}
 
-      {!session && (
+      {!session && !isNew && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-brand-soft px-4 py-3 text-sm">
           <p><span className="font-bold">Kamu belajar sebagai tamu.</span> Progres tersimpan di perangkat ini saja.</p>
           <LinkButton href="/daftar" size="sm">Buat akun gratis</LinkButton>
         </div>
       )}
 
-      {top && (
+      {top && !(isNew && top.kind === 'placement') && (
         <section aria-labelledby="rec-title">
           <h2 id="rec-title" className="mb-2 text-lg font-extrabold">Langkah berikutnya untukmu</h2>
           <Card className="border-2 border-brand">
@@ -105,7 +144,9 @@ export default function Dashboard() {
                 <p className="font-bold">{m.mission.title} <Badge tone={m.mission.period === 'daily' ? 'brand' : 'accent'}>{m.mission.period === 'daily' ? 'Harian' : 'Mingguan'}</Badge></p>
                 <div className="mt-1.5 flex items-center gap-2"><Progress value={m.progress} max={m.mission.target} tone={m.done ? 'ok' : 'brand'} className="h-2" label={m.mission.title} /><span className="shrink-0 text-xs font-bold text-muted">{m.progress}/{m.mission.target}</span></div>
               </div>
-              {m.claimed ? <Badge tone="ok"><CheckCircle2 size={14} aria-hidden />Diklaim</Badge> : <Button size="sm" variant="accent" disabled={!m.done} onClick={() => act((d, at) => claimMission(d, m.key, m.mission.reward, at))}>+{m.mission.reward} XP</Button>}
+              {m.claimed ? <Badge tone="ok"><CheckCircle2 size={14} aria-hidden />Diklaim</Badge> : m.done
+                ? <Button size="sm" variant="accent" onClick={() => act((d, at) => claimMission(d, m.key, m.mission.reward, at))}>Klaim +{m.mission.reward} XP</Button>
+                : <span className="shrink-0 text-sm font-bold text-muted">+{m.mission.reward} XP</span>}
             </div>
           ))}
         </Card>

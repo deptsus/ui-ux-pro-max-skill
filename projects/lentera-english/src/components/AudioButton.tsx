@@ -21,14 +21,14 @@ export function AudioButton({ text, audioKey, size = 'md', label = 'Putar audio'
     setFailed(result === 'none');
     setBusy(null);
   };
-  const dim = size === 'lg' ? 'h-16 w-16' : size === 'sm' ? 'h-9 w-9' : 'h-12 w-12';
+  const dim = size === 'lg' ? 'h-16 w-16' : size === 'sm' ? 'h-11 w-11' : 'h-12 w-12';
   const icon = size === 'lg' ? 30 : size === 'sm' ? 16 : 22;
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       <button type="button" onClick={() => run(false)} aria-label={label} className={cx('grid place-items-center rounded-2xl border-2 border-b-4 border-brand-strong bg-brand text-on-brand transition active:translate-y-0.5 active:border-b-2', dim, busy === 'normal' && 'animate-pulse')}>
         <Volume2 size={icon} aria-hidden />
       </button>
-      <button type="button" onClick={() => run(true)} aria-label={`${label} (lambat)`} title="Putar lambat" className={cx('grid place-items-center rounded-2xl border-2 border-b-4 border-line bg-surface text-brand transition active:translate-y-0.5 active:border-b-2', size === 'lg' ? 'h-12 w-12' : 'h-9 w-9', busy === 'slow' && 'animate-pulse')}>
+      <button type="button" onClick={() => run(true)} aria-label={`${label} (lambat)`} title="Putar lambat" className={cx('grid place-items-center rounded-2xl border-2 border-b-4 border-line bg-surface text-brand transition active:translate-y-0.5 active:border-b-2', size === 'lg' ? 'h-12 w-12' : 'h-11 w-11', busy === 'slow' && 'animate-pulse')}>
         <Snail size={size === 'lg' ? 22 : 16} aria-hidden />
       </button>
       {showSource && (

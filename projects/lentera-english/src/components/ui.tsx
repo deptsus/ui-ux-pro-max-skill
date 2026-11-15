@@ -14,7 +14,7 @@ const VARIANT: Record<Variant, string> = {
   accent: 'bg-accent text-[#1e1b3a] border-accent-strong hover:brightness-105',
 };
 const BASE = 'inline-flex items-center justify-center gap-2 rounded-2xl font-bold transition duration-150 border-2 border-b-4 active:border-b-2 active:translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none select-none';
-const SIZE = { sm: 'px-3 py-1.5 text-sm min-h-9', md: 'px-5 py-2.5 text-base min-h-11', lg: 'px-6 py-3.5 text-lg min-h-13' };
+const SIZE = { sm: 'px-3 py-1.5 text-sm min-h-11', md: 'px-5 py-2.5 text-base min-h-11', lg: 'px-6 py-3.5 text-lg min-h-13' };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -113,7 +113,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
     </label>
   );
 }
-export const inputClass = 'w-full rounded-2xl border-2 border-line bg-surface px-4 py-3 text-base text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none';
+export const inputClass = 'w-full rounded-2xl border-2 border-line-strong bg-surface px-4 py-3 text-base text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none';
 
 // Formatter tinggal di '@/lib/format' (tanpa 'use client'); diekspor ulang agar impor lama tetap jalan.
 export { rupiah, dateId, dateTimeId } from '@/lib/format';

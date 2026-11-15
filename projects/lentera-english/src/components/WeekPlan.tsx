@@ -64,7 +64,7 @@ export function WeekPlanCard() {
     return (
       <Card className="flex flex-wrap items-center gap-3 p-4">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-strong"><CalendarCheck size={20} aria-hidden /></span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-52">
           <p className="font-extrabold">Rencana belajar 52 minggu</p>
           <p className="text-sm text-muted">Paket Premium Tahunan membagi jalurmu sampai C2 menjadi target mingguan, lalu menyesuaikannya setiap Senin.</p>
         </div>

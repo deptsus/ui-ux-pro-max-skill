@@ -9,6 +9,7 @@
   --ink: #1e1b3a;
   --muted: #5b5878;
   --line: #dddaee;
+  --line-strong: #84809e;
   --brand: #4b3fd6;
   --brand-strong: #362aa8;
   --on-brand: #ffffff;
@@ -31,6 +32,7 @@
   --ink: #f1effc;
   --muted: #aaa6c9;
   --line: #36315c;
+  --line-strong: #6f6a9c;
   --brand: #9087ff;
   --brand-strong: #6f63f0;
   --on-brand: #121022;
@@ -54,6 +56,7 @@
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-brand: var(--brand);
   --color-brand-strong: var(--brand-strong);
   --color-on-brand: var(--on-brand);
