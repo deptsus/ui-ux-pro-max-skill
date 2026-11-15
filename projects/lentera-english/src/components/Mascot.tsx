@@ -106,19 +106,24 @@ export function Mascot({ mood = 'happy', size = 96, className, decorative = fals
   );
 }
 
-/** Lentera's mark: a speech bubble holding a flame (light for learning a language). */
+/** Lentera's mark: a lantern with a glowing flame (the light that guides learning). */
 export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
   const id = useId().replace(/:/g, '');
   return (
     <svg viewBox="0 0 48 48" width={size} height={size} className={className} aria-hidden>
       <defs>
         <linearGradient id={`lb-${id}`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6355f0" /><stop offset="1" stopColor="#3a2db5" /></linearGradient>
-        <linearGradient id={`lf-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fcd34d" /><stop offset="1" stopColor="#f97316" /></linearGradient>
+        <linearGradient id={`lf-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fde68a" /><stop offset="1" stopColor="#f97316" /></linearGradient>
+        <radialGradient id={`lg-${id}`}><stop offset="0" stopColor="#fde68a" stopOpacity="0.6" /><stop offset="1" stopColor="#fde68a" stopOpacity="0" /></radialGradient>
       </defs>
       <rect width="48" height="48" rx="12" fill={`url(#lb-${id})`} />
-      <path d="M20 10.5 H28 A9.5 9.5 0 0 1 37.5 20 V23.5 A9.5 9.5 0 0 1 28 33 H21.5 L15 38.5 V31.4 A9.5 9.5 0 0 1 10.5 23.5 V20 A9.5 9.5 0 0 1 20 10.5 Z" fill="#fff" />
-      <path d="M24 13.2 C28.6 17.6 30.2 20.6 30.2 23.4 A6.2 6.2 0 0 1 17.8 23.4 C17.8 21.3 18.8 19.3 20.5 17.6 C20.8 19.5 21.8 20.6 23 21 C22.2 18.5 22.7 15.8 24 13.2 Z" fill={`url(#lf-${id})`} />
-      <path d="M24 20.2 C25.9 22.2 26.6 23.6 26.6 24.8 A2.6 2.6 0 0 1 21.4 24.8 C21.4 23.6 22.2 22.2 24 20.2 Z" fill="#fff4cc" />
+      <circle cx="24" cy="27.5" r="13.5" fill={`url(#lg-${id})`} />
+      <path d="M19.2 11 A4.8 4.8 0 0 1 28.8 11" fill="none" stroke="#eef0ff" strokeWidth="2.8" strokeLinecap="round" />
+      <path d="M14.2 13.2 H33.8 L31 17.4 H17 Z" fill="#eef0ff" />
+      <rect x="14.6" y="17.4" width="18.8" height="18.6" rx="5" fill="#fff" fillOpacity="0.14" stroke="#eef0ff" strokeWidth="2.8" />
+      <path d="M24 19.8 C27.8 23.8 29.4 26.4 29.4 28.6 A5.4 5.4 0 0 1 18.6 28.6 C18.6 26.4 20.2 23.8 24 19.8 Z" fill={`url(#lf-${id})`} />
+      <path d="M24 25 C25.5 26.6 26.2 27.7 26.2 28.7 A2.2 2.2 0 0 1 21.8 28.7 C21.8 27.7 22.5 26.6 24 25 Z" fill="#fff4cc" />
+      <path d="M16.8 36 H31.2 L29.1 39.8 H18.9 Z" fill="#eef0ff" />
     </svg>
   );
 }

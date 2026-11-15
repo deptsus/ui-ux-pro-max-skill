@@ -44,11 +44,13 @@ describe('avatar karakter', () => {
 });
 
 describe('logo Lentera', () => {
-  it('logo baru (balon percakapan dengan nyala) dan gradiennya unik per salinan', () => {
+  it('logo baru (lentera dengan nyala api) dan gradiennya unik per salinan', () => {
     const html = renderToStaticMarkup(h('div', null, h(LogoMark, {}), h(LogoMark, {})));
-    const ids = [...html.matchAll(/linearGradient id="([^"]+)"/g)].map((m) => m[1]);
-    expect(ids).toHaveLength(4);
-    expect(new Set(ids).size).toBe(4);
+    const ids = [...html.matchAll(/(?:linear|radial)Gradient id="([^"]+)"/g)].map((m) => m[1]);
+    expect(ids).toHaveLength(6);
+    expect(new Set(ids).size).toBe(6);
+    // handle, cap, glass, flame and base of the lantern
+    expect(html).toContain('M19.2 11 A4.8 4.8 0 0 1 28.8 11');
   });
   it('nama "Lentera English" tetap ada, juga dalam bentuk ringkas untuk HP sempit', () => {
     const html = renderToStaticMarkup(h(Logo, { compact: true }));
