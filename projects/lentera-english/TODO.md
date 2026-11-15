@@ -52,7 +52,8 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 5 dari `ROADMAP.md`: 12 pelajaran B2–C2 (9 per level), 4 cerita bercabang B1–C2, 4 skenario dan 4 materi menyimak C1–C2 (`tests/rilis5.test.ts`, `e2e:skills`). Pemilik: jalankan `apply-0011.sql`, lalu impor ulang + terbitkan.
 - [x] Rilis 6 dari `ROADMAP.md`: tab Rekaman (rekam/unggah, Supabase Storage), audit UI/UX dengan `ui-ux-pro-max` (kontras, target 44 px, layar 320 px, sambutan), ukuran huruf, getaran, label "Bercabang" untuk tamu (`tests/rilis6.test.ts`, `e2e:recordings`, `e2e:ui`). Pemilik: jalankan `apply-0012.sql`, lalu rekam di tab Rekaman dan terbitkan.
 - [x] Keputusan pemilik (15 Nov 2026): audio tetap memakai suara bawaan perangkat; tab Rekaman tidak diisi. Fiturnya tetap tersedia bila suatu saat ada rekaman (pemilik atau pengisi suara).
-- [ ] Pilih pekerjaan "Setelah Rilis 6" di `ROADMAP.md`.
+- [x] Perbaikan simpan profil (avatar saja bisa disimpan; avatar sampai ke papan peringkat), 8 avatar karakter (satu pink #E89EB8), logo baru (`tests/profil.test.ts`, `e2e:ui`).
+- [ ] Pilih pekerjaan "Setelah Rilis 6" atau "Usulan update besar" di `ROADMAP.md`.
 - [x] Pengingat PR terbukti sampai di HP sungguhan (15 Nov 2026, HP Android pemilik). Fungsi terjadwal Netlify `homework-reminders` terdaftar (`@hourly`).
 - [ ] Perbesar bank soal ujian level (sekarang 12 + 8 + 8 soal per level); batas waktu ujian level belum dicek server (hanya di perangkat).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).

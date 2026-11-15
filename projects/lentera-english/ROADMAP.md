@@ -215,6 +215,23 @@ Rencana awal:
 - Mode belajar luring penuh untuk materi Premium yang sudah dibuka.
 - Rilis Play Store (butuh akun Play Console).
 
+### Usulan update besar (saran Claude, 15 November 2026, untuk dipilih pemilik)
+
+Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, jadi pertumbuhan berikutnya lebih ditentukan oleh **jangkauan, pembayaran, dan kebiasaan belajar** daripada jumlah materi.
+
+1. **Rilis 7 "Siap Tumbuh"** (paling berdampak):
+   - **Play Store**: aplikasi resmi (dipercaya, mudah dicari, update otomatis). Butuh akun Play Console (biaya sekali sekitar US$25), AAB dari kunci tanda tangan yang dipegang pemilik, halaman kebijakan privasi, dan formulir keamanan data.
+   - **Pembayaran QRIS otomatis** (Xendit atau Midtrans): Premium aktif detik itu juga tanpa konfirmasi manual. Kode Xendit sudah ada tetapi nonaktif; butuh verifikasi usaha di penyedia dan kunci API yang sah. Potongan QRIS sekitar 0,7% per transaksi.
+2. **Rilis 8 "Kebiasaan Belajar"** (retensi):
+   - **Pengingat harian beruntun** di HP pada jam pilihan pelajar (memakai jalur pengingat PR yang sudah terbukti).
+   - **Liga mingguan** (naik/turun divisi) dan **tantangan antarteman** dengan kode undangan.
+   - **Latihan "shadowing"**: dengar, rekam diri sendiri, bandingkan berdampingan (tanpa penilaian AI, sesuai klaim situs).
+3. **Rilis 9 "Kelas"** (pendapatan dari sekolah/kursus): guru membuat kelas dengan kode, memberi pelajaran/PR, melihat progres per siswa; lisensi per kelas. Termasuk dasbor orang tua.
+4. **Jalur khusus** (segmen baru): persiapan TOEFL ITP/IELTS, Bahasa Inggris untuk kerja (wawancara, email, rapat), dan jalur anak.
+5. **Analitik pemilik di `/admin`**: corong daftar → tes penempatan → pelajaran pertama → hari ke-7, retensi per minggu, dan konversi ke Premium, untuk dasar keputusan berikutnya.
+6. **Halaman materi publik untuk SEO**: ringkasan tata bahasa dan contoh gratis yang bisa ditemukan di Google, mengarah ke aplikasi.
+7. **Ketahanan**: pemantauan error, cadangan otomatis kurikulum dan data pelajar, dan rencana naik paket Supabase/Netlify saat pengguna bertambah.
+
 ---
 
 ## 4. Pekerjaan berkelanjutan tanpa deploy
