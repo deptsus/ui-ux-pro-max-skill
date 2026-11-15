@@ -333,7 +333,7 @@ export const TABLES: TableDef[] = [
   {
     id: 'stories', label: 'Cerita', singular: 'cerita bergambar', group: 'Pustaka', pk: 'id', idHint: 'Contoh: story-market-day',
     title: (r) => r.title,
-    subtitle: (r, d) => `${r.level_code} · ${(r.scenes ?? []).length} adegan · ${count(d.questions, (q) => q.story_id === r.id)} soal`,
+    subtitle: (r, d) => `${r.level_code} · ${(r.scenes ?? []).length} adegan · ${r.branch ? `bercabang (${(r.branch.nodes ?? []).length} cabang)` : `${count(d.questions, (q) => q.story_id === r.id)} soal`}`,
     badges: (r) => [[r.is_premium ? 'Premium' : 'Gratis', r.is_premium ? 'accent' : 'ok']],
     fields: [
       { key: 'title', label: 'Judul', kind: 'text', required: true },
@@ -342,6 +342,7 @@ export const TABLES: TableDef[] = [
       { key: 'is_premium', label: 'Hanya untuk Premium', kind: 'bool' },
       { key: 'characters', label: 'Tokoh (JSON)', kind: 'json', rows: 8, required: true, hint: 'Daftar { "id", "name", "look", "shirt", "hair", "skin", "hijab" }. look: pijar, girl, boy, woman, man, grandma, grandpa. Warna berbentuk #rrggbb.' },
       { key: 'scenes', label: 'Adegan (JSON)', kind: 'json', rows: 18, required: true, hint: 'Daftar adegan { "backdrop", "time", "actors": [{ "who", "at", "pose", "enter" }], "lines": [{ "who", "en", "tr", "pose" }] }. backdrop: home, bedroom, school, street, market, station, cafe, park, shop, temple. at: left, center, right. pose: stand, wave, happy, sad, surprised, think, point. who "narrator" untuk narasi.' },
+      { key: 'branch', label: 'Cabang cerita (JSON, opsional)', kind: 'json', rows: 18, nullable: true, hint: 'Untuk cerita bercabang (Rilis 5). Kosongkan untuk cerita biasa. { "as": id tokoh yang diperankan pelajar, "start": id cabang awal, "nodes": [{ "id", "scene": adegan seperti di atas, "ask": "Apa jawaban ...?", "choices": [{ "text", "correct", "natural" (1-3), "note", "better", "next" }] } atau { "id", "scene", "ending": { "good", "title", "text" } }] }. Adegan di atas menjadi pembuka sebelum pilihan pertama.' },
     ],
     blank: () => ({ level_code: 'A1', is_premium: true, summary: '', characters: [], scenes: [] }),
     cascade: (r, d) => plural(count(d.questions, (q) => q.story_id === r.id), 'soal'),

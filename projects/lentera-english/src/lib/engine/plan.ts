@@ -89,7 +89,8 @@ export function planMilestones(ix: ContentIndex, from: Cefr): Milestone[] {
     const after = new Map<number, Milestone[]>();
     const loose: Milestone[] = [];
     for (const t of tales) {
-      const ci = storyChapter(ix, t.questionIds, chapters.map((c) => c.id));
+      // A branching story (Rilis 5) draws on the whole level, so it closes the level.
+      const ci = t.branch ? chapters.length - 1 : storyChapter(ix, t.questionIds, chapters.map((c) => c.id));
       const m = milestone('story', t.id, level, t.title, `/app/stories?id=${t.id}`);
       if (ci === undefined) loose.push(m);
       else after.set(ci, [...(after.get(ci) ?? []), m]);

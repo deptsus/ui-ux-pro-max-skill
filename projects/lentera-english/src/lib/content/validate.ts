@@ -1,6 +1,6 @@
 // Content quality gate. Used by `npm run content:check`, by the test suite and
 // by the CMS before a curriculum version is published.
-import { EXAM_BANK_TYPES, STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise, type WritingTask } from './types';
+import { EXAM_BANK_TYPES, STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise, type StoryBranch, type StoryNode, type StoryScene, type WritingTask } from './types';
 import { grade, normalize } from '@/lib/engine/grading';
 import { checkWriting } from '@/lib/engine/writing';
 
@@ -71,6 +71,50 @@ export function validateWriting(p: string, w: WritingTask): string[] {
       else if (checkWriting(l.text, w).score < 100) errs.push(`${p}: contoh "${l.label}" tidak memenuhi daftar periksa`);
     }
   }
+  return errs;
+}
+
+/** Branching story (Rilis 5): every path reaches an ending, nothing loops, every choice is explained. */
+export function validateBranch(id: string, b: StoryBranch, cast: Set<string>): string[] {
+  const errs: string[] = [];
+  const p = `cerita ${id}`;
+  if (!cast.has(b.as)) errs.push(`${p}: tokoh pelajar "${b.as}" tidak ada di daftar tokoh`);
+  const byId = new Map<string, StoryNode>();
+  for (const n of b.nodes) {
+    if (byId.has(n.id)) errs.push(`${p}: cabang "${n.id}" ganda`);
+    byId.set(n.id, n);
+  }
+  if (!byId.has(b.start)) errs.push(`${p}: cabang awal "${b.start}" tidak ada`);
+  for (const n of b.nodes) {
+    const q = `${p}/cabang ${n.id}`;
+    if (!!n.ending === !!n.choices?.length) errs.push(`${q}: harus punya pilihan atau akhir cerita, tidak keduanya`);
+    if (n.ending && (!n.ending.title.trim() || !n.ending.text.trim())) errs.push(`${q}: akhir cerita butuh judul dan teks`);
+    if (n.choices?.length) {
+      if (n.choices.length < 2) errs.push(`${q}: minimal dua pilihan`);
+      if (!n.choices.some((c) => c.correct && c.natural === 3)) errs.push(`${q}: tidak ada jawaban terbaik (benar dan kewajaran 3)`);
+      if (new Set(n.choices.map((c) => c.text)).size !== n.choices.length) errs.push(`${q}: pilihan ganda`);
+      if (!n.scene.actors.some((a) => a.who === b.as)) errs.push(`${q}: tokoh pelajar harus ada di adegan sebelum memilih`);
+      for (const c of n.choices) {
+        if (!c.text.trim() || !c.note.trim()) errs.push(`${q}: setiap pilihan butuh teks dan penjelasan`);
+        if (!byId.has(c.next)) errs.push(`${q}: tujuan "${c.next}" tidak ada`);
+        if (!(c.correct && c.natural === 3) && !c.better?.trim()) errs.push(`${q}: pilihan "${c.text}" butuh contoh yang lebih baik`);
+      }
+    }
+  }
+  // Reachable from the start, no loops, and at least one good ending.
+  const seen = new Set<string>();
+  const onPath = new Set<string>();
+  const walk = (nid: string): void => {
+    if (onPath.has(nid)) { errs.push(`${p}: jalur berputar di "${nid}"`); return; }
+    if (seen.has(nid) || !byId.has(nid)) return;
+    seen.add(nid);
+    onPath.add(nid);
+    for (const c of byId.get(nid)!.choices ?? []) walk(c.next);
+    onPath.delete(nid);
+  };
+  walk(b.start);
+  for (const n of b.nodes) if (!seen.has(n.id)) errs.push(`${p}/cabang ${n.id}: tidak bisa dicapai dari awal`);
+  if (!b.nodes.some((n) => n.ending?.good)) errs.push(`${p}: belum ada akhir cerita yang baik`);
   return errs;
 }
 
@@ -218,9 +262,9 @@ export function validatePack(pack: ContentPack): string[] {
       for (const color of [c.shirt, c.hair, c.skin, c.hijab]) if (color !== undefined && !/^#[0-9a-f]{6}$/i.test(color)) errs.push(`cerita ${s.id}: warna "${color}" pada tokoh ${c.id} harus berbentuk #rrggbb`);
       if (!c.name.trim()) errs.push(`cerita ${s.id}: tokoh ${c.id} belum punya nama`);
     }
-    if (s.scenes.length < 2) errs.push(`cerita ${s.id}: minimal dua adegan`);
-    s.scenes.forEach((sc, i) => {
-      const p = `cerita ${s.id}/adegan ${i + 1}`;
+    if (s.scenes.length < (s.branch ? 1 : 2)) errs.push(`cerita ${s.id}: minimal ${s.branch ? 'satu adegan pembuka' : 'dua adegan'}`);
+    const scenes: [string, StoryScene][] = [...s.scenes.map((sc, i): [string, StoryScene] => [`cerita ${s.id}/adegan ${i + 1}`, sc]), ...(s.branch?.nodes ?? []).map((n): [string, StoryScene] => [`cerita ${s.id}/cabang ${n.id}`, n.scene])];
+    scenes.forEach(([p, sc]) => {
       if (!known(STORY_BACKDROPS, sc.backdrop)) errs.push(`${p}: latar "${sc.backdrop}" tidak dikenal`);
       if (sc.actors.length > 3) errs.push(`${p}: maksimal tiga tokoh dalam satu adegan`);
       if (new Set(sc.actors.map((a) => a.at)).size !== sc.actors.length) errs.push(`${p}: dua tokoh berdiri di posisi yang sama`);
@@ -236,7 +280,8 @@ export function validatePack(pack: ContentPack): string[] {
         if (!known(STORY_POSES, l.pose)) errs.push(`${p}: pose "${l.pose}" tidak dikenal`);
       }
     });
-    if (s.questionIds.length < 3) errs.push(`cerita ${s.id}: minimal tiga soal setelah cerita`);
+    if (s.branch) errs.push(...validateBranch(s.id, s.branch, cast));
+    else if (s.questionIds.length < 3) errs.push(`cerita ${s.id}: minimal tiga soal setelah cerita`);
     for (const id of s.questionIds) {
       if (!ids.has(id)) errs.push(`cerita ${s.id}: soal ${id} tidak ada`);
       else if (stage.get(id) !== 'story') errs.push(`cerita ${s.id}: soal ${id} harus bertahap "story"`);

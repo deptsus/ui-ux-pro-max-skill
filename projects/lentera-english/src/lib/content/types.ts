@@ -254,6 +254,34 @@ export interface StoryScene {
   actors: StoryActor[];
   lines: StoryLine[];
 }
+/** A reply the learner can choose in a branching story (Rilis 5). Graded like a conversation option. */
+export interface StoryChoice {
+  text: string;
+  /** false = grammar error. A grammatical but tactless reply is true with low naturalness. */
+  correct: boolean;
+  natural: 1 | 2 | 3;
+  /** Why this reply works or not (Indonesian). */
+  note: string;
+  /** A better way to say it, shown when the reply is not the best. */
+  better?: string;
+  /** Node shown next. */
+  next: string;
+}
+export interface StoryNode {
+  id: string;
+  scene: StoryScene;
+  /** What the learner decides here, e.g. "Apa jawaban Sari?". */
+  ask?: string;
+  choices?: StoryChoice[];
+  /** Ending nodes have no choices. */
+  ending?: { good: boolean; title: string; text: string };
+}
+/** Branching part of a story: after the opening scenes, the learner speaks as `as` and the choices decide the path. */
+export interface StoryBranch {
+  as: string;
+  start: string;
+  nodes: StoryNode[];
+}
 export interface Story {
   id: string;
   level: Cefr;
@@ -262,9 +290,11 @@ export interface Story {
   premium: boolean;
   locked?: boolean;
   characters: StoryCharacter[];
+  /** For a branching story: the opening scenes before the first choice. */
   scenes: StoryScene[];
-  /** Exercise ids (stage "story") answered after the story. */
+  /** Exercise ids (stage "story") answered after the story. Branching stories are scored by their choices instead. */
   questionIds: string[];
+  branch?: StoryBranch;
 }
 
 export interface Phoneme {

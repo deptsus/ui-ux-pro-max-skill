@@ -17,6 +17,13 @@ async function require0008(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
   if (!Array.isArray(features) || !features.includes('stories')) throw new HttpError(409, NEEDS_0008);
 }
+const NEEDS_0011 = 'Basis data belum diperbarui untuk Rilis 5 (cerita bercabang). Jalankan supabase/manual/apply-0011.sql di Supabase SQL Editor, lalu ulangi.';
+/** Branching stories are stored in a column 0011 adds; importing without it would silently drop them. */
+async function require0011(db: Rpc) {
+  await require0009(db);
+  const features = await db.rpc<string[]>('content_features').catch(() => null);
+  if (!Array.isArray(features) || !features.includes('branching_stories')) throw new HttpError(409, NEEDS_0011);
+}
 const NEEDS_0010 = 'Basis data belum diperbarui untuk Rilis 4 (ringkasan dan pengingat PR). Jalankan supabase/manual/apply-0010.sql di Supabase SQL Editor, lalu muat ulang.';
 async function require0010(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
@@ -53,7 +60,7 @@ export const POST = route(async (req) => {
       return json(result);
     }
     case 'import-bundled':
-      await require0009(db);
+      await require0011(db);
       return json(await db.rpc('import_content', { p_actor: userId, p_rows: packToRows(buildPack()) }));
     // Review notes: the owner flags content in the CMS; the next release works through them.
     case 'notes':

@@ -22,6 +22,7 @@ import { listening, phonemes, placement } from './listening';
 import { listeningUpper } from './listening-upper';
 import { listeningR5, scenariosR5 } from './skills-r5';
 import { stories } from './stories';
+import { branchStories } from './stories-branch';
 import { EXAM_BANK, EXAM_MINUTES } from './exam-bank';
 import { WRITING_UPPER } from './writing-upper';
 import { futurePerfectLesson, participleLesson, verbPatternsLesson, wishLesson } from './b2-3';
@@ -465,10 +466,10 @@ export function buildPack(): ContentPack {
   }
 
   // Illustrated stories.
-  const storyItems: Story[] = stories.map((s) => {
+  const storyItems: Story[] = [...stories, ...branchStories].map((s) => {
     const qs = stamp(s.questions, s.id, 'story', 'skill.story', null);
     exercises.push(...qs);
-    return { id: s.id, level: s.level, title: s.title, summary: s.summary, premium: s.premium, characters: s.characters, scenes: s.scenes, questionIds: qs.map((q) => q.id) };
+    return { id: s.id, level: s.level, title: s.title, summary: s.summary, premium: s.premium, characters: s.characters, scenes: s.scenes, questionIds: qs.map((q) => q.id), ...(s.branch ? { branch: s.branch } : {}) };
   });
 
   // Placement test and level exams.

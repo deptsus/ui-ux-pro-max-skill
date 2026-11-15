@@ -5,7 +5,7 @@
 // Story questions never set `focus`: they only make sense right after the story,
 // so they stay out of remedial drills. Wrong options may still carry a tag, so a
 // mistake here still points the learner to the right drill.
-import type { Cefr, StoryActor, StoryCharacter, StoryLine, StoryPose, StoryScene } from '@/lib/content/types';
+import type { Cefr, StoryActor, StoryBranch, StoryCharacter, StoryLine, StoryPose, StoryScene } from '@/lib/content/types';
 import { match, mc, para, tf, type Draft } from './dsl';
 
 export interface StoryDraft {
@@ -17,10 +17,12 @@ export interface StoryDraft {
   characters: StoryCharacter[];
   scenes: StoryScene[];
   questions: Draft[];
+  /** Branching stories (Rilis 5) are scored by their choices and have no questions. */
+  branch?: StoryBranch;
 }
 
 // ---------------------------------------------------------------- cast
-const C = {
+export const C = {
   pijar: { id: 'pijar', name: 'Pijar', look: 'pijar', shirt: '#4b3fd6' },
   dimas: { id: 'dimas', name: 'Dimas', look: 'boy', shirt: '#0ea5e9', hair: '#1c1917', skin: '#f2c8a4' },
   sari: { id: 'sari', name: 'Sari', look: 'girl', shirt: '#ec4899', hair: '#1c1917', skin: '#f6d3b8' },
@@ -33,9 +35,9 @@ const C = {
 } satisfies Record<string, StoryCharacter>;
 
 // ---------------------------------------------------------------- helpers
-const say = (who: string, en: string, tr: string, pose?: StoryPose): StoryLine => ({ who, en, tr, ...(pose ? { pose } : {}) });
-const tell = (en: string, tr: string): StoryLine => ({ who: 'narrator', en, tr });
-const at = (who: string, where: StoryActor['at'], pose?: StoryPose, enter?: StoryActor['enter']): StoryActor => ({ who, at: where, ...(pose ? { pose } : {}), ...(enter ? { enter } : {}) });
+export const say = (who: string, en: string, tr: string, pose?: StoryPose): StoryLine => ({ who, en, tr, ...(pose ? { pose } : {}) });
+export const tell = (en: string, tr: string): StoryLine => ({ who: 'narrator', en, tr });
+export const at = (who: string, where: StoryActor['at'], pose?: StoryPose, enter?: StoryActor['enter']): StoryActor => ({ who, at: where, ...(pose ? { pose } : {}), ...(enter ? { enter } : {}) });
 const Q = 'Jawab pertanyaan tentang cerita.';
 const S = { topic: 'skill.story' } as const;
 

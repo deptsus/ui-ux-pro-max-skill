@@ -38,7 +38,9 @@ projects/lentera-english/
 │   ├── conversations-upper.ts 5 skenario B2–C2 (tahap 3)
 │   ├── listening.ts          Materi menyimak A1–B1, fonem, soal tes penempatan
 │   ├── listening-upper.ts    11 materi menyimak B1–C2 dengan dikte (tahap 3)
-│   ├── stories.ts            6 cerita bergambar A1–A2 + soalnya (Rilis 1)
+│   ├── stories.ts            cerita bergambar + soalnya (Rilis 1–2)
+│   ├── stories-branch.ts     4 cerita bercabang B1–C2: pilihan pelajar menentukan adegan dan akhir (Rilis 5)
+│   ├── b2-3.ts, c1-3.ts, c2-3.ts  12 pelajaran B2–C2 lanjutan (Rilis 5); skills-r5.ts: skenario + menyimak C1–C2
 │   └── index.ts              Silabus, topik, pola kesalahan, buildPack() → ContentPack
 ├── scripts/check-content.ts  Gerbang kualitas konten (npm run content:check)
 ├── scripts/export-content.ts Cadangkan kurikulum dari basis data ke backups/*.json (npm run content:export)
@@ -69,7 +71,8 @@ projects/lentera-english/
 │   ├── components/           UI: ui.tsx (primitif), ExerciseCard, SessionRunner, LessonContent,
 │   │                         AudioButton, Charts, Mouth, Mascot (Pijar, animasi CSS), AuthForm, nav.ts,
 │   │                         WeekPlan (rencana mingguan)
-│   │   ├── story/            StoryStage.tsx: adegan cerita SVG (latar, tokoh, pose) beranimasi CSS
+│   │   ├── story/            StoryStage.tsx: adegan cerita SVG (latar, tokoh, pose) beranimasi CSS;
+│   │                         BranchPlayer.tsx: pemutar cerita bercabang (nilai di src/lib/engine/branch.ts)
 │   │   └── admin/            Dashboard admin: schema.ts (definisi form tiap tabel CMS + validasi),
 │   │                         fields.tsx (kontrol form), CmsPanel, PaymentsPanel, PublishPanel, Confirm, api.ts
 │   └── lib/

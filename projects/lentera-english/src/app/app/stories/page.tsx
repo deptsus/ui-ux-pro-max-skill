@@ -1,17 +1,18 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookHeart, Check, Crown, Languages, Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookHeart, Check, Crown, GitBranch, Languages, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import type { Exercise, Story } from '@/lib/content/types';
 import { play, stopAudio } from '@/lib/client/audio';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
-import { completeStory } from '@/lib/engine/state';
+import { addXp, completeStory } from '@/lib/engine/state';
 import { AudioButton } from '@/components/AudioButton';
 import { Mascot } from '@/components/Mascot';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
 import { BACKDROP_LABEL, StoryStage } from '@/components/story/StoryStage';
-import { Badge, Button, Card, Empty, LinkButton, PageHeader, Progress, cx } from '@/components/ui';
+import { BranchPlayer, type BranchResult } from '@/components/story/BranchPlayer';
+import { Badge, Button, Card, Empty, LinkButton, PageHeader, Progress, Ring, cx } from '@/components/ui';
 import { CEFR_ORDER } from '@/lib/content/types';
 
 const TR_KEY = 'lentera.story.translation';
@@ -114,13 +115,58 @@ function Player({ story, onDone }: { story: Story; onDone: () => void }) {
   );
 }
 
+/** End of a branching story: the ending reached, the score, and every choice with its explanation. */
+function BranchEnd({ story, result, onReplay }: { story: Story; result: BranchResult; onReplay: () => void }) {
+  return (
+    <div className="mx-auto max-w-2xl space-y-5 pb-10">
+      <Card className="flex flex-col items-center gap-3 text-center">
+        <Mascot mood={result.ending.good ? (result.score >= 90 ? 'dance' : 'cheer') : 'encourage'} size={88} />
+        <Badge tone={result.ending.good ? 'ok' : 'accent'}>{result.ending.good ? 'Akhir terbaik' : 'Akhir lain'}</Badge>
+        <h1 className="text-2xl font-extrabold">{result.ending.title}</h1>
+        <p className="text-muted">{result.ending.text}</p>
+        <Ring value={result.score} tone={result.score >= 80 ? 'ok' : 'accent'} size={110}><span className="text-2xl font-extrabold">{result.score}%</span></Ring>
+        <p className="text-sm text-muted">Nilai dari ketepatan dan kewajaran setiap jawabanmu.</p>
+        <div className="flex w-full flex-col gap-2 sm:flex-row">
+          <Button variant="secondary" full onClick={onReplay}>Coba jalur lain</Button>
+          <LinkButton href="/app/stories" full>Cerita lain</LinkButton>
+        </div>
+      </Card>
+      <Card>
+        <h2 className="font-extrabold">Pilihanmu</h2>
+        <ol className="mt-3 space-y-3" data-branch-review>
+          {result.picks.map(({ node, choice }, k) => (
+            <li key={k} className={cx('rounded-2xl border-2 p-3 text-sm', choice.correct && choice.natural === 3 ? 'border-ok/40' : choice.correct ? 'border-accent/50' : 'border-bad/50')}>
+              <p className="font-bold">{k + 1}. {node.ask ?? story.title}</p>
+              <p className="en mt-1 font-bold">{choice.text}</p>
+              <p className="mt-1">{choice.note}</p>
+              {choice.better && <p className="mt-1"><span className="font-bold">Lebih baik: </span><span className="en">{choice.better}</span></p>}
+            </li>
+          ))}
+        </ol>
+      </Card>
+    </div>
+  );
+}
+
 function StoryView({ story }: { story: Story }) {
   const { ix, learner } = useApp();
   const [phase, setPhase] = useState<'intro' | 'story' | 'questions' | 'result'>('intro');
   const [result, setResult] = useState<SessionResult | null>(null);
+  const [branchResult, setBranchResult] = useState<BranchResult | null>(null);
+  const [run, setRun] = useState(0);
   const questions = useMemo(() => story.questionIds.map((q) => ix.exerciseById.get(q)).filter((e): e is Exercise => !!e), [story, ix]);
   const done = learner.rewards[`story:${story.id}`];
 
+  if (story.branch) {
+    if (phase === 'story') {
+      return <BranchPlayer key={run} story={story} onDone={(r) => {
+        act((d, at) => { const first = !d.rewards[`story:${story.id}`]; completeStory(d, story.id, at); if (first) addXp(d, Math.round(r.score / 5), 'story', at, story.id); });
+        setBranchResult(r);
+        setPhase('result');
+      }} />;
+    }
+    if (phase === 'result' && branchResult) return <BranchEnd story={story} result={branchResult} onReplay={() => { setBranchResult(null); setRun((n) => n + 1); setPhase('story'); }} />;
+  }
   if (phase === 'story') return <Player story={story} onDone={() => setPhase('questions')} />;
   if (phase === 'questions') {
     return <SessionRunner title={story.title} ctx="story" exercises={questions} feedback="immediate" seed={story.id} exitHref="/app/stories"
@@ -132,7 +178,7 @@ function StoryView({ story }: { story: Story }) {
   const first = story.scenes[0];
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <PageHeader title={story.title} subtitle={`Level ${story.level} · ${story.scenes.length} adegan · ${questions.length} pertanyaan`} />
+      <PageHeader title={story.title} subtitle={story.branch ? `Level ${story.level} · cerita bercabang · ${story.branch.nodes.filter((n) => n.choices?.length).length} keputusan` : `Level ${story.level} · ${story.scenes.length} adegan · ${questions.length} pertanyaan`} />
       <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-card">
         <StoryStage scene={{ ...first, lines: [] }} characters={story.characters} beat={0} label={`Pembuka cerita ${story.title}`} />
       </div>
@@ -141,7 +187,9 @@ function StoryView({ story }: { story: Story }) {
         <ul className="flex flex-wrap gap-2" aria-label="Tokoh">
           {story.characters.map((c) => <li key={c.id} className="rounded-full px-2.5 py-0.5 text-xs font-extrabold text-white" style={{ background: c.shirt }}>{c.name}</li>)}
         </ul>
-        <p className="text-sm text-muted">Setiap kalimat dibacakan. Ketuk Lanjut untuk kalimat berikutnya, atau pilih Putar otomatis. Setelah cerita selesai, jawab beberapa pertanyaan.</p>
+        <p className="text-sm text-muted">{story.branch
+          ? `Kamu berperan sebagai ${story.characters.find((c) => c.id === story.branch!.as)?.name ?? 'tokoh utama'}. Di setiap keputusan, pilih apa yang dikatakannya. Setiap pilihan dijelaskan, dan pilihanmu menentukan jalan serta akhir cerita.`
+          : 'Setiap kalimat dibacakan. Ketuk Lanjut untuk kalimat berikutnya, atau pilih Putar otomatis. Setelah cerita selesai, jawab beberapa pertanyaan.'}</p>
         {done && <Badge tone="ok"><Check size={12} aria-hidden />Sudah pernah diselesaikan</Badge>}
       </Card>
       <Button full size="lg" onClick={() => setPhase('story')}><Play size={18} aria-hidden />Mulai cerita</Button>
@@ -178,7 +226,7 @@ function Stories() {
                 const done = learner.rewards[`story:${s.id}`];
                 return (
                   <Card as="li" key={s.id} className={cx('flex flex-col gap-2', s.locked && 'opacity-80')}>
-                    <div className="flex flex-wrap items-center gap-2"><Badge>{s.level}</Badge><Badge tone="muted"><BookHeart size={12} aria-hidden />Cerita</Badge>{s.locked ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : done ? <Badge tone="ok"><Check size={12} aria-hidden />Selesai</Badge> : null}</div>
+                    <div className="flex flex-wrap items-center gap-2"><Badge>{s.level}</Badge><Badge tone="muted">{s.branch ? <GitBranch size={12} aria-hidden /> : <BookHeart size={12} aria-hidden />}{s.branch ? 'Bercabang' : 'Cerita'}</Badge>{s.locked ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : done ? <Badge tone="ok"><Check size={12} aria-hidden />Selesai</Badge> : null}</div>
                     <h3 className="font-extrabold">{s.title}</h3>
                     <p className="text-sm text-muted">{s.summary}</p>
                     <LinkButton href={s.locked ? '/app/subscription' : `/app/stories?id=${s.id}`} size="sm" variant={s.locked ? 'accent' : done ? 'secondary' : 'primary'} className="mt-auto">{s.locked ? 'Buka dengan Premium' : done ? 'Baca lagi' : 'Mulai cerita'}</LinkButton>

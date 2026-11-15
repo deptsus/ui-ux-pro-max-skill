@@ -28,7 +28,7 @@ export function packToRows(pack: ContentPack): Rows {
     misconception_tags: pack.tags.map((t) => ({ id: t.id, topic_id: t.topic, title: t.title, tip: t.tip })),
     audio_resources: pack.audio.map((a) => clean({ key: a.key, accent: a.accent, url: a.url, speaker: a.speaker, transcript: a.transcript })),
     listening_items: pack.listening.map((l) => clean({ id: l.id, level_code: l.level, title: l.title, kind: l.kind, transcript: l.transcript, translation: l.translation, is_premium: l.premium, audio_key: l.audioKey })),
-    stories: pack.stories.map((s) => ({ id: s.id, level_code: s.level, title: s.title, summary: s.summary, is_premium: s.premium, characters: s.characters, scenes: s.scenes })),
+    stories: pack.stories.map((s) => clean({ id: s.id, level_code: s.level, title: s.title, summary: s.summary, is_premium: s.premium, characters: s.characters, scenes: s.scenes, branch: s.branch })),
     lessons: pack.lessons.map((l) => ({ id: l.id, unit_id: l.unitId, position: l.position, title: l.title, summary: l.summary, topic_id: l.topic, is_premium: l.premium, passing_score: l.passScore, status: 'published', intro: l.intro, teaching: l.teaching, demo: l.demo, vocab: l.vocab ?? [], objectives: l.objectives })),
     questions: pack.exercises.map((e) => {
       const payload: Record<string, unknown> = {};
@@ -93,7 +93,7 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
     scenarios: (rows.conversation_scenarios ?? []).map((s) => ({ id: s.id, title: s.title, level: s.level_code, setting: s.setting, goal: s.goal, premium: s.is_premium, start: s.start_node, nodes: s.nodes, closing: s.closing })),
     listening: (rows.listening_items ?? []).map((l): ListeningItem => clean({ id: l.id, level: l.level_code, title: l.title, kind: l.kind, transcript: l.transcript, translation: l.translation, premium: l.is_premium, audioKey: opt(l.audio_key), questionIds: listeningQuestions(l.id) })),
     // Databases without migration 0008 have no stories; the app simply shows none.
-    stories: (rows.stories ?? []).map((s): Story => ({ id: s.id, level: s.level_code, title: s.title, summary: s.summary ?? '', premium: s.is_premium, characters: s.characters ?? [], scenes: s.scenes ?? [], questionIds: storyQuestions(s.id) })),
+    stories: (rows.stories ?? []).map((s): Story => ({ id: s.id, level: s.level_code, title: s.title, summary: s.summary ?? '', premium: s.is_premium, characters: s.characters ?? [], scenes: s.scenes ?? [], questionIds: storyQuestions(s.id), ...(s.branch ? { branch: s.branch } : {}) })),
     phonemes: (rows.pronunciation_guides ?? []).map((p) => ({ id: p.id, ipa: p.ipa, label: p.label, examples: p.examples, howTo: p.how_to, commonError: p.common_error, mouth: p.mouth })),
     homework: (rows.homework ?? []).map((h) => clean({ id: h.id, chapterId: h.chapter_id, lessonId: opt(h.lesson_id), title: h.title, kind: h.kind, dueDays: h.due_days, exerciseIds: h.question_ids ?? [], writing: opt(h.writing) })),
     exams: (rows.exams ?? []).map((x) => clean({ id: x.id, scope: x.scope, ref: x.ref, title: x.title, passScore: x.passing_score, timeLimitSec: x.time_limit_sec, premium: x.is_premium, exerciseIds: x.question_ids ?? [], sampleSize: x.sample_size, sections: x.sections?.length ? x.sections : undefined })),
@@ -130,7 +130,7 @@ export function packForFree(full: ContentPack): ContentPack {
     vocabulary: pack.vocabulary.filter((v) => !v.premium),
     scenarios: pack.scenarios.map((s) => (s.premium ? { ...s, locked: true, nodes: [], closing: '' } : s)),
     listening: pack.listening.map((l) => (lockedListening.has(l.id) ? { ...l, locked: true, transcript: '', translation: '', questionIds: [] } : l)),
-    stories: pack.stories.map((s) => (s.premium ? { ...s, locked: true, characters: [], scenes: [], questionIds: [] } : s)),
+    stories: pack.stories.map((s) => (s.premium ? { ...s, locked: true, characters: [], scenes: [], questionIds: [], branch: undefined } : s)),
     // Homework of a Premium lesson or chapter, or pointing at a stripped question, stays on the server.
     homework: pack.homework.filter((h) => (!h.lessonId || !lockedLessons.has(h.lessonId)) && !lockedChapters.has(h.chapterId) && h.exerciseIds.every((id) => kept.has(id))),
   };

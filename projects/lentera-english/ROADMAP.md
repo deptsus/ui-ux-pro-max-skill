@@ -169,7 +169,15 @@ Rencana awal:
   mengizinkan notifikasi (saat ini notifikasi HP baru untuk admin).
 - Pemilik bisa melihat ringkasan PR seluruh pelajar di `/admin`.
 
-### Rilis 5 — "B2–C2 Lanjutan dan Cerita Bercabang" (perkiraan Maret 2027)
+### Rilis 5 — "B2–C2 Lanjutan dan Cerita Bercabang" — **SELESAI 15 November 2026** (versi konten 2027.3.0, migrasi 0011)
+
+Isi akhirnya:
+- **12 pelajaran baru** (jadi 9 per level B2, C1, C2), di tiga bab baru. B2 "Harapan dan Gaya Ringkas": Wish dan If only; Future Continuous dan Future Perfect; Participle Clauses; Stop, Remember, Try: -ing atau to?. C1 "Register dan Persuasi": Register Formal dan Informal; Pasif Impersonal; Kata Kerja Pelapor; Bahasa Persuasi. C2 "Bahasa Profesional": Inversi Lanjutan; Konsesi Formal; Idiom di Dunia Kerja; Pembentukan Kata. Setiap bab baru punya ujian unit, kosakata, PR menyimak, dan tugas menulis dengan contoh bertingkat.
+- **4 cerita bercabang B1–C2**: adegan bergambar seperti cerita biasa, lalu pelajar berperan sebagai satu tokoh dan memilih ucapannya. Setiap pilihan dijelaskan seperti di simulator percakapan, dan pilihan menentukan adegan berikutnya serta akhir cerita. Layar akhir: akhir yang dicapai, nilai, ulasan setiap pilihan, "Coba jalur lain".
+- **4 skenario percakapan dan 4 materi menyimak C1–C2**.
+- Rencana mingguan ikut bertambah otomatis (dari A1: 150 langkah); cerita bercabang menutup levelnya.
+
+Rencana awal:
 
 - **+4 pelajaran per level B2, C1, C2** (jadi 9 per level), misalnya: wish/if
   only, participle clauses, inversi lanjutan, register formal vs informal,

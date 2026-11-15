@@ -123,7 +123,73 @@ const moodAfter = async (correct) => {
   return mood;
 };
 const moods = [];
-for (const st of (pack.stories ?? []).filter((x) => wanted(x.id))) {
+const branchScore = (picks) => Math.round((picks.reduce((n, c) => n + (c.correct ? c.natural : 0), 0) / (3 * picks.length)) * 100);
+const BADGE = (c) => (!c.correct ? 'Salah tata bahasa' : c.natural === 3 ? 'Tepat dan wajar' : 'Benar, tetapi kurang tepat');
+/** Plays a branching story from its first line to an ending, choosing with `pick`. */
+async function playBranch(st, pick, label, avoid = []) {
+  const nodes = new Map(st.branch.nodes.map((n) => [n.id, n]));
+  const intro = st.scenes.flatMap((sc) => sc.lines);
+  const visited = [];
+  const picks = [];
+  let lines = 0;
+  let matches = 0;
+  let feedback = 0;
+  for (let k = 0; k < 120; k++) {
+    const tag = await page.locator('[data-line]').getAttribute('data-line', { timeout: 10000 });
+    const cut = tag.lastIndexOf('-');
+    const nodeId = tag.slice(0, cut);
+    const idx = Number(tag.slice(cut + 1));
+    const expected = nodeId === 'intro' ? intro[idx]?.en : nodes.get(nodeId)?.scene.lines[idx]?.en;
+    if ((await page.locator('[data-line]').innerText()) === expected) matches++;
+    lines++;
+    if (nodeId !== 'intro' && visited.at(-1) !== nodeId) visited.push(nodeId);
+    if (await page.getByRole('button', { name: 'Lihat akhir cerita' }).count()) {
+      await page.getByRole('button', { name: 'Lihat akhir cerita' }).click();
+      break;
+    }
+    const group = page.getByRole('group', { name: 'Pilihan jawaban' });
+    if (await group.count()) {
+      const node = nodes.get(nodeId);
+      const choice = pick(node, visited, avoid);
+      picks.push(choice);
+      await group.getByRole('button', { name: choice.text, exact: true }).click();
+      await page.getByText(BADGE(choice), { exact: true }).waitFor({ timeout: 5000 });
+      if ((await page.getByText(choice.note, { exact: true }).count()) && (!choice.better || (await page.getByText(choice.better, { exact: true }).count()))) feedback++;
+      await page.getByRole('button', { name: 'Lanjut', exact: true }).click();
+      continue;
+    }
+    await page.getByRole('button', { name: 'Lanjut', exact: true }).click();
+  }
+  const ending = nodes.get(visited.at(-1))?.ending;
+  await page.getByRole('heading', { name: ending.title }).waitFor({ timeout: 10000 });
+  const score = branchScore(picks);
+  const shownScore = await page.getByText(`${score}%`, { exact: true }).count();
+  const reviewed = await page.locator('[data-branch-review] > li').count();
+  const expectedLines = intro.length + visited.reduce((n, id) => n + nodes.get(id).scene.lines.length, 0);
+  return { label, visited, picks, score, ending, ok: lines === expectedLines && matches === lines && feedback === picks.length && shownScore > 0 && reviewed === picks.length, detail: `${label}: ${lines}/${expectedLines} kalimat, ${matches} cocok, umpan balik ${feedback}/${picks.length}, ulasan ${reviewed}` };
+}
+for (const st of (pack.stories ?? []).filter((x) => wanted(x.id) && x.branch)) {
+  const before = issues.length;
+  try {
+    await page.goto(`${BASE}/app/stories?id=${st.id}`);
+    await page.getByRole('button', { name: 'Mulai cerita' }).click({ timeout: 30000 });
+    const a = await playBranch(st, (node) => node.choices.find((c) => c.correct && c.natural === 3), 'terbaik');
+    const stamped = await page.evaluate(([uid, id]) => !!JSON.parse(localStorage.getItem(`lentera.state.${uid}`)).rewards[`story:${id}`], [session.userId, st.id]);
+    // "Coba jalur lain" replays from the start; this time take unseen branches, else the weakest reply.
+    await page.getByRole('button', { name: 'Coba jalur lain' }).click();
+    const b = await playBranch(st, (node, visited, avoid) => node.choices.find((o) => !visited.includes(o.next) && !avoid.includes(o.next))
+      ?? [...node.choices].sort((x, y) => (x.correct ? x.natural : 0) - (y.correct ? y.natural : 0))[0], 'memutar', a.visited);
+    const covered = new Set([...a.visited, ...b.visited]);
+    check(`${st.id} (${st.level}, bercabang): jalur terbaik ${a.score}% dan akhir "${a.ending.title}", jalur lain ${b.score}% dan akhir "${b.ending.title}", ${covered.size}/${st.branch.nodes.length} adegan terlihat, tercatat selesai`,
+      a.ok && b.ok && a.score === 100 && a.ending.good && b.score < 100 && b.ending.title !== a.ending.title && covered.size === st.branch.nodes.length && stamped && issues.length === before,
+      `${a.detail} | ${b.detail} | ${a.visited.join('>')} / ${b.visited.join('>')} ${issues.slice(before, before + 2).join(' | ')}`);
+    if (st.id === 'story-cafe-interview') await page.screenshot({ path: path.join(SHOTS, 'skills-story-branch-end.png'), fullPage: true });
+  } catch (e) {
+    await page.screenshot({ path: path.join(SHOTS, `skills-gagal-${st.id}.png`), fullPage: true }).catch(() => {});
+    check(`${st.id}: macet`, false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+}
+for (const st of (pack.stories ?? []).filter((x) => wanted(x.id) && !x.branch)) {
   const before = issues.length;
   try {
     await page.goto(`${BASE}/app/stories?id=${st.id}`);
@@ -187,11 +253,11 @@ const upperScenarios = freePack.scenarios.filter((s) => ['B2', 'C1', 'C2'].inclu
 check('tamu: materi menyimak B1–C2 terkunci tanpa transkrip dan tanpa soal', upperListening.length >= 12 && upperListening.every((l) => l.locked && !l.transcript && !l.questionIds.length));
 check('tamu: skenario B2–C2 terkunci tanpa isi dialog', upperScenarios.length >= 7 && upperScenarios.every((s) => s.locked && !s.nodes.length));
 const freeStories = freePack.stories ?? [];
-check('tamu: cerita pertama gratis lengkap, cerita lain terkunci tanpa adegan dan soal', freeStories.find((x) => x.id === 'story-first-day')?.scenes.length > 0 && freeStories.filter((x) => x.premium).length >= 5 && freeStories.filter((x) => x.premium).every((x) => x.locked && !x.scenes.length && !x.questionIds.length));
+check('tamu: cerita pertama gratis lengkap, cerita lain terkunci tanpa adegan dan soal', freeStories.find((x) => x.id === 'story-first-day')?.scenes.length > 0 && freeStories.filter((x) => x.premium).length >= 5 && freeStories.filter((x) => x.premium).every((x) => x.locked && !x.scenes.length && !x.questionIds.length && !x.branch));
 check('tamu: soal cerita Premium tidak dikirim', !freePack.exercises.some((e) => e.stage === 'story' && !e.id.startsWith('story-first-day')) && freePack.exercises.some((e) => e.id.startsWith('story-first-day')));
 check('tamu: PR menyimak bab Premium tidak dikirim', !freePack.homework.some((h) => /^hw\.(b1|b2|c1|c2)-c\d\.listen$/.test(h.id)));
 const raw = await gp.evaluate(async () => (await fetch('/api/content')).text());
-check('tamu: teks rekaman dan cerita Premium tidak ada di respons server', !raw.includes('won over') && !raw.includes('negligible') && !raw.includes('Bright Smile') && !raw.includes('banana pancakes') && !raw.includes("It's huge"));
+check('tamu: teks rekaman dan cerita Premium tidak ada di respons server', !raw.includes('won over') && !raw.includes('negligible') && !raw.includes('Bright Smile') && !raw.includes('banana pancakes') && !raw.includes("It's huge") && !raw.includes("aunt's food stall"));
 await gp.goto(`${BASE}/app/listening?id=listen-c2-app`);
 check('tamu: membuka materi C2 menampilkan ajakan Premium', await gp.getByText('Audio Premium').waitFor({ timeout: 15000 }).then(() => true).catch(() => false));
 await gp.goto(`${BASE}/app/conversations?id=press`);
