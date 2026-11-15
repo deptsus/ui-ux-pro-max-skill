@@ -45,7 +45,7 @@ export function PromoVideo() {
       </div>
       <div>
         <p className="text-sm font-bold text-muted">Isi video ({PROMO_CHAPTERS.length} fitur). Ketuk untuk langsung ke bagiannya:</p>
-        <ol className="mt-2 grid max-h-[26rem] gap-1.5 overflow-y-auto pr-1" aria-label="Bab video promosi">
+        <ol className="mt-2 grid gap-1.5 lg:max-h-[26rem] lg:overflow-y-auto lg:pr-1" aria-label="Bab video promosi">
           {PROMO_CHAPTERS.map((c, i) => (
             <li key={c.t}>
               <button type="button" onClick={() => play(c.t)} aria-current={i === active ? 'true' : undefined}

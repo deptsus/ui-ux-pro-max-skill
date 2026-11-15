@@ -190,6 +190,32 @@ for (const width of [320, 390]) {
   await ctx.close();
 }
 
+// ───────────── 3b. Landing page: the promo video and its chapters ─────────────
+{
+  const { ctx, p } = await phone({ width: 320, signedIn: false });
+  const videoHits = [];
+  p.on('request', (r) => { if (r.url().includes('/promo/lentera-promo.mp4')) videoHits.push(r.url()); });
+  await p.goto(`${BASE}/`);
+  const video = p.locator('#video video');
+  await video.waitFor({ timeout: 45000 });
+  await p.waitForTimeout(1500);
+  const attrs = await video.evaluate((v) => ({ preload: v.getAttribute('preload'), poster: v.getAttribute('poster'), src: v.querySelector('source')?.getAttribute('src') }));
+  check('halaman depan: video promosi dengan sampul, dan videonya belum diunduh sebelum diputar', attrs.preload === 'none' && attrs.poster === '/promo/lentera-promo-poster.jpg' && attrs.src === '/promo/lentera-promo.mp4' && videoHits.length === 0, JSON.stringify({ attrs, videoHits }));
+  const poster = await fetch(`${BASE}/promo/lentera-promo-poster.jpg`);
+  const mp4 = await fetch(`${BASE}/promo/lentera-promo.mp4`, { headers: { Range: 'bytes=0-99' } });
+  check('berkas sampul dan video tersedia (video bisa diputar sebagian/di-seek)', poster.status === 200 && (mp4.status === 206 || mp4.status === 200) && /video\/mp4/.test(mp4.headers.get('content-type') ?? ''), `${poster.status} ${mp4.status} ${mp4.headers.get('content-type')}`);
+  const chapters = p.getByRole('list', { name: 'Bab video promosi' }).getByRole('button');
+  check('daftar isi video: 15 fitur dengan waktunya, bisa diketuk', (await chapters.count()) === 15 && (await chapters.first().innerText()).includes('0:03'));
+  const m = await measure(p);
+  check('halaman depan dengan video di layar 320 px: tanpa geser ke samping, kontrol minimal 44 px', m.over === 0 && m.small.length === 0, `${m.over}px ${m.small.slice(0, 3).join(' | ')}`);
+  await chapters.nth(4).click();
+  await p.waitForTimeout(1500);
+  const after = await video.evaluate((v) => ({ controls: v.controls, src: v.currentSrc }));
+  check('mengetuk bab menyalakan video (baru saat itu videonya diminta)', after.controls && videoHits.length > 0 && (await p.getByRole('button', { name: /^Putar video promosi/ }).count()) === 0, JSON.stringify({ after, hits: videoHits.length }));
+  await p.screenshot({ path: path.join(SHOTS, 'ui-halaman-depan-video.png'), fullPage: false });
+  await ctx.close();
+}
+
 // ───────────── 4. Profile: avatar or name alone can be saved, and reach the account ─────────────
 {
   const email = `profil${Date.now()}@lentera.test`;
