@@ -67,6 +67,10 @@ function Listening() {
         <PageHeader title={item.title} subtitle={`Level ${item.level} · dengarkan dulu tanpa membaca, ulangi sesukamu, lalu jawab pertanyaannya.`} />
         <Card className="space-y-3">
           <AudioButton text={item.transcript} audioKey={item.audioKey} size="lg" showSource />
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Aksen audio">
+            <span className="text-sm font-bold text-muted">Aksen</span>
+            {(['us', 'uk'] as const).map((a) => <Button key={a} size="sm" variant={accent === a ? 'primary' : 'secondary'} aria-pressed={accent === a} onClick={() => act((d) => { d.profile.accent = a; })}>{a === 'us' ? 'Amerika' : 'Inggris (British)'}</Button>)}
+          </div>
           <Button size="sm" variant="ghost" onClick={() => setShow((s) => !s)}>{show ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}{show ? 'Sembunyikan transkrip' : 'Tampilkan transkrip'}</Button>
           {show && <div className="rounded-2xl bg-surface-2 p-3"><p className="en font-semibold">{item.transcript}</p><p className="mt-1 text-sm text-muted">{item.translation}</p></div>}
         </Card>
