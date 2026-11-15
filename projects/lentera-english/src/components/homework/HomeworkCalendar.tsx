@@ -58,7 +58,7 @@ export function HomeworkCalendar({ items, now }: { items: CalendarItem[]; now: n
         </div>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-muted" aria-hidden>{WEEKDAYS.map((d) => <span key={d}>{d}</span>)}</div>
-      <div className="grid grid-cols-7 gap-1" role="grid" aria-labelledby="kalender-pr">
+      <div className="grid grid-cols-7 gap-1" role="group" aria-labelledby="kalender-pr">
         {cells.map((d, i) => {
           if (!d) return <span key={i} />;
           const key = dayKey(d.getTime());

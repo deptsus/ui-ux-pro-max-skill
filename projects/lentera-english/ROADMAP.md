@@ -150,7 +150,16 @@ Rencana awal:
   CEFR resmi.
 - Jadwal ujian ulang yang wajar (jeda dan latihan wajib sebelum mengulang).
 
-### Rilis 4 — "PR dan Menulis" (perkiraan Februari 2027)
+### Rilis 4 — "PR dan Menulis" — **SELESAI 15 November 2026** (versi konten 2027.2.0, migrasi 0010)
+
+Isi akhirnya:
+- **PR Mingguan otomatis** (`src/lib/engine/weekly.ts`): sekitar 10 soal, disusun sekali seminggu dengan aturan tetap: soal dari topik yang dilatih 7 hari terakhir (maks. 3 topik, bergiliran) dan soal dari kesalahan sendiri (soal yang terakhir dijawab salah dalam 30 hari, lalu soal baru dari pola kesalahan yang belum dibereskan). Tenggat Minggu 23.59, minimal dua hari setelah PR tersusun. Tidak dibuat bila bahannya kurang dari 4 soal.
+- **Tugas menulis B2–C2** (`content/writing-upper.ts`): ringkasan berita (B2), email melaporkan rapat (B2), opini (C1), ringkasan akademik (C1), surat formal usulan (C2), kolom opini (C2). Ringkasan punya teks sumber dan batas atas kata. Tiap tugas punya tiga contoh bertingkat (Cukup, Baik, Sangat baik) yang semuanya lolos daftar periksa, masing-masing dengan catatan apa yang membuatnya lebih baik.
+- **Kalender PR** di Pusat PR, plus tombol simpan tenggat ke kalender HP (.ics, alarm pukul 18.00 sehari sebelumnya).
+- **Pengingat PR di HP** untuk semua pelajar yang masuk akun: sekali per PR, sekitar sehari sebelum tenggat, pukul 07.00–20.00 WIB, dikirim fungsi terjadwal Netlify setiap jam.
+- **Tab "PR" di `/admin`**: ringkasan, grafik pengumpulan per minggu, per PR (PR mingguan digabung), per pelajar.
+
+Rencana awal:
 
 - **PR mingguan otomatis**: campuran soal dari topik minggu itu dan
   kesalahan si pelajar sendiri (aturan tetap, tanpa AI).

@@ -48,7 +48,9 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 2 dari `ROADMAP.md`: 10 pelajaran A2–B1, 4 cerita, 2 percakapan, 2 materi menyimak, PR menulis tiap bab A2–B1.
 - [x] Rilis 3 dari `ROADMAP.md`: ujian level bergaya CEFR dinilai di server, bank soal khusus ujian A1–C2, pembahasan + latihan perbaikan, jeda dan latihan wajib, sertifikat dengan kode verifikasi (`tests/rilis3.test.ts`, `e2e/level-exams.mjs`). Pemilik: jalankan `apply-0009.sql`, lalu impor ulang + terbitkan.
 - [x] Ikut deploy Rilis 3: perbaikan urutan cerita di rencana mingguan (commit `ca64712`).
-- [ ] Rilis 4–6 dari `ROADMAP.md` (dikerjakan per rilis, satu deploy per rilis).
+- [x] Rilis 4 dari `ROADMAP.md`: PR mingguan otomatis, tugas menulis B2–C2 dengan contoh bertingkat, kalender PR (.ics), pengingat PR di HP, tab PR di `/admin` (`tests/rilis4.test.ts`, `e2e/homework.mjs`). Pemilik: jalankan `apply-0010.sql`, lalu impor ulang + terbitkan.
+- [ ] Rilis 5–6 dari `ROADMAP.md` (dikerjakan per rilis, satu deploy per rilis).
+- [ ] Pengingat PR: buktikan sampai di HP sungguhan setelah Rilis 4 live (browser uji tidak punya layanan push). Fungsi terjadwal Netlify `homework-reminders` harus terlihat di Netlify → Functions.
 - [ ] Perbesar bank soal ujian level (sekarang 12 + 8 + 8 soal per level); batas waktu ujian level belum dicek server (hanya di perangkat).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).
 - [x] Ujian level B1, B2, C1, C2 (Rilis 3: semua level A1–C2 punya ujian empat bagian).
