@@ -1,5 +1,5 @@
 -- 0019 (Rilis 15 "Pelajaran Interaktif"): four new exercise types.
---   picture  – choose a picture (options carry an illustration key in payload.pics)
+--   picture  – choose a picture (each option's picture key is kept in payload.optionMeta)
 --   scene    – place an object in a scene (prepositions); options are the spots
 --   timeline – tap when an action happens (past / now / future); options are the zones
 --   spell    – build a word from letter tiles (typed answer, like fill)
