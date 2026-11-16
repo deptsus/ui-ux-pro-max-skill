@@ -41,6 +41,8 @@ const account = async (email, name) => {
   const ok = await fetch(`${BASE}/api/cron/backup`, { method: 'POST', headers: { 'x-lentera-cron': sig } });
   const okBody = await ok.json().catch(() => ({}));
   check('cadangan terjadwal berjalan dengan tanda tangan yang benar', ok.status === 200 && /^daily\/\d{4}-\d{2}-\d{2}\.json\.gz$/.test(okBody.name) && okBody.rows > 0, JSON.stringify(okBody));
+  const again = await fetch(`${BASE}/api/cron/backup`, { method: 'POST', headers: { 'x-lentera-cron': sig } }).then((r) => r.json()).catch(() => ({}));
+  check('cadangan terjadwal hanya sekali per hari (panggilan ulang dilewati)', again.skipped === 'ran-today', JSON.stringify(again));
   check('dashboard admin menolak tamu (401)', (await call('/api/admin', { action: 'health' })).status === 401);
 }
 
