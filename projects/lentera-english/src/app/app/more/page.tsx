@@ -9,6 +9,7 @@ const DESC: Record<string, string> = {
   '/app/homework': 'Tugas tiap pelajaran dan bab, lengkap dengan tenggat.',
   '/app/exams': 'Tes penempatan, ujian unit, dan ujian level CEFR.',
   '/app/vocabulary': 'Kata, IPA, arti, contoh, dan audio.',
+  '/app/pasangan': 'Permainan memori: cocokkan kata dengan gambarnya, kejar kombo dan rekor.',
   '/app/grammar': 'Rujukan semua topik tata bahasa.',
   '/app/stories': 'Cerita pendek beranimasi, lalu pertanyaan tentang ceritanya.',
   '/app/listening': 'Latihan menyimak dan panduan pelafalan.',

@@ -122,3 +122,4 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
 - Maskot Pijar (kunang-kunang berlentera) dalam SVG, dengan suasana happy/cheer/think/sad.
 - Grafik SVG tanpa library; warna grafik `--chart` (`#4b3fd6` terang, `#7d72f2` gelap) sudah divalidasi kontras dan buta warna; setiap grafik punya tampilan tabel.
 - Navigasi: sidebar di desktop, tab bawah 5 item di ponsel (Beranda, Jalur, Ulangan, Kelas, Profil).
+- Rilis 15: soal adegan memakai ketuk, bukan seret (WCAG 2.2 "Dragging Movements", dan lebih mudah untuk anak di HP). Gambar kosakata dibuat sebagai SVG di kode (tanpa berkas gambar, tetap tajam, ikut tema gelap). Rekor Pasangan Kilat disimpan di perangkat saja (tanpa tabel baru); XP permainan dibatasi 3 papan per hari supaya liga tetap adil.

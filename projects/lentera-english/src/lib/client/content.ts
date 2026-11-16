@@ -127,7 +127,7 @@ export async function setOffline(on: boolean, onProgress?: (msg: string) => void
   if ('serviceWorker' in navigator && 'caches' in window) {
     await navigator.serviceWorker.register('/sw.js');
     const cache = await caches.open('lentera-pages');
-    const routes = ['/app', '/app/path', '/app/plan', '/app/jalur', '/app/lesson', '/app/practice', '/app/review', '/app/homework', '/app/exams', '/app/vocabulary', '/app/grammar', '/app/listening', '/app/stories', '/app/conversations', '/app/analytics', '/app/achievements', '/app/profile', '/app/settings', '/app/more'];
+    const routes = ['/app', '/app/path', '/app/plan', '/app/jalur', '/app/lesson', '/app/practice', '/app/review', '/app/homework', '/app/exams', '/app/vocabulary', '/app/pasangan', '/app/grammar', '/app/listening', '/app/stories', '/app/conversations', '/app/analytics', '/app/achievements', '/app/profile', '/app/settings', '/app/more'];
     const assets = new Set<string>();
     for (const [i, route] of routes.entries()) {
       onProgress?.(`Menyimpan halaman ${i + 1}/${routes.length}...`);

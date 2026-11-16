@@ -228,6 +228,16 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0
 @keyframes st-dot { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-2px); opacity: 1; } }
 @keyframes st-drift { from { transform: translateX(-8px); } to { transform: translateX(10px); } }
 
+/* Pasangan Kilat flip cards (Rilis 15). */
+.flip { perspective: 700px; }
+.flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.38s cubic-bezier(0.3, 1.35, 0.5, 1); }
+.flip[data-open='true'] .flip-inner { transform: rotateY(180deg); }
+.flip-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-front { transform: rotateY(180deg); }
+.pair-hit { animation: cast-pop 0.7s ease-out 1; }
+.pair-miss { animation: pair-shake 0.4s ease-in-out 1; }
+@keyframes pair-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   .pijar *, .story-stage *, .cast * { animation: none !important; }

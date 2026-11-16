@@ -1,6 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { CalendarClock, CheckCircle2, Timer } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Shapes, Timer } from 'lucide-react';
 import { GAME } from '@/lib/engine/config';
 import { dayKey, retestReady } from '@/lib/engine/mastery';
 import { buildReviewTasks, type ReviewTask } from '@/lib/engine/sessions';
@@ -88,6 +88,11 @@ export default function ReviewPage() {
         <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent text-[#1e1b3a]"><Timer size={24} aria-hidden /></span>
         <div className="min-w-0 flex-1"><h2 className="font-extrabold">Tantangan Kilat</h2><p className="text-sm text-muted">Soal cepat berbatas waktu dari materi yang sudah kamu pelajari.</p></div>
         <LinkButton href="/app/practice?mode=timed" variant="accent" size="sm">Main</LinkButton>
+      </Card>
+      <Card className="mt-3 flex flex-wrap items-center gap-3">
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-on-brand"><Shapes size={24} aria-hidden /></span>
+        <div className="min-w-0 flex-1"><h2 className="font-extrabold">Pasangan Kilat</h2><p className="text-sm text-muted">Cocokkan kata bahasa Inggris dengan gambarnya secepat mungkin.</p></div>
+        <LinkButton href="/app/pasangan" variant="secondary" size="sm">Main</LinkButton>
       </Card>
 
       <h2 className="mb-2 mt-6 flex items-center gap-2 text-lg font-extrabold"><CalendarClock size={20} aria-hidden />Jadwal semua materi</h2>

@@ -6,7 +6,7 @@
 import { useMemo } from 'react';
 import type { Exercise, Option, Spot, Zone } from '@/lib/content/types';
 import { shuffle } from '@/lib/engine/grading';
-import { isPic } from '@/lib/content/pics';
+import { PICS, isPic } from '@/lib/content/pics';
 import { Pic } from '../pics/Pic';
 import { INK } from '../cast/Face';
 import { cx } from '../ui';
@@ -43,12 +43,15 @@ export function PictureChoice({ ex, order, choice, locked, onPick }: ChoiceProps
 
 // ───────────── Scene: prepositions of place ─────────────
 /** Where each spot sits in the 240×160 scene, per piece of furniture. */
-const SPOTS: Record<NonNullable<Exercise['scene']>['place'], Partial<Record<Spot, [number, number]>>> = {
-  table: { on: [120, 46], under: [120, 122], next: [212, 118], behind: [150, 50], front: [70, 140] },
-  box: { in: [120, 100], on: [120, 50], next: [208, 118], behind: [150, 62], front: [72, 140] },
-  bed: { on: [120, 70], under: [120, 128], next: [214, 118] },
-  chair: { on: [120, 72], under: [120, 130], next: [200, 118], behind: [146, 52] },
+/** Where the object rests (x, the line its base sits on) and, when it differs, the height of the tap target. */
+const SPOTS: Record<NonNullable<Exercise['scene']>['place'], Partial<Record<Spot, [x: number, base: number, tapY?: number]>>> = {
+  table: { on: [86, 66], under: [120, 150], next: [216, 150], behind: [162, 80, 50] },
+  box: { in: [120, 118, 118], on: [108, 90, 66], next: [212, 150], behind: [158, 100, 62], front: [84, 158, 140] },
+  bed: { on: [128, 66], under: [96, 150], next: [212, 150] },
+  chair: { on: [120, 90], under: [120, 150], next: [204, 150], behind: [130, 58, 26] },
 };
+/** Spots each place offers (the validator uses the same list). */
+export const PLACE_SPOTS = Object.fromEntries(Object.entries(SPOTS).map(([k, v]) => [k, Object.keys(v)])) as Record<NonNullable<Exercise['scene']>['place'], Spot[]>;
 
 function Furniture({ place, part }: { place: NonNullable<Exercise['scene']>['place']; part: 'back' | 'front' }) {
   const o = { stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const };
@@ -56,15 +59,15 @@ function Furniture({ place, part }: { place: NonNullable<Exercise['scene']>['pla
     <g><path d="M40 66 H200 L190 80 H50 Z" fill="#d97706" {...o} /><path d="M58 80 V150 M182 80 V150" stroke="#78350f" strokeWidth="7" strokeLinecap="round" /></g>
   ) : null;
   if (place === 'box') return part === 'back' ? (
-    <path d="M70 76 L120 64 L170 76 L170 84 L70 84 Z" fill="#92400e" {...o} />
+    <path d="M70 86 L120 74 L170 86 L170 94 L70 94 Z" fill="#92400e" {...o} />
   ) : (
-    <g><path d="M70 84 L170 84 L170 140 L70 140 Z" fill="#d97706" {...o} /><path d="M70 84 L52 70 M170 84 L188 70" {...o} stroke="#b45309" strokeWidth="6" /></g>
+    <g><path d="M70 94 L170 94 L170 150 L70 150 Z" fill="#d97706" {...o} /><path d="M70 94 L52 80 M170 94 L188 80" {...o} stroke="#b45309" strokeWidth="6" /></g>
   );
   if (place === 'bed') return part === 'front' ? (
-    <g><path d="M30 60 V150 M210 92 V150" stroke="#78350f" strokeWidth="7" strokeLinecap="round" /><path d="M30 92 H210 V112 H30 Z" fill="#fff" {...o} /><path d="M100 88 H210 V112 H100 Z" fill="#60a5fa" {...o} /><path d="M36 82 C36 76 62 76 62 82 V92 H36 Z" fill="#fde68a" {...o} /></g>
+    <g><path d="M14 38 V150 M180 70 V150" stroke="#78350f" strokeWidth="7" strokeLinecap="round" /><path d="M14 70 H180 V92 H14 Z" fill="#fff" {...o} /><path d="M78 66 H180 V92 H78 Z" fill="#60a5fa" {...o} /><path d="M20 60 C20 54 46 54 46 60 V70 H20 Z" fill="#fde68a" {...o} /></g>
   ) : null;
   return part === 'front' ? (
-    <g><path d="M92 30 H148 V86 H92 Z" fill="#f59e0b" {...o} /><path d="M86 86 H154 V98 H86 Z" fill="#b45309" {...o} /><path d="M94 98 V150 M146 98 V150" stroke="#78350f" strokeWidth="6" strokeLinecap="round" /></g>
+    <g><path d="M92 36 H148 V86 H92 Z" fill="#f59e0b" {...o} /><path d="M86 86 H154 V98 H86 Z" fill="#b45309" {...o} /><path d="M94 98 V150 M146 98 V150" stroke="#78350f" strokeWidth="6" strokeLinecap="round" /></g>
   ) : null;
 }
 
@@ -94,7 +97,7 @@ export function SceneChoice({ ex, order, choice, locked, onPick }: ChoiceProps) 
           <Furniture place={scene.place} part="front" />
           {layer === 2 && figure}
         </svg>
-        <div role="radiogroup" aria-label={`Tempat untuk ${scene.object}`} className="absolute inset-0">
+        <div role="radiogroup" aria-label={`Tempat untuk ${isPic(scene.object) ? PICS[scene.object][1] : scene.object}`} className="absolute inset-0">
           {order.map((i) => {
             const o = ex.options![i];
             const p = SPOTS[scene.place][o.spot!];
@@ -104,7 +107,7 @@ export function SceneChoice({ ex, order, choice, locked, onPick }: ChoiceProps) 
               <button key={i} type="button" role="radio" aria-checked={choice === i} aria-label={o.text} disabled={locked} onClick={() => onPick(i)}
                 className={cx('absolute grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[2.5px] border-dashed font-display text-sm font-bold transition',
                   st === 'right' ? 'border-ok bg-ok/25' : st === 'wrong' ? 'border-bad bg-bad/20' : st === 'chosen' ? 'border-brand bg-brand/15' : 'border-outline/50 bg-white/50 hover:bg-white/80')}
-                style={{ left: `${(p[0] / 240) * 100}%`, top: `${((p[1] - 18) / 160) * 100}%` }} />
+                style={{ left: `${(p[0] / 240) * 100}%`, top: `${((p[2] ?? p[1] - 18) / 160) * 100}%` }} />
             );
           })}
         </div>
@@ -166,13 +169,17 @@ export function spellTiles(word: string, seed: string): string[] {
 export function SpellTiles({ ex, seed, picked, locked, onChange }: { ex: Exercise; seed: string; picked: number[]; locked: boolean; onChange: (picked: number[], text: string) => void }) {
   const tiles = useMemo(() => spellTiles(ex.answers?.[0] ?? '', seed + ex.id), [ex, seed]);
   const word = picked.map((i) => tiles[i]).join('');
-  const length = (ex.answers?.[0] ?? '').length;
+  const answer = ex.answers?.[0] ?? '';
+  const length = answer.length;
+  // After the answer is checked with nothing placed (the card was redrawn), show the right spelling.
+  const reveal = locked && !picked.length;
   return (
     <div className="space-y-4">
       {isPic(ex.pic) && <div className="grid place-items-center"><Pic k={ex.pic} size={104} /></div>}
-      <div className="flex flex-wrap justify-center gap-2" aria-label={`Kata yang kamu susun: ${word || 'kosong'}`}>
+      <div className="flex flex-wrap justify-center gap-2" role="group" aria-label={reveal ? `Ejaan yang benar: ${answer}` : `Kata yang kamu susun: ${word || 'kosong'}`}>
         {Array.from({ length }, (_, s) => {
           const t = picked[s];
+          if (reveal) return <span key={s} className="tile en grid h-12 w-10 place-items-center rounded-xl border-ok bg-ok-soft font-display text-2xl font-bold [--edge:var(--ok)]" aria-hidden>{answer[s]}</span>;
           return t === undefined ? (
             <span key={s} className="grid h-12 w-10 place-items-center rounded-xl border-[2.5px] border-dashed border-line-strong" aria-hidden />
           ) : (

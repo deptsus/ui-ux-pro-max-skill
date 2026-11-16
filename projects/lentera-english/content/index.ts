@@ -31,8 +31,9 @@ import { concessionLesson, inversionAdvLesson, wordFormationLesson, workIdiomsLe
 import { ieltsReading, ieltsSpeaking, ieltsWriting, toeflListening, toeflStructure, toeflWritten } from './track-exam';
 import { kidsColors, kidsFamily, kidsFood, kidsNumbers, kidsRoutine, kidsSchool } from './track-kids';
 import { workCv, workEmail, workInterview, workMeeting, workPhone, workPresentation } from './track-work';
+import { INTERACTIVE } from './interactive';
 
-export const CONTENT_VERSION = '2027.5.0';
+export const CONTENT_VERSION = '2027.6.0';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -434,6 +435,11 @@ export function buildPack(): ContentPack {
         // Tracks: the first lesson is free so anyone can try the track.
         lessons.push({ ...b.lesson, unitId: u.id, position: li + 1, premium: c.track ? li > 0 || ui > 0 : c.premium });
         exercises.push(...b.exercises);
+        // Rilis 15: interactive items go after the stage's authored ones.
+        const extra = INTERACTIVE[b.lesson.id] ?? {};
+        (['guided', 'independent', 'homework', 'mastery'] as const).forEach((stage, si) => {
+          if (extra[stage]?.length) exercises.push(...stamp(extra[stage], `${b.lesson.id}.x`, stage, b.lesson.topic, b.lesson.id, si * 100 + 50));
+        });
         const hw = b.exercises.filter((e) => e.stage === 'homework').map((e) => e.id);
         homework.push({ id: `hw.${b.lesson.id}`, chapterId: c.id, lessonId: b.lesson.id, title: b.lesson.title, kind: HOMEWORK_KIND[b.lesson.id] ?? 'grammar', dueDays: 3, exerciseIds: hw });
       });

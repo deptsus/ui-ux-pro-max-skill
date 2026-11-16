@@ -103,3 +103,4 @@ Semua persiapan teknis sudah selesai; yang tersisa butuh akun atau biaya pemilik
 - [x] Peringatan React "script tag" dari skrip tema di `src/app/layout.tsx`: tidak muncul lagi setelah bug landing diperbaiki.
 - [x] Rapikan ekspresi progress bar di `SessionRunner` (Rilis 13).
 - [ ] Optimasi ukuran pack konten yang dikirim ke klien bila kurikulum membesar (mis. muat per level).
+- [ ] Pustaka gambar kosakata menuju ±150 kata: keluarga, profesi, dan anggota tubuh lainnya (memakai para karakter Rilis 14; bersama Rilis 16).

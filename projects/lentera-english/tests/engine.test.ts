@@ -61,8 +61,8 @@ describe('content quality gate', () => {
       expect(bad.correctAnswer.length, e.id).toBeGreaterThan(0);
     }
   });
-  it('covers all 14 exercise types and has unique vocabulary ids', () => {
-    expect(new Set(pack.exercises.map((e) => e.type)).size).toBe(14);
+  it('covers all 18 exercise types and has unique vocabulary ids', () => {
+    expect(new Set(pack.exercises.map((e) => e.type)).size).toBe(18);
     expect(new Set(pack.vocabulary.map((v) => v.id)).size).toBe(pack.vocabulary.length);
   });
   it('every CEFR level has at least one fully authored lesson', () => {

@@ -51,6 +51,12 @@ export async function answerCurrent(page, pack, correct = true) {
     const words = ex.text.split(' ');
     const idx = correct ? words.findIndex((w) => strip(w) === ex.wrongWord) : words.findIndex((w) => strip(w) !== ex.wrongWord);
     await card.locator('div.flex.flex-wrap.gap-2 > button').nth(idx).click();
+  } else if (ex.type === 'spell') {
+    // Letter tiles: tap them in order; a placed tile is disabled, so take the first one still free.
+    const w = ex.answers[0];
+    const word = correct ? w : w.slice(1) + w[0];
+    const tiles = card.getByRole('group', { name: 'Huruf' });
+    for (const c of word) await tiles.getByRole('button', { name: c, exact: true, disabled: false }).first().click();
   } else if (ex.type === 'para') {
     const order = correct ? ex.sentences : [...ex.sentences].reverse();
     for (const s of order) await card.getByRole('button', { name: s }).click();
@@ -60,8 +66,8 @@ export async function answerCurrent(page, pack, correct = true) {
   return id;
 }
 
-/** Plays a whole session. `plan(i, id)` decides right/wrong per question. */
-export async function runSession(page, pack, { plan = () => true, deferred = false } = {}) {
+/** Plays a whole session. `plan(i, id)` decides right/wrong per question; `onQuestion(id, phase)` runs before each answer and after its feedback. */
+export async function runSession(page, pack, { plan = () => true, deferred = false, onQuestion } = {}) {
   const seen = [];
   for (let i = 0; i < 60; i++) {
     const card = page.locator('[data-ex]');
@@ -69,11 +75,13 @@ export async function runSession(page, pack, { plan = () => true, deferred = fal
     if (done) break;
     const before = await card.getAttribute('data-ex');
     const correct = plan(i, before);
+    if (onQuestion) await onQuestion(before, 'question');
     await answerCurrent(page, pack, correct);
     seen.push({ id: before, correct });
     await page.getByRole('button', { name: deferred ? 'Jawab' : 'Periksa', exact: true }).click();
     if (!deferred) {
       await page.getByText(correct ? 'Benar!' : 'Belum tepat', { exact: true }).waitFor({ timeout: 5000 });
+      if (onQuestion) await onQuestion(before, correct ? 'right' : 'wrong');
       const end = page.getByRole('button', { name: /Nyawa habis/ });
       if (await end.count()) { await end.click(); break; }
       await page.getByRole('button', { name: 'Lanjut', exact: true }).click();

@@ -17,6 +17,18 @@ export const PICS = {
   sun: ['sun', 'matahari'], rain: ['rain', 'hujan'], cloud: ['cloud', 'awan'], tree: ['tree', 'pohon'], flower: ['flower', 'bunga'],
   // clothes and things
   shirt: ['shirt', 'baju'], hat: ['hat', 'topi'], shoes: ['shoes', 'sepatu'], ball: ['ball', 'bola'], box: ['box', 'kotak'], phone: ['phone', 'ponsel'], umbrella: ['umbrella', 'payung'],
+  // numbers
+  one: ['one', 'satu'], two: ['two', 'dua'], three: ['three', 'tiga'], four: ['four', 'empat'], five: ['five', 'lima'], six: ['six', 'enam'], seven: ['seven', 'tujuh'], eight: ['eight', 'delapan'], nine: ['nine', 'sembilan'], ten: ['ten', 'sepuluh'],
+  // body
+  eye: ['eye', 'mata'], ear: ['ear', 'telinga'], nose: ['nose', 'hidung'], mouth: ['mouth', 'mulut'], hand: ['hand', 'tangan'], tooth: ['tooth', 'gigi'],
+  // weather
+  wind: ['wind', 'angin'], snow: ['snow', 'salju'], rainbow: ['rainbow', 'pelangi'], storm: ['storm', 'badai'],
+  // more animals
+  duck: ['duck', 'bebek'], frog: ['frog', 'katak'], butterfly: ['butterfly', 'kupu-kupu'], snake: ['snake', 'ular'], monkey: ['monkey', 'monyet'], turtle: ['turtle', 'kura-kura'],
+  // more food
+  grape: ['grape', 'anggur'], strawberry: ['strawberry', 'stroberi'], pineapple: ['pineapple', 'nanas'], coconut: ['coconut', 'kelapa'], icecream: ['ice cream', 'es krim'], tea: ['tea', 'teh'],
+  // more things at home
+  cup: ['cup', 'cangkir'], spoon: ['spoon', 'sendok'], key: ['key', 'kunci'], television: ['television', 'televisi'], computer: ['computer', 'komputer'], toothbrush: ['toothbrush', 'sikat gigi'],
   // colours
   red: ['red', 'merah'], blue: ['blue', 'biru'], green: ['green', 'hijau'], yellow: ['yellow', 'kuning'], black: ['black', 'hitam'], white: ['white', 'putih'], purple: ['purple', 'ungu'], pink: ['pink', 'merah muda'], brown: ['brown', 'cokelat'],
 } as const satisfies Record<string, readonly [en: string, id: string]>;

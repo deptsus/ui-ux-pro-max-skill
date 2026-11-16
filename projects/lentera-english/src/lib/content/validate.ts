@@ -46,7 +46,7 @@ export function validateExercise(e: Exercise): string[] {
     if (new Set((e.options ?? []).map((o) => o.pic)).size !== (e.options ?? []).length) bad('gambar pilihan duplikat');
   }
   if (e.type === 'scene') {
-    const places: Record<string, string[]> = { table: ['on', 'under', 'next', 'behind', 'front'], box: ['in', 'on', 'next', 'behind', 'front'], bed: ['on', 'under', 'next'], chair: ['on', 'under', 'next', 'behind'] };
+    const places: Record<string, string[]> = { table: ['on', 'under', 'next', 'behind'], box: ['in', 'on', 'next', 'behind', 'front'], bed: ['on', 'under', 'next'], chair: ['on', 'under', 'next', 'behind'] };
     if (!e.scene || !places[e.scene.place]) bad('scene butuh tempat (table, box, bed, chair)');
     else {
       if (!isPic(e.scene.object)) bad(`benda "${e.scene.object}" tidak ada di pustaka gambar`);
@@ -165,7 +165,7 @@ export function validatePack(pack: ContentPack): string[] {
   // The same question twice reads as filler.
   const seen = new Map<string, string>();
   for (const e of pack.exercises) {
-    const k = `${e.type}|${e.prompt}|${e.text ?? ''}|${e.context ?? ''}|${(e.options ?? []).map((o) => o.text).join('/')}|${(e.pairs ?? []).flat().join('/')}|${(e.sentences ?? []).join('/')}|${e.audioText ?? ''}`.toLowerCase();
+    const k = `${e.type}|${e.prompt}|${e.text ?? ''}|${e.context ?? ''}|${(e.options ?? []).map((o) => o.text).join('/')}|${(e.pairs ?? []).flat().join('/')}|${(e.sentences ?? []).join('/')}|${e.audioText ?? ''}|${e.pic ?? ''}|${e.type === 'spell' ? (e.answers ?? []).join('/') : ''}|${e.scene ? `${e.scene.object}@${e.scene.place}` : ''}`.toLowerCase();
     if (seen.has(k)) errs.push(`${e.id}: sama persis dengan ${seen.get(k)}`);
     else seen.set(k, e.id);
   }

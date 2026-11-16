@@ -6,9 +6,20 @@ import { Check, Flame, Heart, X, Zap } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';
 import { CAST, CastMember, type CastId } from '@/components/cast/Kid';
 import { MOODS, MOOD_LABEL, type Mood } from '@/components/cast/Face';
+import { Pic } from '@/components/pics/Pic';
+import { SceneChoice } from '@/components/interactive/Interactive';
+import type { Exercise, Spot } from '@/lib/content/types';
+import { PICS, type PicKey } from '@/lib/content/pics';
 
 const clayCard = 'rounded-3xl border-[3px] border-[#1e1b3a]/85 bg-surface shadow-[0_6px_0_rgba(30,27,58,0.85)]';
 const btn = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border-[3px] border-[#1e1b3a] px-6 py-3 font-display text-lg font-bold tracking-wide transition-[transform,box-shadow] duration-100 active:translate-y-[4px] active:shadow-[0_1px_0_#1e1b3a]';
+
+const SCENES: [NonNullable<Exercise['scene']>['place'], string, Spot[]][] = [
+  ['table', 'book', ['on', 'under', 'next', 'behind']],
+  ['box', 'ball', ['in', 'on', 'next', 'behind', 'front']],
+  ['bed', 'cat', ['on', 'under', 'next']],
+  ['chair', 'bag', ['on', 'under', 'next', 'behind']],
+];
 
 function Title({ children }: { children: React.ReactNode }) {
   return <h2 className="mb-3 font-display text-2xl font-bold tracking-tight">{children}</h2>;
@@ -71,6 +82,34 @@ export function StylePreview() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section aria-labelledby="t-pics">
+        <Title><span id="t-pics">Pustaka gambar kosakata · Rilis 15</span></Title>
+        <ul className={`${clayCard} grid grid-cols-4 gap-3 p-4 sm:grid-cols-6 lg:grid-cols-8`}>
+          {(Object.keys(PICS) as PicKey[]).map((k) => (
+            <li key={k} className="flex flex-col items-center gap-1 text-center">
+              <Pic k={k} size={64} />
+              <span className="en text-sm font-bold">{PICS[k][0]}</span>
+              <span className="text-xs text-muted">{PICS[k][1]}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="t-scenes">
+        <Title><span id="t-scenes">Adegan letak benda · Rilis 15</span></Title>
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {SCENES.map(([place, object, spots]) => spots.map((spot) => {
+            const ex: Exercise = { id: `gaya.${place}.${spot}`, lessonId: null, stage: 'drill', position: 0, topic: 'a1.greetings', type: 'scene', difficulty: 1, prompt: '', explanation: '', scene: { place, object }, options: spots.map((sp, i) => ({ text: sp, spot: sp, ...(i === 0 ? { correct: true } : { why: '-' }) })) };
+            return (
+              <li key={`${place}-${spot}`} className={`${clayCard} p-3`}>
+                <p className="mb-2 font-display font-bold">{object} · {spot} · {place}</p>
+                <SceneChoice ex={ex} order={spots.map((_, i) => i)} choice={spots.indexOf(spot)} locked={false} onPick={() => {}} />
+              </li>
+            );
+          }))}
+        </ul>
       </section>
 
       <section aria-labelledby="t-ui" className="grid gap-6 lg:grid-cols-2">

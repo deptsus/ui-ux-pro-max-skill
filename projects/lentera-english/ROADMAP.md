@@ -251,11 +251,11 @@ aplikasi lain. Dirilis bertahap; tiap rilis satu deploy.
 - Sesi latihan baru: guru membacakan soal, pilihan jawaban tebal, umpan balik dengan karakter yang bereaksi, kombo jawaban benar beruntun, layar selesai dengan konfeti dan XP yang menghitung naik, efek suara (dibuat di perangkat, bisa dimatikan).
 - Karakter dipakai di Beranda, pelajaran, cerita, layar kosong, sertifikat, dan halaman depan.
 
-**Rilis 15 "Pelajaran Interaktif"**:
-- Jenis latihan baru: ketuk gambar, seret ke adegan (preposisi, ruangan), susun kalimat bersama karakter, obrolan dengan karakter, garis waktu tenses, eja dengan huruf, pasangan kilat (permainan memori), dengar lalu pilih adegan.
-- Pustaka ilustrasi kosakata bergaya 2.5D (±150 kata A1–A2: hewan, makanan, benda sekolah, keluarga, tubuh, warna, angka, cuaca, profesi, kendaraan).
-- Mini-game ulangan (kombo, batas waktu, skor tertinggi).
-- Free: jenis latihan baru muncul di pelajaran gratis; Premium: semuanya.
+**Rilis 15 "Pelajaran Interaktif"** — **SELESAI 16 November 2026** (migrasi 0019, konten 2027.6.0):
+- Empat jenis latihan baru: **pilih gambar** (lihat kata atau dengar lalu ketuk gambarnya), **letakkan di adegan** (preposisi on/under/in/next to/behind/in front of; diketuk, bukan diseret, supaya bisa dipakai siapa saja termasuk dengan keyboard dan pembaca layar), **garis waktu tenses** (dulu, sekarang, kebiasaan, nanti), **eja dengan huruf** (ubin huruf plus dua pengecoh). Soal dibacakan karakter (Rilis 14) dan obrolan dialog memakai wajah karakter.
+- Pustaka ilustrasi kosakata 2.5D: **99 gambar** (hewan, makanan dan minuman, benda sekolah dan rumah, kendaraan, alam dan cuaca, pakaian, tubuh, angka 1–10, warna). Sisanya menuju ±150 (keluarga, profesi, tubuh lengkap) ikut Rilis 16, karena butuh gambar orang memakai para karakter.
+- 43 soal interaktif (16 pilih gambar, 7 adegan, 10 garis waktu, 10 eja) ditambahkan ke 16 pelajaran A1–A2 dan Jalur Anak; pelajaran gratis (Warna dan Hewan, Articles, This/That, Simple Present) memuat keempat jenisnya.
+- **Pasangan Kilat**: permainan memori kata ↔ gambar (12 kartu, waktu, poin kombo, bonus waktu, rekor per tema di perangkat, +5 XP untuk 3 papan pertama tiap hari). Free: Hewan, Warna, Makanan & Minuman; Premium: Angka, Tubuh, Sekolah, Rumah, Kendaraan, Alam & Pakaian, Campur Semua.
 
 **Rilis 16 "Jalur Sekolah SD–SMA"** (materi baru):
 - Satu jalur per jenjang, selaras tema Kurikulum Merdeka (Fase A–F):
