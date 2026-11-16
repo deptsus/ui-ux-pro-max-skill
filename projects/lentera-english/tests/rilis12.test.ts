@@ -117,3 +117,25 @@ describe('antrean event tamu', () => {
     expect(account.outbox.length).toBeGreaterThan(GUEST_OUTBOX_MAX);
   });
 });
+
+describe('QRIS otomatis (Xendit) siap dinyalakan', () => {
+  afterEach(() => vi.unstubAllEnvs());
+  it('tanpa kunci lengkap tetap QRIS manual; kunci uji = mode uji; kunci produksi = live', async () => {
+    const { paymentMode } = await import('@/lib/server/api');
+    vi.stubEnv('LENTERA_BACKEND', '');
+    vi.stubEnv('SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('SUPABASE_SECRET_KEY', 'sb_secret_test');
+    vi.stubEnv('PAYMENT_PROVIDER', '');
+    expect(paymentMode()).toBe('manual');
+    vi.stubEnv('PAYMENT_PROVIDER', 'xendit');
+    vi.stubEnv('XENDIT_SECRET_KEY', '');
+    vi.stubEnv('XENDIT_WEBHOOK_TOKEN', '');
+    expect(paymentMode()).toBe('manual');
+    vi.stubEnv('XENDIT_SECRET_KEY', 'xnd_development_abc');
+    expect(paymentMode()).toBe('manual');
+    vi.stubEnv('XENDIT_WEBHOOK_TOKEN', 'token');
+    expect(paymentMode()).toBe('test');
+    vi.stubEnv('XENDIT_SECRET_KEY', 'xnd_production_abc');
+    expect(paymentMode()).toBe('live');
+  });
+});

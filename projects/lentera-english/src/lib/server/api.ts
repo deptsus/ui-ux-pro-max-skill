@@ -70,8 +70,9 @@ export function route<A extends unknown[]>(fn: (req: Request, ...args: A) => Pro
 }
 
 /**
- * manual : the owner's own QRIS, confirmed by an admin (the default).
- * live / test / mock : Xendit, only with PAYMENT_PROVIDER=xendit.
+ * manual : the owner's own QRIS, confirmed by an admin (the default, and the
+ *          fallback when PAYMENT_PROVIDER=xendit lacks a key or token).
+ * live / test / mock : Xendit, only with PAYMENT_PROVIDER=xendit and both keys.
  * off : no database, so nothing can be recorded.
  */
 export type PaymentMode = 'manual' | 'live' | 'test' | 'mock' | 'off';
@@ -82,7 +83,9 @@ export function paymentMode(): PaymentMode {
   if (process.env.PAYMENT_PROVIDER !== 'xendit') return 'manual';
   const key = process.env.XENDIT_SECRET_KEY;
   if (key && process.env.XENDIT_WEBHOOK_TOKEN) return isLiveKey(key) ? 'live' : 'test';
-  return backend === 'embedded' ? 'mock' : 'off';
+  // Xendit chosen but its keys are incomplete: keep taking payments by manual
+  // QRIS instead of switching payments off (Rilis 12).
+  return backend === 'embedded' ? 'mock' : 'manual';
 }
 
 const g = globalThis as unknown as { __lenteraMock?: MockXendit };

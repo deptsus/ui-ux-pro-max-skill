@@ -146,6 +146,35 @@ function ConfirmationQueue({ queue, reload }: { queue: QueueItem[]; reload: () =
   );
 }
 
+/** Which way learners pay right now, and how automatic QRIS is switched on (Rilis 12; guide in PEMBAYARAN-OTOMATIS.md). */
+function PaymentModeCard({ payments }: { payments: 'manual' | 'live' | 'test' | 'mock' | 'off' }) {
+  const webhook = typeof window === 'undefined' ? '/api/webhooks/xendit' : `${window.location.origin}/api/webhooks/xendit`;
+  const auto = payments === 'live' || payments === 'test' || payments === 'mock';
+  return (
+    <Card className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="font-extrabold">Cara pelajar membayar</h3>
+        {payments === 'live' ? <Badge tone="ok">QRIS otomatis (Xendit)</Badge> : payments === 'test' ? <Badge tone="accent">QRIS otomatis · mode uji</Badge> : payments === 'mock' ? <Badge tone="accent">Simulator lokal</Badge> : payments === 'manual' ? <Badge>QRIS manual, dikonfirmasi admin</Badge> : <Badge tone="muted">Nonaktif</Badge>}
+      </div>
+      {auto ? (
+        <p className="text-sm text-muted">Premium aktif sendiri begitu Xendit mengirim konfirmasi ke <span className="break-all font-mono">{webhook}</span>. Antrean konfirmasi manual tetap tampil bila masih ada laporan lama.</p>
+      ) : (
+        <details className="text-sm">
+          <summary className="cursor-pointer font-bold text-brand">Cara menyalakan QRIS otomatis (Xendit)</summary>
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted">
+            <li>Daftar dan verifikasi akun di dashboard.xendit.co, lalu aktifkan kanal QRIS.</li>
+            <li>Di Xendit: Settings → Webhooks, isi URL pembayaran dengan <span className="break-all font-mono text-ink">{webhook}</span> dan salin Verification Token.</li>
+            <li>Di Xendit: Settings → API Keys, buat Secret Key dengan izin Money-in (tulis). Mulai dengan kunci <span className="font-mono">xnd_development_…</span> untuk uji.</li>
+            <li>Di Netlify: Project configuration → Environment variables, tambahkan <span className="font-mono">PAYMENT_PROVIDER=xendit</span>, <span className="font-mono">XENDIT_SECRET_KEY</span>, dan <span className="font-mono">XENDIT_WEBHOOK_TOKEN</span> (tandai sebagai rahasia), lalu deploy ulang.</li>
+            <li>Uji satu pembelian di mode uji, lalu ganti kunci ke <span className="font-mono">xnd_production_…</span>. Panduan lengkap: PEMBAYARAN-OTOMATIS.md.</li>
+          </ol>
+          <p className="mt-2 text-xs text-muted">Kunci rahasia hanya dimasukkan di Netlify, tidak pernah di aplikasi atau dikirim lewat chat. Selama kunci belum lengkap, pembayaran tetap memakai QRIS manual.</p>
+        </details>
+      )}
+    </Card>
+  );
+}
+
 export function PaymentsPanel({ data, loadedAt, loading, error, reload, payments }: { data: Overview | null; loadedAt: number | null; loading: boolean; error: string | null; reload: () => void; payments: 'manual' | 'live' | 'test' | 'mock' | 'off' }) {
   const [status, setStatus] = useState('');
   const [query, setQuery] = useState('');
@@ -186,6 +215,7 @@ export function PaymentsPanel({ data, loadedAt, loading, error, reload, payments
         <Button size="sm" variant="secondary" onClick={reload} disabled={loading}><RefreshCw size={16} className={cx(loading && 'animate-spin')} aria-hidden />{loading ? 'Memuat...' : 'Muat ulang'}</Button>
       </div>
       {error && <Notice tone="bad" title="Gagal memuat ulang">{error}</Notice>}
+      <PaymentModeCard payments={payments} />
       {payments === 'mock' && <Notice tone="accent" title="Mode simulasi lokal">Server ini memakai simulator gerbang pembayaran. Angka di bawah berasal dari transaksi simulasi, bukan uang sungguhan.</Notice>}
       {payments === 'test' && <Notice tone="accent" title="Mode uji (sandbox Xendit)">Transaksi di mode ini tidak memindahkan uang sungguhan.</Notice>}
       {payments === 'off' && <Notice tone="muted" title="Pembayaran belum aktif">Server ini belum dikonfigurasi dengan gerbang pembayaran, jadi belum ada transaksi baru yang bisa masuk.</Notice>}
