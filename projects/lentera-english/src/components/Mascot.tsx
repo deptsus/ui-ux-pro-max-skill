@@ -1,76 +1,52 @@
-// Pijar, the Lentera firefly. Original mascot drawn as inline SVG and
-// animated with CSS only (see the .pijar rules in globals.css), so it costs no
-// extra JavaScript and stands still when the device asks for reduced motion.
+// Pijar, the Lentera firefly (2.5D redraw, Rilis 14): thick ink outlines, soft
+// clay shading and highlights, and 14 expressions shared with the rest of the
+// cast (src/components/cast/Face.tsx). Inline SVG animated with CSS only (the
+// .pijar rules in globals.css): no extra JavaScript, still under reduced motion.
 import { useId } from 'react';
+import { Face, INK, MOOD_LABEL, type Mood } from './cast/Face';
 
-export type Mood = 'happy' | 'cheer' | 'think' | 'sad' | 'encourage' | 'sleep' | 'dance';
+export type { Mood };
 
-const INK = '#1e1b3a';
-
-/** Pijar's body in a 96×96 box, without the surrounding <svg>, so stories can place it in a scene. */
+/** Pijar's body in a 96×96 box, without the surrounding <svg>, so stories can place it in a scene. Needs <PijarDefs />. */
 export function PijarFigure({ mood = 'happy', still = false }: { mood?: Mood; still?: boolean }) {
-  const raised = mood === 'cheer' || mood === 'dance';
-  const mouth = {
-    happy: <path d="M41 50 Q48 57 55 50" fill="none" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />,
-    cheer: <path d="M40 48 Q48 62 56 48 Z" fill={INK} />,
-    dance: <path d="M40 48 Q48 62 56 48 Z" fill={INK} />,
-    encourage: <path d="M41 49 Q48 58 55 49 Z" fill={INK} />,
-    think: <path d="M43 52 H53" fill="none" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />,
-    sad: <path d="M41 54 Q48 48 55 54" fill="none" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />,
-    sleep: <ellipse cx="48" cy="52" rx="2.6" ry="2" fill={INK} />,
-  }[mood];
-  const eyes = mood === 'think' ? (
-    <>
-      <circle cx="42" cy="41" r="3" fill={INK} />
-      <circle cx="55" cy="39" r="3" fill={INK} />
-    </>
-  ) : raised ? (
-    <path d="M38 42 Q41.5 37 45 42 M51 42 Q54.5 37 58 42" fill="none" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
-  ) : mood === 'sleep' ? (
-    <path d="M38 41 Q41.5 45 45 41 M51 41 Q54.5 45 58 41" fill="none" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
-  ) : (
-    <>
-      <circle cx="42" cy="42" r="3" fill={INK} />
-      <circle cx="54" cy="42" r="3" fill={INK} />
-      <circle cx="43" cy="41" r="1" fill="#fff" />
-      <circle cx="55" cy="41" r="1" fill="#fff" />
-    </>
-  );
+  const raised = mood === 'cheer' || mood === 'dance' || mood === 'laugh' || mood === 'love' || mood === 'proud';
+  const droop = mood === 'sad' || mood === 'sleep' || mood === 'worried';
   return (
     <g className={`pijar pijar-${mood}${still ? ' pijar-still' : ''}`}>
+      <ellipse className="pj-shadow" cx="48" cy="93" rx="17" ry="3" fill={INK} opacity="0.14" />
       <g className="pj-float">
-        <circle cx="48" cy="72" r="24" fill="url(#pj-glow)" className="pj-glow" />
-        {/* wings */}
-        <g className="pj-wing pj-wing-l"><ellipse cx="24" cy="38" rx="15" ry="9" fill="#c7d2fe" opacity="0.85" transform={raised ? 'rotate(-38 24 38)' : 'rotate(-18 24 38)'} /></g>
-        <g className="pj-wing pj-wing-r"><ellipse cx="72" cy="38" rx="15" ry="9" fill="#c7d2fe" opacity="0.85" transform={raised ? 'rotate(38 72 38)' : 'rotate(18 72 38)'} /></g>
-        {/* lantern tail */}
-        <ellipse cx="48" cy="72" rx="13" ry="12" fill="#fbbf24" />
-        <path d="M37 70 H59 M39 76 H57" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
-        {/* body */}
-        <circle cx="48" cy="42" r="23" fill="url(#pj-body)" />
-        {/* antennae */}
-        <path d="M40 22 Q36 10 30 9 M56 22 Q60 10 66 9" fill="none" stroke="#4b3fd6" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="30" cy="9" r="3" fill="#fbbf24" />
-        <circle cx="66" cy="9" r="3" fill="#fbbf24" />
-        {/* face */}
-        <ellipse cx="48" cy="45" rx="16" ry="14" fill="#fef3c7" />
-        {mood === 'encourage' && <path d="M38 35 L45 36.5 M58 35 L51 36.5" stroke={INK} strokeWidth="2" strokeLinecap="round" />}
-        <g className="pj-eyes">{eyes}</g>
-        {mouth}
-        <circle cx="36" cy="49" r="3" fill="#fda4af" opacity="0.7" />
-        <circle cx="60" cy="49" r="3" fill="#fda4af" opacity="0.7" />
-      </g>
-      {raised && (
-        <g fill="#fbbf24">
-          <path className="pj-spark" d="M12 20 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z" />
-          <path className="pj-spark" d="M84 16 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 z" />
-          <path className="pj-spark" d="M86 62 l1.4 3.4 3.4 1.4 -3.4 1.4 -1.4 3.4 -1.4 -3.4 -3.4 -1.4 3.4 -1.4 z" />
+        <circle cx="48" cy="72" r="26" fill="url(#pj-glow)" className="pj-glow" />
+        {/* wings, behind the body */}
+        <g className="pj-wing pj-wing-l">
+          <path d="M30 34 C14 18 2 30 8 40 C12 47 24 46 31 40 Z" fill="url(#pj-wing)" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" transform={raised ? 'rotate(-22 30 38)' : droop ? 'rotate(14 30 38)' : undefined} />
         </g>
-      )}
-      {mood === 'sleep' && (
-        <g fill="#6d5ff0" fontWeight="800" fontFamily="inherit">
-          <text className="pj-z" x="70" y="24" fontSize="10">z</text>
-          <text className="pj-z" x="78" y="14" fontSize="13">z</text>
+        <g className="pj-wing pj-wing-r">
+          <path d="M66 34 C82 18 94 30 88 40 C84 47 72 46 65 40 Z" fill="url(#pj-wing)" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" transform={raised ? 'rotate(22 66 38)' : droop ? 'rotate(-14 66 38)' : undefined} />
+        </g>
+        {/* lantern tail */}
+        <ellipse cx="48" cy="73" rx="14" ry="12.5" fill="url(#pj-tail)" stroke={INK} strokeWidth="2.6" />
+        <path d="M36.5 70 Q48 74 59.5 70 M37.5 77 Q48 81 58.5 77" fill="none" stroke="#c2410c" strokeWidth="1.8" strokeLinecap="round" opacity="0.55" />
+        <ellipse cx="42" cy="67.5" rx="4" ry="2.4" fill="#fff" opacity="0.65" transform="rotate(-20 42 67.5)" />
+        {/* antennae */}
+        <path d={droop ? 'M40 22 Q34 14 26 16 M56 22 Q62 14 70 16' : 'M40 22 Q36 10 29 8 M56 22 Q60 10 67 8'} fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+        <g className="pj-tips">
+          <circle cx={droop ? 26 : 29} cy={droop ? 16 : 8} r="3.6" fill="#fcd34d" stroke={INK} strokeWidth="2" />
+          <circle cx={droop ? 70 : 67} cy={droop ? 16 : 8} r="3.6" fill="#fcd34d" stroke={INK} strokeWidth="2" />
+        </g>
+        {/* body: clay sphere with a soft lower shade and a glossy highlight */}
+        <circle cx="48" cy="42" r="24" fill="url(#pj-body)" stroke={INK} strokeWidth="3" />
+        <path d="M27.5 50 A22 22 0 0 0 68.5 50 A26 22 0 0 1 27.5 50 Z" fill="#2a1f9a" opacity="0.3" />
+        <ellipse cx="36" cy="27" rx="7.5" ry="4.2" fill="#fff" opacity="0.5" transform="rotate(-32 36 27)" />
+        <circle cx="45.5" cy="22.5" r="1.7" fill="#fff" opacity="0.85" />
+        {/* face plate */}
+        <ellipse cx="48" cy="46.5" rx="17.5" ry="15.5" fill="url(#pj-face)" stroke={INK} strokeWidth="1.6" strokeOpacity="0.35" />
+        <Face mood={mood} cx={48} cy={46.5} gap={7.2} />
+      </g>
+      {(mood === 'cheer' || mood === 'dance') && (
+        <g fill="#fde047" stroke={INK} strokeWidth="1.1" strokeLinejoin="round">
+          <path className="pj-spark" d="M10 18 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z" />
+          <path className="pj-spark" d="M85 14 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 z" />
+          <path className="pj-spark" d="M88 60 l1.4 3.4 3.4 1.4 -3.4 1.4 -1.4 3.4 -1.4 -3.4 -3.4 -1.4 3.4 -1.4 z" />
         </g>
       )}
     </g>
@@ -85,17 +61,27 @@ export function PijarDefs() {
         <stop offset="0%" stopColor="#fde68a" stopOpacity="0.95" />
         <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
       </radialGradient>
-      <linearGradient id="pj-body" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#6d5ff0" />
-        <stop offset="100%" stopColor="#4b3fd6" />
+      <radialGradient id="pj-body" cx="34%" cy="28%" r="78%">
+        <stop offset="0%" stopColor="#a99fff" />
+        <stop offset="45%" stopColor="#6d5ff0" />
+        <stop offset="100%" stopColor="#4034c4" />
+      </radialGradient>
+      <radialGradient id="pj-tail" cx="38%" cy="32%" r="75%">
+        <stop offset="0%" stopColor="#fff3bf" />
+        <stop offset="50%" stopColor="#fbbf24" />
+        <stop offset="100%" stopColor="#e07a0b" />
+      </radialGradient>
+      <linearGradient id="pj-wing" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#f5f3ff" />
+        <stop offset="100%" stopColor="#c4c9fb" />
       </linearGradient>
+      <radialGradient id="pj-face" cx="45%" cy="35%" r="70%">
+        <stop offset="0%" stopColor="#fffbf0" />
+        <stop offset="100%" stopColor="#fde9c4" />
+      </radialGradient>
     </defs>
   );
 }
-
-const MOOD_LABEL: Record<Mood, string> = {
-  happy: 'tersenyum', cheer: 'melompat gembira', think: 'sedang berpikir', sad: 'sedih', encourage: 'menyemangatimu', sleep: 'tertidur', dance: 'menari',
-};
 
 export function Mascot({ mood = 'happy', size = 96, className, decorative = false, still = false }: { mood?: Mood; size?: number; className?: string; decorative?: boolean; still?: boolean }) {
   return (

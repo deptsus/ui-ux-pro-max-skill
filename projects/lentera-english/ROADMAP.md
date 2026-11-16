@@ -236,6 +236,45 @@ Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, 
 6. **Halaman materi publik untuk SEO** — **SELESAI di Rilis 11 (16 Nov 2026)**: `/materi` dan satu halaman statis per pelajaran, sitemap, robots, data terstruktur. Berikutnya: daftarkan situs di Google Search Console dan kirim sitemap (pemilik).
 7. **Ketahanan** — **SELESAI di Rilis 9 (15 Nov 2026)** bersama keamanan tingkat tinggi dan penghematan Liga & Teman (lihat `SCALING.md`): pemantauan error, cadangan otomatis kurikulum dan data pelajar, dan rencana naik paket Supabase/Netlify saat pengguna bertambah.
 
+### Update besar "Lentera Hidup" (permintaan pemilik, 16 November 2026)
+
+Tujuan: aplikasi belajar bahasa Inggris lokal yang unggul, tampilan dan rasa
+setara atau satu tingkat di bawah aplikasi belajar bahasa terbaik, cukup
+meyakinkan bagi orang tua untuk memasukkan anak SD–SMA, dan sepadan dengan harga
+Premium. Gaya Lentera sendiri (orisinal), bukan meniru tampilan atau karakter
+aplikasi lain. Dirilis bertahap; tiap rilis satu deploy.
+
+**Rilis 14 "Wajah Baru"** (desain dan karakter):
+- Karakter 2.5D (garis tebal, bayangan lembut, kilau): Pijar 2.0 dengan 14 ekspresi, dan teman belajar orisinal: Sari (SD, seragam merah-putih), Bima (SMP, biru-putih), Nadia (SMA, berhijab, abu-putih), Raka (SMA, berkacamata), Bu Lina (guru). Semua berbagi 14 ekspresi yang sama dan bergerak dengan CSS (diam bila perangkat meminta gerak dikurangi). Pratinjau: `/gaya` (hanya di server lokal).
+- Desain "clay": tombol tebal yang terasa ditekan, kartu bergaris tebal, judul huruf Baloo 2 (isi tetap Plus Jakarta Sans), chip beruntun/XP/nyawa, progress bar tebal; mode gelap disesuaikan.
+- Jalur Belajar menjadi peta berliku (titik pelajaran bulat, karakter di posisi sekarang, hadiah di akhir unit).
+- Sesi latihan baru: guru membacakan soal, pilihan jawaban tebal, umpan balik dengan karakter yang bereaksi, kombo jawaban benar beruntun, layar selesai dengan konfeti dan XP yang menghitung naik, efek suara (dibuat di perangkat, bisa dimatikan).
+- Karakter dipakai di Beranda, pelajaran, cerita, layar kosong, sertifikat, dan halaman depan.
+
+**Rilis 15 "Pelajaran Interaktif"**:
+- Jenis latihan baru: ketuk gambar, seret ke adegan (preposisi, ruangan), susun kalimat bersama karakter, obrolan dengan karakter, garis waktu tenses, eja dengan huruf, pasangan kilat (permainan memori), dengar lalu pilih adegan.
+- Pustaka ilustrasi kosakata bergaya 2.5D (±150 kata A1–A2: hewan, makanan, benda sekolah, keluarga, tubuh, warna, angka, cuaca, profesi, kendaraan).
+- Mini-game ulangan (kombo, batas waktu, skor tertinggi).
+- Free: jenis latihan baru muncul di pelajaran gratis; Premium: semuanya.
+
+**Rilis 16 "Jalur Sekolah SD–SMA"** (materi baru):
+- Satu jalur per jenjang, selaras tema Kurikulum Merdeka (Fase A–F):
+  - SD kelas 1–6: salam, angka, warna, keluarga, tubuh, hewan, benda di kelas, kegiatan harian, jam, makanan, cuaca, hobi.
+  - SMP kelas 7–9: mendeskripsikan orang/tempat, teks prosedur, recount, pengumuman, pesan singkat, narrative, kartu ucapan.
+  - SMA kelas 10–12: report, exposition, discussion, explanation, news item, saran dan pendapat, surat lamaran, persiapan SNBT Literasi dalam Bahasa Inggris.
+- Mode SD: instruksi dibacakan dalam bahasa Indonesia, tombol lebih besar, nama tidak tampil di liga publik, pembelian lewat gerbang orang tua.
+- Free: unit pertama tiap jenjang; Premium: semua unit, latihan SNBT, ujian jenjang dan sertifikat.
+
+**Rilis 17 "Untuk Orang Tua"**:
+- Halaman `/orang-tua`: alasan memilih Lentera, keselarasan dengan kurikulum sekolah, keamanan anak, contoh laporan, harga dibanding les.
+- Laporan mingguan (di aplikasi dan dibagikan ke WhatsApp): menit belajar, pelajaran tuntas, kekuatan dan kelemahan, rencana minggu depan.
+- Pantau Anak diperbarui: beberapa anak dalam satu akun orang tua, grafik kemajuan, sertifikat. Paket keluarga: keputusan pemilik.
+
+**Rilis 18 "Materi dan Poles"**:
+- Tambah pelajaran jalur CEFR A1–B1 (tempat sebagian besar pelajar SD–SMP), cerita baru dengan para karakter, materi menyimak beranimasi, video promosi baru.
+
+Catatan: karakter digambar dengan kode (SVG), ringan dan bisa bergerak, tetapi bukan animasi tangan studio; kualitas dijaga dengan audit aksesibilitas (Rilis 13) di setiap rilis. Materi baru diimpor dan diterbitkan pemilik di /admin seperti biasa.
+
 ---
 
 ## 4. Pekerjaan berkelanjutan tanpa deploy
