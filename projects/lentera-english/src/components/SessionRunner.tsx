@@ -154,7 +154,7 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
 
       {/* Always present, so the verdict is announced when it changes (a live region added with its text is often missed). */}
       <p className="sr-only" role="status" aria-live="polite">{announce}</p>
-      <section ref={questionRef} tabIndex={-1} aria-label={`Soal ${number}${count ? ` dari ${count}` : ''}`} className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-6 pt-4 focus:outline-none">
+      <section ref={questionRef} tabIndex={0} aria-label={`Soal ${number}${count ? ` dari ${count}` : ''}`} className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-6 pt-4 focus:outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand">
         <ExerciseCard key={`${current.id}:${items.length}`} ex={current} seed={`${seed}:${items.length}`} grade={result} onChange={setAnswer} onSubmit={() => submit()} />
         {hints && current.hint && !result && (
           <div className="mt-5">

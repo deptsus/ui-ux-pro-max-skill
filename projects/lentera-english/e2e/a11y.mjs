@@ -52,6 +52,8 @@ async function open({ who, mode }) {
 }
 
 async function audit(p, label, meta) {
+  // Measure the settled screen, not a fade-in halfway through (it reads as low contrast).
+  await p.evaluate(() => Promise.all(document.getAnimations().filter((a) => Number.isFinite(a.effect?.getComputedTiming().endTime)).map((a) => a.finished.catch(() => undefined)))).catch(() => {});
   if (!(await p.evaluate(() => !!window.axe))) await p.evaluate(AXE);
   const res = await p.evaluate(async () => {
     const out = await window.axe.run(document, { resultTypes: ['violations'], runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] } });
