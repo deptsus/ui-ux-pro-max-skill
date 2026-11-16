@@ -142,7 +142,30 @@ try {
   check('ajakan memperbarui (berakun): macet', false, String(e.message).split('\n')[0].slice(0, 200));
 }
 
-// ───────────── 3. A normal browser is unchanged ─────────────
+// ───────────── 3. The Play Store build: no purchase, no APK offers ─────────────
+const play = await app(learner);
+try {
+  await play.goto(`${BASE}/app?apk=4&store=play`);
+  await play.locator('main').first().waitFor({ timeout: 30000 });
+  await play.waitForTimeout(1500);
+  check('versi Play Store tidak pernah menawarkan unduhan APK', (await play.getByText('Versi baru aplikasi Lentera').count()) === 0);
+  await play.goto(`${BASE}/app/subscription`);
+  await play.getByText('Pembelian tidak tersedia di aplikasi ini').waitFor({ timeout: 30000 });
+  check('versi Play Store: halaman Premium tanpa tombol bayar, harga, dan QRIS', (await play.getByRole('button', { name: /Bayar/ }).count()) === 0 && (await play.getByText('Rp58.500').count()) === 0 && (await play.getByText('QRIS').count()) === 0);
+  await play.goto(`${BASE}/app/checkout?tx=abc`);
+  check('versi Play Store: halaman pembayaran tidak bisa dibuka', await play.getByText('Pembelian tidak tersedia di aplikasi ini').waitFor({ timeout: 30000 }).then(() => true, () => false));
+} catch (e) {
+  check('versi Play Store: macet', false, String(e.message).split('\n')[0].slice(0, 200));
+}
+const site = await app(learner, { native: false });
+try {
+  await site.goto(`${BASE}/app/subscription`);
+  check('browser biasa tetap bisa membeli Premium dengan QRIS', await site.getByRole('button', { name: /Bayar .* dengan QRIS/ }).waitFor({ timeout: 30000 }).then(() => true, () => false));
+} catch (e) {
+  check('pembelian di browser: macet', false, String(e.message).split('\n')[0].slice(0, 200));
+}
+
+// ───────────── 4. A normal browser is unchanged ─────────────
 const web = await app(learner, { native: false });
 try {
   await web.goto(`${BASE}/app/settings#pengingat`);

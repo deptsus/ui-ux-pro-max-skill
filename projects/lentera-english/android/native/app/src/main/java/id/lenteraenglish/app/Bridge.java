@@ -53,6 +53,7 @@ final class Bridge implements WebViewCompat.WebMessageListener {
             case "hello":
                 JSONObject h = json("hello", "version", BuildConfig.VERSION_NAME);
                 h.put("versionCode", BuildConfig.VERSION_CODE);
+                h.put("store", BuildConfig.STORE);
                 h.put("notifications", host.notificationState());
                 h.put("speech", host.speechAvailable());
                 h.put("dailyHour", Reminders.prefs(activity).getInt("daily_hour", -1));

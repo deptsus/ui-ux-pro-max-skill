@@ -157,7 +157,7 @@ public class MainActivity extends Activity implements Bridge.Host {
             return SITE + ReminderLogic.safeAppPath(u.getEncodedPath() + (u.getEncodedQuery() == null ? "" : "?" + u.getEncodedQuery()));
         }
         // ?apk= tells the site which app version runs (update notice, src/lib/android.ts).
-        return SITE + "/app?apk=" + BuildConfig.VERSION_CODE;
+        return SITE + "/app?apk=" + BuildConfig.VERSION_CODE + ("play".equals(BuildConfig.STORE) ? "&store=play" : "");
     }
 
     @Override protected void onNewIntent(Intent i) {

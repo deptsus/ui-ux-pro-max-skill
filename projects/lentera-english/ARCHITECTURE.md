@@ -172,6 +172,8 @@ Status Premium **tidak disimpan sebagai flag**: `get_entitlement()` menghitungny
 
 **Halaman publik dan SEO (Rilis 11)**: `src/lib/seo.ts` membangun data pelajaran dari kurikulum bawaan saat build; `/materi`, `/materi/[id]` (`generateStaticParams`, `dynamicParams = false`), `sitemap.ts`, dan `robots.ts` semuanya statis. Tidak ada soal latihan di halaman publik.
 
+**Rilis 12 (migrasi 0017)**: `level_exam_starts` (waktu mulai pertama per percobaan ujian level; `level_exam_begin()`), `premium_expiry_targets()` untuk pengingat Premium. Pembayaran: `paymentMode()` kembali ke `manual` bila Xendit dipilih tanpa kunci lengkap. Aplikasi Android punya `BuildConfig.STORE` (`web`/`play`); situs membaca `?store=play` (`src/lib/client/store-build.ts`) untuk menyembunyikan pembelian dan tawaran APK di versi Play.
+
 **Fungsi SQL** (semua hanya bisa dieksekusi `service_role`):
 akun `get_account`, `get_entitlement`, `update_profile`; progres `sync_learner`, `get_snapshot`, `get_leaderboard`;
 CMS `admin_content`, `admin_upsert`, `admin_delete`, `import_content`, `publish_curriculum`, `get_published_content`,

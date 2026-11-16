@@ -21,6 +21,18 @@ sebagai arsip; APK 1.3.0 tetap bisa diunduh di
 | Unduhan | `/download/lentera-english.apk` (tombol di halaman depan) |
 | Sidik jari sertifikat (SHA-256, publik) | `74:B2:DD:32:1D:1F:DC:49:6B:C9:E0:3C:BC:B9:0B:98:DB:29:9C:E3:AD:FF:F6:4B:84:EE:7E:77:29:E9:DA:A5` |
 
+## Dua varian: APK situs dan Google Play
+
+Kode yang sama dibangun dua cara. Bedanya hanya `BuildConfig.STORE`:
+
+- **APK situs** (`./gradlew assembleRelease`, `STORE = "web"`): membuka
+  `/app?apk=N`, menjual Premium dengan QRIS, dan menerima ajakan pembaruan APK.
+- **Google Play** (`./gradlew bundleRelease -Pstore=play`): membuka
+  `/app?apk=N&store=play`. Di dalamnya situs tidak menjual apa pun (kebijakan
+  pembayaran Google Play) dan tidak pernah menawarkan unduhan APK (pembaruan
+  hanya lewat Play). Premium yang dibeli di situs tetap berlaku. Paket lengkap
+  untuk Play Console ada di `play-store/` (lihat `play-store/README.md`).
+
 ## Pindah dari 1.x ke 2.0
 
 APK 2.0 memakai nama paket dan kunci yang sama, jadi terpasang sebagai

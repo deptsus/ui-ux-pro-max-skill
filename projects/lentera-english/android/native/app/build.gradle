@@ -11,6 +11,9 @@ android {
         versionCode 5
         versionName '2.0.0'
         buildConfigField 'String', 'SITE', '"https://lentera-english-app.netlify.app"'
+        // "play" for the Google Play bundle (./gradlew bundleRelease -Pstore=play): the site then
+        // sells nothing in the app and never offers an APK download. Default: the website APK.
+        buildConfigField 'String', 'STORE', "\"${project.findProperty('store') ?: 'web'}\""
     }
     buildFeatures { buildConfig true }
     buildTypes {

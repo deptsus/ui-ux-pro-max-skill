@@ -60,10 +60,12 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 10 "Kelas" + aplikasi Android 2.0.0 tanpa Chrome: lisensi sekolah di /admin → Sekolah, Ruang Guru, Kelas Saya, Pantau Anak, `/sekolah`, APK 2.0.0 WebView (`tests/rilis10.test.ts`, `e2e:classes`, `e2e:native`). `apply-0015.sql` sudah dijalankan pemilik dan diperiksa (16 Nov 2026). Pemilik: buat lisensi pertama di /admin → Sekolah bila ada sekolah yang berminat.
 - [ ] Uji APK 2.0.0 di HP sungguhan (suara, pengingat harian pada jamnya, izin mikrofon untuk shadowing, berbagi, cetak sertifikat).
 - [x] Rilis 11 "Jalur Khusus & SEO": 3 jalur (Kerja, TOEFL ITP/IELTS, Anak) × 3 pelajaran, pelajaran pertama gratis, `/app/jalur`, halaman materi publik `/materi`, sitemap, robots, data terstruktur (`tests/rilis11.test.ts`, `e2e:tracks`). Pemilik: jalankan `apply-0016.sql`, lalu /admin → Konten → "Impor materi bawaan" → Terbitkan; daftarkan situs di Google Search Console dan kirim `sitemap.xml`.
-- [ ] Tambah pelajaran tiap jalur khusus (IELTS Speaking dan Reading, TOEFL Listening, presentasi kerja, cerita anak bergambar).
-- [ ] Sesudah Rilis 11: Rilis 7 "Siap Tumbuh" (Play Store, QRIS otomatis) bila pemilik siap.
+- [x] Rilis 12: jalur khusus 6 pelajaran per jalur; ujian level diperiksa server (migrasi 0017) + bank soal 16 per level; pengingat Premium hampir habis; batas antrean tamu; QRIS otomatis siap nyala (`PEMBAYARAN-OTOMATIS.md`); paket Play Store (`play-store/`); halaman depan dan video promosi baru. Pemilik: jalankan `apply-0017.sql`, lalu Impor materi bawaan + Terbitkan.
+- [ ] Pemilik: akun Play Console dan uji tertutup 12 penguji × 14 hari (`play-store/README.md`); akun Xendit bila ingin QRIS otomatis.
+- [ ] Bila ingin menjual Premium di dalam aplikasi Play Store: integrasi Google Play Billing (atau program pembayaran alternatif di Indonesia).
+- [x] Rilis 7 "Siap Tumbuh" disiapkan di Rilis 12 (sisa langkah pemilik di atas).
 - [x] Pengingat PR terbukti sampai di HP sungguhan (15 Nov 2026, HP Android pemilik). Fungsi terjadwal Netlify `homework-reminders` terdaftar (`@hourly`).
-- [ ] Perbesar bank soal ujian level (sekarang 12 + 8 + 8 soal per level); batas waktu ujian level belum dicek server (hanya di perangkat).
+- [x] Bank soal ujian level 16 + 8 + 8 per level; batas waktu ujian level diperiksa server (Rilis 12).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).
 - [x] Ujian level B1, B2, C1, C2 (Rilis 3: semua level A1–C2 punya ujian empat bagian).
 - [ ] Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Sekarang hanya di klien; konten Premium sudah dipangkas di server.
@@ -75,12 +77,12 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [ ] Beri tahu admin (mis. email) saat ada pembayaran baru yang dilaporkan.
 - [ ] Alur admin untuk transaksi `NEEDS_REVIEW` (hanya relevan bila Xendit dihidupkan).
 - [ ] Rekonsiliasi berkala transaksi `PENDING` Xendit (hanya relevan bila Xendit dihidupkan).
-- [ ] Pengingat masa aktif Premium hampir habis (saat ini hanya lencana "Segera berakhir" di halaman paket bila ≤ 7 hari).
+- [x] Pengingat masa aktif Premium hampir habis (Rilis 12: notifikasi 3 hari sebelumnya + kartu di Beranda).
 - [ ] Unggah audio dari dashboard admin (storage). Saat ini admin hanya bisa mendaftarkan URL berkas yang sudah diunggah.
 - [ ] Editor visual untuk skenario percakapan dan panduan pelafalan di dashboard admin (sekarang kolom JSON).
 - [ ] Uji mode belajar offline (IndexedDB + `public/sw.js`) di browser, termasuk sinkronisasi setelah kembali online.
 - [x] `scripts/export-content.ts`: ekspor kurikulum dari DB ke file (`npm run content:export`), teruji bolak-balik ekspor → impor.
-- [ ] Outbox event tamu tumbuh tanpa batas selama pengguna tidak pernah mendaftar (tersimpan di localStorage). Batasi atau ringkas untuk tamu jangka panjang.
+- [x] Outbox event tamu dibatasi 2.000 (Rilis 12).
 - [ ] README khusus proyek (ringkas, menunjuk ke empat dokumen ini).
 - [ ] CI untuk folder ini (workflow repo tidak mencakup `projects/**`).
 

@@ -1,15 +1,16 @@
 import Link from 'next/link';
-import { BookOpen, Brain, CalendarClock, Check, ClipboardList, GraduationCap, Headphones, MessagesSquare, ShieldCheck, Smartphone, Target, WifiOff, Wrench } from 'lucide-react';
+import { BellRing, BookOpen, Brain, CalendarClock, Check, ClipboardList, Compass, DatabaseBackup, Download, GraduationCap, Headphones, HeartHandshake, KeyRound, Lock, MessagesSquare, School, ShieldCheck, Smartphone, Target, Trophy, Trash2, Users, WifiOff, Wrench } from 'lucide-react';
 import { Logo, Mascot } from '@/components/Mascot';
 import { PromoVideo } from '@/components/PromoVideo';
 import { PROMO_DURATION } from '@/components/promo-chapters';
 import { Badge, Card, LinkButton } from '@/components/ui';
 import { ANDROID_APP } from '@/lib/android';
 import { TRACKS } from '@/lib/content/tracks';
+import { buildPack } from '@content/index';
 import { rupiah } from '@/lib/format';
 import { BENCHMARK_MONTHLY, FREE_FEATURES, PLANS, PREMIUM_FEATURES } from '@/lib/plans';
 
-/** Android app (Trusted Web Activity around this site), served from public/download. */
+/** Android app (its own WebView, no Chrome needed), served from public/download. */
 const ANDROID_APK = ANDROID_APP.url;
 
 const STEPS = [
@@ -30,12 +31,40 @@ const FEATURES = [
   [Headphones, 'Menyimak, pelafalan, dan shadowing', 'Putar normal atau lambat, lihat posisi lidah dan bibir, lalu rekam suaramu dan bandingkan berdampingan dengan contohnya.'],
   [GraduationCap, 'PR dan ujian sungguhan', 'Tes penempatan, ujian unit, dan ujian level CEFR dengan pembahasan lengkap.'],
 ] as const;
+/** Counted from the curriculum at build time (the landing page is static). */
+const PACK = buildPack();
+const STATS = [
+  [String(PACK.lessons.length), 'pelajaran lengkap'],
+  [PACK.exercises.length.toLocaleString('id-ID'), 'soal dengan pembahasan'],
+  ['A1–C2', 'kurikulum CEFR'],
+  ['3', 'jalur khusus'],
+] as const;
+const HABITS = [
+  [Trophy, 'Liga mingguan', 'Lima divisi, naik atau turun tiap Senin sesuai XP-mu.'],
+  [Users, 'Teman dan tantangan', 'Undang teman dengan kode, lalu adu XP 3 atau 7 hari.'],
+  [Headphones, 'Shadowing', 'Dengar, rekam suaramu, lalu bandingkan berdampingan.'],
+  [BellRing, 'Pengingat harian', 'Satu notifikasi pada jam pilihanmu, hanya di hari kamu belum belajar.'],
+] as const;
+const SCHOOL = [
+  [School, 'Kelas dengan kode', 'Guru membuat kelas, siswa bergabung dengan kode 6 karakter dan langsung Premium selama lisensi berlaku.'],
+  [ClipboardList, 'Tugas dan progres', 'Pelajaran, PR, atau ujian unit dengan tenggat; nilai tiap siswa terlihat, rekap bisa diunduh untuk rapor.'],
+  [HeartHandshake, 'Pantau Anak', 'Orang tua melihat hari aktif, pelajaran, PR, dan tugas guru, tanpa melihat jawaban latihan.'],
+] as const;
+const TRUST = [
+  [Lock, 'Terenkripsi dan terlindungi', 'Semua lalu lintas lewat HTTPS dengan header keamanan ketat; percobaan menebak kode dibatasi otomatis.'],
+  [KeyRound, 'Admin dengan verifikasi 2 langkah', 'Dashboard pengelola hanya terbuka dengan kata sandi dan kode dari aplikasi authenticator.'],
+  [DatabaseBackup, 'Cadangan setiap malam', 'Progres dicadangkan otomatis setiap hari dan disimpan 14 hari.'],
+  [Trash2, 'Datamu milikmu', 'Tanpa iklan pihak ketiga dan tanpa menjual data. Akun bisa dihapus sendiri kapan saja dari Pengaturan.'],
+] as const;
 const LEVELS = [['A1', 'Pemula'], ['A2', 'Dasar'], ['B1', 'Menengah'], ['B2', 'Menengah Atas'], ['C1', 'Mahir'], ['C2', 'Sangat Mahir']];
 const FAQ = [
   ['Apakah aplikasi ini memakai AI saat aku belajar?', 'Tidak. Semua materi diperiksa dan dikembangkan sebelum terbit. Penilaian jawaban dan rekomendasi belajar dihitung dengan aturan dan skor yang bisa dijelaskan, bukan model bahasa, dan tidak ada jawabanmu yang dikirim ke layanan AI.'],
   ['Apakah pelafalanku dinilai otomatis?', 'Tidak. Kami tidak mengklaim penilaian pelafalan otomatis. Kamu mendapat contoh audio, panduan posisi mulut, dan latihan shadowing untuk membandingkan suaramu sendiri berdampingan dengan contohnya.'],
   ['Apakah Premium diperpanjang otomatis?', 'Tidak ada auto-debit. Kamu memperpanjang sendiri. Saat masa aktif habis, akun kembali ke Free dan seluruh progresmu tetap tersimpan.'],
   ['Metode pembayaran apa yang tersedia?', 'QRIS, yang bisa dibayar dari aplikasi mobile banking atau e-wallet apa pun (DANA, GoPay, OVO, ShopeePay, BCA, dan lainnya). Setelah membayar, laporkan pembayaranmu di aplikasi; Premium aktif setelah kami mengonfirmasinya. Kami tidak menyimpan data rekening atau e-wallet.'],
+  ['Apakah ada aplikasi Android?', `Ada. Unduh APK ${ANDROID_APP.versionName} dari halaman ini. Sejak versi 2.0 aplikasinya tidak membutuhkan Chrome: suara memakai mesin suara HP dan pengingat dijadwalkan langsung di HP. Di iPhone dan komputer, cukup buka situs ini di browser.`],
+  ['Apakah sertifikatnya bisa dicek keasliannya?', 'Bisa. Setiap sertifikat ujian level punya kode unik yang bisa diverifikasi siapa pun di halaman Verifikasi sertifikat. Ujian level dinilai dan dibatasi waktunya oleh server, bukan oleh HP.'],
+  ['Bisakah dipakai sekolah atau kursus?', 'Bisa. Sekolah mendapat lisensi per kelas: guru membuat kelas, memberi tugas, dan memantau progres; siswanya otomatis Premium selama lisensi berlaku. Hubungi kami lewat halaman Lentera untuk Sekolah.'],
   ['Apakah semua level sudah lengkap?', 'Kurikulum A1 sampai C2 sudah dipetakan dan setiap level punya pelajaran yang bisa dikerjakan. Unit yang masih disusun ditandai jelas di jalur belajar.'],
 ];
 
@@ -46,6 +75,8 @@ export default function Landing() {
       <header className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4">
         <Link href="/" className="text-lg"><Logo /></Link>
         <nav className="flex items-center gap-2" aria-label="Navigasi">
+          <Link href="/materi" className="hidden rounded-xl px-3 py-2 text-sm font-bold text-muted hover:text-ink md:block">Materi</Link>
+          <Link href="/sekolah" className="hidden rounded-xl px-3 py-2 text-sm font-bold text-muted hover:text-ink md:block">Untuk sekolah</Link>
           <a href="#harga" className="hidden rounded-xl px-3 py-2 text-sm font-bold text-muted hover:text-ink sm:block">Harga</a>
           <LinkButton href="/masuk" variant="secondary" size="sm">Masuk</LinkButton>
           <LinkButton href="/app" size="sm">Mulai gratis</LinkButton>
@@ -64,7 +95,7 @@ export default function Landing() {
             </div>
             <p className="mt-3 text-sm text-muted">Tanpa kartu kredit. Bisa langsung dicoba sebagai tamu.</p>
             {/* A plain <a>: the APK is a static file, not a route. */}
-            <a href={ANDROID_APK} download className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand underline underline-offset-4 hover:text-ink"><Smartphone size={18} aria-hidden />Unduh aplikasi Android (APK {ANDROID_APP.versionName})</a>
+            <a href={ANDROID_APK} download className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand underline underline-offset-4 hover:text-ink"><Smartphone size={18} aria-hidden />Unduh aplikasi Android (APK {ANDROID_APP.versionName}, tanpa Chrome)</a>
           </div>
           <Card className="relative mx-auto w-full max-w-sm">
             <Mascot mood="cheer" size={120} className="mx-auto" />
@@ -76,6 +107,12 @@ export default function Landing() {
             </div>
             <div className="mt-2 rounded-2xl bg-brand-soft p-3 text-sm"><p className="font-extrabold text-brand">Langkah berikutnya untukmu</p><p className="mt-1">Latihan perbaikan: tertukar was / were. Kamu 3× keliru pada pola ini minggu ini.</p></div>
           </Card>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 pb-12" aria-label="Lentera dalam angka">
+          <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {STATS.map(([value, label]) => <div key={label} className="rounded-3xl border border-line bg-surface p-4 text-center"><dt className="sr-only">{label}</dt><dd><span className="block text-3xl font-extrabold text-brand">{value}</span><span className="text-sm font-bold text-muted">{label}</span></dd></div>)}
+          </dl>
         </section>
 
         <section className="mx-auto max-w-6xl px-5 pb-14" aria-labelledby="video-title" id="video">
@@ -111,6 +148,16 @@ export default function Landing() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-6xl px-5 pb-14" aria-labelledby="kebiasaan-title">
+          <h2 id="kebiasaan-title" className="text-3xl font-extrabold tracking-tight">Belajar jadi kebiasaan</h2>
+          <p className="mt-2 max-w-2xl text-muted">Lima belas menit sehari terasa ringan bila ada teman, target, dan pengingat yang tidak mengganggu.</p>
+          <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {HABITS.map(([Icon, title, desc]) => (
+              <Card as="li" key={title}><Icon size={24} className="text-brand" aria-hidden /><h3 className="mt-2 font-extrabold">{title}</h3><p className="mt-1 text-sm text-muted">{desc}</p></Card>
+            ))}
+          </ul>
+        </section>
+
         <section className="bg-surface py-14">
           <div className="mx-auto max-w-6xl px-5">
             <h2 className="text-3xl font-extrabold tracking-tight">Dari nol sampai mahir</h2>
@@ -123,7 +170,7 @@ export default function Landing() {
         </section>
 
         <section className="mx-auto max-w-6xl px-5 py-14" aria-labelledby="jalur-title">
-          <h2 id="jalur-title" className="text-3xl font-extrabold tracking-tight">Jalur khusus</h2>
+          <h2 id="jalur-title" className="flex items-center gap-2 text-3xl font-extrabold tracking-tight"><Compass className="text-brand" aria-hidden />Jalur khusus</h2>
           <p className="mt-2 max-w-2xl text-muted">Di samping jalur CEFR, ada jalur untuk tujuan tertentu. Pelajaran pertama tiap jalur gratis.</p>
           <ul className="mt-6 grid gap-4 md:grid-cols-3">
             {TRACKS.map((t) => (
@@ -131,6 +178,38 @@ export default function Landing() {
             ))}
           </ul>
           <p className="mt-4 text-sm text-muted">Lihat ringkasan semua pelajaran di <Link href="/materi" className="font-bold text-brand underline">Materi gratis</Link>. Untuk sekolah dan kursus: <Link href="/sekolah" className="font-bold text-brand underline">Lentera untuk Sekolah</Link>.</p>
+        </section>
+
+        <section className="bg-surface py-14" aria-labelledby="sekolah-title">
+          <div className="mx-auto max-w-6xl px-5">
+            <h2 id="sekolah-title" className="text-3xl font-extrabold tracking-tight">Untuk sekolah, guru, dan orang tua</h2>
+            <p className="mt-2 max-w-2xl text-muted">Satu ruang belajar yang sama di kelas dan di rumah, dengan lisensi per sekolah.</p>
+            <ul className="mt-6 grid gap-4 md:grid-cols-3">
+              {SCHOOL.map(([Icon, title, desc]) => (
+                <Card as="li" key={title}><span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-soft text-brand"><Icon size={24} aria-hidden /></span><h3 className="mt-3 text-lg font-extrabold">{title}</h3><p className="mt-1 text-sm text-muted">{desc}</p></Card>
+              ))}
+            </ul>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <LinkButton href="/sekolah">Lentera untuk Sekolah</LinkButton>
+              <LinkButton href="/app/orang-tua" variant="secondary">Pantau anak</LinkButton>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 py-14" aria-labelledby="aman-title">
+          <h2 id="aman-title" className="text-3xl font-extrabold tracking-tight">Aman dan menghormati privasimu</h2>
+          <p className="mt-2 max-w-2xl text-muted">Belajar bahasa tidak boleh dibayar dengan data pribadi.</p>
+          <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TRUST.map(([Icon, title, desc]) => (
+              <li key={title} className="rounded-3xl border border-line bg-surface p-4"><Icon size={22} className="text-ok" aria-hidden /><p className="mt-2 font-extrabold">{title}</p><p className="mt-1 text-sm text-muted">{desc}</p></li>
+            ))}
+          </ul>
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-3xl border-2 border-brand bg-brand-soft p-4">
+            <Smartphone size={28} className="shrink-0 text-brand" aria-hidden />
+            <div className="min-w-0 flex-1"><p className="font-extrabold">Aplikasi Android {ANDROID_APP.versionName}, tanpa Chrome</p><p className="text-sm text-muted">Suara dari mesin suara HP, pengingat yang tetap berbunyi walau tanpa internet, dan berbagi langsung dari aplikasi. Ukurannya sekitar 250 KB.</p></div>
+            <a href={ANDROID_APK} download className="inline-flex min-h-11 items-center gap-2 rounded-2xl border-2 border-b-4 border-brand-strong bg-brand px-4 font-extrabold text-on-brand"><Download size={18} aria-hidden />Unduh APK</a>
+          </div>
+          <p className="mt-3 text-sm text-muted">Rincian ada di <Link href="/privasi" className="font-bold text-brand underline">Kebijakan privasi</Link>. Sertifikat ujian level bisa dicek siapa pun di <Link href="/sertifikat" className="font-bold text-brand underline">Verifikasi sertifikat</Link>.</p>
         </section>
 
         <section id="harga" className="mx-auto max-w-6xl scroll-mt-6 px-5 py-14">

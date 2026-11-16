@@ -17,8 +17,9 @@ fs.rmSync(SHOTS, { recursive: true, force: true });
 fs.mkdirSync(SHOTS, { recursive: true });
 const PASSWORD = 'rahasia-12345';
 const ADMIN = 'admin@lentera.test';
-const W = 390;
-const H = 844;
+const W = Number(process.env.PROMO_W ?? 390);
+const H = Number(process.env.PROMO_H ?? 844);
+const DPR = Number(process.env.PROMO_DPR ?? 2);
 
 const call = async (url, body, token, method) => {
   const res = await fetch(BASE + url, { method: method ?? (body ? 'POST' : 'GET'), headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: body ? JSON.stringify(body) : undefined });
@@ -70,14 +71,16 @@ const VOICE = path.join(OUT, 'fake-voice.wav');
   fs.writeFileSync(VOICE, b);
 }
 const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${VOICE}`] });
-const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, timezoneId: 'Asia/Jakarta', permissions: ['microphone', 'notifications'] });
+const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR, isMobile: true, hasTouch: true, timezoneId: 'Asia/Jakarta', permissions: ['microphone', 'notifications'] });
 await ctx.addInitScript(() => localStorage.setItem('lentera.story.sound', '0'));
 const page = await ctx.newPage();
+const mainPage = page;
 const shots = [];
 let n = 0;
 
 /** Screenshot of the screen as it is; `tap` = where the finger goes next (recorded, then clicked). */
-async function shot(name, { tap, full = false, caption, wait = 700, scrollTo, mark, markOffset = 0 } = {}) {
+async function shot(name, { tap, full = false, caption, wait = 700, scrollTo, mark, markOffset = 0, on } = {}) {
+  const page = on ?? mainPage;
   if (scrollTo) await scrollTo.scrollIntoViewIfNeeded();
   await page.waitForTimeout(wait);
   const file = `${String(++n).padStart(2, '0')}-${name}.png`;
@@ -98,7 +101,7 @@ async function shot(name, { tap, full = false, caption, wait = 700, scrollTo, ma
     await tap.click();
   }
   shots.push(entry);
-  fs.writeFileSync(path.join(OUT, 'shots.json'), JSON.stringify({ width: W, height: H, scale: 2, shots }, null, 1));
+  fs.writeFileSync(path.join(OUT, 'shots.json'), JSON.stringify({ width: W, height: H, scale: DPR, shots }, null, 1));
   console.log(file);
 }
 const btn = (name, exact = true) => page.getByRole('button', { name, exact });
@@ -372,6 +375,58 @@ try {
   await page.goto(`${BASE}/app/vocabulary`);
   await page.locator('main').first().waitFor({ timeout: 30000 });
   await shot('vocabulary', { wait: 1200 });
+  // ── Rilis 10–11: special tracks, classes for teachers, the parent view, free lesson pages ──
+  // Back to the light theme for the rest of the tour.
+  await page.goto(`${BASE}/app/settings`);
+  await page.getByRole('radio', { name: 'Terang' }).click({ timeout: 30000 });
+  await page.waitForTimeout(400);
+  await page.goto(`${BASE}/app/jalur`);
+  await page.getByRole('heading', { name: 'Bahasa Inggris untuk Kerja' }).waitFor({ timeout: 30000 });
+  await shot('tracks', { full: true, wait: 1000, mark: page.getByRole('heading', { name: 'Persiapan TOEFL ITP dan IELTS' }), markOffset: -40 });
+
+  // A school license from the owner, a teacher with a class and one assignment, classmates who did it.
+  const wib = (days) => new Date(Date.now() + 7 * 3600_000 + days * 86_400_000).toISOString().slice(0, 10);
+  const lic = (await call('/api/admin', { action: 'create-license', license: { school: 'SMP Harapan Bangsa', contact: 'Bu Kepala', max_teachers: 3, max_classes: 3, seats: 40, starts: wib(0), ends: wib(180), note: '' } }, admin.token)).data;
+  const sari = await account('promo-sari@lentera.test', 'Bu Sari');
+  await call('/api/me', { avatar: 3, display_name: 'Bu Sari' }, sari.token, 'PATCH');
+  await call('/api/teacher', { action: 'activate', code: lic.code }, sari.token);
+  const cls = (await call('/api/teacher', { action: 'create-class', licenseId: lic.id, name: 'Kelas 8A', level: 'A2' }, sari.token)).data;
+  const due = new Date(Date.now() + 3 * 86_400_000).toISOString();
+  await call('/api/teacher', { action: 'assign', classId: cls.id, kind: 'lesson', refId: 'a2-past-regular', title: 'Simple Past: Kata Kerja Beraturan (-ed)', note: 'Kerjakan sampai tes penguasaan, ya.', dueAt: due }, sari.token);
+  await call('/api/teacher', { action: 'assign', classId: cls.id, kind: 'lesson', refId: 'work-interview-intro', title: 'Wawancara Kerja: Memperkenalkan Diri', note: '', dueAt: new Date(Date.now() + 6 * 86_400_000).toISOString() }, sari.token);
+  for (const [name, score] of [['Dimas', 92], ['Nisa', 88], ['Bayu', null]]) {
+    await call('/api/classes', { action: 'join', code: cls.join_code }, mates[name].token);
+    if (score) await call('/api/sync', { events: [{ id: `promo-class-${name}`, kind: 'lesson', at: Date.now(), data: { id: 'a2-past-regular', score, passed: true } }], snapshot: null, updatedAt: 1 }, mates[name].token);
+  }
+  await page.goto(`${BASE}/app/kelas?kode=${cls.join_code}`);
+  await page.getByLabel(/Kode kelas dari guru/).waitFor({ timeout: 30000 });
+  await shot('class-join', { tap: btn('Gabung') });
+  await page.getByText(/Kamu bergabung ke kelas Kelas 8A/).waitFor({ timeout: 20000 });
+  await shot('class-tasks', { wait: 900 });
+
+  const other = async (who) => {
+    const c = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR, isMobile: true, hasTouch: true, timezoneId: 'Asia/Jakarta' });
+    await c.addInitScript((sess) => { if (!sessionStorage.getItem('promo-init')) { sessionStorage.setItem('promo-init', '1'); localStorage.setItem('lentera.session', JSON.stringify(sess)); } }, who);
+    return c.newPage();
+  };
+  const teacher = await other(sari);
+  await teacher.goto(`${BASE}/app/guru`);
+  await teacher.getByRole('button', { name: 'Buka kelas' }).first().click({ timeout: 30000 });
+  await teacher.getByRole('heading', { name: /Kelas 8A/ }).waitFor({ timeout: 20000 });
+  await shot('teacher-class', { on: teacher, full: true, wait: 1000, mark: teacher.getByRole('button', { name: /^Siswa \(/ }), markOffset: -120 });
+
+  const mom = await account('promo-ibu-rina@lentera.test', 'Ibu Rina');
+  const code = (await call('/api/parent', { action: 'code' }, session.token)).data.code;
+  await call('/api/parent', { action: 'link', code }, mom.token);
+  const parent = await other(mom);
+  await parent.goto(`${BASE}/app/orang-tua`);
+  await parent.locator('section').filter({ has: parent.getByRole('heading', { name: /Rina/ }) }).waitFor({ timeout: 30000 });
+  await shot('parent', { on: parent, full: true, wait: 1000, mark: parent.getByRole('heading', { name: /Rina/ }), markOffset: -60 });
+
+  await page.goto(`${BASE}/materi/work-interview-intro`);
+  await page.getByRole('heading', { name: 'Tiga bagian jawaban' }).waitFor({ timeout: 30000 });
+  await shot('materi', { full: true, wait: 800, mark: page.getByRole('heading', { name: 'Yang dipelajari' }), markOffset: -20 });
+
   console.log(`\n${shots.length} gambar tersimpan di ${SHOTS}`);
 } catch (e) {
   await page.screenshot({ path: path.join(OUT, 'capture-error.png'), fullPage: true }).catch(() => {});

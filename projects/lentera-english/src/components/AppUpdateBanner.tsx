@@ -6,6 +6,7 @@ import { Download, X } from 'lucide-react';
 import Link from 'next/link';
 import { ANDROID_APP, installedApk, needsRelogin, shouldOfferUpdate } from '@/lib/android';
 import { useSession } from '@/lib/client/session';
+import { playBuild } from '@/lib/client/store-build';
 
 const SESSION_KEY = 'lentera.apk';
 const DISMISS_KEY = 'lentera.apk.dismissed';
@@ -21,7 +22,8 @@ export function AppUpdateBanner() {
       const installed = installedApk(window.location.search, document.referrer, sessionStorage.getItem(SESSION_KEY));
       // Remember for the rest of this app session: later pages have no ?apk= or referrer.
       if (installed !== null) sessionStorage.setItem(SESSION_KEY, String(installed));
-      setShow(shouldOfferUpdate(installed, localStorage.getItem(DISMISS_KEY)));
+      // Play Store installs are updated by Google Play, never by downloading an APK.
+      setShow(!playBuild() && shouldOfferUpdate(installed, localStorage.getItem(DISMISS_KEY)));
       setRelogin(needsRelogin(installed));
     } catch {
       setShow(false);

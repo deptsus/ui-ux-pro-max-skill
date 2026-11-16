@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ANDROID_APP, installedApk, needsRelogin, shouldOfferUpdate } from '@/lib/android';
+import { ANDROID_APP, installedApk, installedStore, needsRelogin, shouldOfferUpdate } from '@/lib/android';
 
 const TWA_REFERRER = 'android-app://id.lenteraenglish.app/';
 
@@ -43,6 +43,21 @@ describe('pindah dari 1.x (Chrome) ke 2.0 (WebView sendiri)', () => {
     expect(needsRelogin(4)).toBe(true);
     expect(needsRelogin(5)).toBe(false);
     expect(needsRelogin(null)).toBe(false);
+  });
+});
+
+describe('versi Play Store', () => {
+  it('dikenali dari ?store=play dan diingat sepanjang sesi aplikasi', () => {
+    expect(installedStore('?apk=5&store=play', null)).toBe('play');
+    expect(installedStore('', 'play')).toBe('play');
+    expect(installedStore('?apk=5', null)).toBeNull();
+    expect(installedStore('?store=web', null)).toBeNull();
+  });
+  it('bundle Play membuka /app dengan store=play; APK situs tidak', () => {
+    const gradle = fs.readFileSync(path.resolve(__dirname, '../android/native/app/build.gradle'), 'utf8');
+    const activity = fs.readFileSync(path.resolve(__dirname, '../android/native/app/src/main/java/id/lenteraenglish/app/MainActivity.java'), 'utf8');
+    expect(gradle).toContain("project.findProperty('store') ?: 'web'");
+    expect(activity).toContain('"play".equals(BuildConfig.STORE) ? "&store=play" : ""');
   });
 });
 

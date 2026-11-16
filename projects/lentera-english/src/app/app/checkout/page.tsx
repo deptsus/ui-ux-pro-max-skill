@@ -1,4 +1,5 @@
 'use client';
+import { usePlayBuild } from '@/lib/client/store-build';
 // Checkout status page. It only DISPLAYS the state of a transaction: Premium
 // is activated on the server, by an admin confirming a manual QRIS payment
 // (default) or, with Xendit enabled, by a verified webhook or the official
@@ -145,5 +146,7 @@ function Checkout() {
 }
 
 export default function CheckoutPage() {
+  // Google Play build: no payment screens inside the app (Rilis 12).
+  if (usePlayBuild()) return <Empty title="Pembelian tidak tersedia di aplikasi ini" action={<LinkButton href="/app/subscription" variant="secondary">Lihat status Premium</LinkButton>}>Status Premium mengikuti akunmu.</Empty>;
   return <Suspense><Checkout /></Suspense>;
 }

@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { usePlayBuild } from '@/lib/client/store-build';
 import { Check, Crown, QrCode, ShieldCheck, Smartphone, Wallet } from 'lucide-react';
 import { isAdminPlan } from '@/lib/engine/types';
 import { api } from '@/lib/client/api';
@@ -41,6 +42,8 @@ export default function SubscriptionPage() {
   const adminPlan = isAdminPlan(ent);
   const daysLeft = premium && !adminPlan ? Math.ceil((ent.expiresAt! - now) / 86_400_000) : 0;
   const saving = Math.round((1 - PLANS.premium_monthly.price / BENCHMARK_MONTHLY) * 100);
+  // Google Play build: show the account's status and benefits only (no prices, no purchase).
+  const play = usePlayBuild();
 
   return (
     <div className="space-y-5">
@@ -68,13 +71,18 @@ export default function SubscriptionPage() {
           <ul className="mt-4 space-y-2">{FREE_FEATURES.map((f) => <li key={f} className="flex gap-2 text-sm"><Check size={18} className="mt-0.5 shrink-0 text-ok" aria-hidden />{f}</li>)}</ul>
         </Card>
         <Card className="border-2 border-brand">
-          <div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-extrabold">Premium</h2><Badge tone="accent">±{saving}% di bawah patokan {rupiah(BENCHMARK_MONTHLY)}/bulan</Badge></div>
+          <div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-extrabold">Premium</h2>{!play && <Badge tone="accent">±{saving}% di bawah patokan {rupiah(BENCHMARK_MONTHLY)}/bulan</Badge>}</div>
+          {!play && <>
           <p className="mt-1 text-3xl font-extrabold">{rupiah(PLANS.premium_monthly.price)}<span className="text-base font-bold text-muted"> / bulan</span></p>
           <p className="text-sm text-muted">atau <span className="line-through">{rupiah(PLANS.premium_yearly.listPrice)}</span> <span className="font-bold text-ink">{rupiah(PLANS.premium_yearly.price)}</span> per tahun (diskon {PLANS.premium_yearly.discountPct}%)</p>
+          </>}
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">{PREMIUM_FEATURES.map((f) => <li key={f} className="flex gap-2 text-sm"><Check size={18} className="mt-0.5 shrink-0 text-ok" aria-hidden />{f}</li>)}</ul>
         </Card>
       </div>
 
+      {play ? (
+        <Notice tone="muted" title="Pembelian tidak tersedia di aplikasi ini">Status Premium mengikuti akunmu: bila Premium aktif di akunmu, semua manfaatnya juga berlaku di sini.</Notice>
+      ) : (
       <Card className="space-y-4">
         <h2 className="text-lg font-extrabold">{premium ? 'Perpanjang Premium' : 'Berlangganan Premium'}</h2>
         <fieldset>
@@ -124,6 +132,7 @@ export default function SubscriptionPage() {
           ? 'Setelah membayar, laporkan pembayaranmu di halaman berikutnya. Premium aktif setelah pembayaran kami cocokkan dan konfirmasi. Kami tidak menyimpan data rekening atau e-wallet.'
           : 'Pembayaran diproses oleh Xendit. Kami tidak menyimpan data rekening atau e-wallet. Premium aktif otomatis setelah Xendit mengonfirmasi pembayaran ke server kami.'}</p>
       </Card>
+      )}
 
       {session && (
         <Card>

@@ -46,3 +46,12 @@ export function installedApk(search: string, referrer: string, stored: string | 
 export function shouldOfferUpdate(installed: number | null, dismissed: string | null, latest: number = ANDROID_APP.versionCode): boolean {
   return installed !== null && installed < latest && dismissed !== String(latest);
 }
+
+/**
+ * The Play Store build (Rilis 12) opens /app?apk=N&store=play. Inside it the
+ * site sells nothing and never offers an APK download (Google Play payments
+ * and device-abuse policies); Premium bought on the website still applies.
+ */
+export function installedStore(search: string, stored: string | null): 'play' | null {
+  return new URLSearchParams(search).get('store') === 'play' || stored === 'play' ? 'play' : null;
+}

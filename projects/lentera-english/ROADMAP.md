@@ -223,7 +223,7 @@ Pemilik meminta semuanya, dirilis bertahap: **Rilis 9 "Aman & Terukur"** (keaman
 
 Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, jadi pertumbuhan berikutnya lebih ditentukan oleh **jangkauan, pembayaran, dan kebiasaan belajar** daripada jumlah materi.
 
-1. **Rilis 7 "Siap Tumbuh"** (paling berdampak):
+1. **Rilis 7 "Siap Tumbuh"** — **disiapkan di Rilis 12 (16 Nov 2026)**; tinggal langkah pemilik: akun Play Console + uji tertutup 12 penguji × 14 hari (`play-store/README.md`), dan akun Xendit + kunci di Netlify (`PEMBAYARAN-OTOMATIS.md`):
    - **Play Store**: aplikasi resmi (dipercaya, mudah dicari, update otomatis). Butuh akun Play Console (biaya sekali sekitar US$25), AAB dari kunci tanda tangan yang dipegang pemilik, halaman kebijakan privasi, dan formulir keamanan data.
    - **Pembayaran QRIS otomatis** (Xendit atau Midtrans): Premium aktif detik itu juga tanpa konfirmasi manual. Kode Xendit sudah ada tetapi nonaktif; butuh verifikasi usaha di penyedia dan kunci API yang sah. Potongan QRIS sekitar 0,7% per transaksi.
 2. **Rilis 8 "Kebiasaan Belajar"** (retensi) — **SELESAI 15 November 2026** (migrasi 0013, APK 1.3.0; rincian di PROJECT_STATUS bagian 2c):
