@@ -5,6 +5,7 @@ import type { Exercise } from '@/lib/content/types';
 import { shuffle, type Answer, type Grade } from '@/lib/engine/grading';
 import { AudioButton } from './AudioButton';
 import { CastMember, type CastId } from './cast/Kid';
+import { PictureChoice, SceneChoice, SpellTiles, TimelineChoice } from './interactive/Interactive';
 import type { Mood } from './cast/Face';
 import { cx, inputClass } from './ui';
 
@@ -24,6 +25,7 @@ interface Props {
 const TYPE_LABEL: Record<Exercise['type'], string> = {
   mc: 'Pilihan ganda', fill: 'Isi bagian kosong', arrange: 'Susun kata', construct: 'Susun kalimat', match: 'Pasangkan', translate: 'Terjemahan', fix: 'Perbaiki kesalahan',
   listen: 'Menyimak', read: 'Membaca', dialogue: 'Lengkapi dialog', tf: 'Benar atau salah', spot: 'Temukan kesalahan', vocab: 'Kosakata dalam konteks', para: 'Susun paragraf',
+  picture: 'Pilih gambar', scene: 'Letakkan di tempatnya', timeline: 'Kapan terjadinya?', spell: 'Eja dengan huruf',
 };
 
 function Blanked({ text }: { text: string }) {
@@ -40,6 +42,8 @@ function Blanked({ text }: { text: string }) {
   );
 }
 
+const CHAT_CAST: CastId[] = ['nadia', 'raka', 'lina', 'bima', 'sari'];
+
 function Context({ ex }: { ex: Exercise }) {
   if (!ex.context) return null;
   if (ex.type === 'dialogue') {
@@ -48,9 +52,12 @@ function Context({ ex }: { ex: Exercise }) {
         {ex.context.split('\n').map((line, i) => {
           const [who, ...rest] = line.split(': ');
           const mine = who === 'Kamu' || who === 'B';
+          // Rilis 15: the other speaker is a cast member (chosen by name, so a scene keeps one face).
+          const face = CHAT_CAST[[...who].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 3) % CHAT_CAST.length];
           return (
-            <div key={i} className={cx('flex', mine && 'justify-end')}>
-              <div className={cx('max-w-[85%] rounded-2xl px-4 py-2.5', mine ? 'bg-brand-soft' : 'bg-surface-2')}>
+            <div key={i} className={cx('flex items-end gap-2', mine && 'justify-end')}>
+              {!mine && <CastMember who={face} mood="happy" size={40} decorative className="shrink-0" />}
+              <div className={cx('max-w-[80%] rounded-2xl border-2 px-4 py-2.5', mine ? 'rounded-br-md border-brand/40 bg-brand-soft' : 'rounded-bl-md border-line bg-surface-2')}>
                 <p className="text-xs font-bold text-muted">{who}</p>
                 <p className="en font-semibold">{rest.join(': ')}</p>
               </div>
@@ -109,7 +116,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
         </div>
       </div>
 
-      {(ex.type === 'listen' || ex.type === 'fill') && ex.audioText && (
+      {(ex.type === 'listen' || ex.type === 'fill' || ex.type === 'picture' || ex.type === 'spell') && ex.audioText && (
         <div className="flex flex-col items-start gap-2 rounded-2xl bg-surface-2 p-4">
           <AudioButton text={ex.audioText} audioKey={ex.audioKey} size="lg" showSource />
           {locked && <p className="en text-sm text-muted">Transkrip: {ex.audioText}</p>}
@@ -118,7 +125,14 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
       <Context ex={ex} />
 
       {ex.text && ex.type === 'fill' && <Blanked text={ex.text} />}
-      {ex.text && ex.options && (ex.text.includes('___') ? <Blanked text={ex.text} /> : <p className={cx('text-xl font-bold leading-relaxed', ex.type !== 'tf' && 'en')}>{ex.text}</p>)}
+      {ex.text && ex.options && (ex.text.includes('___') ? <Blanked text={ex.text} /> : <p className={cx('text-xl font-bold leading-relaxed', ex.type !== 'tf' && 'en', (ex.type === 'picture' || ex.type === 'timeline') && 'text-center text-2xl')}>{ex.text}</p>)}
+      {ex.text && ex.type === 'spell' && <p className="text-center font-display text-2xl font-bold">{ex.text}</p>}
+
+      {/* Rilis 15 interactive types */}
+      {ex.type === 'picture' && ex.options && <PictureChoice ex={ex} order={optionOrder} choice={choice} locked={locked} onPick={(i) => { setChoice(i); onChange({ choice: i }); }} />}
+      {ex.type === 'scene' && ex.options && ex.scene && <SceneChoice ex={ex} order={optionOrder} choice={choice} locked={locked} onPick={(i) => { setChoice(i); onChange({ choice: i }); }} />}
+      {ex.type === 'timeline' && ex.options && <TimelineChoice ex={ex} choice={choice} locked={locked} onPick={(i) => { setChoice(i); onChange({ choice: i }); }} />}
+      {ex.type === 'spell' && <SpellTiles ex={ex} seed={seed} picked={picked} locked={locked} onChange={(next, word) => { setPicked(next); onChange(word.length === (ex.answers?.[0] ?? '').length ? { text: word } : null); }} />}
       {ex.text && ex.type === 'construct' && (
         <div className="flex flex-wrap gap-2" aria-label="Kata kunci">
           {ex.text.split(' / ').map((w, i) => (
@@ -130,7 +144,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
       {ex.text && ex.type === 'fix' && <p className="en rounded-2xl border-2 border-dashed border-bad bg-bad-soft [--edge:var(--bad)] p-4 text-xl font-bold">{ex.text}</p>}
       {ex.text && (ex.type === 'arrange') && <p className="rounded-2xl bg-surface-2 p-4 text-lg font-semibold">{ex.text}</p>}
 
-      {ex.options && (
+      {ex.options && !['picture', 'scene', 'timeline'].includes(ex.type) && (
         <div className={cx('grid gap-3', ex.type === 'tf' ? 'grid-cols-2' : 'grid-cols-1')} role="radiogroup" aria-label="Pilihan jawaban">
           {optionOrder.map((i) => {
             const o = ex.options![i];

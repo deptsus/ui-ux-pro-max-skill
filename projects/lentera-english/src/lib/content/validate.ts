@@ -3,6 +3,7 @@
 import { EXAM_BANK_TYPES, STORY_BACKDROPS, STORY_LOOKS, STORY_POSES, type ContentPack, type Exercise, type StoryBranch, type StoryNode, type StoryScene, type WritingTask } from './types';
 import { grade, normalize } from '@/lib/engine/grading';
 import { checkWriting } from '@/lib/engine/writing';
+import { isPic } from './pics';
 
 export function validateExercise(e: Exercise): string[] {
   const errs: string[] = [];
@@ -39,6 +40,30 @@ export function validateExercise(e: Exercise): string[] {
     if (e.type === 'arrange' && (e.answers?.[0] ?? '').split(' ').length < 3) bad('arrange butuh minimal tiga kata');
   }
   if (e.type === 'listen' && !e.audioText && !e.audioKey) bad('listen butuh audioText atau audioKey');
+  // Rilis 15 interactive types.
+  if (e.type === 'picture') {
+    for (const o of e.options ?? []) if (!isPic(o.pic)) bad(`gambar "${o.pic ?? ''}" untuk pilihan "${o.text}" tidak ada di pustaka gambar`);
+    if (new Set((e.options ?? []).map((o) => o.pic)).size !== (e.options ?? []).length) bad('gambar pilihan duplikat');
+  }
+  if (e.type === 'scene') {
+    const places: Record<string, string[]> = { table: ['on', 'under', 'next', 'behind', 'front'], box: ['in', 'on', 'next', 'behind', 'front'], bed: ['on', 'under', 'next'], chair: ['on', 'under', 'next', 'behind'] };
+    if (!e.scene || !places[e.scene.place]) bad('scene butuh tempat (table, box, bed, chair)');
+    else {
+      if (!isPic(e.scene.object)) bad(`benda "${e.scene.object}" tidak ada di pustaka gambar`);
+      for (const o of e.options ?? []) if (!o.spot || !places[e.scene.place].includes(o.spot)) bad(`posisi "${o.spot ?? ''}" tidak tersedia untuk ${e.scene.place}`);
+      if (new Set((e.options ?? []).map((o) => o.spot)).size !== (e.options ?? []).length) bad('posisi pilihan duplikat');
+    }
+  }
+  if (e.type === 'timeline') {
+    for (const o of e.options ?? []) if (!o.zone || !['past', 'now', 'future', 'past-now', 'always'].includes(o.zone)) bad(`zona waktu "${o.zone ?? ''}" tidak dikenal`);
+    if (new Set((e.options ?? []).map((o) => o.zone)).size !== (e.options ?? []).length) bad('zona waktu duplikat');
+  }
+  if (e.type === 'spell') {
+    const w = e.answers?.[0] ?? '';
+    if (!/^[a-z]{3,10}$/.test(w) || (e.answers?.length ?? 0) !== 1) bad('eja butuh tepat satu kata 3–10 huruf kecil');
+    if (e.pic !== undefined && !isPic(e.pic)) bad(`gambar "${e.pic}" tidak ada di pustaka gambar`);
+    if (!e.pic && !e.audioText && !e.text) bad('eja butuh gambar, audio, atau arti');
+  }
   // Dictation: the model answer, put back into the gap, must be exactly what the audio says.
   if (e.type === 'fill' && e.audioText && e.answers?.length && (e.text ?? '').includes('___')) {
     const heard = ` ${normalize(e.audioText)} `;
@@ -144,7 +169,7 @@ export function validatePack(pack: ContentPack): string[] {
     if (seen.has(k)) errs.push(`${e.id}: sama persis dengan ${seen.get(k)}`);
     else seen.set(k, e.id);
   }
-  const PRODUCTION = new Set(['fill', 'translate', 'construct', 'fix', 'arrange']);
+  const PRODUCTION = new Set(['fill', 'translate', 'construct', 'fix', 'arrange', 'spell']);
   for (const l of pack.lessons) {
     const p = `pelajaran ${l.id}`;
     if (!units.has(l.unitId)) errs.push(`${p}: unit tidak ditemukan`);

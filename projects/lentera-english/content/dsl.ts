@@ -1,6 +1,6 @@
 // Compact authoring helpers. Authors write nested lessons; build() flattens
 // them into the ContentPack rows that the app and the database both use.
-import type { Exercise, ExerciseType, Lesson, Option, Stage, TeachingSection, TypedError } from '@/lib/content/types';
+import type { Exercise, ExerciseType, Lesson, Option, Spot, Stage, TeachingSection, TypedError, Zone } from '@/lib/content/types';
 
 export type Opt = [text: string, verdict: true | string, tag?: string];
 export type Errs = Record<string, [why: string, tag?: string]>;
@@ -96,6 +96,33 @@ export const match = (d: D, prompt: string, pairs: [string, string][], exp: stri
   ...base('match', d, prompt, exp, x),
   pairs,
 });
+// Rilis 15 interactive helpers. Options: [illustration/spot/zone, Indonesian label, verdict, tag?].
+type IOpt<K extends string> = [key: K, label: string, verdict: true | string, tag?: string];
+const iopts = <K extends string>(field: 'pic' | 'spot' | 'zone', list: IOpt<K>[]): Option[] =>
+  list.map(([key, text, verdict, tag]) => (verdict === true ? { text, correct: true, [field]: key } : { text, why: verdict, [field]: key, ...(tag ? { tag } : {}) }) as Option);
+/** Choose the picture. `text`: the English word or sentence shown (null when only heard via `audioText`). */
+export const picture = (d: D, prompt: string, text: string | null, o: IOpt<string>[], exp: string, x?: Extra & { audioText?: string }): Draft => ({
+  ...base('picture', d, prompt, exp, x),
+  ...(text ? { text } : {}),
+  options: iopts('pic', o),
+});
+/** Place `object` in/on/under… the `place`. */
+export const scene = (d: D, prompt: string, place: NonNullable<Exercise['scene']>['place'], object: string, o: IOpt<Spot>[], exp: string, x?: Extra): Draft => ({
+  ...base('scene', d, prompt, exp, x),
+  scene: { object, place },
+  options: iopts('spot', o),
+});
+/** When does it happen? `sentence` is shown; options are timeline zones. */
+export const timeline = (d: D, sentence: string, o: IOpt<Zone>[], exp: string, x?: Extra & { prompt?: string }): Draft => {
+  const { prompt, ...rest } = x ?? {};
+  return { ...base('timeline', d, prompt ?? 'Kapan kejadiannya? Ketuk bagian garis waktu yang tepat.', exp, rest), text: sentence, options: iopts('zone', o) };
+};
+/** Spell the word with letter tiles; show a picture, play the word, or give the meaning. */
+export const spell = (d: D, word: string, exp: string, x?: Extra & { pic?: string; audioText?: string; meaning?: string; prompt?: string }): Draft => {
+  const { pic, audioText, meaning, prompt, ...rest } = x ?? {};
+  return { ...base('spell', d, prompt ?? 'Susun hurufnya menjadi kata bahasa Inggris.', exp, rest), answers: [word], ...(pic ? { pic } : {}), ...(audioText ? { audioText } : {}), ...(meaning ? { text: meaning } : {}) };
+};
+
 export const para = (d: D, prompt: string, sentences: string[], exp: string, x?: Extra): Draft => ({
   ...base('para', d, prompt, exp, x),
   sentences,

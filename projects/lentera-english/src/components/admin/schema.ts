@@ -69,10 +69,10 @@ export interface TableDef {
 const LEVELS = [['A1', 'A1'], ['A2', 'A2'], ['B1', 'B1'], ['B2', 'B2'], ['C1', 'C1'], ['C2', 'C2']] as const;
 const STATUS = [['draft', 'Draf'], ['published', 'Terbit']] as const;
 export const STAGES = [['guided', 'Latihan terbimbing'], ['independent', 'Latihan mandiri'], ['homework', 'PR'], ['mastery', 'Tes penguasaan'], ['drill', 'Bank latihan perbaikan'], ['exam', 'Ujian'], ['placement', 'Tes penempatan'], ['listening', 'Menyimak'], ['story', 'Cerita bergambar']] as const;
-export const TYPES = [['mc', 'Pilihan ganda'], ['fill', 'Isian'], ['arrange', 'Susun kata'], ['construct', 'Susun kalimat dari kata kunci'], ['match', 'Mencocokkan'], ['translate', 'Terjemahan'], ['fix', 'Perbaiki kesalahan'], ['listen', 'Menyimak'], ['read', 'Membaca'], ['dialogue', 'Melengkapi dialog'], ['tf', 'Benar atau salah'], ['spot', 'Temukan kata yang salah'], ['vocab', 'Kosakata dalam konteks'], ['para', 'Susun paragraf']] as const;
+export const TYPES = [['mc', 'Pilihan ganda'], ['fill', 'Isian'], ['arrange', 'Susun kata'], ['construct', 'Susun kalimat dari kata kunci'], ['match', 'Mencocokkan'], ['translate', 'Terjemahan'], ['fix', 'Perbaiki kesalahan'], ['listen', 'Menyimak'], ['read', 'Membaca'], ['dialogue', 'Melengkapi dialog'], ['tf', 'Benar atau salah'], ['spot', 'Temukan kata yang salah'], ['vocab', 'Kosakata dalam konteks'], ['para', 'Susun paragraf'], ['picture', 'Pilih gambar'], ['scene', 'Letakkan di adegan'], ['timeline', 'Garis waktu'], ['spell', 'Eja dengan huruf']] as const;
 
-export const OPTION_TYPES = ['mc', 'vocab', 'dialogue', 'read', 'listen', 'tf'];
-export const TYPED_TYPES = ['fill', 'arrange', 'construct', 'translate', 'fix'];
+export const OPTION_TYPES = ['mc', 'vocab', 'dialogue', 'read', 'listen', 'tf', 'picture', 'scene', 'timeline'];
+export const TYPED_TYPES = ['fill', 'arrange', 'construct', 'translate', 'fix', 'spell'];
 const usesText = ['mc', 'vocab', 'tf', 'read', 'listen', 'fill', 'construct', 'translate', 'fix', 'arrange', 'spot'];
 const TEXT_HINT: Record<string, string> = {
   fill: 'Kalimat dengan ___ sebagai bagian yang dikosongkan.',

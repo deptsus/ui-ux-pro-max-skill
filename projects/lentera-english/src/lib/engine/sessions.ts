@@ -169,7 +169,7 @@ export function buildReviewTasks(ix: ContentIndex, s: LearnerState, due: ReviewI
 /** Quick-fire round for timed challenges: short choice questions only. */
 export function buildTimedRound(ix: ContentIndex, s: LearnerState, seed: string, size = 12): Exercise[] {
   const seen = new Set(Object.keys(s.topics));
-  const quick = ix.pack.exercises.filter((e) => ['mc', 'tf', 'vocab', 'dialogue'].includes(e.type) && e.stage !== 'placement' && !e.context && (seen.size === 0 || seen.has(e.topic)));
+  const quick = ix.pack.exercises.filter((e) => ['mc', 'tf', 'vocab', 'dialogue', 'picture', 'timeline'].includes(e.type) && e.stage !== 'placement' && !e.context && (seen.size === 0 || seen.has(e.topic)));
   const vocab = Object.keys(s.vocabLearned)
     .map((id) => ix.vocabById.get(id))
     .filter((v): v is VocabItem => !!v)

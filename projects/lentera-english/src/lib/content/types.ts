@@ -29,7 +29,17 @@ export type ExerciseType =
   | 'tf' // true or false
   | 'spot' // identify the grammatical error (tap the word)
   | 'vocab' // context-based vocabulary
-  | 'para'; // paragraph arrangement
+  | 'para' // paragraph arrangement
+  // Rilis 15 interactive types (migration 0019):
+  | 'picture' // choose the picture (options carry `pic`)
+  | 'scene' // place an object in a scene (options carry `spot`)
+  | 'timeline' // tap when the action happens (options carry `zone`)
+  | 'spell'; // build the word from letter tiles (typed answer)
+
+/** Where an object can be placed in a scene (prepositions of place). */
+export type Spot = 'on' | 'under' | 'in' | 'next' | 'behind' | 'front';
+/** When an action happens, for the tenses timeline. */
+export type Zone = 'past' | 'now' | 'future' | 'past-now' | 'always';
 // "Timed challenge" is a delivery mode: any exercise may carry timeLimitSec,
 // and the Review Center runs timed rounds over quick exercise types.
 
@@ -40,6 +50,10 @@ export interface Option {
   why?: string;
   /** Misconception this wrong choice reveals, e.g. "was-were". */
   tag?: string;
+  /** Rilis 15: illustration key (picture), scene spot (scene) or timeline zone (timeline). */
+  pic?: string;
+  spot?: Spot;
+  zone?: Zone;
 }
 
 export interface TypedError {
@@ -72,6 +86,10 @@ export interface Exercise {
   correction?: string;
   audioText?: string;
   audioKey?: string;
+  /** Rilis 15: the illustration shown with a spelling item. */
+  pic?: string;
+  /** Rilis 15: the scene of a `scene` item: what is placed, and where. */
+  scene?: { object: string; place: 'table' | 'box' | 'bed' | 'chair' };
   explanation: string;
   hint?: string;
   timeLimitSec?: number;

@@ -47,6 +47,12 @@ async function require0016(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
   if (!Array.isArray(features) || !features.includes('tracks')) throw new HttpError(409, NEEDS_0016, 'not_ready');
 }
+const NEEDS_0019 = 'Basis data belum diperbarui untuk Rilis 15 (latihan interaktif). Jalankan supabase/manual/apply-0019.sql di Supabase SQL Editor, lalu ulangi impor.';
+/** Picture, scene, timeline and spelling items need the types 0019 allows. */
+async function require0019(db: Rpc) {
+  const features = await db.rpc<string[]>('content_features').catch(() => null);
+  if (!Array.isArray(features) || !features.includes('interactive')) throw new HttpError(409, NEEDS_0019, 'not_ready');
+}
 const NEEDS_0015 = 'Basis data belum diperbarui untuk Rilis 10 (kelas dan lisensi sekolah). Jalankan supabase/manual/apply-0015.sql di Supabase SQL Editor, lalu muat ulang.';
 async function require0015(db: Rpc) {
   const features = await db.rpc<string[]>('content_features').catch(() => null);
@@ -90,6 +96,7 @@ export const POST = route(async (req) => {
     case 'import-bundled':
       await require0011(db);
       await require0016(db);
+      await require0019(db);
       return json(await db.rpc('import_content', { p_actor: userId, p_rows: packToRows(buildPack()) }));
     // Review notes: the owner flags content in the CMS; the next release works through them.
     case 'notes':

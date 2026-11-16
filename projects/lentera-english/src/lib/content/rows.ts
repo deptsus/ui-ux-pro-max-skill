@@ -8,7 +8,7 @@ import type { ContentPack, Exercise, Lesson, ListeningItem, Story } from './type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type Rows = Record<string, any[]>;
 
-const PAYLOAD_KEYS = ['text', 'context', 'answers', 'errors', 'tiles', 'pairs', 'sentences', 'wrongWord', 'correction', 'audioText'] as const;
+const PAYLOAD_KEYS = ['text', 'context', 'answers', 'errors', 'tiles', 'pairs', 'sentences', 'wrongWord', 'correction', 'audioText', 'pic', 'scene'] as const;
 const clean = <T extends object>(o: T): T => {
   const r = o as Record<string, unknown>;
   for (const k of Object.keys(r)) if (r[k] === undefined) delete r[k];
@@ -34,7 +34,9 @@ export function packToRows(pack: ContentPack): Rows {
     questions: pack.exercises.map((e) => {
       const payload: Record<string, unknown> = {};
       for (const k of PAYLOAD_KEYS) if (e[k] !== undefined) payload[k] = e[k];
-      return clean({ id: e.id, lesson_id: e.lessonId ?? null, listening_item_id: listeningOf.get(e.id), story_id: storyOf.get(e.id), stage: e.stage, position: e.position, type: e.type, topic_id: e.topic, focus_tag: e.focus, difficulty: e.difficulty, prompt: e.prompt, explanation: e.explanation, hint: e.hint, time_limit_sec: e.timeLimitSec, audio_key: e.audioKey, cefr_level: e.level, payload, status: 'published', options: e.options ?? [] });
+      // Rilis 15: option pictures, spots and zones travel in the payload (answer_options has no column for them).
+      if (e.options?.some((o) => o.pic || o.spot || o.zone)) payload.optionMeta = e.options.map((o) => clean({ pic: o.pic, spot: o.spot, zone: o.zone }));
+      return clean({ id: e.id, lesson_id: e.lessonId ?? null, listening_item_id: listeningOf.get(e.id), story_id: storyOf.get(e.id), stage: e.stage, position: e.position, type: e.type, topic_id: e.topic, focus_tag: e.focus, difficulty: e.difficulty, prompt: e.prompt, explanation: e.explanation, hint: e.hint, time_limit_sec: e.timeLimitSec, audio_key: e.audioKey, cefr_level: e.level, payload, status: 'published', options: (e.options ?? []).map(({ pic: _p, spot: _s, zone: _z, ...o }) => o) });
     }),
     vocabulary: pack.vocabulary.map((v) => clean({ id: v.id, word: v.word, ipa: v.ipa, part_of_speech: v.pos, meaning: v.meaning, example: v.example, example_translation: v.exampleId, level_code: v.level, set_name: v.set, is_premium: v.premium, audio_key: v.audioKey })),
     conversation_scenarios: pack.scenarios.map((s) => ({ id: s.id, title: s.title, level_code: s.level, setting: s.setting, goal: s.goal, closing: s.closing, is_premium: s.premium, start_node: s.start, nodes: s.nodes })),
@@ -46,6 +48,7 @@ export function packToRows(pack: ContentPack): Rows {
 }
 
 const opt = <T>(v: T | null | undefined): T | undefined => (v === null || v === undefined ? undefined : v);
+const withoutMeta = (p: Record<string, unknown> | null | undefined) => { const { optionMeta: _m, ...rest } = p ?? {}; return rest; };
 
 export function rowsToPack(rows: Rows, version: string): ContentPack {
   const courseLevel = new Map<string, string>((rows.courses ?? []).map((c) => [c.id, c.level_code]));
@@ -60,8 +63,8 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
       focus: opt(q.focus_tag),
       difficulty: q.difficulty,
       prompt: q.prompt,
-      ...(q.payload ?? {}),
-      options: q.options?.length ? q.options.map((o: any) => clean({ text: o.text, correct: o.correct ? true : undefined, why: opt(o.why), tag: opt(o.tag) })) : undefined,
+      ...withoutMeta(q.payload),
+      options: q.options?.length ? q.options.map((o: any, i: number) => clean({ text: o.text, correct: o.correct ? true : undefined, why: opt(o.why), tag: opt(o.tag), ...(q.payload?.optionMeta?.[i] ?? {}) })) : undefined,
       explanation: q.explanation,
       hint: opt(q.hint),
       timeLimitSec: opt(q.time_limit_sec),
