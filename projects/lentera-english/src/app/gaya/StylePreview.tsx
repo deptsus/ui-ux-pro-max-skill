@@ -1,7 +1,6 @@
 'use client';
 // Rilis 14 style preview: the 2.5D cast, Pijar's expressions, the clay controls,
 // and one interactive question, for the owner to approve before the rollout.
-import '@fontsource-variable/baloo-2';
 import { useState } from 'react';
 import { Check, Flame, Heart, X, Zap } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';

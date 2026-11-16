@@ -12,6 +12,7 @@ import { useApp } from '@/lib/client/hooks';
 import { useSession } from '@/lib/client/session';
 import { act } from '@/lib/client/store';
 import { Mascot } from '@/components/Mascot';
+import { CastMember } from '@/components/cast/Kid';
 import { WeekPlanCard, openingAt, useWeekPlan } from '@/components/WeekPlan';
 import { ClassTasksCard } from '@/components/ClassTasksCard';
 import { Badge, Button, Card, LinkButton, Progress, Ring } from '@/components/ui';
@@ -30,7 +31,11 @@ function Welcome({ guest, firstLesson }: { guest: boolean; firstLesson?: string 
     <section aria-labelledby="welcome-title">
       <Card className="space-y-4">
         <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-4">
-          <Mascot mood="happy" size={68} className="shrink-0" />
+          <div className="flex shrink-0 items-end" aria-hidden>
+            <Mascot mood="cheer" size={68} decorative />
+            <CastMember who="sari" mood="happy" size={48} decorative className="-ml-2" />
+            <CastMember who="bima" mood="wink" size={48} decorative className="-ml-2" />
+          </div>
           <div className="min-w-0">
             <h1 id="welcome-title" className="text-2xl font-extrabold tracking-tight">Selamat datang di Lentera English!</h1>
             <p className="mt-1 text-muted">Belajar bahasa Inggris dari nol sampai C2, dijelaskan dalam bahasa Indonesia.</p>

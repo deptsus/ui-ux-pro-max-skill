@@ -1,15 +1,21 @@
 'use client';
 import Link from 'next/link';
-import { Check, Crown, GraduationCap, Hourglass, Lock, Play } from 'lucide-react';
+import { Check, Crown, GraduationCap, Hourglass, Lock, Play, Trophy } from 'lucide-react';
 import { CEFR_ORDER, type Cefr } from '@/lib/content/types';
-import { examOpensAt, lessonLock, lessonsOfUnit, levelExam, levelExamStatus, levelOpen, unitExam, unitExamStatus } from '@/lib/engine/unlock';
+import { examOpensAt, lessonLock, lessonsOfUnit, levelExam, levelExamStatus, levelOpen, nextLesson, unitExam, unitExamStatus } from '@/lib/engine/unlock';
+import { Mascot } from '@/components/Mascot';
 import { planWaitReason } from '@/lib/engine/plan';
 import { useApp } from '@/lib/client/hooks';
 import { Badge, Card, LinkButton, PageHeader, Progress, cx } from '@/components/ui';
 
+/** Winding trail (Rilis 14): nodes step right and back in a gentle wave. */
+const WAVE = ['ml-0', 'ml-6 sm:ml-10', 'ml-10 sm:ml-16', 'ml-6 sm:ml-10'];
+const NODE = 'grid h-14 w-14 shrink-0 place-items-center rounded-full border-[2.5px] border-outline shadow-[0_4px_0_var(--outline)]';
+
 export default function PathPage() {
   const { ix, learner, ent, now } = useApp();
   const placed = learner.profile.placementLevel;
+  const here = nextLesson(learner, ix, ent, now)?.id;
 
   return (
     <div>
@@ -30,7 +36,7 @@ export default function PathPage() {
           return (
             <section key={code} aria-labelledby={`level-${code}`}>
               <div className="mb-3 flex items-center gap-3">
-                <span className={cx('grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-lg font-extrabold', open ? 'bg-brand text-on-brand' : 'bg-surface-2 text-muted')}>{code}</span>
+                <span className={cx('grid h-14 w-14 shrink-0 place-items-center rounded-2xl border-[2.5px] border-outline font-display text-xl font-extrabold shadow-[0_4px_0_var(--outline)]', open ? 'bg-brand text-on-brand' : 'bg-surface-2 text-muted')}>{code}</span>
                 <div className="min-w-0 flex-1">
                   <h2 id={`level-${code}`} className="text-xl font-extrabold">{level.title}</h2>
                   <p className="text-sm text-muted">{level.description}</p>
@@ -56,47 +62,52 @@ export default function PathPage() {
                         const ueWait = ue && ueRaw === 'available' ? examOpensAt(learner, ix, ue, ent, now) : undefined;
                         const ues = ueWait ? 'locked' : ueRaw;
                         return (
-                          <div key={u.id} className="mt-4">
-                            <p className="text-sm font-extrabold uppercase tracking-wide text-muted">Unit {u.position} · {u.title}</p>
-                            <ol className="mt-2 space-y-2">
-                              {unitLessons.map((l) => {
+                          <div key={u.id} className="mt-5">
+                            <p className="inline-flex rounded-2xl border-2 border-outline bg-brand px-3 py-1 font-display text-sm font-bold uppercase tracking-wider text-on-brand shadow-[0_3px_0_var(--outline)]">Unit {u.position} · {u.title}</p>
+                            <ol className="mt-3 space-y-3">
+                              {unitLessons.map((l, li) => {
                                 const lock = lessonLock(learner, ix, l, ent, now);
                                 const p = learner.lessons[l.id];
                                 const reachable = lock.status !== 'locked';
                                 const Icon = lock.status === 'completed' ? Check : lock.status === 'premium' ? Crown : lock.status === 'locked' ? Lock : Play;
                                 const tone = lock.status === 'completed' ? 'bg-ok text-on-brand' : lock.status === 'premium' ? 'bg-accent text-[#1e1b3a]' : lock.status === 'locked' ? 'bg-surface-2 text-muted' : 'bg-brand text-on-brand';
+                                const current = l.id === here;
                                 const body = (
                                   <>
-                                    <span className={cx('grid h-10 w-10 shrink-0 place-items-center rounded-full', tone)}><Icon size={18} aria-hidden /></span>
+                                    <span className="relative shrink-0">
+                                      <span className={cx(NODE, tone, current && 'ring-4 ring-brand/30')}><Icon size={24} strokeWidth={2.6} aria-hidden /></span>
+                                      {current && <span className="absolute -right-3 -top-4"><Mascot mood="cheer" size={34} decorative /></span>}
+                                    </span>
                                     <span className="min-w-0 flex-1">
-                                      <span className="block font-bold">{l.title}</span>
+                                      {current && <span className="mb-0.5 inline-flex rounded-full bg-accent px-2 py-0.5 font-display text-xs font-bold uppercase tracking-wider text-[#1e1b3a]">Mulai di sini</span>}
+                                      <span className="block font-display text-lg font-bold leading-snug">{l.title}</span>
                                       <span className="block text-sm text-muted">{lock.status === 'locked' || lock.status === 'premium' ? lock.reason : l.summary}</span>
                                     </span>
                                     {p?.masteryBest ? <Badge tone={p.completedAt ? 'ok' : 'muted'}>Tes {p.masteryBest}%</Badge> : lock.status === 'in-progress' ? <Badge>Berjalan</Badge> : null}
                                   </>
                                 );
                                 return (
-                                  <li key={l.id}>
+                                  <li key={l.id} className={WAVE[li % WAVE.length]}>
                                     {reachable ? (
-                                      <Link href={lock.status === 'premium' ? '/app/subscription' : `/app/lesson?id=${l.id}`} className="flex items-center gap-3 rounded-2xl border border-line p-3 transition hover:border-brand hover:bg-surface-2">{body}</Link>
+                                      <Link href={lock.status === 'premium' ? '/app/subscription' : `/app/lesson?id=${l.id}`} className="flex items-center gap-3 rounded-2xl p-2 transition hover:bg-surface-2">{body}</Link>
                                     ) : (
-                                      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3" aria-disabled>{body}</div>
+                                      <div className="flex items-center gap-3 rounded-2xl p-2" aria-disabled>{body}</div>
                                     )}
                                   </li>
                                 );
                               })}
                               {(u.plannedLessons ?? []).map((t) => (
-                                <li key={t} className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3">
-                                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><Hourglass size={18} aria-hidden /></span>
+                                <li key={t} className="flex items-center gap-3 rounded-2xl p-2">
+                                  <span className={cx(NODE, 'border-dashed bg-surface-2 text-muted shadow-none')}><Hourglass size={22} aria-hidden /></span>
                                   <span><span className="block font-bold">{t}</span><span className="block text-sm text-muted">Ada di silabus. Materinya sedang disiapkan.</span></span>
                                 </li>
                               ))}
                               {ue && (
                                 <li>
                                   {ues === 'locked' ? (
-                                    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><GraduationCap size={18} aria-hidden /></span><span><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ueWait ? planWaitReason(ueWait, now) : 'Terbuka setelah semua pelajaran unit ini tuntas.'}</span></span></div>
+                                    <div className="flex items-center gap-3 rounded-2xl p-2"><span className={cx(NODE, 'bg-surface-2 text-muted')}><Trophy size={24} aria-hidden /></span><span><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ueWait ? planWaitReason(ueWait, now) : 'Terbuka setelah semua pelajaran unit ini tuntas.'}</span></span></div>
                                   ) : (
-                                    <Link href={`/app/exams?id=${ue.id}`} className="flex items-center gap-3 rounded-2xl border-2 border-accent bg-accent-soft p-3"><span className={cx('grid h-10 w-10 shrink-0 place-items-center rounded-full', ues === 'passed' ? 'bg-ok text-on-brand' : 'bg-accent text-[#1e1b3a]')}>{ues === 'passed' ? <Check size={18} aria-hidden /> : <GraduationCap size={18} aria-hidden />}</span><span className="flex-1"><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ues === 'passed' ? 'Lulus. Unit berikutnya terbuka.' : `Lulus min. ${ue.passScore}% untuk membuka unit berikutnya.`}</span></span></Link>
+                                    <Link href={`/app/exams?id=${ue.id}`} className="flex items-center gap-3 rounded-2xl border-2 border-accent bg-accent-soft p-2"><span className={cx(NODE, ues === 'passed' ? 'bg-ok text-on-brand' : 'bg-accent text-[#1e1b3a]')}>{ues === 'passed' ? <Check size={24} strokeWidth={2.6} aria-hidden /> : <Trophy size={24} aria-hidden />}</span><span className="flex-1"><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ues === 'passed' ? 'Lulus. Unit berikutnya terbuka.' : `Lulus min. ${ue.passScore}% untuk membuka unit berikutnya.`}</span></span></Link>
                                   )}
                                 </li>
                               )}

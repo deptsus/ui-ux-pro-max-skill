@@ -33,3 +33,44 @@ export function buzz(kind: 'ok' | 'bad') {
     // Some browsers throw when the page has not been interacted with yet.
   }
 }
+
+// Sound effects (Rilis 14): short tones made on the device with WebAudio (no audio files),
+// on by default and switchable in Pengaturan.
+export const SOUND_KEY = 'lentera.sound';
+export const soundOn = () => typeof localStorage !== 'undefined' && localStorage.getItem(SOUND_KEY) !== '0';
+export const setSound = (on: boolean) => localStorage.setItem(SOUND_KEY, on ? '1' : '0');
+
+let audio: AudioContext | null = null;
+const TUNES: Record<'ok' | 'bad' | 'combo' | 'done', { wave: OscillatorType; notes: [number, number][]; len: number }> = {
+  ok: { wave: 'sine', notes: [[660, 0], [990, 0.09]], len: 0.22 },
+  bad: { wave: 'triangle', notes: [[262, 0], [196, 0.13]], len: 0.26 },
+  combo: { wave: 'sine', notes: [[784, 0], [988, 0.07], [1175, 0.14], [1568, 0.21]], len: 0.2 },
+  done: { wave: 'sine', notes: [[523, 0], [659, 0.11], [784, 0.22], [1047, 0.34]], len: 0.42 },
+};
+
+/** Plays a short tune. Silent when switched off, unsupported, or before the first tap. */
+export function chime(kind: keyof typeof TUNES) {
+  if (!soundOn() || typeof window === 'undefined') return;
+  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AC) return;
+  try {
+    audio ??= new AC();
+    if (audio.state === 'suspended') void audio.resume();
+    const { wave, notes, len } = TUNES[kind];
+    for (const [freq, delay] of notes) {
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      const at = audio.currentTime + delay;
+      osc.type = wave;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(0.16, at + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + len);
+      osc.connect(gain).connect(audio.destination);
+      osc.start(at);
+      osc.stop(at + len + 0.05);
+    }
+  } catch {
+    // Audio is a nicety; never let it break a session.
+  }
+}

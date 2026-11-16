@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Exercise } from '@/lib/content/types';
 import { shuffle, type Answer, type Grade } from '@/lib/engine/grading';
 import { AudioButton } from './AudioButton';
+import { CastMember, type CastId } from './cast/Kid';
+import type { Mood } from './cast/Face';
 import { cx, inputClass } from './ui';
 
 interface Props {
@@ -15,6 +17,8 @@ interface Props {
   onSubmit?: () => void;
   /** Restores a saved choice or typed answer (level exams keep a draft across reloads). */
   initial?: Answer | null;
+  /** Rilis 14: a cast member who asks the question and reacts to the answer. */
+  host?: { who: CastId; mood: Mood };
 }
 
 const TYPE_LABEL: Record<Exercise['type'], string> = {
@@ -59,7 +63,7 @@ function Context({ ex }: { ex: Exercise }) {
   return <div className="en rounded-2xl bg-surface-2 p-4 leading-relaxed">{ex.context}</div>;
 }
 
-export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: Props) {
+export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, host }: Props) {
   const locked = !!grade;
   const [choice, setChoice] = useState<number | null>(null);
   const [text, setText] = useState('');
@@ -97,9 +101,12 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
 
   return (
     <div className="space-y-5" data-ex={ex.id} data-type={ex.type}>
-      <div>
-        <p className="text-xs font-bold uppercase tracking-wide text-brand">{ex.type === 'fill' && ex.audioText ? 'Dikte' : TYPE_LABEL[ex.type]}</p>
-        <h2 className="mt-1 text-lg font-bold sm:text-xl">{ex.prompt}</h2>
+      <div className={cx(host && 'flex items-end gap-3')}>
+        {host && <CastMember who={host.who} mood={host.mood} size={76} decorative className="shrink-0" />}
+        <div className={cx(host && 'relative min-w-0 flex-1 rounded-2xl border-[2.5px] border-outline bg-surface px-4 py-3 shadow-[0_3px_0_var(--outline)] before:absolute before:-left-[9px] before:bottom-4 before:h-4 before:w-4 before:rotate-45 before:border-b-[2.5px] before:border-l-[2.5px] before:border-outline before:bg-surface before:content-[\'\']')}>
+          <p className="font-display text-xs font-bold uppercase tracking-wider text-brand">{ex.type === 'fill' && ex.audioText ? 'Dikte' : TYPE_LABEL[ex.type]}</p>
+          <h2 className="mt-0.5 text-lg font-bold leading-snug sm:text-xl">{ex.prompt}</h2>
+        </div>
       </div>
 
       {(ex.type === 'listen' || ex.type === 'fill') && ex.audioText && (
@@ -120,7 +127,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
         </div>
       )}
       {ex.text && ex.type === 'translate' && <p className="rounded-2xl bg-surface-2 p-4 text-xl font-bold">{ex.text}</p>}
-      {ex.text && ex.type === 'fix' && <p className="en rounded-2xl border-2 border-dashed border-bad bg-bad-soft p-4 text-xl font-bold">{ex.text}</p>}
+      {ex.text && ex.type === 'fix' && <p className="en rounded-2xl border-2 border-dashed border-bad bg-bad-soft [--edge:var(--bad)] p-4 text-xl font-bold">{ex.text}</p>}
       {ex.text && (ex.type === 'arrange') && <p className="rounded-2xl bg-surface-2 p-4 text-lg font-semibold">{ex.text}</p>}
 
       {ex.options && (
@@ -133,8 +140,8 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
             return (
               <button key={i} type="button" role="radio" aria-checked={isChosen} disabled={locked}
                 onClick={() => { setChoice(i); onChange({ choice: i }); }}
-                className={cx('rounded-2xl border-2 border-b-4 px-4 py-3 text-left text-base font-semibold transition', ex.type !== 'tf' && 'en',
-                  showRight ? 'border-ok bg-ok-soft' : showWrong ? 'border-bad bg-bad-soft' : isChosen ? 'border-brand bg-brand-soft' : 'border-line bg-surface hover:bg-surface-2')}>
+                className={cx('rounded-2xl tile min-h-14 px-4 py-3 text-left font-display text-lg font-bold', ex.type !== 'tf' && 'en',
+                  showRight ? 'border-ok bg-ok-soft [--edge:var(--ok)]' : showWrong ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : isChosen ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface hover:bg-surface-2')}>
                 {o.text}
               </button>
             );
@@ -147,7 +154,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
           aria-label="Jawabanmu" placeholder={ex.type === 'fill' ? 'Ketik kata yang hilang' : 'Ketik jawabanmu dalam bahasa Inggris'}
           onChange={(e) => { setText(e.target.value); onChange(e.target.value.trim() ? { text: e.target.value } : null); }}
           onKeyDown={(e) => { if (e.key === 'Enter' && text.trim()) onSubmit?.(); }}
-          className={cx(inputClass, 'en text-lg font-semibold', locked && (grade!.correct ? 'border-ok bg-ok-soft' : 'border-bad bg-bad-soft'))} />
+          className={cx(inputClass, 'en text-lg font-semibold', locked && (grade!.correct ? 'border-ok bg-ok-soft [--edge:var(--ok)]' : 'border-bad bg-bad-soft [--edge:var(--bad)]'))} />
       )}
 
       {ex.type === 'arrange' && (
@@ -155,14 +162,14 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
           <div className="en flex min-h-16 flex-wrap items-start gap-2 rounded-2xl border-2 border-dashed border-line p-3" aria-label="Kalimatmu">
             {picked.map((ti, pos) => (
               <button key={pos} type="button" disabled={locked} onClick={() => { const next = picked.filter((_, p) => p !== pos); setPicked(next); onChange(next.length ? { text: next.map((t) => tiles[t]).join(' ') } : null); }}
-                className="rounded-xl border-2 border-b-4 border-brand bg-brand-soft px-3 py-1.5 font-bold">{tiles[ti]}</button>
+                className="rounded-xl tile border-brand bg-brand-soft [--edge:var(--brand)] px-3 py-1.5 font-bold">{tiles[ti]}</button>
             ))}
             {!picked.length && <span className="px-1 py-1.5 text-muted">Ketuk kata di bawah untuk menyusun kalimat.</span>}
           </div>
           <div className="en flex flex-wrap gap-2">
             {tiles.map((t, ti) => (
               <button key={ti} type="button" disabled={locked || picked.includes(ti)} onClick={() => { const next = [...picked, ti]; setPicked(next); onChange({ text: next.map((x) => tiles[x]).join(' ') }); }}
-                className={cx('rounded-xl border-2 border-b-4 border-line bg-surface px-3 py-1.5 font-bold transition', picked.includes(ti) && 'invisible')}>{t}</button>
+                className={cx('rounded-xl tile border-line bg-surface px-3 py-1.5 font-bold transition', picked.includes(ti) && 'invisible')}>{t}</button>
             ))}
           </div>
         </div>
@@ -177,7 +184,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
               <li key={t}>
                 <button type="button" disabled={locked}
                   onClick={() => { const next = pos >= 0 ? picked.filter((p) => p !== si) : [...picked, si]; setPicked(next); onChange(next.length === tiles.length ? { order: next } : null); }}
-                  className={cx('en flex w-full items-start gap-3 rounded-2xl border-2 border-b-4 px-4 py-3 text-left font-semibold transition', pos >= 0 ? 'border-brand bg-brand-soft' : 'border-line bg-surface')}>
+                  className={cx('en flex w-full items-start gap-3 rounded-2xl tile px-4 py-3 text-left font-semibold transition', pos >= 0 ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>
                   <span className={cx('grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm font-extrabold', pos >= 0 ? 'bg-brand text-on-brand' : 'bg-surface-2 text-muted')}>{pos >= 0 ? pos + 1 : '·'}</span>
                   {ex.sentences![si]}
                 </button>
@@ -194,7 +201,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
             const isWrongWord = w.replace(/[.,!?;:"]/g, '') === ex.wrongWord;
             return (
               <button key={i} type="button" disabled={locked} onClick={() => { setWordIndex(i); onChange({ wordIndex: i }); }}
-                className={cx('rounded-xl border-2 border-b-4 px-3 py-2 transition', locked && isWrongWord ? 'border-ok bg-ok-soft' : locked && wordIndex === i ? 'border-bad bg-bad-soft' : wordIndex === i ? 'border-brand bg-brand-soft' : 'border-line bg-surface')}>{w}</button>
+                className={cx('rounded-xl tile px-3 py-2 transition', locked && isWrongWord ? 'border-ok bg-ok-soft [--edge:var(--ok)]' : locked && wordIndex === i ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : wordIndex === i ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>{w}</button>
             );
           })}
         </div>
@@ -205,7 +212,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
           <div className="space-y-2">
             {ex.pairs!.map(([l], i) => (
               <button key={i} type="button" disabled={locked || matchState.doneL.includes(i)} onClick={() => setMatchState((m) => ({ ...m, left: i, flash: null }))}
-                className={cx('en w-full rounded-2xl border-2 border-b-4 px-3 py-3 text-left font-bold transition', matchState.doneL.includes(i) ? 'border-ok bg-ok-soft opacity-70' : matchState.left === i ? 'border-brand bg-brand-soft' : 'border-line bg-surface')}>{l}</button>
+                className={cx('en w-full rounded-2xl tile px-3 py-3 text-left font-bold transition', matchState.doneL.includes(i) ? 'border-ok bg-ok-soft [--edge:var(--ok)] opacity-70' : matchState.left === i ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>{l}</button>
             ))}
           </div>
           <div className="space-y-2">
@@ -222,7 +229,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial }: P
                     setMatchState({ ...m, left: null, mistakes: m.mistakes + 1, flash: ri });
                   }
                 }}
-                className={cx('w-full rounded-2xl border-2 border-b-4 px-3 py-3 text-left font-bold transition', matchState.doneR.includes(ri) ? 'border-ok bg-ok-soft opacity-70' : matchState.flash === ri ? 'border-bad bg-bad-soft' : 'border-line bg-surface')}>{ex.pairs![ri][1]}</button>
+                className={cx('w-full rounded-2xl tile px-3 py-3 text-left font-bold transition', matchState.doneR.includes(ri) ? 'border-ok bg-ok-soft [--edge:var(--ok)] opacity-70' : matchState.flash === ri ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : 'border-line bg-surface')}>{ex.pairs![ri][1]}</button>
             ))}
           </div>
           <p className="col-span-2 text-sm text-muted">Ketuk satu kata di kiri, lalu pasangannya di kanan.{matchState.mistakes > 0 && ` Salah pasang: ${matchState.mistakes}.`}</p>

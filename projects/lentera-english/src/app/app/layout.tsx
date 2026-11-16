@@ -92,7 +92,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Link href="/app" className="mb-4 px-2 text-lg"><Logo /></Link>
         <nav aria-label="Navigasi utama" className="flex-1 space-y-0.5 overflow-y-auto">
           {NAV.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={cx('flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-bold transition', active(href) ? 'bg-brand-soft text-brand' : 'text-muted hover:bg-surface-2 hover:text-ink')}>
+            <Link key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={cx('flex items-center gap-3 rounded-2xl border-2 px-3 py-2 font-display text-base font-bold transition', active(href) ? 'border-brand bg-brand-soft text-brand' : 'border-transparent text-muted hover:bg-surface-2 hover:text-ink')}>
               <Icon size={18} aria-hidden />
               {label}
               {href === '/app/review' && due > 0 && <span className="ml-auto rounded-full bg-accent px-2 text-xs text-[#1e1b3a]">{due}</span>}
@@ -108,7 +108,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       </aside>
 
-      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b-2 border-outline/10 bg-bg/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2.5">
           <Link href="/app" className="mr-auto flex min-h-11 min-w-11 items-center lg:hidden"><Logo size={24} compact /></Link>
           <span className="mr-auto hidden text-sm font-bold text-muted lg:block">{session ? session.email : 'Mode tamu · progres tersimpan di perangkat ini'}</span>
@@ -119,12 +119,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           )}
           {sync === 'offline' && <span title="Sedang offline. Progres disimpan di perangkat dan dikirim saat tersambung." className="text-muted"><CloudOff size={18} aria-label="Offline" /></span>}
-          <Link href="/app/profile" className="relative flex shrink-0 items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 text-sm font-extrabold text-accent-strong before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Hari belajar beruntun"><Flame size={16} aria-hidden /><span aria-label={`Beruntun ${streak} hari`}>{streak}</span></Link>
-          <Link href="/app/achievements" className="relative flex shrink-0 items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-sm font-extrabold text-brand before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Total XP"><Zap size={16} aria-hidden /><span aria-label={`${learner.xp} XP`}>{learner.xp}</span></Link>
+          <Link href="/app/profile" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] bg-[#fff1d6] text-[#c2410c] dark:bg-accent-soft dark:text-accent-strong" title="Hari belajar beruntun"><Flame size={17} fill="#fb923c" aria-hidden /><span aria-label={`Beruntun ${streak} hari`}>{streak}</span></Link>
+          <Link href="/app/achievements" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] bg-brand-soft text-brand" title="Total XP"><Zap size={17} fill="currentColor" aria-hidden /><span aria-label={`${learner.xp} XP`}>{learner.xp}</span></Link>
           {premium ? (
-            <Link href="/app/subscription" className="relative flex min-w-11 shrink-0 items-center justify-center gap-1 rounded-full bg-accent px-2.5 py-1 text-sm font-extrabold before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] text-[#1e1b3a]"><Crown size={16} aria-hidden /><span className="sr-only min-[420px]:not-sr-only">Premium</span></Link>
+            <Link href="/app/subscription" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] min-w-11 justify-center bg-accent text-[#1e1b3a]"><Crown size={17} aria-hidden /><span className="sr-only min-[420px]:not-sr-only">Premium</span></Link>
           ) : (
-            <Link href="/app/subscription" className="relative flex shrink-0 items-center gap-1 rounded-full bg-bad-soft px-2.5 py-1 text-sm font-extrabold text-bad before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']" title="Nyawa. Berkurang saat salah di latihan mandiri dan tes."><Heart size={16} fill="currentColor" aria-hidden /><span aria-label={`${hearts} nyawa`}>{hearts}</span></Link>
+            <Link href="/app/subscription" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] bg-bad-soft text-bad" title="Nyawa. Berkurang saat salah di latihan mandiri dan tes."><Heart size={17} fill="currentColor" aria-hidden /><span aria-label={`${hearts} nyawa`}>{hearts}</span></Link>
           )}
         </div>
       </header>
@@ -149,12 +149,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <nav aria-label="Navigasi bawah" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <nav aria-label="Navigasi bawah" className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-outline bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
         <ul className="mx-auto grid max-w-md grid-cols-5">
           {TABS.map(({ href, label, icon: Icon }) => (
             <li key={href}>
-              <Link href={href} aria-current={active(href) ? 'page' : undefined} className={cx('relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-bold', active(href) ? 'text-brand' : 'text-muted')}>
-                <Icon size={22} aria-hidden />
+              <Link href={href} aria-current={active(href) ? 'page' : undefined} className={cx('relative flex flex-col items-center gap-0.5 py-1.5 font-display text-xs font-bold', active(href) ? 'text-brand' : 'text-muted')}>
+                <span className={cx('grid h-8 w-12 place-items-center rounded-xl border-2 transition', active(href) ? 'border-brand bg-brand-soft' : 'border-transparent')}><Icon size={22} strokeWidth={active(href) ? 2.6 : 2} aria-hidden /></span>
                 {label}
                 {href === '/app/review' && due > 0 && <span className="absolute right-4 top-1 h-2.5 w-2.5 rounded-full bg-accent" aria-label={`${due} ulangan menunggu`} />}
               </Link>

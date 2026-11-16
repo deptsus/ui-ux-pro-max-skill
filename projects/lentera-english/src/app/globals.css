@@ -23,6 +23,8 @@
   --bad-soft: #ffe4ea;
   --chart: #4b3fd6;
   --shadow: 0 1px 2px rgb(30 27 58 / 0.06), 0 8px 24px rgb(30 27 58 / 0.06);
+  /* Clay outlines and ledges (Rilis 14). */
+  --outline: #1e1b3a;
   color-scheme: light;
 }
 .dark {
@@ -46,6 +48,7 @@
   --bad-soft: #3d1420;
   --chart: #7d72f2;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+  --outline: #05040c;
   color-scheme: dark;
 }
 
@@ -56,6 +59,7 @@
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-outline: var(--outline);
   --color-line-strong: var(--line-strong);
   --color-brand: var(--brand);
   --color-brand-strong: var(--brand-strong);
@@ -103,6 +107,18 @@ button, a, [role="button"] { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled), [role="button"] { cursor: pointer; }
 :focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
 .en { font-feature-settings: "ss01"; }
+/* Rilis 14: rounded display face for headings; body text stays Plus Jakarta Sans. */
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.005em; }
+.clay { border: 2px solid var(--outline); box-shadow: 0 4px 0 var(--outline); }
+/* Answer tiles (Rilis 14): thick border with a ledge in the state colour (--edge); pressing sinks the tile. */
+.tile { border-width: 2.5px; box-shadow: 0 4px 0 var(--edge, var(--line-strong)); transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s, border-color 0.15s; }
+.tile:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--edge, var(--line-strong)); }
+/* Celebration confetti (session results). */
+.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.confetti i { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 3px; opacity: 0; animation: confetti-fall 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) forwards; }
+@keyframes confetti-fall { 0% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg); } 100% { opacity: 0; transform: translate3d(var(--dx, 0px), 420px, 0) rotate(var(--rot, 540deg)); } }
+.combo-pop { animation: combo-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1); }
+@keyframes combo-pop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 /* Pijar, the mascot: CSS-only animation per mood (src/components/Mascot.tsx). */
 .pijar .pj-float, .pijar .pj-wing, .pijar .pj-eyes, .pijar .pj-spark, .pijar .pj-z { transform-box: fill-box; }

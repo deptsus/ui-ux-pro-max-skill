@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BellRing, BookOpen, Brain, CalendarClock, Check, ClipboardList, Compass, DatabaseBackup, Download, GraduationCap, Headphones, HeartHandshake, KeyRound, Lock, MessagesSquare, School, ShieldCheck, Smartphone, Target, Trophy, Trash2, Users, WifiOff, Wrench } from 'lucide-react';
 import { Logo, Mascot } from '@/components/Mascot';
+import { CastMember } from '@/components/cast/Kid';
 import { PromoVideo } from '@/components/PromoVideo';
 import { PROMO_DURATION } from '@/components/promo-chapters';
 import { Badge, Card, LinkButton } from '@/components/ui';
@@ -98,8 +99,14 @@ export default function Landing() {
             <a href={ANDROID_APK} download className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand underline underline-offset-4 hover:text-ink"><Smartphone size={18} aria-hidden />Unduh aplikasi Android (APK {ANDROID_APP.versionName}, tanpa Chrome)</a>
           </div>
           <Card className="relative mx-auto w-full max-w-sm">
-            <Mascot mood="cheer" size={120} className="mx-auto" />
-            <p className="mt-2 text-center text-sm font-bold text-muted">Kenalkan, Pijar si kunang-kunang.</p>
+            <div className="flex items-end justify-center gap-1">
+              <CastMember who="sari" mood="cheer" size={66} />
+              <CastMember who="bima" mood="laugh" size={66} />
+              <Mascot mood="cheer" size={92} />
+              <CastMember who="nadia" mood="love" size={66} />
+              <CastMember who="lina" mood="proud" size={66} />
+            </div>
+            <p className="mt-2 text-center text-sm font-bold text-muted">Pijar si kunang-kunang dan teman belajar dari SD, SMP, SMA, bersama Bu Lina.</p>
             <div className="mt-4 rounded-2xl border-2 border-bad bg-bad-soft p-3 text-sm">
               <p className="font-extrabold text-bad">Belum tepat</p>
               <p className="en mt-1 font-bold">I <span className="line-through decoration-bad">were</span> sick yesterday.</p>

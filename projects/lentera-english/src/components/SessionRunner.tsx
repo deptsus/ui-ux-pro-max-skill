@@ -2,7 +2,7 @@
 // Runs a practice session: one exercise at a time, feedback, hearts, timers.
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BookOpen, Check, Clock, Heart, Lightbulb, X } from 'lucide-react';
+import { BookOpen, Check, Clock, Heart, Lightbulb, X, Zap } from 'lucide-react';
 import type { Exercise } from '@/lib/content/types';
 import { grade as gradeAnswer, type Answer, type Grade } from '@/lib/engine/grading';
 import { currentHearts } from '@/lib/engine/gamification';
@@ -10,9 +10,11 @@ import { recordAttempt } from '@/lib/engine/state';
 import { isPremium, type AttemptContext } from '@/lib/engine/types';
 import { useContent } from '@/lib/client/content';
 import { act, getLearner, useEntitlement, useLearner } from '@/lib/client/store';
-import { buzz } from '@/lib/client/prefs';
+import { buzz, chime } from '@/lib/client/prefs';
 import { ExerciseCard } from './ExerciseCard';
 import { Mascot } from './Mascot';
+import { CAST, type CastId } from './cast/Kid';
+import type { Mood } from './cast/Face';
 import { Badge, Button, Card, LinkButton, Progress, Ring, cx } from './ui';
 
 export interface SessionItem {
@@ -45,6 +47,14 @@ interface Props {
   onFinish: (r: SessionResult) => void;
   exitHref: string;
 }
+
+// Rilis 14: who asks each question (varies through the cast) and how they react.
+const HOSTS = Object.keys(CAST) as CastId[];
+const hostOf = (id: string): CastId => HOSTS[[...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % HOSTS.length];
+const CHEERS: Mood[] = ['cheer', 'laugh', 'proud', 'love'];
+const COMFORT: Mood[] = ['encourage', 'worried', 'think'];
+/** Right answers in a row at the end of the list. */
+export const comboOf = (items: { grade: { correct: boolean } }[]) => { let n = 0; for (let i = items.length - 1; i >= 0 && items[i].grade.correct; i--) n++; return n; };
 
 const summarize = (items: SessionItem[], outOfHearts = false, timedOut = false): SessionResult => {
   const correct = items.filter((i) => i.grade.correct).length;
@@ -102,6 +112,8 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
       return advance(list);
     }
     buzz(g.correct ? 'ok' : 'bad');
+    const combo = comboOf(list);
+    chime(!g.correct ? 'bad' : combo >= 3 && combo % 2 === 1 ? 'combo' : 'ok');
     setResult(g);
   }, [current, result, answer, items, hintShown, ctx, premium, useHearts, feedback, advance, finish]);
 
@@ -135,6 +147,9 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
   const tag = result && !result.correct && result.tag ? ix?.tagById.get(result.tag) : undefined;
   const topic = ix?.topicById.get(current.topic);
   const outOfHearts = useHearts && heartsNow <= 0 && !!result;
+  const combo = result?.correct ? comboOf(items) : 0;
+  const host = hostOf(current.id);
+  const hostMood: Mood = !result ? 'happy' : result.correct ? CHEERS[items.length % CHEERS.length] : COMFORT[items.length % COMFORT.length];
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
@@ -155,7 +170,7 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
       {/* Always present, so the verdict is announced when it changes (a live region added with its text is often missed). */}
       <p className="sr-only" role="status" aria-live="polite">{announce}</p>
       <section ref={questionRef} tabIndex={0} aria-label={`Soal ${number}${count ? ` dari ${count}` : ''}`} className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-6 pt-4 focus:outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand">
-        <ExerciseCard key={`${current.id}:${items.length}`} ex={current} seed={`${seed}:${items.length}`} grade={result} onChange={setAnswer} onSubmit={() => submit()} />
+        <ExerciseCard key={`${current.id}:${items.length}`} ex={current} seed={`${seed}:${items.length}`} grade={result} onChange={setAnswer} onSubmit={() => submit()} host={feedback === 'deferred' ? undefined : { who: host, mood: hostMood }} />
         {hints && current.hint && !result && (
           <div className="mt-5">
             {hintShown ? (
@@ -177,7 +192,8 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
                   <span className={cx('absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full text-on-brand ring-2 ring-surface', result.correct ? 'bg-ok' : 'bg-bad')}>{result.correct ? <Check size={14} aria-hidden /> : <X size={14} aria-hidden />}</span>
                 </span>
                 <div className="min-w-0 space-y-1.5 text-sm">
-                  <p className={cx('text-lg font-extrabold', result.correct ? 'text-ok' : 'text-bad')}>{result.correct ? 'Benar!' : 'Belum tepat'}</p>
+                  <p className={cx('font-display text-xl font-extrabold', result.correct ? 'text-ok' : 'text-bad')}>{result.correct ? 'Benar!' : 'Belum tepat'}</p>
+                  {combo >= 3 && <p className="combo-pop inline-flex items-center gap-1 rounded-full border-2 border-outline bg-accent px-2.5 py-0.5 font-display text-sm font-bold text-[#1e1b3a] shadow-[0_2px_0_var(--outline)]"><Zap size={14} fill="currentColor" aria-hidden />Kombo ×{combo}!</p>}
                   {!result.correct && <p><span className="font-bold">Kenapa salah: </span>{result.feedback}</p>}
                   {!result.correct && <p><span className="font-bold">Jawaban benar: </span><span className="en font-bold">{result.correctAnswer}</span></p>}
                   <p><span className="font-bold">Penjelasan: </span>{result.explanation}</p>
@@ -202,6 +218,32 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
   );
 }
 
+const CONFETTI = ['#6d5ff0', '#fbbf24', '#22c55e', '#f43f5e', '#38bdf8', '#fb923c'];
+/** A one-off burst of confetti (CSS only; nothing under reduced motion). */
+export function Confetti({ pieces = 30 }: { pieces?: number }) {
+  return (
+    <div className="confetti" aria-hidden>
+      {Array.from({ length: pieces }, (_, i) => (
+        <i key={i} style={{ left: `${(i * 37) % 100}%`, background: CONFETTI[i % CONFETTI.length], animationDelay: `${(i % 7) * 0.06}s`, ['--dx' as string]: `${((i * 53) % 120) - 60}px`, ['--rot' as string]: `${360 + ((i * 97) % 540)}deg` }} />
+      ))}
+    </div>
+  );
+}
+
+/** Counts up to `to` once (the score on the results screen). */
+function useCountUp(to: number, ms = 900) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setN(to); return; }
+    const start = performance.now();
+    let raf = 0;
+    const step = (t: number) => { const k = Math.min(1, (t - start) / ms); setN(Math.round(to * (1 - (1 - k) ** 3))); if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [to, ms]);
+  return n;
+}
+
 /** Result screen with every question, the answer given, and the explanation. */
 export function SessionSummary({ result, title, passScore, children, onRetry, doneHref, doneLabel = 'Selesai' }: { result: SessionResult; title: string; passScore?: number; children?: React.ReactNode; onRetry?: () => void; doneHref: string; doneLabel?: string }) {
   const ix = useContent();
@@ -209,13 +251,18 @@ export function SessionSummary({ result, title, passScore, children, onRetry, do
   const wrong = result.items.filter((i) => !i.grade.correct);
   const tags = new Map<string, number>();
   for (const w of wrong) if (w.grade.tag) tags.set(w.grade.tag, (tags.get(w.grade.tag) ?? 0) + 1);
+  const shown = useCountUp(result.score);
+  // Rilis 14: a fanfare and confetti when the session is passed.
+  useEffect(() => { if (passed) chime('done'); }, [passed]);
   return (
     <div className="mx-auto max-w-2xl space-y-5 pb-10">
-      <Card className="flex flex-col items-center gap-3 text-center">
-        <Mascot mood={result.score >= 90 ? 'dance' : passed ? 'cheer' : 'encourage'} size={88} />
-        <h1 className="text-2xl font-extrabold">{title}</h1>
-        <Ring value={result.score} tone={passed ? 'ok' : 'bad'} size={120}>
-          <span className="text-3xl font-extrabold">{result.score}%</span>
+      <Card className="relative flex flex-col items-center gap-3 overflow-hidden text-center">
+        {passed && <Confetti />}
+        <Mascot mood={result.score >= 90 ? 'dance' : passed ? 'cheer' : 'encourage'} size={104} />
+        <h1 className="text-3xl font-extrabold">{title}</h1>
+        <Ring value={shown} tone={passed ? 'ok' : 'bad'} size={128} stroke={12}>
+          <span className="font-display text-4xl font-extrabold" aria-hidden>{shown}%</span>
+          <span className="sr-only">{result.score}%</span>
         </Ring>
         <p className="text-muted">{result.correct} dari {result.total} benar{passScore !== undefined && ` · batas lulus ${passScore}%`}</p>
         {result.outOfHearts && <Badge tone="bad">Sesi berhenti karena nyawa habis</Badge>}

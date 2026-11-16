@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import '@fontsource-variable/plus-jakarta-sans';
+import '@fontsource-variable/baloo-2';
 import './globals.css';
 import { ErrorReporter } from '@/components/ErrorReporter';
 

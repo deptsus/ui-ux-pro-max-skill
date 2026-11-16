@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Crown, Download, Monitor, Moon, Sun, Type, Vibrate } from 'lucide-react';
+import { Crown, Download, Monitor, Moon, Sun, Type, Vibrate, Volume2 } from 'lucide-react';
 import { GAME } from '@/lib/engine/config';
 import { setOffline, useOffline } from '@/lib/client/content';
 import { getTheme, setTheme, useApp } from '@/lib/client/hooks';
 import { act, resetLearner } from '@/lib/client/store';
 import { api } from '@/lib/client/api';
 import { signOut, useSession } from '@/lib/client/session';
-import { buzz, getFontScale, hapticsOn, hapticsSupported, setFontScale, setHaptics, type FontScale } from '@/lib/client/prefs';
+import { buzz, chime, getFontScale, hapticsOn, hapticsSupported, setFontScale, setHaptics, setSound, soundOn, type FontScale } from '@/lib/client/prefs';
 import { Badge, Button, Card, LinkButton, Notice, PageHeader } from '@/components/ui';
 import { ReminderSettings } from '@/components/ReminderSettings';
 
@@ -39,10 +39,12 @@ export default function SettingsPage() {
   const [confirm, setConfirm] = useState(false);
   const [font, setFont] = useState<FontScale>('normal');
   const [haptics, setHapticsState] = useState<{ supported: boolean; on: boolean }>({ supported: false, on: true });
+  const [sound, setSoundState] = useState(true);
   useEffect(() => {
     setThemeState(getTheme());
     setFont(getFontScale());
     setHapticsState({ supported: hapticsSupported(), on: hapticsOn() });
+    setSoundState(soundOn());
   }, []);
   const pick = (t: 'light' | 'dark' | 'system') => { setTheme(t); setThemeState(t); };
   const toggleOffline = async (on: boolean) => {
@@ -76,6 +78,11 @@ export default function SettingsPage() {
             <p className="text-sm text-muted">Getar singkat saat jawaban benar, dua kali saat belum tepat.</p>
           </>
         ) : <p className="text-sm text-muted">Perangkat atau browser ini tidak mendukung getaran (misalnya iPhone dan komputer). Di HP Android, getaran menyala otomatis.</p>}
+        <h3 className="flex items-center gap-2 pt-2 font-bold" id="suara"><Volume2 size={16} aria-hidden />Efek suara</h3>
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="suara">
+          {([[true, 'Nyala'], [false, 'Mati']] as const).map(([on, label]) => <Button key={label} role="radio" aria-checked={sound === on} variant={sound === on ? 'primary' : 'secondary'} size="sm" onClick={() => { setSound(on); setSoundState(on); if (on) chime('ok'); }}>{label}</Button>)}
+        </div>
+        <p className="text-sm text-muted">Bunyi singkat saat jawaban benar atau belum tepat, saat kombo, dan saat sesi selesai. Mengikuti volume perangkat.</p>
       </Card>
       <Card className="space-y-3">
         <h2 className="font-extrabold">Target harian</h2>
