@@ -23,12 +23,12 @@ const trackChapters = pack.chapters.filter((c) => c.track);
 const lessonsOfTrack = (id: string) => ix.trackLessons.filter((l) => ix.chapterById.get(ix.unitById.get(l.unitId)!.chapterId)!.track === id);
 
 describe('isi jalur khusus', () => {
-  it('tiga jalur, masing-masing tiga pelajaran; pelajaran pertama gratis, sisanya dan ujian unitnya Premium', () => {
+  it('tiga jalur, masing-masing enam pelajaran (Rilis 12 menambah tiga); pelajaran pertama gratis, sisanya dan ujian unitnya Premium', () => {
     expect(trackChapters.map((c) => c.track).sort()).toEqual(['exam', 'kids', 'work']);
     for (const t of ['work', 'exam', 'kids']) {
       const lessons = lessonsOfTrack(t);
-      expect(lessons, t).toHaveLength(3);
-      expect(lessons.map((l) => l.premium), t).toEqual([false, true, true]);
+      expect(lessons, t).toHaveLength(6);
+      expect(lessons.map((l) => l.premium), t).toEqual([false, true, true, true, true, true]);
       const unit = ix.unitById.get(lessons[0].unitId)!;
       expect(pack.exams.find((e) => e.scope === 'unit' && e.ref === unit.id)?.premium, t).toBe(true);
     }
@@ -44,7 +44,7 @@ describe('isi jalur khusus', () => {
 
 describe('terpisah dari jalur CEFR', () => {
   it('jalur belajar, rencana mingguan, dan "pelajaran berikutnya" tidak memuat pelajaran jalur khusus', () => {
-    expect(ix.trackLessons).toHaveLength(9);
+    expect(ix.trackLessons).toHaveLength(18);
     expect(ix.orderedLessons.some((l) => ix.trackLessons.includes(l))).toBe(false);
     expect(ix.orderedLessons.length + ix.trackLessons.length).toBe(pack.lessons.length);
     for (const level of ['A1', 'B1', 'B2'] as const) expect(unitsOfLevel(ix, level).some((u) => u.id.startsWith('track-')), level).toBe(false);
@@ -73,8 +73,8 @@ describe('terpisah dari jalur CEFR', () => {
 
   it('latihan shadowing tetap memakai jalur CEFR (kalimat jalur khusus tidak membuka level Premium)', () => {
     const lines = shadowLines(packForFree(pack));
-    const trackSentences = new Set(ix.trackLessons.flatMap((l) => l.demo.map((d) => d.good)));
-    expect(lines.some((l) => trackSentences.has(l.text) && l.source.startsWith('Pelajaran'))).toBe(false);
+    const trackSources = new Set(ix.trackLessons.map((l) => `Pelajaran · ${l.title}`));
+    expect(lines.some((l) => trackSources.has(l.source))).toBe(false);
     expect(linesByLevel(lines).B1).toBe(0);
   });
 
@@ -127,7 +127,7 @@ describe('paket materi dan basis data', () => {
       const published = await db.rpc<{ rows: Rows; version: number }>('get_published_content');
       const live = rowsToPack(published.rows, `db-${published.version}`);
       expect(live.chapters.filter((c) => c.track).map((c) => c.track).sort()).toEqual(['exam', 'kids', 'work']);
-      expect(indexContent(live).trackLessons).toHaveLength(9);
+      expect(indexContent(live).trackLessons).toHaveLength(18);
     });
   });
 });

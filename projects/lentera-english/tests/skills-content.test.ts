@@ -43,11 +43,17 @@ describe('materi menyimak B1–C2', () => {
 
   it('kalimat dikte diambil persis dari rekamannya, dan kuncinya dinilai benar', () => {
     const dictations = pack.exercises.filter((e) => e.type === 'fill' && e.audioText);
-    expect(dictations.length).toBeGreaterThanOrEqual(8);
-    for (const e of dictations) {
+    // Dictations in listening items come from their recording; those inside a
+    // lesson (e.g. TOEFL Listening, Rilis 12) carry their own audio sentence.
+    const fromItems = dictations.filter((e) => pack.listening.some((l) => l.questionIds.includes(e.id)));
+    expect(fromItems.length).toBeGreaterThanOrEqual(8);
+    for (const e of fromItems) {
       const item = pack.listening.find((l) => l.questionIds.includes(e.id))!;
       expect(` ${normalize(item.transcript)} `.includes(` ${normalize(e.audioText!)} `), e.id).toBe(true);
-      expect(grade(e, { text: e.answers![0] }).correct).toBe(true);
+    }
+    for (const e of dictations) {
+      expect(` ${normalize(e.audioText!)} `.includes(` ${normalize(e.text!.replace('___', e.answers![0]))} `), e.id).toBe(true);
+      expect(grade(e, { text: e.answers![0] }).correct, e.id).toBe(true);
     }
   });
 

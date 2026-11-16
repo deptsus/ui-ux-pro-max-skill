@@ -1,6 +1,6 @@
 // Jalur Khusus (Rilis 11) · Bahasa Inggris untuk Kerja — wawancara, email, rapat.
 // The first lesson is free; the rest are Premium (set in content/index.ts).
-import { arrange, construct, dlg, fill, fix, lesson, match, mc, read, spot, tf, tr } from './dsl';
+import { arrange, construct, dlg, fill, fix, lesson, listen, match, mc, read, spot, tf, tr } from './dsl';
 
 export const workInterview = lesson({
   id: 'work-interview-intro',
@@ -277,5 +277,265 @@ export const workMeeting = lesson({
       ['Mengirim survei ke semua pelanggan.', 'Itu usul Rina, yang ditanggapi Doni.'],
       ['Membatalkan survei.', 'Doni tidak mengusulkan pembatalan, hanya memulai dari yang lebih kecil.'],
     ], 'Usul Doni ada setelah "How about ...".'),
+  ],
+});
+
+export const workPhone = lesson({
+  id: 'work-phone',
+  title: 'Telepon Kerja',
+  summary: 'Mengangkat telepon, menanyakan maksud, meninggalkan pesan, dan mengeja dengan jelas.',
+  topic: 'work.phone',
+  objectives: [
+    'Membuka dan menjawab telepon kerja dengan ungkapan standar.',
+    'Meminta orang mengulang atau mengeja: Could you repeat that? / Could you spell that?',
+    'Meninggalkan dan menerima pesan: Can I take a message? / Could you ask him to call me back?',
+  ],
+  intro: 'Telepon terasa lebih sulit daripada bicara langsung karena tidak ada gerak tubuh dan suara sering terputus. Kabar baiknya, percakapan telepon kerja memakai ungkapan yang hampir selalu sama. Kuasai ungkapan itu dan kamu bisa fokus pada isinya.',
+  teaching: [
+    {
+      heading: 'Membuka telepon',
+      body: 'Saat mengangkat, sebut nama perusahaan dan namamu. Saat menelepon, perkenalkan diri dengan "This is ..." (bukan "I am ..." yang terdengar janggal di telepon) lalu sebut maksudmu.',
+      examples: [
+        { en: 'Good morning, Lentera Logistics, Rina speaking. How can I help you?', id: 'Selamat pagi, Lentera Logistics, dengan Rina. Ada yang bisa saya bantu?' },
+        { en: "Hello, this is Budi from PT Maju. I'm calling about the invoice.", id: 'Halo, saya Budi dari PT Maju. Saya menelepon soal tagihan.' },
+        { en: 'Could I speak to Ms. Sari, please?', id: 'Boleh saya bicara dengan Bu Sari?' },
+      ],
+    },
+    {
+      heading: 'Kalau tidak jelas',
+      body: 'Jangan pura-pura mengerti. Minta diulang atau dieja dengan sopan. Untuk nama dan email, eja huruf demi huruf.',
+      table: [
+        ['Situasi', 'Ungkapan'],
+        ['Tidak dengar', 'Sorry, could you repeat that, please?'],
+        ['Terlalu cepat', 'Could you speak a little more slowly, please?'],
+        ['Nama/email', 'Could you spell that for me, please?'],
+        ['Memastikan', 'So that is Thursday at 10 a.m., right?'],
+      ],
+    },
+    {
+      heading: 'Pesan',
+      body: 'Kalau orang yang dicari tidak ada, tawarkan untuk mencatat pesan. Kalau kamu yang menelepon, minta ditelepon balik.',
+      examples: [
+        { en: "I'm afraid she's in a meeting. Can I take a message?", id: 'Maaf, beliau sedang rapat. Boleh saya catat pesannya?' },
+        { en: 'Could you ask him to call me back this afternoon?', id: 'Bisakah Anda minta dia menelepon saya kembali sore ini?' },
+      ],
+    },
+  ],
+  demo: [
+    ['Hello, this is Dina from Bank Sentosa.', 'Hello, I am Dina from Bank Sentosa.', 'Di telepon, perkenalan memakai "This is ...".'],
+    ['Sorry, could you repeat that, please?', 'What? Say again.', 'Terlalu langsung untuk telepon kerja; minta dengan sopan.'],
+    ["I'm afraid he's not available. Can I take a message?", 'He is not here. Call again later.', 'Tawarkan mencatat pesan, jangan menyuruh menelepon ulang.'],
+  ],
+  guided: [
+    mc(1, 'Bagaimana memperkenalkan diri saat menelepon?', null, [
+      ['Hello, this is Andi from PT Sinar.', true],
+      ['Hello, I am Andi from PT Sinar.', 'Di telepon, penutur asli memakai "This is ...".'],
+      ['Hello, my name Andi from PT Sinar.', 'Kurang kata kerja "is"; dan di telepon lebih wajar "This is ...".'],
+    ], 'Perkenalan di telepon: This is + nama.'),
+    match(1, 'Pasangkan situasi dengan ungkapannya.', [
+      ['Tidak dengar jelas', 'Could you repeat that, please?'],
+      ['Butuh ejaan nama', 'Could you spell that, please?'],
+      ['Orangnya tidak ada', 'Can I take a message?'],
+      ['Ingin ditelepon balik', 'Could you ask her to call me back?'],
+    ], 'Empat ungkapan inti telepon kerja.'),
+    fill(1, "I'm ___ about the delivery date.", ['calling'], '"I\'m calling about ..." menyatakan maksud menelepon.', { call: ['Setelah "I\'m", pakai -ing: calling.'] }),
+    listen(1, 'Good afternoon, Mitra Travel, Yudi speaking.', 'Siapa yang mengangkat telepon?', [
+      ['Yudi', true],
+      ['Mitra', 'Mitra Travel adalah nama perusahaannya.'],
+      ['Tidak disebut', 'Nama disebut setelah nama perusahaan: "Yudi speaking".'],
+    ], 'Pola standar: nama perusahaan, lalu "... speaking".'),
+  ],
+  independent: [
+    tr(2, 'Boleh saya bicara dengan Pak Hendra?', ['Could I speak to Mr. Hendra, please?', 'Could I speak to Mr Hendra, please?', 'May I speak to Mr. Hendra, please?', 'Can I speak to Mr. Hendra, please?', 'Could I speak with Mr. Hendra, please?'], 'Could/May I speak to + nama, please?'),
+    fix(2, 'Sorry, can you say again?', ['Sorry, could you repeat that, please?', 'Sorry, could you say that again, please?', 'Sorry, could you repeat that?', 'Sorry, can you repeat that, please?'], 'Pakai "repeat that" atau "say that again".', { 'Sorry, can you say again?': ['Kalimatnya belum diubah.'] }),
+    construct(2, 'I / afraid / she / in a meeting', ["I'm afraid she's in a meeting.", 'I am afraid she is in a meeting.', "I'm afraid she is in a meeting."], '"I\'m afraid ..." melunakkan kabar yang kurang menyenangkan.'),
+    spot(2, 'Could you ask him to calling me back?', 'calling', 'call', 'ask someone to + kata kerja dasar: to call me back.'),
+  ],
+  homework: [
+    arrange(2, 'Boleh saya catat pesannya?', 'Can I take a message', ['make', 'write'], 'Ungkapan tetap: take a message.'),
+    listen(2, 'Hi, this is Lina from Delta Print. Could you ask Mr. Arif to call me back before five?', 'Apa yang diminta Lina?', [
+      ['Pak Arif meneleponnya kembali sebelum pukul lima.', true],
+      ['Pak Arif datang ke Delta Print.', 'Lina minta ditelepon balik, bukan didatangi.'],
+      ['Pesanan dicetak sebelum pukul lima.', 'Yang dibatasi pukul lima adalah telepon baliknya.'],
+    ], 'Kunci: "call me back before five".'),
+    tf(2, '"Could you spell that, please?" dipakai untuk meminta lawan bicara mengeja kata atau nama.', true, 'spell = mengeja.', 'Pernyataan ini benar.'),
+  ],
+  mastery: [
+    tr(3, 'Halo, saya Rina dari PT Cahaya. Saya menelepon soal pesanan kami.', ['Hello, this is Rina from PT Cahaya. I am calling about our order.', "Hello, this is Rina from PT Cahaya. I'm calling about our order.", "Hi, this is Rina from PT Cahaya. I'm calling about our order."], 'This is + nama; I\'m calling about + hal.', { 'Hello, I am Rina from PT Cahaya. I am calling about our order.': ['Di telepon, perkenalan memakai "This is ...".'] }),
+    fix(3, 'He is not here. Call again tomorrow.', ["I'm afraid he isn't available. Can I take a message?", "I'm afraid he's not here. Can I take a message?", "I'm afraid he's not available. Can I take a message?", "I'm afraid he is not available. Can I take a message?"], 'Lunakkan dengan "I\'m afraid ..." dan tawarkan mencatat pesan.', { 'He is not here. Call again tomorrow.': ['Kalimatnya belum diubah.'] }),
+    dlg(3, 'Pilih jawaban terbaik.', 'Penelepon: "My email is r-a-h-m-a-t at gmail dot com." (kamu ragu)', [
+      ['Sorry, could you spell that again more slowly, please?', true],
+      ["OK, I've got it.", 'Jangan pura-pura mengerti; email yang salah membuat pesan tidak sampai.'],
+      ['What?', 'Terlalu singkat dan terdengar kasar.'],
+    ], 'Untuk data penting, minta dieja ulang dengan sopan.'),
+  ],
+});
+
+export const workPresentation = lesson({
+  id: 'work-presentation',
+  title: 'Presentasi Singkat',
+  summary: 'Membuka, mengatur alur, membaca data dari grafik, dan menutup presentasi.',
+  topic: 'work.presentation',
+  objectives: [
+    'Membuka presentasi dan menyebut tujuannya: Today I\'d like to talk about ...',
+    'Menandai alur dengan kata penanda: First, Next, Finally.',
+    'Menjelaskan grafik: increased, decreased, remained stable, by/to.',
+  ],
+  intro: 'Presentasi kerja yang baik tidak butuh kosakata sulit. Yang dibutuhkan adalah peta yang jelas untuk pendengar: apa yang akan dibahas, di mana posisi sekarang, dan apa kesimpulannya. Kata penanda membuat pendengar tidak tersesat.',
+  teaching: [
+    {
+      heading: 'Pembukaan',
+      body: 'Sapa, sebut topik, lalu beri peta isi presentasi.',
+      examples: [
+        { en: "Good morning, everyone. Today I'd like to talk about our sales in the third quarter.", id: 'Selamat pagi semuanya. Hari ini saya ingin membahas penjualan kita di kuartal ketiga.' },
+        { en: "First, I'll show the results. Then, I'll explain the reasons. Finally, I'll suggest next steps.", id: 'Pertama, saya tunjukkan hasilnya. Lalu saya jelaskan penyebabnya. Terakhir, saya usulkan langkah berikutnya.' },
+      ],
+    },
+    {
+      heading: 'Menjelaskan grafik',
+      body: 'Pakai kata kerja perubahan. "by" menyebut besarnya perubahan; "to" menyebut angka akhirnya.',
+      table: [
+        ['Naik', 'Turun', 'Tetap'],
+        ['increased / rose', 'decreased / fell', 'remained stable'],
+        ['Sales increased by 20%.', 'Costs fell to 40 million.', 'Prices remained stable.'],
+      ],
+    },
+    {
+      heading: 'Penutup dan tanya jawab',
+      body: 'Ringkas pesan utama, lalu undang pertanyaan.',
+      examples: [
+        { en: 'To sum up, online orders are growing fast.', id: 'Singkatnya, pesanan daring tumbuh cepat.' },
+        { en: 'Thank you for listening. Are there any questions?', id: 'Terima kasih sudah mendengarkan. Ada pertanyaan?' },
+      ],
+    },
+  ],
+  demo: [
+    ["Today I'd like to talk about our new app.", 'Today I want to tell about our new app.', '"talk about" atau "tell you about"; "tell about" kurang tepat.'],
+    ['Sales increased by 15% in June.', 'Sales were increase 15% in June.', 'Pakai kata kerja lampau "increased" dan "by" untuk besarnya perubahan.'],
+    ['Thank you for listening. Are there any questions?', 'Thank you for your listening. Any question?', '"Thank you for listening" tanpa "your"; "any questions" jamak.'],
+  ],
+  guided: [
+    mc(1, 'Pilih kalimat pembuka yang tepat.', null, [
+      ["Today I'd like to talk about our marketing plan.", true],
+      ['Today I want to tell about our marketing plan.', '"tell" butuh orang: tell you about ...; atau pakai "talk about".'],
+      ['Today I will explanation our marketing plan.', '"explanation" kata benda; pakai kata kerja "explain".'],
+    ], 'Pembuka standar: Today I\'d like to talk about ...'),
+    mc(2, 'Pilih kata yang tepat.', 'Our costs fell ___ 30% last year, from 100 million to 70 million.', [
+      ['by', true],
+      ['to', '"to" menyebut angka akhirnya (to 70 million), bukan besarnya perubahan.'],
+      ['at', '"at" tidak dipakai untuk besarnya perubahan.'],
+    ], '"by" = besarnya perubahan (30%).'),
+    match(1, 'Pasangkan kata penanda dengan fungsinya.', [
+      ['First,', 'Memulai bagian pertama'],
+      ['Next,', 'Pindah ke bagian berikutnya'],
+      ['Finally,', 'Bagian terakhir'],
+      ['To sum up,', 'Meringkas'],
+    ], 'Kata penanda membuat alur presentasi jelas.'),
+    tf(1, '"Prices remained stable" berarti harga tidak berubah.', true, 'remain stable = tetap.', 'Pernyataan ini benar.'),
+  ],
+  independent: [
+    fill(2, 'The number of users ___ (naik) to 5,000 in March.', ['increased', 'rose', 'grew'], 'Kata kerja lampau untuk kenaikan: increased/rose/grew.', { increase: ['Pakai bentuk lampau: increased.'], raised: ['"raise" butuh objek; untuk angka yang naik sendiri pakai rose/increased.'] }),
+    tr(2, 'Singkatnya, penjualan daring tumbuh dengan cepat.', ['To sum up, online sales are growing fast.', 'To sum up, online sales are growing quickly.', 'In summary, online sales are growing fast.', 'To sum up, online sales grew quickly.', 'To sum up, online sales are growing rapidly.'], 'To sum up / In summary + kalimat.'),
+    fix(2, 'Thank you for your listening.', ['Thank you for listening.'], 'Ungkapan tetapnya tanpa "your".', { 'Thank you for your listening.': ['Kalimatnya belum diubah.'] }),
+    construct(2, 'first / I / show / the results (will)', ["First, I'll show the results.", 'First, I will show the results.'], 'First, + I\'ll + kata kerja dasar.'),
+  ],
+  homework: [
+    arrange(2, 'Biaya turun sebesar sepuluh persen.', 'Costs fell by ten percent', ['to', 'falled'], 'fell (lampau dari fall) + by + besarnya perubahan.', { alt: ['Costs fell by 10 percent'] }),
+    read(2, 'Good morning, everyone. Today I\'d like to talk about our customer survey. First, I\'ll show the results. Next, I\'ll explain the main complaints. Finally, I\'ll suggest three changes.', 'Apa yang dibahas di bagian kedua?', [
+      ['Keluhan utama pelanggan.', true],
+      ['Hasil survei.', 'Itu bagian pertama (First).'],
+      ['Tiga usulan perubahan.', 'Itu bagian terakhir (Finally).'],
+    ], 'Bagian kedua ditandai "Next".'),
+    spot(2, 'Our profit increase by 12% last year.', 'increase', 'increased', 'Kejadian tahun lalu memakai bentuk lampau: increased.'),
+  ],
+  mastery: [
+    tr(3, 'Hari ini saya ingin membahas hasil penjualan bulan Juni.', ["Today I'd like to talk about the sales results for June.", 'Today I would like to talk about the sales results for June.', "Today I'd like to talk about June's sales results.", "Today I'd like to talk about the June sales results."], "Today I'd like to talk about + topik.", { 'Today I want to tell about the sales results for June.': ['Pakai "talk about".'] }),
+    fill(3, 'Downloads fell ___ 8,000 to 6,000 after the update.', ['from'], 'from + angka awal, to + angka akhir.', { by: ['"by" untuk besarnya perubahan; di sini dari 8.000 ke 6.000: from ... to.'] }),
+    fix(3, 'Any question? Thank you for your listening.', ['Thank you for listening. Are there any questions?', 'Thank you for listening. Do you have any questions?', 'Are there any questions? Thank you for listening.'], '"questions" jamak, dan "Thank you for listening" tanpa your.', { 'Any question? Thank you for your listening.': ['Kalimatnya belum diubah.'] }),
+  ],
+});
+
+export const workCv = lesson({
+  id: 'work-cv',
+  title: 'CV dan Surat Lamaran',
+  summary: 'Kata kerja aksi di CV, bentuk lampau yang konsisten, dan kalimat pembuka surat lamaran.',
+  topic: 'work.cv',
+  objectives: [
+    'Menulis poin pengalaman dengan kata kerja aksi: managed, led, increased.',
+    'Memakai bentuk lampau untuk pekerjaan lama dan present untuk pekerjaan sekarang, secara konsisten.',
+    'Membuka surat lamaran: I am writing to apply for the position of ...',
+  ],
+  intro: 'Perekrut membaca CV dalam hitungan detik. Poin pengalaman yang dibuka dengan kata kerja aksi dan berisi angka lebih cepat dipahami daripada kalimat panjang seperti "I was responsible for doing many things". Surat lamaran juga punya kalimat pembuka yang baku.',
+  teaching: [
+    {
+      heading: 'Kata kerja aksi dan angka',
+      body: 'Mulai setiap poin dengan kata kerja aksi, tanpa "I". Tambahkan angka bila bisa.',
+      table: [
+        ['Lemah', 'Kuat'],
+        ['I was responsible for social media.', 'Managed three social media accounts with 20,000 followers.'],
+        ['Helped to sell products.', 'Increased monthly sales by 15%.'],
+        ['Did training for new staff.', 'Trained 12 new staff members.'],
+      ],
+    },
+    {
+      heading: 'Bentuk waktu yang konsisten',
+      body: 'Pekerjaan yang sudah selesai: bentuk lampau (managed, led). Pekerjaan sekarang: bentuk present (manage, lead). Jangan mencampur dalam satu bagian.',
+      examples: [
+        { en: 'Sales Assistant, Toko Maju (2021–2023): Served 80 customers a day.', id: 'Pramuniaga, Toko Maju (2021–2023): Melayani 80 pelanggan per hari.' },
+        { en: 'Sales Supervisor, Toko Jaya (2023–now): Lead a team of five.', id: 'Supervisor Penjualan, Toko Jaya (2023–sekarang): Memimpin tim lima orang.' },
+      ],
+    },
+    {
+      heading: 'Surat lamaran',
+      body: 'Kalimat pertama menyebut posisi dan sumber lowongan. Paragraf berikutnya menghubungkan pengalamanmu dengan kebutuhan perusahaan.',
+      examples: [
+        { en: 'I am writing to apply for the position of Admin Officer advertised on your website.', id: 'Saya menulis untuk melamar posisi Staf Admin yang diiklankan di situs web Anda.' },
+        { en: 'I would welcome the opportunity to discuss my application with you.', id: 'Saya akan senang mendapat kesempatan membicarakan lamaran saya dengan Anda.' },
+      ],
+    },
+  ],
+  demo: [
+    ['Increased monthly sales by 15%.', 'I was responsible to increase the sales.', 'Kata kerja aksi + angka lebih kuat dan jelas.'],
+    ['I am writing to apply for the position of Data Analyst.', 'I want to apply job Data Analyst.', 'Kalimat pembuka baku dan tata bahasanya lengkap.'],
+    ['Trained 12 new staff members.', 'Training 12 new staff.', 'Poin CV dibuka dengan kata kerja bentuk lampau, bukan -ing.'],
+  ],
+  guided: [
+    mc(1, 'Poin CV mana yang paling kuat?', null, [
+      ['Reduced delivery errors by 30% in six months.', true],
+      ['I was responsible for delivery.', 'Tidak menunjukkan hasil; mulai dengan kata kerja aksi dan angka.'],
+      ['Doing many tasks about delivery.', 'Tidak jelas dan memakai -ing.'],
+    ], 'Kata kerja aksi + hasil terukur.'),
+    match(1, 'Pasangkan kata kerja aksi dengan artinya.', [
+      ['managed', 'mengelola'],
+      ['led', 'memimpin'],
+      ['trained', 'melatih'],
+      ['reduced', 'mengurangi'],
+    ], 'Kata kerja aksi yang sering dipakai di CV.'),
+    fill(1, 'I am writing to apply ___ the position of Graphic Designer.', ['for'], 'apply for + posisi.', { to: ['apply for a position; "apply to" untuk perusahaan.'] }),
+    tf(1, 'Untuk pekerjaan yang sudah selesai, poin CV memakai bentuk lampau seperti "managed".', true, 'Pekerjaan lama: bentuk lampau.', 'Pernyataan ini benar.'),
+  ],
+  independent: [
+    fix(2, 'I was responsible to train new staff.', ['Trained new staff.', 'Trained new staff members.', 'I trained new staff.'], 'Pakai kata kerja aksi: Trained new staff.', { 'I was responsible to train new staff.': ['Kalimatnya belum diubah.'] }),
+    construct(2, 'increase / customer satisfaction / by 20% (poin CV, lampau)', ['Increased customer satisfaction by 20%.'], 'Kata kerja aksi lampau + by + angka.'),
+    tr(2, 'Saya menulis untuk melamar posisi Staf Keuangan.', ['I am writing to apply for the position of Finance Officer.', "I'm writing to apply for the position of Finance Officer.", 'I am writing to apply for the Finance Officer position.', 'I am writing to apply for the position of Finance Staff.'], 'I am writing to apply for the position of ...', { 'I want to apply job Finance Officer.': ['Pakai kalimat pembuka baku.'] }),
+    spot(2, 'Leading a team of four designers in 2022.', 'Leading', 'Led', 'Pekerjaan yang sudah selesai: bentuk lampau "Led".'),
+  ],
+  homework: [
+    arrange(2, 'Mengelola anggaran 50 juta rupiah.', 'Managed a budget of 50 million rupiah', ['Managing', 'manage'], 'Kata kerja aksi lampau di awal poin.'),
+    mc(2, 'Pilih kalimat penutup surat lamaran yang paling tepat.', null, [
+      ['I would welcome the opportunity to discuss my application with you.', true],
+      ['Please accept me, I really need this job.', 'Terdengar memohon, bukan profesional.'],
+      ['Thanks before for your attention.', '"Thanks before" tidak wajar dalam bahasa Inggris.'],
+    ], 'Penutup profesional menawarkan diskusi lebih lanjut.'),
+    tf(2, '"Responsible for doing many things" adalah poin CV yang kuat.', false, 'Terlalu umum. Poin kuat memakai kata kerja aksi dan angka.', 'Pernyataan ini salah.'),
+  ],
+  mastery: [
+    tr(3, 'Meningkatkan penjualan bulanan sebesar 25%.', ['Increased monthly sales by 25%.', 'Increased monthly sales by 25 percent.', 'Raised monthly sales by 25%.', 'Boosted monthly sales by 25%.'], 'Kata kerja aksi lampau + by + angka.', { 'Increasing monthly sales by 25%.': ['Pakai bentuk lampau, bukan -ing.'] }),
+    fix(3, 'I want to apply job as Marketing Staff in your company.', ['I am writing to apply for the position of Marketing Staff at your company.', 'I am writing to apply for the Marketing Staff position at your company.', "I'm writing to apply for the position of Marketing Staff at your company.", 'I am writing to apply for the position of Marketing Officer at your company.'], 'Kalimat pembuka baku: I am writing to apply for the position of ... at ...', { 'I want to apply job as Marketing Staff in your company.': ['Kalimatnya belum diubah.'] }),
+    read(3, 'Customer Service Officer, Bank Mandiri Jaya (2020–2024)\n• Answered 60 customer calls a day.\n• Reduced complaint response time from 48 to 24 hours.\n• Trained 8 new team members.', 'Poin mana yang menunjukkan hasil perbaikan proses?', [
+      ['Mempercepat waktu respons keluhan dari 48 menjadi 24 jam.', true],
+      ['Menjawab 60 telepon per hari.', 'Itu menunjukkan beban kerja, bukan perbaikan.'],
+      ['Melatih 8 anggota tim baru.', 'Itu pengalaman melatih, bukan perbaikan proses.'],
+    ], '"Reduced ... from 48 to 24 hours" menunjukkan perbaikan yang terukur.'),
   ],
 });

@@ -2,7 +2,7 @@
 // bahasa yang paling sering diuji. Lentera tidak berafiliasi dengan ETS,
 // British Council, IDP, atau Cambridge; soal di sini latihan bergaya ujian,
 // bukan soal resmi. The first lesson is free; the rest are Premium.
-import { arrange, construct, fill, fix, lesson, match, mc, read, spot, tf, tr } from './dsl';
+import { arrange, construct, dictation, fill, fix, lesson, listen, match, mc, read, spot, tf, tr } from './dsl';
 
 export const toeflStructure = lesson({
   id: 'exam-toefl-structure',
@@ -268,5 +268,284 @@ export const ieltsWriting = lesson({
       ['I play football every Saturday with my friends.', 'Pengalaman pribadi santai, bukan kalimat topik akademik.'],
       ['Sports are a lot of fun and kids love them.', 'Terlalu informal dan tidak menyatakan gagasan utama yang jelas.'],
     ], 'Kalimat topik menyatakan satu gagasan utama paragraf dengan bahasa akademik.'),
+  ],
+});
+
+export const toeflListening = lesson({
+  id: 'exam-toefl-listening',
+  title: 'TOEFL ITP Listening: Percakapan Pendek',
+  summary: 'Menangkap jawaban orang kedua, idiom, dan saran yang tersirat di Part A.',
+  topic: 'exam.toefl-listening',
+  objectives: [
+    'Fokus pada kalimat orang kedua, tempat jawaban biasanya berada.',
+    'Mengenali jawaban tersirat: saran, penolakan halus, dan kejutan.',
+    'Menghindari jebakan pilihan yang mengulang bunyi kata dari audio.',
+  ],
+  intro: 'Listening Part A TOEFL ITP berisi percakapan dua orang yang sangat pendek, lalu satu pertanyaan. Jawabannya hampir selalu ada di kalimat orang kedua, dan sering tidak diucapkan langsung. Pilihan yang memakai kata yang persis sama dengan audio justru sering jebakan.',
+  teaching: [
+    {
+      heading: 'Dengarkan orang kedua',
+      body: 'Orang pertama memberi situasi; orang kedua memberi tanggapan yang ditanyakan. Bacalah pilihan jawaban lebih dulu (bila sempat) agar tahu apa yang dicari.',
+      examples: [
+        { en: 'Woman: I can\'t find my notes. Man: Did you check your backpack?', id: 'Perempuan: Catatanku tidak ketemu. Laki-laki: Sudah cek ranselmu?', note: 'Makna: laki-laki menyarankan ia mencari di ransel.' },
+      ],
+    },
+    {
+      heading: 'Makna tersirat',
+      body: 'Pertanyaan balik sering berarti saran; "I wish ..." berarti kenyataannya sebaliknya; "Not again!" berarti hal itu sudah sering terjadi.',
+      table: [
+        ['Ucapan', 'Makna'],
+        ['Why don\'t you ask the professor?', 'Saran: tanyakan ke dosen'],
+        ['I wish I had more time.', 'Dia tidak punya cukup waktu'],
+        ['I\'d rather stay home.', 'Dia memilih tidak pergi'],
+      ],
+    },
+    {
+      heading: 'Jebakan bunyi mirip',
+      body: 'Pilihan yang memakai kata dengan bunyi mirip (walk/work, sixteen/sixty) atau mengulang kata dari audio sering salah. Pilih makna, bukan bunyi.',
+      examples: [
+        { en: 'Man: Is the library open late? Woman: Only during exam week.', id: 'Laki-laki: Perpustakaan buka sampai malam? Perempuan: Hanya saat minggu ujian.', note: 'Makna: biasanya tidak buka sampai malam.' },
+      ],
+    },
+  ],
+  demo: [
+    ['She suggests checking the backpack.', 'She has a backpack.', 'Pertanyaan "Did you check your backpack?" adalah saran, bukan informasi kepemilikan.'],
+    ['He did not have enough time.', 'He had a lot of time.', '"I wish I had more time" berarti waktunya kurang.'],
+    ['The library is usually not open late.', 'The library is always open late.', '"Only during exam week" berarti tidak biasanya.'],
+  ],
+  guided: [
+    listen(1, 'Woman: I missed the bus again. Man: Why don\'t you leave home ten minutes earlier?', 'Apa yang disarankan laki-laki?', [
+      ['Berangkat sepuluh menit lebih awal.', true],
+      ['Naik bus yang lain.', 'Tidak ada bus lain disebut.'],
+      ['Tinggal di rumah.', '"leave home" berarti berangkat dari rumah, bukan tinggal di rumah.'],
+    ], '"Why don\'t you ...?" adalah saran.'),
+    listen(1, 'Man: Are you coming to the party tonight? Woman: I\'d rather stay home and rest.', 'Apa maksud perempuan itu?', [
+      ['Dia tidak akan datang ke pesta.', true],
+      ['Dia akan datang setelah beristirahat.', '"I\'d rather stay home" berarti memilih tidak pergi.'],
+      ['Pestanya diadakan di rumahnya.', 'Jebakan kata "home"; maknanya ia memilih di rumah.'],
+    ], '"I\'d rather ..." = lebih memilih.'),
+    match(1, 'Pasangkan ucapan dengan maknanya.', [
+      ['Why don\'t you ...?', 'Memberi saran'],
+      ['I wish I had ...', 'Kenyataannya tidak punya'],
+      ['Not again!', 'Sudah sering terjadi'],
+    ], 'Makna tersirat yang sering diuji.'),
+    tf(1, 'Pilihan jawaban yang memakai kata persis sama dengan audio selalu benar.', false, 'Justru sering jebakan; pilih berdasarkan makna.', 'Pernyataan ini salah.'),
+  ],
+  independent: [
+    dictation(2, 'I wish I had studied harder for the test.', 'I wish I had ___ harder for the test.', ['studied'], 'Setelah "I wish I had" pakai bentuk ketiga: studied.', { study: ['Setelah had, pakai bentuk ketiga: studied.'] }),
+    listen(2, 'Woman: Is the cafeteria open on Sunday? Man: Only in the morning.', 'Apa yang bisa disimpulkan?', [
+      ['Kafetaria tutup pada Minggu sore.', true],
+      ['Kafetaria tutup sepanjang hari Minggu.', 'Kafetaria buka pagi hari.'],
+      ['Kafetaria buka setiap pagi.', 'Laki-laki hanya menjawab tentang hari Minggu.'],
+    ], '"Only in the morning" berarti sore dan malam tutup.'),
+    tr(2, 'Dia menyarankan agar saya bertanya kepada dosen.', ['He suggested that I ask the professor.', 'He suggested asking the professor.', 'She suggested that I ask the professor.', 'She suggested asking the professor.', 'He suggested I ask the professor.', 'She suggested I ask the professor.'], 'suggest + that + subjek + kata kerja dasar, atau suggest + -ing.', { 'He suggested me to ask the professor.': ['"suggest" tidak memakai pola "someone to do".'] }),
+    fill(2, "Man: I'd rather ___ (take) the train.", ['take'], "I'd rather + kata kerja dasar.", { taking: ["Setelah I'd rather, pakai kata kerja dasar."], 'to take': ["Setelah I'd rather, tanpa to."] }),
+  ],
+  homework: [
+    listen(2, 'Man: Did you finish the report? Woman: I\'m still waiting for the sales figures.', 'Apa yang bisa disimpulkan tentang laporan itu?', [
+      ['Laporannya belum selesai.', true],
+      ['Laporannya sudah dikirim.', 'Ia masih menunggu data, jadi belum selesai.'],
+      ['Penjualan sedang menurun.', 'Tidak ada informasi tentang naik turunnya penjualan.'],
+    ], 'Masih menunggu data berarti laporan belum selesai.'),
+    construct(2, 'why / you / not / call / the office (saran)', ["Why don't you call the office?", 'Why do not you call the office?'], "Why don't you + kata kerja dasar?"),
+    mc(2, 'Pria berkata: "Not again! The printer is broken." Apa artinya?', null, [
+      ['Printer itu sudah sering rusak.', true],
+      ['Printer itu baru pertama kali rusak.', '"Not again" menunjukkan kejadian berulang.'],
+      ['Dia tidak mau memakai printer lagi.', 'Bukan penolakan, melainkan keluhan.'],
+    ], '"Not again!" = sudah berulang kali.'),
+  ],
+  mastery: [
+    tr(3, 'Saya berharap saya punya lebih banyak waktu.', ['I wish I had more time.'], 'I wish + bentuk lampau untuk keadaan sekarang yang berbeda.', { 'I wish I have more time.': ['Setelah I wish, pakai bentuk lampau: had.'] }),
+    listen(3, 'Woman: Professor Lim\'s class is so hard. Man: You can say that again.', 'Apa maksud laki-laki itu?', [
+      ['Dia setuju kelasnya sulit.', true],
+      ['Dia ingin perempuan itu mengulang ucapannya.', '"You can say that again" adalah idiom untuk setuju sepenuhnya.'],
+      ['Dia belum pernah ikut kelas itu.', 'Tidak ada petunjuk tentang hal itu.'],
+    ], 'Idiom "You can say that again" = sangat setuju.'),
+    fix(3, 'He suggested me to take the earlier bus.', ['He suggested that I take the earlier bus.', 'He suggested taking the earlier bus.', 'He suggested I take the earlier bus.'], 'suggest that + subjek + kata kerja dasar, atau suggest + -ing.', { 'He suggested me to take the earlier bus.': ['Kalimatnya belum diubah.'] }),
+  ],
+});
+
+export const ieltsReading = lesson({
+  id: 'exam-ielts-reading',
+  title: 'IELTS Reading: True, False, Not Given',
+  summary: 'Membedakan pernyataan yang dibantah teks (False) dan yang tidak dibahas (Not Given).',
+  topic: 'exam.ielts-reading',
+  objectives: [
+    'Menjawab True hanya bila teks menyatakan hal yang sama, walau dengan kata lain.',
+    'Menjawab False bila teks menyatakan kebalikannya.',
+    'Menjawab Not Given bila teks tidak memberi informasi itu, tanpa menebak dari pengetahuan umum.',
+  ],
+  intro: 'Soal True/False/Not Given adalah salah satu yang paling banyak membuat peserta kehilangan nilai di IELTS Reading. Kesalahan utamanya: memakai pengetahuan sendiri atau menganggap "tidak disebut" sama dengan "salah". Kuncinya adalah hanya percaya pada teks.',
+  teaching: [
+    {
+      heading: 'Tiga kemungkinan',
+      body: 'Bandingkan pernyataan dengan bagian teks yang sesuai. Teks biasanya memakai sinonim (parafrase), bukan kata yang sama.',
+      table: [
+        ['Jawaban', 'Artinya'],
+        ['True', 'Teks menyatakan hal yang sama (sering dengan kata lain).'],
+        ['False', 'Teks menyatakan kebalikannya.'],
+        ['Not Given', 'Teks tidak membahasnya; tidak bisa dipastikan.'],
+      ],
+    },
+    {
+      heading: 'Kata pembatas',
+      body: 'Perhatikan kata seperti all, some, only, always, usually, most. Satu kata pembatas bisa mengubah jawaban.',
+      examples: [
+        { en: 'Text: Most visitors arrive by train. Statement: All visitors arrive by train.', id: 'Teks: Kebanyakan pengunjung datang naik kereta. Pernyataan: Semua pengunjung datang naik kereta.', note: 'Jawaban: False (most ≠ all).' },
+        { en: 'Text: The museum opened in 1990. Statement: The museum was popular in 1990.', id: 'Teks: Museum dibuka pada 1990. Pernyataan: Museum itu populer pada 1990.', note: 'Jawaban: Not Given (popularitas tidak dibahas).' },
+      ],
+    },
+    {
+      heading: 'Jangan menebak dari pengetahuan umum',
+      body: 'Walau kamu tahu sesuatu benar di dunia nyata, jawab Not Given jika teks tidak menyatakannya.',
+      examples: [
+        { en: 'Text: Coffee was first grown in Ethiopia. Statement: Coffee contains caffeine.', id: 'Teks: Kopi pertama kali ditanam di Etiopia. Pernyataan: Kopi mengandung kafein.', note: 'Jawaban: Not Given, walau faktanya benar.' },
+      ],
+    },
+  ],
+  demo: [
+    ['Not Given (the text says nothing about price).', 'False (because I think it is expensive).', 'Jangan menilai dari pendapat atau pengetahuan sendiri.'],
+    ['False (most is not all).', 'True (both mention visitors and trains).', 'Kata pembatas "most" dan "all" berbeda.'],
+    ['True (rose = increased).', 'Not Given (the word "increased" is not in the text).', 'Teks sering memakai sinonim; maknanya sama.'],
+  ],
+  guided: [
+    read(1, 'The town library was built in 1975. It has more than 20,000 books and is open every day except Monday.', 'Pernyataan: "The library is closed on Mondays."', [
+      ['True', true],
+      ['False', 'Teks menyatakan buka setiap hari kecuali Senin, jadi Senin tutup.'],
+      ['Not Given', 'Informasinya ada: "except Monday".'],
+    ], '"open every day except Monday" = tutup hari Senin.'),
+    read(1, 'The town library was built in 1975. It has more than 20,000 books and is open every day except Monday.', 'Pernyataan: "The library is the largest in the province."', [
+      ['Not Given', true],
+      ['True', 'Teks tidak membandingkan dengan perpustakaan lain.'],
+      ['False', 'Teks tidak membantahnya; hanya tidak membahas.'],
+    ], 'Perbandingan ukuran tidak disebut sama sekali.'),
+    read(2, 'Most students in the survey said they study better in the morning.', 'Pernyataan: "All students prefer studying in the morning."', [
+      ['False', true],
+      ['True', '"Most" tidak sama dengan "all".'],
+      ['Not Given', 'Teks memberi informasi yang bertentangan: hanya sebagian besar, bukan semua.'],
+    ], 'Kata pembatas: most ≠ all.'),
+    match(1, 'Pasangkan sinonim yang sering muncul dalam parafrase.', [
+      ['rose', 'increased'],
+      ['purchase', 'buy'],
+      ['approximately', 'about'],
+      ['annual', 'every year'],
+    ], 'Teks dan pernyataan sering memakai sinonim.'),
+  ],
+  independent: [
+    fill(2, 'If the text says nothing about it, the answer is Not ___.', ['Given'], 'Pilihan ketiga: Not Given.', { True: ['Jawaban lengkapnya "Not Given".'] }),
+    tr(2, 'Teks tidak membahas harganya.', ['The text does not mention the price.', "The text doesn't mention the price.", 'The text does not discuss the price.', "The text doesn't say anything about the price."], 'mention/discuss + objek tanpa about (kecuali "say anything about").'),
+    read(2, 'Sales of electric scooters rose sharply in 2023, mainly in large cities.', 'Pernyataan: "Electric scooter sales increased in 2023."', [
+      ['True', true],
+      ['False', '"rose sharply" berarti naik tajam.'],
+      ['Not Given', 'Informasinya ada dengan sinonim: rose = increased.'],
+    ], 'Parafrase: rose = increased.'),
+    construct(2, 'the text / not / say / anything / about the cost', ["The text doesn't say anything about the cost.", 'The text does not say anything about the cost.'], 'does not / doesn\'t + say anything about.'),
+  ],
+  homework: [
+    read(2, 'The bridge was completed in 2009. It connects the two islands and has reduced travel time from three hours to forty minutes.', 'Pernyataan: "Before 2009, the trip between the islands took less time."', [
+      ['False', true],
+      ['True', 'Sebelumnya tiga jam, sekarang empat puluh menit; jadi dulu lebih lama.'],
+      ['Not Given', 'Teks menyebut waktu tempuh sebelum dan sesudah jembatan.'],
+    ], 'Teks bertentangan dengan pernyataan.'),
+    read(2, 'The bridge was completed in 2009. It connects the two islands and has reduced travel time from three hours to forty minutes.', 'Pernyataan: "The bridge was built by a foreign company."', [
+      ['Not Given', true],
+      ['True', 'Pembangunnya tidak disebut.'],
+      ['False', 'Teks tidak membantahnya.'],
+    ], 'Siapa pembangunnya tidak dibahas.'),
+    arrange(2, 'Jawabannya False karena teks mengatakan sebaliknya.', 'The answer is False because the text says the opposite', ['Given', 'same'], 'False = teks menyatakan kebalikannya.'),
+  ],
+  mastery: [
+    read(3, 'Researchers found that people who walked for 30 minutes a day slept better than those who did not exercise. However, the study did not look at diet.', 'Pernyataan: "Eating vegetables helps people sleep better."', [
+      ['Not Given', true],
+      ['True', 'Pola makan tidak diteliti dalam studi ini.'],
+      ['False', 'Teks tidak membantahnya; hanya tidak membahas.'],
+    ], 'Teks bahkan menyebut studi tidak meneliti pola makan.'),
+    tr(3, 'Kebanyakan pengunjung datang pada akhir pekan.', ['Most visitors come at the weekend.', 'Most visitors come on weekends.', 'Most visitors arrive at the weekend.', 'Most visitors come on the weekend.', 'Most visitors arrive on weekends.'], 'Most + kata benda jamak tanpa "of the".', { 'Most of visitors come at the weekend.': ['Tanpa "the", pakai "Most visitors" (bukan "most of visitors").'] }),
+    fix(3, 'The answer is False because the text does not mention it.', ['The answer is Not Given because the text does not mention it.', "The answer is Not Given because the text doesn't mention it."], 'Tidak disebut = Not Given, bukan False.', { 'The answer is False because the text does not mention it.': ['Kalimatnya belum diubah.'] }),
+  ],
+});
+
+export const ieltsSpeaking = lesson({
+  id: 'exam-ielts-speaking',
+  title: 'IELTS Speaking: Jawaban yang Berkembang',
+  summary: 'Part 1 dengan alasan dan contoh, Part 2 (cue card) dengan struktur, dan ungkapan mengulur waktu.',
+  topic: 'exam.ielts-speaking',
+  objectives: [
+    'Mengembangkan jawaban Part 1: jawab, beri alasan, beri contoh.',
+    'Menyusun Part 2 (cue card) dua menit mengikuti poin di kartu.',
+    'Memakai ungkapan mengulur waktu yang wajar alih-alih diam.',
+  ],
+  intro: 'Di IELTS Speaking, jawaban "Yes, I do." terlalu pendek untuk menunjukkan kemampuanmu. Penguji menilai kelancaran, kosakata, tata bahasa, dan pelafalan; semuanya butuh jawaban yang berkembang. Pola sederhana "jawab, alasan, contoh" membantu kamu berbicara lebih panjang dengan rapi.',
+  teaching: [
+    {
+      heading: 'Part 1: jawab, alasan, contoh',
+      body: 'Dua sampai tiga kalimat cukup. Jangan menghafal jawaban; penguji bisa mengenalinya.',
+      examples: [
+        { en: 'Q: Do you like cooking? A: Yes, I do, because it helps me relax after work. For example, I often make fried rice for my family on Sundays.', id: 'T: Kamu suka memasak? J: Ya, karena membantu saya santai setelah bekerja. Misalnya, saya sering membuat nasi goreng untuk keluarga setiap Minggu.' },
+      ],
+    },
+    {
+      heading: 'Part 2: cue card',
+      body: 'Kamu punya satu menit untuk menyiapkan dan bicara sampai dua menit. Ikuti urutan poin di kartu dan pakai kata penanda.',
+      table: [
+        ['Poin di kartu', 'Pembuka kalimat'],
+        ['what it is', "I'd like to talk about ..."],
+        ['when/where', 'It happened when ... / It was in ...'],
+        ['what happened', 'First, ... Then, ...'],
+        ['why it was important', 'It was important to me because ...'],
+      ],
+    },
+    {
+      heading: 'Mengulur waktu dengan wajar',
+      body: 'Diam lama mengurangi nilai kelancaran. Pakai ungkapan pendek ini, tetapi jangan berlebihan.',
+      examples: [
+        { en: "That's an interesting question.", id: 'Itu pertanyaan yang menarik.' },
+        { en: "Let me think for a second.", id: 'Biar saya pikirkan sebentar.' },
+        { en: "I haven't really thought about it before, but I guess ...", id: 'Saya belum pernah benar-benar memikirkannya, tapi menurut saya ...' },
+      ],
+    },
+  ],
+  demo: [
+    ['Yes, I do, because it helps me relax. For example, I cook every Sunday.', 'Yes.', 'Jawaban satu kata tidak menunjukkan kemampuan.'],
+    ["Let me think for a second. I'd say my favourite place is the beach.", '... (diam sepuluh detik)', 'Diam lama mengurangi nilai kelancaran.'],
+    ["I'd like to talk about a trip to Lombok.", 'I will tell about trip Lombok.', 'Pembuka cue card yang rapi dan tata bahasanya lengkap.'],
+  ],
+  guided: [
+    mc(1, 'Q: "Do you like reading?" Mana jawaban Part 1 terbaik?', null, [
+      ['Yes, I do, because it helps me learn new things. For example, I read a novel every month.', true],
+      ['Yes.', 'Terlalu pendek.'],
+      ['Reading is an activity when people look at words in books, magazines, newspapers and websites to get information or for fun.', 'Mendefinisikan, bukan menjawab tentang dirimu; terdengar seperti hafalan.'],
+    ], 'Jawab, beri alasan, beri contoh.'),
+    match(1, 'Pasangkan bagian jawaban dengan contohnya.', [
+      ['Jawab', 'Yes, I do.'],
+      ['Alasan', 'because it keeps me fit.'],
+      ['Contoh', 'For example, I swim twice a week.'],
+    ], 'Pola Part 1.'),
+    fill(1, "I'd like to talk ___ a teacher who inspired me.", ['about'], "Pembuka cue card: I'd like to talk about ...", { of: ['talk about, bukan talk of.'] }),
+    tf(1, 'Dalam IELTS Speaking, sebaiknya diam saja sampai benar-benar menemukan jawaban yang sempurna.', false, 'Diam lama mengurangi nilai kelancaran; pakai ungkapan mengulur waktu yang wajar.', 'Pernyataan ini salah.'),
+  ],
+  independent: [
+    tr(2, 'Biar saya pikirkan sebentar.', ['Let me think for a second.', 'Let me think for a moment.', 'Let me think about it for a second.', 'Let me think for a minute.'], 'Let me think + for a second/moment.'),
+    construct(2, 'it / important / to me / because / it / change / my career (lampau)', ['It was important to me because it changed my career.'], 'Bagian terakhir cue card: why it was important.'),
+    fix(2, 'I will tell about my trip to Bali.', ["I'd like to talk about my trip to Bali.", 'I would like to talk about my trip to Bali.', "I'm going to talk about my trip to Bali.", 'I will talk about my trip to Bali.', "I'll tell you about my trip to Bali."], 'tell + orang + about, atau talk about.', { 'I will tell about my trip to Bali.': ['Kalimatnya belum diubah.'] }),
+    spot(2, 'It was important to me because it teached me patience.', 'teached', 'taught', 'Bentuk lampau "teach" adalah "taught".'),
+  ],
+  homework: [
+    arrange(2, 'Itu terjadi ketika saya berumur lima belas tahun.', 'It happened when I was fifteen', ['happen', 'were'], 'It happened when I was + umur.'),
+    read(2, 'Describe a place you like to visit. You should say: where it is, how often you go there, what you do there, and explain why you like it.', 'Poin mana yang sebaiknya dibahas terakhir?', [
+      ['Mengapa kamu menyukai tempat itu.', true],
+      ['Di mana tempat itu.', 'Itu poin pertama.'],
+      ['Seberapa sering kamu ke sana.', 'Itu poin kedua.'],
+    ], 'Ikuti urutan poin di kartu; "explain why" biasanya terakhir.'),
+    mc(2, 'Ungkapan mengulur waktu mana yang paling wajar?', null, [
+      ["That's an interesting question. I'd say ...", true],
+      ['Ehm... ehm... ehm...', 'Terlalu banyak bunyi ragu mengurangi kelancaran.'],
+      ['I don\'t know.', 'Mengakhiri jawaban terlalu cepat.'],
+    ], 'Ungkapan pendek lalu langsung menjawab.'),
+  ],
+  mastery: [
+    tr(3, 'Ya, saya suka, karena membuat saya tetap sehat. Misalnya, saya bersepeda setiap pagi.', ['Yes, I do, because it keeps me healthy. For example, I cycle every morning.', 'Yes, I do, because it keeps me fit. For example, I cycle every morning.', 'Yes, I do, because it keeps me healthy. For example, I ride my bike every morning.', 'Yes, I do because it keeps me healthy. For example, I go cycling every morning.'], 'Pola Part 1: jawab, alasan (because), contoh (For example).'),
+    fix(3, 'Yes. Because healthy.', ['Yes, I do, because it keeps me healthy.', 'Yes, because it keeps me healthy.', 'Yes, I do, because it is healthy.'], 'Kalimat lengkap: subjek + kata kerja setelah because.', { 'Yes. Because healthy.': ['Kalimatnya belum diubah.'] }),
+    construct(3, "I / haven't / really / think about it / before / but / I guess / it / be / useful", ["I haven't really thought about it before, but I guess it is useful.", "I haven't really thought about it before, but I guess it's useful."], "haven't thought (present perfect) + but I guess ..."),
   ],
 });

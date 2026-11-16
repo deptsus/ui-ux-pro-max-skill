@@ -28,11 +28,11 @@ import { WRITING_UPPER } from './writing-upper';
 import { futurePerfectLesson, participleLesson, verbPatternsLesson, wishLesson } from './b2-3';
 import { impersonalLesson, persuasionLesson, registerLesson, reportingVerbsLesson } from './c1-3';
 import { concessionLesson, inversionAdvLesson, wordFormationLesson, workIdiomsLesson } from './c2-3';
-import { ieltsWriting, toeflStructure, toeflWritten } from './track-exam';
-import { kidsColors, kidsFamily, kidsNumbers } from './track-kids';
-import { workEmail, workInterview, workMeeting } from './track-work';
+import { ieltsReading, ieltsSpeaking, ieltsWriting, toeflListening, toeflStructure, toeflWritten } from './track-exam';
+import { kidsColors, kidsFamily, kidsFood, kidsNumbers, kidsRoutine, kidsSchool } from './track-kids';
+import { workCv, workEmail, workInterview, workMeeting, workPhone, workPresentation } from './track-work';
 
-export const CONTENT_VERSION = '2027.4.0';
+export const CONTENT_VERSION = '2027.5.0';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -112,14 +112,14 @@ const syllabus: ChapterSpec[] = [
     { id: 'c2-c3-u2', title: 'Bahasa Dunia Kerja', description: 'Idiom kantor dan pembentukan kata.', lessons: [workIdiomsLesson, wordFormationLesson] },
   ] },
   // ───────── Jalur Khusus (Rilis 11): outside the CEFR path, first lesson free ─────────
-  { id: 'track-work', level: 'B1', track: 'work', title: 'Bahasa Inggris untuk Kerja', description: 'Wawancara kerja, email profesional, dan rapat.', premium: false, units: [
-    { id: 'track-work-u1', title: 'Siap Bekerja', description: 'Memperkenalkan diri, menulis email, dan berpendapat di rapat.', lessons: [workInterview, workEmail, workMeeting] },
+  { id: 'track-work', level: 'B1', track: 'work', title: 'Bahasa Inggris untuk Kerja', description: 'Wawancara kerja, email profesional, rapat, telepon, presentasi, dan CV.', premium: false, units: [
+    { id: 'track-work-u1', title: 'Siap Bekerja', description: 'Wawancara, email, rapat, telepon, presentasi, CV, dan surat lamaran.', lessons: [workInterview, workEmail, workMeeting, workPhone, workPresentation, workCv] },
   ] },
   { id: 'track-exam', level: 'B2', track: 'exam', title: 'Persiapan TOEFL ITP dan IELTS', description: 'Strategi dan tata bahasa yang paling sering diuji. Latihan bergaya ujian, bukan soal resmi; Lentera tidak berafiliasi dengan ETS, British Council, IDP, atau Cambridge.', premium: false, units: [
-    { id: 'track-exam-u1', title: 'Strategi Ujian', description: 'Structure, Written Expression, dan Writing Task 2.', lessons: [toeflStructure, toeflWritten, ieltsWriting] },
+    { id: 'track-exam-u1', title: 'Strategi Ujian', description: 'Structure, Written Expression, Listening, Reading, Writing Task 2, dan Speaking.', lessons: [toeflStructure, toeflWritten, ieltsWriting, toeflListening, ieltsReading, ieltsSpeaking] },
   ] },
   { id: 'track-kids', level: 'A1', track: 'kids', title: 'Jalur Anak', description: 'Bahasa Inggris untuk anak 7–12 tahun: kalimat pendek dan kata sehari-hari.', premium: false, units: [
-    { id: 'track-kids-u1', title: 'Dunia di Sekitarku', description: 'Warna, hewan, keluarga, angka, dan mainan.', lessons: [kidsColors, kidsFamily, kidsNumbers] },
+    { id: 'track-kids-u1', title: 'Dunia di Sekitarku', description: 'Warna, hewan, keluarga, angka, mainan, makanan, sekolah, dan kegiatan sehari-hari.', lessons: [kidsColors, kidsFamily, kidsNumbers, kidsFood, kidsSchool, kidsRoutine] },
   ] },
 ];
 
@@ -194,6 +194,15 @@ const topics: Topic[] = [
   { id: 'kids.colors-animals', kind: 'vocabulary', level: 'A1', title: 'Warna dan hewan', summary: 'a red bird, an elephant.', lessonId: 'kids-colors-animals' },
   { id: 'kids.family', kind: 'vocabulary', level: 'A1', title: 'Keluarga', summary: 'This is my mother. He/She.', lessonId: 'kids-family' },
   { id: 'kids.numbers-toys', kind: 'vocabulary', level: 'A1', title: 'Angka dan mainan', summary: 'one car, two cars, How many ...?', lessonId: 'kids-numbers-toys' },
+  { id: 'work.phone', kind: 'skill', level: 'B1', title: 'Telepon kerja', summary: 'This is ..., Could you repeat that?, Can I take a message?', lessonId: 'work-phone' },
+  { id: 'work.presentation', kind: 'skill', level: 'B1', title: 'Presentasi', summary: "Today I'd like to talk about ..., increased by/to, To sum up.", lessonId: 'work-presentation' },
+  { id: 'work.cv', kind: 'skill', level: 'B1', title: 'CV dan surat lamaran', summary: 'Kata kerja aksi, angka, I am writing to apply for ...', lessonId: 'work-cv' },
+  { id: 'exam.toefl-listening', kind: 'skill', level: 'B2', title: 'TOEFL ITP Listening', summary: 'Kalimat orang kedua, makna tersirat, jebakan bunyi mirip.', lessonId: 'exam-toefl-listening' },
+  { id: 'exam.ielts-reading', kind: 'skill', level: 'B2', title: 'IELTS Reading: T/F/NG', summary: 'True, False, Not Given; parafrase dan kata pembatas.', lessonId: 'exam-ielts-reading' },
+  { id: 'exam.ielts-speaking', kind: 'skill', level: 'B2', title: 'IELTS Speaking', summary: 'Jawab-alasan-contoh, cue card, ungkapan mengulur waktu.', lessonId: 'exam-ielts-speaking' },
+  { id: 'kids.food', kind: 'vocabulary', level: 'A1', title: 'Makanan', summary: "I like ..., I don't like ..., Do you like ...?", lessonId: 'kids-food' },
+  { id: 'kids.school', kind: 'vocabulary', level: 'A1', title: 'Di sekolah', summary: 'This is / These are, Can I borrow your ...?', lessonId: 'kids-school' },
+  { id: 'kids.routine', kind: 'vocabulary', level: 'A1', title: 'Kegiatan sehari-hari', summary: 'I wake up at six. First, ... Then, ...', lessonId: 'kids-routine' },
   { id: 'skill.listening', kind: 'skill', level: 'A1', title: 'Menyimak', summary: 'Menangkap kata, angka, dan informasi dari audio.' },
   { id: 'skill.reading', kind: 'skill', level: 'A1', title: 'Membaca', summary: 'Menangkap gagasan utama, detail, dan maksud penulis dari teks.' },
   { id: 'skill.story', kind: 'skill', level: 'A1', title: 'Cerita bergambar', summary: 'Memahami alur, tokoh, dan detail dari cerita pendek beranimasi.' },

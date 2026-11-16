@@ -21,14 +21,14 @@ export const TRACKS: TrackInfo[] = [
     title: 'Bahasa Inggris untuk Kerja',
     audience: 'Pencari kerja dan karyawan',
     level: 'Disarankan mulai A2–B1',
-    pitch: 'Wawancara kerja ("Tell me about yourself"), email profesional yang sopan, dan menyampaikan pendapat dalam rapat.',
+    pitch: 'Wawancara kerja ("Tell me about yourself"), email profesional, rapat, telepon kerja, presentasi, serta CV dan surat lamaran.',
   },
   {
     id: 'exam',
     title: 'Persiapan TOEFL ITP dan IELTS',
     audience: 'Calon mahasiswa, pelamar beasiswa, dan pekerja',
     level: 'Disarankan mulai B1–B2',
-    pitch: 'Strategi Structure dan Written Expression TOEFL ITP, serta esai opini IELTS Writing Task 2.',
+    pitch: 'TOEFL ITP Structure, Written Expression, dan Listening; IELTS Reading (True/False/Not Given), Writing Task 2, dan Speaking.',
     note: 'Latihan bergaya ujian, bukan soal resmi. TOEFL dan TOEFL ITP adalah merek ETS; IELTS dimiliki British Council, IDP, dan Cambridge. Lentera tidak berafiliasi dengan mereka.',
   },
   {
@@ -36,7 +36,7 @@ export const TRACKS: TrackInfo[] = [
     title: 'Jalur Anak',
     audience: 'Anak 7–12 tahun, didampingi orang tua',
     level: 'Untuk pemula (A1)',
-    pitch: 'Warna dan hewan, keluarga, angka dan mainan, dengan kalimat pendek dan penjelasan yang bisa dibacakan orang tua.',
+    pitch: 'Warna dan hewan, keluarga, angka dan mainan, makanan, sekolah, dan kegiatan sehari-hari, dengan kalimat pendek dan penjelasan yang bisa dibacakan orang tua.',
   },
 ];
 

@@ -267,3 +267,266 @@ export const kidsNumbers = lesson({
     fix(2, 'How many book do you have?', ['How many books do you have?'], 'Setelah How many, benda diberi -s.', { 'How many book do you have?': ['Kalimatnya belum diubah.'] }),
   ],
 });
+
+export const kidsFood = lesson({
+  id: 'kids-food',
+  title: 'Makanan Kesukaanku',
+  summary: 'Menyebut makanan dan minuman: I like rice. I don\'t like onions.',
+  topic: 'kids.food',
+  objectives: [
+    'Menyebut makanan dan minuman sehari-hari dalam bahasa Inggris.',
+    'Mengatakan suka dan tidak suka: I like ... / I don\'t like ...',
+    'Bertanya: Do you like ...? dan menjawab Yes, I do. / No, I don\'t.',
+  ],
+  intro: 'Makanan apa yang paling kamu suka? Nasi goreng? Pisang? Hari ini kita belajar bilang "aku suka" dan "aku tidak suka" dalam bahasa Inggris.',
+  teaching: [
+    {
+      heading: 'Makanan dan minuman',
+      body: 'Ini makanan dan minuman yang sering kita temui.',
+      table: [
+        ['Inggris', 'Indonesia'],
+        ['rice', 'nasi'],
+        ['bread', 'roti'],
+        ['egg', 'telur'],
+        ['banana', 'pisang'],
+        ['milk', 'susu'],
+        ['water', 'air'],
+      ],
+    },
+    {
+      heading: 'Suka dan tidak suka',
+      body: '"I like ..." untuk yang kamu suka. "I don\'t like ..." untuk yang tidak kamu suka.',
+      examples: [
+        { en: 'I like bananas.', id: 'Aku suka pisang.' },
+        { en: "I don't like onions.", id: 'Aku tidak suka bawang.' },
+      ],
+    },
+    {
+      heading: 'Bertanya',
+      body: 'Untuk bertanya, mulai dengan "Do you like ...?". Jawab dengan "Yes, I do." atau "No, I don\'t."',
+      examples: [
+        { en: 'Do you like milk? Yes, I do.', id: 'Kamu suka susu? Ya, suka.' },
+        { en: "Do you like fish? No, I don't.", id: 'Kamu suka ikan? Tidak.' },
+      ],
+    },
+  ],
+  demo: [
+    ["I don't like onions.", 'I not like onions.', 'Untuk "tidak suka", pakai don\'t: I don\'t like.'],
+    ['Do you like milk?', 'You like milk?', 'Pertanyaan dimulai dengan Do.'],
+    ['Yes, I do.', 'Yes, I like.', 'Jawaban pendek: Yes, I do.'],
+  ],
+  guided: [
+    match(1, 'Pasangkan dengan artinya.', [
+      ['rice', 'nasi'],
+      ['bread', 'roti'],
+      ['milk', 'susu'],
+      ['egg', 'telur'],
+    ], 'Nama makanan dan minuman.'),
+    mc(1, 'Bagaimana bilang "Aku tidak suka bawang"?', null, [
+      ["I don't like onions.", true],
+      ['I not like onions.', 'Pakai don\'t: I don\'t like.'],
+      ["I doesn't like onions.", 'Untuk I, pakai don\'t, bukan doesn\'t.'],
+    ], "I don't like + makanan."),
+    mc(1, 'Jawaban pendek untuk "Do you like bananas?" kalau kamu suka:', null, [
+      ['Yes, I do.', true],
+      ['Yes, I like.', 'Jawaban pendeknya "Yes, I do."'],
+      ['Yes, I am.', '"I am" untuk pertanyaan dengan "Are you ...?"'],
+    ], 'Do you ...? → Yes, I do. / No, I don\'t.'),
+    tf(1, '"water" artinya air.', true, 'water = air.', 'Pernyataan ini benar.'),
+  ],
+  independent: [
+    fill(1, 'I ___ like fish.', ["don't", 'do not'], 'Tidak suka: don\'t like.', { not: ['Pakai don\'t sebelum like.'] }),
+    arrange(1, 'Aku suka roti.', 'I like bread', ['likes'], 'I like + makanan.'),
+    tr(1, 'Kamu suka susu?', ['Do you like milk?'], 'Do you like + ...?', { 'You like milk?': ['Pertanyaan dimulai dengan Do.'] }),
+    fix(1, 'I not like eggs.', ["I don't like eggs.", 'I do not like eggs.'], 'Pakai don\'t: I don\'t like eggs.', { 'I not like eggs.': ['Kalimatnya belum diubah.'] }),
+  ],
+  homework: [
+    construct(1, 'I / like / bananas', ['I like bananas.'], 'I like + makanan.'),
+    spot(1, 'Do you likes rice?', 'likes', 'like', 'Setelah "Do you", pakai like tanpa -s.'),
+    mc(1, 'Apa arti "I like water"?', null, [
+      ['Aku suka air.', true],
+      ['Aku tidak suka air.', 'Tidak ada "don\'t", jadi artinya suka.'],
+      ['Aku suka susu.', 'water = air, milk = susu.'],
+    ], 'water = air.'),
+  ],
+  mastery: [
+    tr(2, 'Aku suka nasi, tapi aku tidak suka ikan.', ["I like rice, but I don't like fish.", 'I like rice, but I do not like fish.', "I like rice but I don't like fish."], "I like ..., but I don't like ...", { 'I like rice, but I not like fish.': ['Pakai don\'t sebelum like.'] }),
+    arrange(2, 'Kamu suka telur?', 'Do you like eggs', ['likes', 'Are'], 'Do you like + ...?'),
+    fix(2, 'Do you like milk? Yes, I like.', ['Do you like milk? Yes, I do.'], 'Jawaban pendek: Yes, I do.', { 'Do you like milk? Yes, I like.': ['Kalimatnya belum diubah.'] }),
+  ],
+});
+
+export const kidsSchool = lesson({
+  id: 'kids-school',
+  title: 'Di Sekolah',
+  summary: 'Benda di tas sekolah dan kalimat di kelas: This is my pencil. Can I borrow your eraser?',
+  topic: 'kids.school',
+  objectives: [
+    'Menyebut benda sekolah dalam bahasa Inggris.',
+    'Memakai this/these: This is my pencil. These are my books.',
+    'Meminta dengan sopan: Can I borrow your ...? Thank you!',
+  ],
+  intro: 'Apa saja isi tas sekolahmu? Ada pensil, buku, dan penghapus? Hari ini kita belajar menyebut benda-benda itu dan cara meminjam dengan sopan dalam bahasa Inggris.',
+  teaching: [
+    {
+      heading: 'Benda sekolah',
+      body: 'Coba tunjuk benda-benda ini di tasmu.',
+      table: [
+        ['Inggris', 'Indonesia'],
+        ['pencil', 'pensil'],
+        ['pen', 'pulpen'],
+        ['book', 'buku'],
+        ['eraser', 'penghapus'],
+        ['ruler', 'penggaris'],
+        ['bag', 'tas'],
+      ],
+    },
+    {
+      heading: 'This dan these',
+      body: '"This is" untuk satu benda. "These are" untuk lebih dari satu benda (ingat -s!).',
+      examples: [
+        { en: 'This is my pencil.', id: 'Ini pensilku.' },
+        { en: 'These are my books.', id: 'Ini buku-bukuku.' },
+      ],
+    },
+    {
+      heading: 'Meminjam dengan sopan',
+      body: 'Untuk meminjam, pakai "Can I borrow your ...?" lalu jangan lupa "Thank you!".',
+      examples: [
+        { en: 'Can I borrow your eraser, please?', id: 'Boleh aku pinjam penghapusmu?' },
+        { en: 'Sure. Here you are.', id: 'Boleh. Ini.' },
+      ],
+    },
+  ],
+  demo: [
+    ['These are my books.', 'This are my books.', 'Untuk banyak benda: These are.'],
+    ['This is my bag.', 'This my bag.', 'Jangan lupa "is": This is ...'],
+    ['Can I borrow your ruler, please?', 'Give me your ruler.', 'Meminjam dengan sopan: Can I borrow ..., please?'],
+  ],
+  guided: [
+    match(1, 'Pasangkan dengan artinya.', [
+      ['pencil', 'pensil'],
+      ['eraser', 'penghapus'],
+      ['ruler', 'penggaris'],
+      ['bag', 'tas'],
+    ], 'Benda di sekolah.'),
+    mc(1, 'Pilih yang benar.', '___ my books.', [
+      ['These are', true],
+      ['This is', '"books" lebih dari satu, jadi These are.'],
+      ['This are', '"This" untuk satu benda dan memakai "is".'],
+    ], 'Banyak benda: These are.'),
+    mc(1, 'Cara meminjam yang sopan:', null, [
+      ['Can I borrow your pen, please?', true],
+      ['Give me your pen!', 'Terdengar seperti perintah, kurang sopan.'],
+      ['Your pen, borrow.', 'Urutan katanya tidak benar.'],
+    ], 'Can I borrow your ..., please?'),
+    tf(1, '"book" artinya buku.', true, 'book = buku.', 'Pernyataan ini benar.'),
+  ],
+  independent: [
+    fill(1, '___ is my eraser.', ['This'], 'Satu benda: This is.', { These: ['Satu benda: This.'] }),
+    arrange(1, 'Ini tasku.', 'This is my bag', ['are'], 'This is my + benda.'),
+    tr(1, 'Boleh aku pinjam pensilmu?', ['Can I borrow your pencil?', 'Can I borrow your pencil, please?', 'May I borrow your pencil?', 'May I borrow your pencil, please?'], 'Can I borrow your + benda?'),
+    fix(1, 'This are my pencils.', ['These are my pencils.'], 'Banyak benda: These are.', { 'This are my pencils.': ['Kalimatnya belum diubah.'] }),
+  ],
+  homework: [
+    construct(1, 'these / are / my / rulers', ['These are my rulers.'], 'These are + benda dengan -s.'),
+    spot(1, 'Can I borrow you pen, please?', 'you', 'your', 'Milik kamu: your pen.'),
+    mc(1, 'Temanmu meminjamkan penghapus. Apa yang kamu katakan?', null, [
+      ['Thank you!', true],
+      ['Here you are.', 'Itu diucapkan orang yang memberi.'],
+      ['Sorry.', 'Tidak ada yang perlu dimaafkan; ucapkan terima kasih.'],
+    ], 'Setelah dipinjami, ucapkan Thank you!'),
+  ],
+  mastery: [
+    tr(2, 'Ini buku-bukuku.', ['These are my books.'], 'These are + benda dengan -s.', { 'This is my books.': ['Banyak benda: These are.'] }),
+    arrange(2, 'Boleh aku pinjam penggarismu?', 'Can I borrow your ruler', ['you', 'give'], 'Can I borrow your + benda?'),
+    fix(2, 'This my pen.', ['This is my pen.'], 'Jangan lupa is: This is my pen.', { 'This my pen.': ['Kalimatnya belum diubah.'] }),
+  ],
+});
+
+export const kidsRoutine = lesson({
+  id: 'kids-routine',
+  title: 'Kegiatanku Setiap Hari',
+  summary: 'Menceritakan kegiatan pagi sampai malam: I wake up at six. I brush my teeth.',
+  topic: 'kids.routine',
+  objectives: [
+    'Menyebut kegiatan sehari-hari dalam bahasa Inggris.',
+    'Menyebut jam dengan "at": I wake up at six.',
+    'Menceritakan urutan kegiatan dengan first, then.',
+  ],
+  intro: 'Setiap hari kita bangun, mandi, sarapan, lalu berangkat sekolah. Hari ini kita belajar menceritakan kegiatan itu dalam bahasa Inggris, lengkap dengan jamnya.',
+  teaching: [
+    {
+      heading: 'Kegiatan sehari-hari',
+      body: 'Ini kegiatan yang kita lakukan hampir setiap hari.',
+      table: [
+        ['Inggris', 'Indonesia'],
+        ['wake up', 'bangun tidur'],
+        ['take a bath', 'mandi'],
+        ['brush my teeth', 'menggosok gigi'],
+        ['eat breakfast', 'sarapan'],
+        ['go to school', 'berangkat sekolah'],
+        ['go to bed', 'pergi tidur'],
+      ],
+    },
+    {
+      heading: 'Jam: pakai "at"',
+      body: 'Untuk jam, pakai "at": at six (pukul enam), at seven (pukul tujuh).',
+      examples: [
+        { en: 'I wake up at six.', id: 'Aku bangun pukul enam.' },
+        { en: 'I go to school at seven.', id: 'Aku berangkat sekolah pukul tujuh.' },
+      ],
+    },
+    {
+      heading: 'Urutan: first, then',
+      body: '"First" untuk yang pertama, "then" untuk berikutnya.',
+      examples: [
+        { en: 'First, I take a bath. Then, I eat breakfast.', id: 'Pertama, aku mandi. Lalu, aku sarapan.' },
+      ],
+    },
+  ],
+  demo: [
+    ['I wake up at six.', 'I wake up in six.', 'Untuk jam, pakai at.'],
+    ['I brush my teeth.', 'I brush my tooth.', 'Gigi kita banyak: teeth.'],
+    ['I go to bed at nine.', 'I go to the bed at nine.', 'Ungkapan tetapnya "go to bed" tanpa the.'],
+  ],
+  guided: [
+    match(1, 'Pasangkan kegiatan dengan artinya.', [
+      ['wake up', 'bangun tidur'],
+      ['take a bath', 'mandi'],
+      ['eat breakfast', 'sarapan'],
+      ['go to bed', 'pergi tidur'],
+    ], 'Kegiatan sehari-hari.'),
+    mc(1, 'Pilih yang benar.', 'I go to school ___ seven.', [
+      ['at', true],
+      ['in', 'Untuk jam, pakai at.'],
+      ['on', '"on" untuk hari (on Monday), bukan jam.'],
+    ], 'Jam: at.'),
+    mc(1, 'Mana yang benar?', null, [
+      ['I brush my teeth.', true],
+      ['I brush my tooth.', 'Kita menggosok banyak gigi: teeth.'],
+      ['I brushing my teeth.', 'Pakai brush, bukan brushing.'],
+    ], 'brush my teeth.'),
+    tf(1, '"go to bed" artinya pergi tidur.', true, 'go to bed = pergi tidur.', 'Pernyataan ini benar.'),
+  ],
+  independent: [
+    fill(1, 'I wake up ___ six.', ['at'], 'Untuk jam, pakai at.', { in: ['Untuk jam, pakai at.'], on: ['Untuk jam, pakai at.'] }),
+    arrange(1, 'Aku sarapan pukul enam tiga puluh.', 'I eat breakfast at six thirty', ['in', 'on'], 'Kegiatan + at + jam.'),
+    tr(1, 'Aku menggosok gigi.', ['I brush my teeth.'], 'brush my teeth.', { 'I brush my tooth.': ['Gigi banyak: teeth.'] }),
+    fix(1, 'I go to the bed at nine.', ['I go to bed at nine.'], '"go to bed" tanpa the.', { 'I go to the bed at nine.': ['Kalimatnya belum diubah.'] }),
+  ],
+  homework: [
+    construct(1, 'first / I / take a bath', ['First, I take a bath.', 'First I take a bath.'], 'First, + kegiatan.'),
+    spot(1, 'Then, I goes to school.', 'goes', 'go', 'Untuk I, pakai go.'),
+    mc(1, 'Apa arti "I go to school at seven"?', null, [
+      ['Aku berangkat sekolah pukul tujuh.', true],
+      ['Aku pulang sekolah pukul tujuh.', '"go to school" = berangkat ke sekolah.'],
+      ['Aku tidur pukul tujuh.', 'Tidur adalah "go to bed".'],
+    ], 'go to school = berangkat ke sekolah.'),
+  ],
+  mastery: [
+    tr(2, 'Pertama, aku mandi. Lalu, aku sarapan.', ['First, I take a bath. Then, I eat breakfast.', 'First, I take a bath. Then I eat breakfast.', 'First, I take a shower. Then, I eat breakfast.', 'First I take a bath. Then I eat breakfast.', 'First, I take a bath. Then, I have breakfast.'], 'First, ... Then, ...'),
+    arrange(2, 'Aku pergi tidur pukul sembilan.', 'I go to bed at nine', ['the', 'in'], 'go to bed + at + jam.'),
+    fix(2, 'I wake up in six and brush my tooth.', ['I wake up at six and brush my teeth.'], 'Dua perbaikan: at six, dan teeth.', { 'I wake up in six and brush my tooth.': ['Kalimatnya belum diubah.'], 'I wake up at six and brush my tooth.': ['Gigi banyak: teeth.'], 'I wake up in six and brush my teeth.': ['Untuk jam, pakai at.'] }),
+  ],
+});
