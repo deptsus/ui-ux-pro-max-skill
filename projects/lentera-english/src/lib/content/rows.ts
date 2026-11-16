@@ -23,7 +23,7 @@ export function packToRows(pack: ContentPack): Rows {
   return {
     cefr_levels: pack.levels.map((l) => ({ code: l.code, title: l.title, description: l.description, position: l.position, exam_pass_score: l.examPassScore })),
     courses: pack.levels.map((l) => ({ id: `course-${l.code.toLowerCase()}`, level_code: l.code, title: `Bahasa Inggris ${l.code}: ${l.title}`, description: l.description })),
-    chapters: pack.chapters.map((c) => ({ id: c.id, course_id: `course-${c.level.toLowerCase()}`, position: c.position, title: c.title, description: c.description, is_premium: c.premium, is_planned: !!c.planned })),
+    chapters: pack.chapters.map((c) => ({ id: c.id, course_id: `course-${c.level.toLowerCase()}`, position: c.position, title: c.title, description: c.description, is_premium: c.premium, is_planned: !!c.planned, ...(c.track ? { track: c.track } : {}) })),
     units: pack.units.map((u) => clean({ id: u.id, chapter_id: u.chapterId, position: u.position, title: u.title, description: u.description, exam_pass_score: u.examPassScore, planned_lessons: u.plannedLessons ?? [] })),
     grammar_topics: pack.topics.map((t) => clean({ id: t.id, kind: t.kind, level_code: t.level, title: t.title, summary: t.summary, lesson_id: t.lessonId })),
     misconception_tags: pack.tags.map((t) => ({ id: t.id, topic_id: t.topic, title: t.title, tip: t.tip })),
@@ -84,7 +84,7 @@ export function rowsToPack(rows: Rows, version: string): ContentPack {
   return {
     version,
     levels: (rows.cefr_levels ?? []).map((l) => ({ code: l.code, title: l.title, description: l.description, position: l.position, examPassScore: l.exam_pass_score })),
-    chapters: (rows.chapters ?? []).map((c) => clean({ id: c.id, level: courseLevel.get(c.course_id) as any, position: c.position, title: c.title, description: c.description, premium: c.is_premium, planned: c.is_planned ? true : undefined })),
+    chapters: (rows.chapters ?? []).map((c) => clean({ id: c.id, level: courseLevel.get(c.course_id) as any, position: c.position, title: c.title, description: c.description, premium: c.is_premium, planned: c.is_planned ? true : undefined, track: c.track ?? undefined })),
     units: (rows.units ?? []).map((u) => clean({ id: u.id, chapterId: u.chapter_id, position: u.position, title: u.title, description: opt(u.description), examPassScore: u.exam_pass_score, plannedLessons: u.planned_lessons?.length ? u.planned_lessons : undefined })),
     lessons: (rows.lessons ?? []).map((l): Lesson => clean({ id: l.id, unitId: l.unit_id, position: l.position, title: l.title, summary: l.summary, topic: l.topic_id, premium: l.is_premium, passScore: l.passing_score, objectives: l.objectives ?? [], intro: l.intro, teaching: l.teaching ?? [], demo: l.demo ?? [], vocab: l.vocab?.length ? l.vocab : undefined })),
     exercises,

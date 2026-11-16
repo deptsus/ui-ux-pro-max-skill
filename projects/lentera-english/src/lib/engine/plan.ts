@@ -80,7 +80,7 @@ export function planMilestones(ix: ContentIndex, from: Cefr): Milestone[] {
   const { pack } = ix;
   const out: Milestone[] = [];
   for (const level of CEFR_ORDER.slice(CEFR_ORDER.indexOf(from))) {
-    const chapters = pack.chapters.filter((c) => c.level === level && !c.planned).sort((a, b) => a.position - b.position);
+    const chapters = pack.chapters.filter((c) => c.level === level && !c.planned && !c.track).sort((a, b) => a.position - b.position);
     if (!chapters.length) continue;
     // A story comes right after the chapter that teaches the grammar its questions
     // check (found through the misconception tags on its answers), so it never

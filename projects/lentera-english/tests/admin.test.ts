@@ -116,6 +116,6 @@ describe('catatan pemeriksaan (content_notes, migrasi 0008)', () => {
       const r = await db.query<{ ok: boolean }>(`select has_table_privilege('anon', 'public.${table}', 'select') or has_table_privilege('authenticated', 'public.${table}', 'select') as ok`);
       expect(r[0].ok, table).toBe(false);
     }
-    expect(await db.rpc('content_features')).toEqual(['stories', 'content_notes', 'level_exams', 'homework_reminders', 'branching_stories', 'audio_uploads', 'habits', 'ops', 'classes']);
+    expect(await db.rpc('content_features')).toEqual(['stories', 'content_notes', 'level_exams', 'homework_reminders', 'branching_stories', 'audio_uploads', 'habits', 'ops', 'classes', 'tracks']);
   });
 });

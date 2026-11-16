@@ -217,7 +217,7 @@ Rencana awal:
 
 ### Urutan yang dipilih pemilik (15 November 2026)
 
-Pemilik meminta semuanya, dirilis bertahap: **Rilis 9 "Aman & Terukur"** (keamanan, pemantauan error, cadangan, analitik, rencana naik paket) — SELESAI; **Rilis 10 "Kelas"** (guru, sekolah dengan lisensi yang diatur pemilik di /admin, orang tua) **+ aplikasi Android 2.0.0 tanpa Chrome** (WebView, menggantikan 1.3.0, paket dan kunci sama; pelajar masuk ulang sekali) — SELESAI 16 November 2026 (migrasi 0015); **Rilis 11 "Jalur Khusus & SEO"** (TOEFL ITP/IELTS, Kerja, Anak; pelajaran pertama tiap jalur gratis; halaman materi publik).
+Pemilik meminta semuanya, dirilis bertahap: **Rilis 9 "Aman & Terukur"** (keamanan, pemantauan error, cadangan, analitik, rencana naik paket) — SELESAI; **Rilis 10 "Kelas"** (guru, sekolah dengan lisensi yang diatur pemilik di /admin, orang tua) **+ aplikasi Android 2.0.0 tanpa Chrome** (WebView, menggantikan 1.3.0, paket dan kunci sama; pelajar masuk ulang sekali) — SELESAI 16 November 2026 (migrasi 0015); **Rilis 11 "Jalur Khusus & SEO"** (TOEFL ITP/IELTS, Kerja, Anak; pelajaran pertama tiap jalur gratis; halaman materi publik) — SELESAI 16 November 2026 (migrasi 0016, konten 2027.4.0).
 
 ### Usulan update besar (saran Claude, 15 November 2026, untuk dipilih pemilik)
 
@@ -231,9 +231,9 @@ Disusun dari kondisi aplikasi setelah Rilis 6: materinya sudah lengkap A1–C2, 
    - **Liga mingguan** (naik/turun divisi) dan **tantangan antarteman** dengan kode undangan.
    - **Latihan "shadowing"**: dengar, rekam diri sendiri, bandingkan berdampingan (tanpa penilaian AI, sesuai klaim situs).
 3. **"Kelas"** (pendapatan dari sekolah/kursus) — **SELESAI di Rilis 10 (16 Nov 2026)**: guru membuat kelas dengan kode, memberi pelajaran/PR/ujian unit dengan tenggat, melihat progres per siswa; lisensi per sekolah dari pemilik di /admin. Termasuk dasbor orang tua.
-4. **Jalur khusus** (segmen baru): persiapan TOEFL ITP/IELTS, Bahasa Inggris untuk kerja (wawancara, email, rapat), dan jalur anak.
+4. **Jalur khusus** (segmen baru) — **SELESAI di Rilis 11 (16 Nov 2026)**: persiapan TOEFL ITP/IELTS, Bahasa Inggris untuk kerja (wawancara, email, rapat), dan jalur anak; masing-masing 3 pelajaran, yang pertama gratis. Berikutnya: tambah pelajaran per jalur (IELTS Speaking/Reading, TOEFL Listening, presentasi kerja, cerita anak).
 5. **Analitik pemilik di `/admin`** — **SELESAI di Rilis 9 (15 Nov 2026)**: corong daftar → tes penempatan → pelajaran pertama → hari ke-7, retensi per minggu, dan konversi ke Premium, untuk dasar keputusan berikutnya.
-6. **Halaman materi publik untuk SEO**: ringkasan tata bahasa dan contoh gratis yang bisa ditemukan di Google, mengarah ke aplikasi.
+6. **Halaman materi publik untuk SEO** — **SELESAI di Rilis 11 (16 Nov 2026)**: `/materi` dan satu halaman statis per pelajaran, sitemap, robots, data terstruktur. Berikutnya: daftarkan situs di Google Search Console dan kirim sitemap (pemilik).
 7. **Ketahanan** — **SELESAI di Rilis 9 (15 Nov 2026)** bersama keamanan tingkat tinggi dan penghematan Liga & Teman (lihat `SCALING.md`): pemantauan error, cadangan otomatis kurikulum dan data pelajar, dan rencana naik paket Supabase/Netlify saat pengguna bertambah.
 
 ---

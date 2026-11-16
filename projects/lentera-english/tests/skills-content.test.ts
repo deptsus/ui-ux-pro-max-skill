@@ -65,7 +65,7 @@ describe('materi menyimak B1–C2', () => {
   });
 
   it('setiap bab B1–C2 punya PR menyimak yang menunjuk soal menyimak yang ada', () => {
-    for (const c of pack.chapters.filter((x) => UPPER.includes(x.level))) {
+    for (const c of pack.chapters.filter((x) => UPPER.includes(x.level) && !x.track)) {
       const hw = pack.homework.find((h) => h.id === `hw.${c.id}.listen`);
       expect(hw, c.id).toBeDefined();
       expect(hw!.kind).toBe('listening');

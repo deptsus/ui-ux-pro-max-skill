@@ -138,6 +138,12 @@ export default function Dashboard() {
         <Card className="p-4"><p className="flex items-center gap-1.5 text-sm font-bold text-muted"><Heart size={16} className="text-bad" aria-hidden />Nyawa</p><p className="mt-1 text-2xl font-extrabold">{premium ? 'Tak terbatas' : `${hearts.count} / ${GAME.hearts.max}`}</p><p className="text-xs text-muted">{premium ? 'Manfaat Premium' : hearts.nextAt ? `+1 pukul ${new Date(hearts.nextAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` : 'Penuh'}</p></Card>
       </section>
 
+      <Link href="/app/jalur" className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-brand/40 bg-surface p-4 transition hover:border-brand">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand"><Compass size={20} aria-hidden /></span>
+        <span className="min-w-0 flex-1"><span className="block font-bold">Jalur Khusus</span><span className="block text-sm text-muted">Persiapan TOEFL/IELTS, bahasa Inggris untuk kerja, dan jalur anak. Pelajaran pertama gratis.</span></span>
+        <ArrowRight size={18} className="shrink-0 text-brand" aria-hidden />
+      </Link>
+
       <nav aria-label="Kebiasaan belajar" className="grid gap-3 sm:grid-cols-3">
         {([
           ['/app/leaderboard', Users, 'Liga & Teman', 'Naik divisi dan tantang temanmu.'],

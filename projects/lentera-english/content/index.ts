@@ -1,6 +1,6 @@
 // Assembles the authored curriculum into the flat ContentPack used by the
 // app, the offline cache and the database import.
-import type { Cefr, Chapter, ContentPack, Exercise, ExamDef, HomeworkDef, Lesson, Level, ListeningItem, MisconceptionTag, Story, Topic, Unit } from '@/lib/content/types';
+import type { Cefr, Chapter, ContentPack, TrackId, Exercise, ExamDef, HomeworkDef, Lesson, Level, ListeningItem, MisconceptionTag, Story, Topic, Unit } from '@/lib/content/types';
 import { stamp, type Built, type Draft } from './dsl';
 import { greetings, toBe, toBeNegQ } from './a1-1';
 import { articles, chapter1Homework, demonstratives, unit2Extras } from './a1-2';
@@ -28,8 +28,11 @@ import { WRITING_UPPER } from './writing-upper';
 import { futurePerfectLesson, participleLesson, verbPatternsLesson, wishLesson } from './b2-3';
 import { impersonalLesson, persuasionLesson, registerLesson, reportingVerbsLesson } from './c1-3';
 import { concessionLesson, inversionAdvLesson, wordFormationLesson, workIdiomsLesson } from './c2-3';
+import { ieltsWriting, toeflStructure, toeflWritten } from './track-exam';
+import { kidsColors, kidsFamily, kidsNumbers } from './track-kids';
+import { workEmail, workInterview, workMeeting } from './track-work';
 
-export const CONTENT_VERSION = '2027.3.0';
+export const CONTENT_VERSION = '2027.4.0';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -41,7 +44,8 @@ const levels: Level[] = [
 ];
 
 interface UnitSpec { id: string; title: string; description?: string; lessons: Built[]; planned?: string[]; examExtras?: Draft[] }
-interface ChapterSpec { id: string; level: Cefr; title: string; description: string; premium: boolean; units: UnitSpec[] }
+/** track: a special track (Rilis 11) outside the CEFR path; its first lesson is free, the rest Premium. */
+interface ChapterSpec { id: string; level: Cefr; title: string; description: string; premium: boolean; units: UnitSpec[]; track?: TrackId }
 
 const syllabus: ChapterSpec[] = [
   { id: 'a1-c1', level: 'A1', title: 'Kenalan Pertama', description: 'Menyapa, memperkenalkan diri, dan menyebut benda di sekitar.', premium: false, units: [
@@ -107,6 +111,16 @@ const syllabus: ChapterSpec[] = [
     { id: 'c2-c3-u1', title: 'Penekanan dan Konsesi', description: 'Inversi lanjutan dan konsesi formal.', lessons: [inversionAdvLesson, concessionLesson] },
     { id: 'c2-c3-u2', title: 'Bahasa Dunia Kerja', description: 'Idiom kantor dan pembentukan kata.', lessons: [workIdiomsLesson, wordFormationLesson] },
   ] },
+  // ───────── Jalur Khusus (Rilis 11): outside the CEFR path, first lesson free ─────────
+  { id: 'track-work', level: 'B1', track: 'work', title: 'Bahasa Inggris untuk Kerja', description: 'Wawancara kerja, email profesional, dan rapat.', premium: false, units: [
+    { id: 'track-work-u1', title: 'Siap Bekerja', description: 'Memperkenalkan diri, menulis email, dan berpendapat di rapat.', lessons: [workInterview, workEmail, workMeeting] },
+  ] },
+  { id: 'track-exam', level: 'B2', track: 'exam', title: 'Persiapan TOEFL ITP dan IELTS', description: 'Strategi dan tata bahasa yang paling sering diuji. Latihan bergaya ujian, bukan soal resmi; Lentera tidak berafiliasi dengan ETS, British Council, IDP, atau Cambridge.', premium: false, units: [
+    { id: 'track-exam-u1', title: 'Strategi Ujian', description: 'Structure, Written Expression, dan Writing Task 2.', lessons: [toeflStructure, toeflWritten, ieltsWriting] },
+  ] },
+  { id: 'track-kids', level: 'A1', track: 'kids', title: 'Jalur Anak', description: 'Bahasa Inggris untuk anak 7–12 tahun: kalimat pendek dan kata sehari-hari.', premium: false, units: [
+    { id: 'track-kids-u1', title: 'Dunia di Sekitarku', description: 'Warna, hewan, keluarga, angka, dan mainan.', lessons: [kidsColors, kidsFamily, kidsNumbers] },
+  ] },
 ];
 
 const topics: Topic[] = [
@@ -170,6 +184,16 @@ const topics: Topic[] = [
   { id: 'c2.concession', kind: 'grammar', level: 'C2', title: 'Konsesi formal', summary: 'albeit, notwithstanding, much as, Tired as she was, However hard ...', lessonId: 'c2-concession' },
   { id: 'c2.work-idioms', kind: 'vocabulary', level: 'C2', title: 'Idiom dunia kerja', summary: 'on the same page, back to square one, cut corners, a tall order.', lessonId: 'c2-work-idioms' },
   { id: 'c2.word-formation', kind: 'vocabulary', level: 'C2', title: 'Pembentukan kata', summary: 'Prefiks under-/over-/mis-/counter-/out- dan sufiks kelas kata.', lessonId: 'c2-word-formation' },
+  // Jalur Khusus (Rilis 11)
+  { id: 'work.interview-intro', kind: 'skill', level: 'B1', title: 'Wawancara: memperkenalkan diri', summary: 'Tell me about yourself: sekarang, pengalaman, alasan melamar.', lessonId: 'work-interview-intro' },
+  { id: 'work.email', kind: 'skill', level: 'B1', title: 'Email kerja', summary: 'I am writing to ..., Could you please ...?, Please find attached ...', lessonId: 'work-email' },
+  { id: 'work.meeting', kind: 'skill', level: 'B1', title: 'Pendapat dalam rapat', summary: 'In my opinion, I agree, I see your point, but ...', lessonId: 'work-meeting' },
+  { id: 'exam.toefl-structure', kind: 'grammar', level: 'B2', title: 'TOEFL ITP Structure', summary: 'Subjek dan kata kerja utama di setiap klausa.', lessonId: 'exam-toefl-structure' },
+  { id: 'exam.toefl-written', kind: 'grammar', level: 'B2', title: 'TOEFL ITP Written Expression', summary: 'Kesesuaian subjek-kata kerja, struktur sejajar, bentuk kata.', lessonId: 'exam-toefl-written' },
+  { id: 'exam.ielts-writing', kind: 'skill', level: 'B2', title: 'IELTS Writing Task 2', summary: 'Esai opini: sikap, paragraf isi, kata penghubung, gaya akademik.', lessonId: 'exam-ielts-writing' },
+  { id: 'kids.colors-animals', kind: 'vocabulary', level: 'A1', title: 'Warna dan hewan', summary: 'a red bird, an elephant.', lessonId: 'kids-colors-animals' },
+  { id: 'kids.family', kind: 'vocabulary', level: 'A1', title: 'Keluarga', summary: 'This is my mother. He/She.', lessonId: 'kids-family' },
+  { id: 'kids.numbers-toys', kind: 'vocabulary', level: 'A1', title: 'Angka dan mainan', summary: 'one car, two cars, How many ...?', lessonId: 'kids-numbers-toys' },
   { id: 'skill.listening', kind: 'skill', level: 'A1', title: 'Menyimak', summary: 'Menangkap kata, angka, dan informasi dari audio.' },
   { id: 'skill.reading', kind: 'skill', level: 'A1', title: 'Membaca', summary: 'Menangkap gagasan utama, detail, dan maksud penulis dari teks.' },
   { id: 'skill.story', kind: 'skill', level: 'A1', title: 'Cerita bergambar', summary: 'Memahami alur, tokoh, dan detail dari cerita pendek beranimasi.' },
@@ -394,11 +418,12 @@ export function buildPack(): ContentPack {
     const pos = (perLevel.get(c.level) ?? 0) + 1;
     perLevel.set(c.level, pos);
     const authored = c.units.some((u) => u.lessons.length > 0);
-    chapters.push({ id: c.id, level: c.level, position: pos, title: c.title, description: c.description, premium: c.premium, ...(authored ? {} : { planned: true }) });
+    chapters.push({ id: c.id, level: c.level, position: pos, title: c.title, description: c.description, premium: c.premium, ...(authored ? {} : { planned: true }), ...(c.track ? { track: c.track } : {}) });
     c.units.forEach((u, ui) => {
       units.push({ id: u.id, chapterId: c.id, position: ui + 1, title: u.title, description: u.description, examPassScore: 80, ...(u.planned ? { plannedLessons: u.planned } : {}) });
       u.lessons.forEach((b, li) => {
-        lessons.push({ ...b.lesson, unitId: u.id, position: li + 1, premium: c.premium });
+        // Tracks: the first lesson is free so anyone can try the track.
+        lessons.push({ ...b.lesson, unitId: u.id, position: li + 1, premium: c.track ? li > 0 || ui > 0 : c.premium });
         exercises.push(...b.exercises);
         const hw = b.exercises.filter((e) => e.stage === 'homework').map((e) => e.id);
         homework.push({ id: `hw.${b.lesson.id}`, chapterId: c.id, lessonId: b.lesson.id, title: b.lesson.title, kind: HOMEWORK_KIND[b.lesson.id] ?? 'grammar', dueDays: 3, exerciseIds: hw });
@@ -406,7 +431,7 @@ export function buildPack(): ContentPack {
       if (u.lessons.length) {
         const extras = stamp(u.examExtras ?? [], `exam.${u.id}`, 'exam', u.lessons[0].lesson.topic, null);
         exercises.push(...extras);
-        exams.push({ id: `exam.${u.id}`, scope: 'unit', ref: u.id, title: `Ujian Unit: ${u.title}`, passScore: 80, timeLimitSec: 15 * 60, premium: c.premium, exerciseIds: extras.map((e) => e.id), sampleSize: Math.min(12, u.lessons.length * 4) });
+        exams.push({ id: `exam.${u.id}`, scope: 'unit', ref: u.id, title: `Ujian Unit: ${u.title}`, passScore: 80, timeLimitSec: 15 * 60, premium: c.premium || !!c.track, exerciseIds: extras.map((e) => e.id), sampleSize: Math.min(12, u.lessons.length * 4) });
       }
     });
   }

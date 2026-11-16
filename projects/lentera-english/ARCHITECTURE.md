@@ -168,6 +168,10 @@ Status Premium **tidak disimpan sebagai flag**: `get_entitlement()` menghitungny
 
 **Aplikasi Android 2.0** (`android/native`): WebView sendiri (bukan TWA) dengan jembatan `window.LenteraNative` (`Bridge.java` ↔ `src/lib/client/native.ts`) hanya untuk asal situs Lentera via HTTPS. Situs memakainya untuk suara (TextToSpeech), pengingat lokal (AlarmManager, `ReminderLogic.java` meniru `src/lib/server/reminders.ts`; `src/components/NativeSync.tsx` mengirim beruntun dan daftar PR), berbagi, berkas, dan cetak. Di browser biasa jembatan tidak ada dan semuanya kembali ke cara web.
 
+**Jalur khusus (Rilis 11, migrasi 0016)**: `chapters.track` (`exam`/`work`/`kids`, null untuk jalur CEFR). Di klien, `indexContent()` memisahkan `orderedLessons` (jalur CEFR) dari `trackLessons`; `lessonsByUnit` berisi keduanya. `lessonLock()` membuka pelajaran jalur berurutan di dalam jalurnya tanpa syarat level CEFR. Tampilan jalur: `src/lib/content/tracks.ts`.
+
+**Halaman publik dan SEO (Rilis 11)**: `src/lib/seo.ts` membangun data pelajaran dari kurikulum bawaan saat build; `/materi`, `/materi/[id]` (`generateStaticParams`, `dynamicParams = false`), `sitemap.ts`, dan `robots.ts` semuanya statis. Tidak ada soal latihan di halaman publik.
+
 **Fungsi SQL** (semua hanya bisa dieksekusi `service_role`):
 akun `get_account`, `get_entitlement`, `update_profile`; progres `sync_learner`, `get_snapshot`, `get_leaderboard`;
 CMS `admin_content`, `admin_upsert`, `admin_delete`, `import_content`, `publish_curriculum`, `get_published_content`,

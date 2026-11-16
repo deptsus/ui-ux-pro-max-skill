@@ -38,9 +38,12 @@ function LessonRoom() {
   const mastery = useMemo(() => buildMasteryTest(ix, id, attempt), [ix, id, attempt]);
 
   if (!lesson) return <Empty title="Pelajaran tidak ditemukan" action={<LinkButton href="/app/path">Kembali ke jalur belajar</LinkButton>} />;
+  // Special-track lessons (Rilis 11) return to the track page, not the CEFR path.
+  const track = ix.chapterById.get(ix.unitById.get(lesson.unitId)?.chapterId ?? '')?.track;
+  const home = track ? `/app/jalur#${track}` : '/app/path';
   const lock = lessonLock(learner, ix, lesson, ent, now);
   if (lock.status === 'premium') return <Empty title="Pelajaran Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat paket Premium</LinkButton>}>{lesson.title} adalah bagian dari kurikulum Premium. Tujuan belajarnya: {lesson.objectives.join(' ')}</Empty>;
-  if (lock.status === 'locked') return <Empty title="Pelajaran masih terkunci" action={<LinkButton href="/app/path">Kembali ke jalur belajar</LinkButton>}>{lock.reason}</Empty>;
+  if (lock.status === 'locked') return <Empty title="Pelajaran masih terkunci" action={<LinkButton href={home}>Kembali ke jalur belajar</LinkButton>}>{lock.reason}</Empty>;
 
   const hw = ix.pack.homework.find((h) => h.lessonId === id);
   const hwRec = hw ? learner.homework[hw.id] : undefined;
@@ -63,7 +66,7 @@ function LessonRoom() {
     const list = step === 'guided' ? guided : step === 'independent' ? independent : mastery;
     return (
       <SessionRunner key={`${step}:${attempt}`} title={`${lesson.title} · ${STEP_LABEL[step]}`} ctx={step} exercises={list} seed={`${id}:${step}:${attempt}`}
-        feedback={step === 'mastery' ? 'deferred' : 'immediate'} hints={step === 'guided'} hearts={step !== 'guided'} exitHref="/app/path"
+        feedback={step === 'mastery' ? 'deferred' : 'immediate'} hints={step === 'guided'} hearts={step !== 'guided'} exitHref={home}
         onFinish={(r) => {
           if (step === 'mastery') act((d, at) => void finishMastery(d, ix, id, r.score, at));
           else act((d, at) => finishPractice(d, id, step, r.score, at));
@@ -79,7 +82,7 @@ function LessonRoom() {
     return (
       <SessionSummary result={result} title={passed ? 'Lulus tes penguasaan!' : 'Belum lulus tes penguasaan'} passScore={lesson.passScore}
         onRetry={passed || noHearts ? undefined : () => { setAttempt((a) => a + 1); setResult(null); setRunning(true); }}
-        doneHref={passed ? `/app/lesson?id=${id}` : '/app/path'} doneLabel={passed ? 'Lihat jadwal ulangan' : 'Kembali ke jalur'}>
+        doneHref={passed ? `/app/lesson?id=${id}` : home} doneLabel={passed ? 'Lihat jadwal ulangan' : 'Kembali ke jalur'}>
         {passed ? (
           <Notice tone="ok" title="Pelajaran tuntas">Topik ini masuk ke ulangan terjadwal. Pelajaran berikutnya sudah terbuka.</Notice>
         ) : (
@@ -92,7 +95,7 @@ function LessonRoom() {
   }
   if (result && (step === 'guided' || step === 'independent')) {
     return (
-      <SessionSummary result={result} title={`${STEP_LABEL[step]} selesai`} onRetry={() => { setAttempt((a) => a + 1); setResult(null); setRunning(true); }} doneHref="/app/path" doneLabel="Kembali ke jalur">
+      <SessionSummary result={result} title={`${STEP_LABEL[step]} selesai`} onRetry={() => { setAttempt((a) => a + 1); setResult(null); setRunning(true); }} doneHref={home} doneLabel="Kembali ke jalur">
         <Button variant="success" full onClick={() => go(step === 'guided' ? 'independent' : 'homework')}>Lanjut ke {STEP_LABEL[step === 'guided' ? 'independent' : 'homework'].toLowerCase()}<ArrowRight size={18} aria-hidden /></Button>
       </SessionSummary>
     );
@@ -101,7 +104,7 @@ function LessonRoom() {
   return (
     <div className="mx-auto max-w-2xl space-y-5">
       <div>
-        <Link href="/app/path" className="inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-ink"><ArrowLeft size={16} aria-hidden />Jalur belajar</Link>
+        <Link href={home} className="inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-ink"><ArrowLeft size={16} aria-hidden />{track ? 'Jalur khusus' : 'Jalur belajar'}</Link>
         <h1 className="mt-2 text-2xl font-extrabold tracking-tight">{lesson.title}</h1>
         <ol className="mt-3 flex gap-1.5" aria-label="Langkah pelajaran">
           {LESSON_STEPS.map((s, i) => {
@@ -208,7 +211,7 @@ function LessonRoom() {
             {learner.reviews[`topic:${lesson.topic}`] && <Notice tone="brand" title="Ulangan berikutnya">{dateId(learner.reviews[`topic:${lesson.topic}`].dueAt, { weekday: 'long', day: 'numeric', month: 'long' })}{lesson.vocab?.length ? ` · ${lesson.vocab.length} kosakata pelajaran ini ikut dijadwalkan.` : ''}</Notice>}
             <Notice tone="accent" title="Kapan topik dianggap dikuasai?">Bukan dari satu tes. Skor penguasaanmu harus mencapai 85% dari cukup banyak soal, lalu kamu harus lulus tes ulang setelah jeda minimal 20 jam.</Notice>
           </Card>
-          {nextInUnit ? <LinkButton href={`/app/lesson?id=${nextInUnit.id}`} full size="lg">Pelajaran berikutnya: {nextInUnit.title}<ArrowRight size={20} aria-hidden /></LinkButton> : exam ? <LinkButton href={`/app/exams?id=${exam.id}`} full size="lg" variant="accent">Lanjut ke {exam.title}</LinkButton> : <LinkButton href="/app/path" full size="lg">Kembali ke jalur belajar</LinkButton>}
+          {nextInUnit ? <LinkButton href={`/app/lesson?id=${nextInUnit.id}`} full size="lg">Pelajaran berikutnya: {nextInUnit.title}<ArrowRight size={20} aria-hidden /></LinkButton> : exam ? <LinkButton href={`/app/exams?id=${exam.id}`} full size="lg" variant="accent">Lanjut ke {exam.title}</LinkButton> : <LinkButton href={home} full size="lg">{track ? 'Kembali ke jalur khusus' : 'Kembali ke jalur belajar'}</LinkButton>}
         </>
       )}
     </div>

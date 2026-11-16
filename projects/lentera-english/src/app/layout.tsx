@@ -4,6 +4,7 @@ import './globals.css';
 import { ErrorReporter } from '@/components/ErrorReporter';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://lentera-english-app.netlify.app'),
   title: { default: 'Lentera English — Sekolah Bahasa Inggris Digital', template: '%s · Lentera English' },
   description: 'Belajar bahasa Inggris dari nol sampai mahir dengan kurikulum CEFR, latihan interaktif, dan ulangan terjadwal. Semua materi diperiksa dan dikembangkan.',
   manifest: '/manifest.webmanifest',

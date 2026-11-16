@@ -5,6 +5,7 @@ import { PromoVideo } from '@/components/PromoVideo';
 import { PROMO_DURATION } from '@/components/promo-chapters';
 import { Badge, Card, LinkButton } from '@/components/ui';
 import { ANDROID_APP } from '@/lib/android';
+import { TRACKS } from '@/lib/content/tracks';
 import { rupiah } from '@/lib/format';
 import { BENCHMARK_MONTHLY, FREE_FEATURES, PLANS, PREMIUM_FEATURES } from '@/lib/plans';
 
@@ -121,6 +122,17 @@ export default function Landing() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-6xl px-5 py-14" aria-labelledby="jalur-title">
+          <h2 id="jalur-title" className="text-3xl font-extrabold tracking-tight">Jalur khusus</h2>
+          <p className="mt-2 max-w-2xl text-muted">Di samping jalur CEFR, ada jalur untuk tujuan tertentu. Pelajaran pertama tiap jalur gratis.</p>
+          <ul className="mt-6 grid gap-4 md:grid-cols-3">
+            {TRACKS.map((t) => (
+              <li key={t.id}><Card className="h-full"><p className="text-lg font-extrabold">{t.title}</p><p className="mt-1 text-sm font-bold text-muted">{t.audience}</p><p className="mt-2 text-sm">{t.pitch}</p></Card></li>
+            ))}
+          </ul>
+          <p className="mt-4 text-sm text-muted">Lihat ringkasan semua pelajaran di <Link href="/materi" className="font-bold text-brand underline">Materi gratis</Link>. Untuk sekolah dan kursus: <Link href="/sekolah" className="font-bold text-brand underline">Lentera untuk Sekolah</Link>.</p>
+        </section>
+
         <section id="harga" className="mx-auto max-w-6xl scroll-mt-6 px-5 py-14">
           <h2 className="text-3xl font-extrabold tracking-tight">Harga yang jujur</h2>
           <p className="mt-2 max-w-2xl text-muted">Sekitar {saving}% di bawah patokan {rupiah(BENCHMARK_MONTHLY)} per bulan. Tanpa perpanjangan otomatis.</p>
@@ -153,7 +165,7 @@ export default function Landing() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 text-sm text-muted">
           <Logo size={22} />
           <p>Seluruh mesin belajar berjalan tanpa layanan AI.</p>
-          <nav className="flex flex-wrap gap-x-4" aria-label="Tautan kaki"><a href={ANDROID_APK} download className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Aplikasi Android</a><Link href="/masuk" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Masuk</Link><Link href="/daftar" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Daftar</Link><Link href="/sekolah" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Untuk sekolah</Link><Link href="/privasi" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Privasi</Link><Link href="/kontak" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Hubungi kami</Link><Link href="/admin" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Admin</Link></nav>
+          <nav className="flex flex-wrap gap-x-4" aria-label="Tautan kaki"><a href={ANDROID_APK} download className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Aplikasi Android</a><Link href="/masuk" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Masuk</Link><Link href="/daftar" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Daftar</Link><Link href="/materi" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Materi gratis</Link><Link href="/sekolah" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Untuk sekolah</Link><Link href="/privasi" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Privasi</Link><Link href="/kontak" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Hubungi kami</Link><Link href="/admin" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-ink">Admin</Link></nav>
         </div>
       </footer>
     </div>

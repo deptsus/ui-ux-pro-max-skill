@@ -95,7 +95,11 @@ export interface Chapter {
   premium: boolean;
   /** True when the chapter is on the syllabus but lessons are not authored yet. */
   planned?: boolean;
+  /** Special track (Rilis 11) instead of the main CEFR path; see src/lib/content/tracks.ts. */
+  track?: TrackId;
 }
+
+export type TrackId = 'exam' | 'work' | 'kids';
 
 export interface Unit {
   id: string;
@@ -415,8 +419,12 @@ export interface ContentIndex {
   topicById: Map<string, Topic>;
   tagById: Map<string, MisconceptionTag>;
   vocabById: Map<string, VocabItem>;
-  /** Lessons in curriculum order. */
+  /** Lessons of the main CEFR path, in curriculum order (special tracks excluded). */
   orderedLessons: Lesson[];
+  /** Lessons of the special tracks (Rilis 11), in track order. */
+  trackLessons: Lesson[];
+  /** Every lesson of a unit, in order (main path and tracks). */
+  lessonsByUnit: Map<string, Lesson[]>;
   exercisesByLesson: Map<string, Exercise[]>;
 }
 
@@ -430,12 +438,21 @@ export function indexContent(pack: ContentPack): ContentIndex {
     const c = u ? chapterById.get(u.chapterId) : undefined;
     return [c ? levelPos.get(c.level) ?? 99 : 99, c?.position ?? 99, u?.position ?? 99, l.position];
   };
-  const orderedLessons = [...pack.lessons].sort((a, b) => {
+  const sorted = [...pack.lessons].sort((a, b) => {
     const ka = lessonKey(a);
     const kb = lessonKey(b);
     for (let i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return ka[i] - kb[i];
     return a.id.localeCompare(b.id);
   });
+  const trackOf = (l: Lesson) => chapterById.get(unitById.get(l.unitId)?.chapterId ?? '')?.track;
+  const orderedLessons = sorted.filter((l) => !trackOf(l));
+  const trackLessons = sorted.filter((l) => !!trackOf(l));
+  const lessonsByUnit = new Map<string, Lesson[]>();
+  for (const l of sorted) {
+    const list = lessonsByUnit.get(l.unitId) ?? [];
+    list.push(l);
+    lessonsByUnit.set(l.unitId, list);
+  }
   const exercisesByLesson = new Map<string, Exercise[]>();
   for (const e of pack.exercises) {
     if (!e.lessonId) continue;
@@ -454,6 +471,8 @@ export function indexContent(pack: ContentPack): ContentIndex {
     tagById: byId(pack.tags),
     vocabById: byId(pack.vocabulary),
     orderedLessons,
+    trackLessons,
+    lessonsByUnit,
     exercisesByLesson,
   };
 }

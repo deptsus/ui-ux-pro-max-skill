@@ -17,7 +17,8 @@ const ix = indexContent(pack);
 const NEW_CHAPTERS = ['b2-c3', 'c1-c3', 'c2-c3'];
 const lessonsOf = (level: string) => pack.lessons.filter((l) => {
   const u = pack.units.find((x) => x.id === l.unitId);
-  return pack.chapters.find((c) => c.id === u?.chapterId)?.level === level;
+  const c = pack.chapters.find((x) => x.id === u?.chapterId);
+  return !c?.track && c?.level === level;
 });
 
 describe('Rilis 5: pelajaran B2–C2 lanjutan', () => {

@@ -26,9 +26,11 @@ describe('urutan rencana', () => {
 
   it('mencakup seluruh jalur A1–C2 tepat sekali', () => {
     const p = ix.pack;
+    // The plan covers the main CEFR path; special tracks (Rilis 11) are separate.
+    const trackUnits = new Set(p.units.filter((u) => p.chapters.find((c) => c.id === u.chapterId)?.track).map((u) => u.id));
     expect(new Set(all.map((m) => m.key)).size).toBe(all.length);
-    expect(all.filter((m) => m.kind === 'lesson').length).toBe(p.lessons.length);
-    expect(all.filter((m) => m.kind === 'unit-exam').length).toBe(p.exams.filter((e) => e.scope === 'unit').length);
+    expect(all.filter((m) => m.kind === 'lesson').length).toBe(ix.orderedLessons.length);
+    expect(all.filter((m) => m.kind === 'unit-exam').length).toBe(p.exams.filter((e) => e.scope === 'unit' && !trackUnits.has(e.ref)).length);
     expect(all.filter((m) => m.kind === 'level-exam').length).toBe(6);
     expect(all.filter((m) => m.kind === 'listening').length).toBe(p.listening.length);
     expect(all.filter((m) => m.kind === 'conversation').length).toBe(p.scenarios.length);
@@ -37,7 +39,8 @@ describe('urutan rencana', () => {
 
   it('pelajaran mengikuti urutan kurikulum, ujian unit setelah pelajaran terakhir unitnya, ujian level paling akhir di levelnya', () => {
     expect(all.filter((m) => m.kind === 'lesson').map((m) => m.ref)).toEqual(ix.orderedLessons.map((l) => l.id));
-    for (const e of ix.pack.exams.filter((x) => x.scope === 'unit')) {
+    const trackUnits = new Set(ix.pack.units.filter((u) => ix.chapterById.get(u.chapterId)?.track).map((u) => u.id));
+    for (const e of ix.pack.exams.filter((x) => x.scope === 'unit' && !trackUnits.has(x.ref))) {
       const at = all.findIndex((m) => m.ref === e.id);
       const last = Math.max(...ix.pack.lessons.filter((l) => l.unitId === e.ref).map((l) => all.findIndex((m) => m.ref === l.id)));
       expect(at, e.id).toBeGreaterThan(last);

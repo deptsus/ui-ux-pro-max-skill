@@ -59,7 +59,8 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] `apply-0014.sql` dijalankan pemilik dan diperiksa; verifikasi 2 langkah admin aktif (16 Nov 2026). Sisa: nyalakan auto recharge Netlify.
 - [x] Rilis 10 "Kelas" + aplikasi Android 2.0.0 tanpa Chrome: lisensi sekolah di /admin → Sekolah, Ruang Guru, Kelas Saya, Pantau Anak, `/sekolah`, APK 2.0.0 WebView (`tests/rilis10.test.ts`, `e2e:classes`, `e2e:native`). `apply-0015.sql` sudah dijalankan pemilik dan diperiksa (16 Nov 2026). Pemilik: buat lisensi pertama di /admin → Sekolah bila ada sekolah yang berminat.
 - [ ] Uji APK 2.0.0 di HP sungguhan (suara, pengingat harian pada jamnya, izin mikrofon untuk shadowing, berbagi, cetak sertifikat).
-- [ ] Rilis 11 "Jalur Khusus & SEO".
+- [x] Rilis 11 "Jalur Khusus & SEO": 3 jalur (Kerja, TOEFL ITP/IELTS, Anak) × 3 pelajaran, pelajaran pertama gratis, `/app/jalur`, halaman materi publik `/materi`, sitemap, robots, data terstruktur (`tests/rilis11.test.ts`, `e2e:tracks`). Pemilik: jalankan `apply-0016.sql`, lalu /admin → Konten → "Impor materi bawaan" → Terbitkan; daftarkan situs di Google Search Console dan kirim `sitemap.xml`.
+- [ ] Tambah pelajaran tiap jalur khusus (IELTS Speaking dan Reading, TOEFL Listening, presentasi kerja, cerita anak bergambar).
 - [ ] Sesudah Rilis 11: Rilis 7 "Siap Tumbuh" (Play Store, QRIS otomatis) bila pemilik siap.
 - [x] Pengingat PR terbukti sampai di HP sungguhan (15 Nov 2026, HP Android pemilik). Fungsi terjadwal Netlify `homework-reminders` terdaftar (`@hourly`).
 - [ ] Perbesar bank soal ujian level (sekarang 12 + 8 + 8 soal per level); batas waktu ujian level belum dicek server (hanya di perangkat).

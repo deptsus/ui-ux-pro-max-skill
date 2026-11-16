@@ -14,11 +14,12 @@ const passedExam = (s: LearnerState, examId: string) => !!s.exams[examId]?.attem
 export const unitExam = (ix: ContentIndex, unitId: string): ExamDef | undefined => ix.pack.exams.find((e) => e.scope === 'unit' && e.ref === unitId);
 export const levelExam = (ix: ContentIndex, level: Cefr): ExamDef | undefined => ix.pack.exams.find((e) => e.scope === 'level' && e.ref === level);
 
+/** Units of the main CEFR path at one level (special tracks are not part of it). */
 export function unitsOfLevel(ix: ContentIndex, level: Cefr): Unit[] {
-  const chapters = ix.pack.chapters.filter((c) => c.level === level).sort((a, b) => a.position - b.position);
+  const chapters = ix.pack.chapters.filter((c) => c.level === level && !c.track).sort((a, b) => a.position - b.position);
   return chapters.flatMap((c) => ix.pack.units.filter((u) => u.chapterId === c.id).sort((a, b) => a.position - b.position));
 }
-export const lessonsOfUnit = (ix: ContentIndex, unitId: string): Lesson[] => ix.orderedLessons.filter((l) => l.unitId === unitId);
+export const lessonsOfUnit = (ix: ContentIndex, unitId: string): Lesson[] => ix.lessonsByUnit?.get(unitId) ?? ix.orderedLessons.filter((l) => l.unitId === unitId);
 
 /** A level is done when its exam is passed, or (no exam) all its lessons are. */
 export function levelCompleted(s: LearnerState, ix: ContentIndex, level: Cefr): boolean {
@@ -51,6 +52,14 @@ export function lessonLock(s: LearnerState, ix: ContentIndex, lesson: Lesson, en
   const progress = s.lessons[lesson.id];
   if ((lesson.premium || lesson.locked) && !isPremium(ent, now)) return { status: 'premium', reason: 'Pelajaran ini bagian dari Premium.' };
   if (progress?.completedAt) return { status: 'completed' };
+  // Special tracks (Rilis 11) stand apart from the CEFR path: open to everyone,
+  // one lesson after another inside the track.
+  if (chapter.track) {
+    const inTrack = ix.pack.units.filter((u) => u.chapterId === chapter.id).sort((a, b) => a.position - b.position).flatMap((u) => lessonsOfUnit(ix, u.id));
+    const prev = inTrack[inTrack.findIndex((l) => l.id === lesson.id) - 1];
+    if (prev && !s.lessons[prev.id]?.completedAt) return { status: 'locked', reason: `Lulus tes penguasaan "${prev.title}" (min. ${prev.passScore}%) terlebih dahulu.` };
+    return { status: progress ? 'in-progress' : 'available' };
+  }
   if (!levelOpen(s, ix, chapter.level)) {
     const prev = CEFR_ORDER[CEFR_ORDER.indexOf(chapter.level) - 1];
     return { status: 'locked', reason: `Selesaikan level ${prev} atau ikuti tes penempatan untuk membuka level ${chapter.level}.` };

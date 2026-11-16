@@ -17,7 +17,7 @@ export default function PathPage() {
         {CEFR_ORDER.map((code: Cefr) => {
           const level = ix.pack.levels.find((l) => l.code === code);
           if (!level) return null;
-          const chapters = ix.pack.chapters.filter((c) => c.level === code).sort((a, b) => a.position - b.position);
+          const chapters = ix.pack.chapters.filter((c) => c.level === code && !c.track).sort((a, b) => a.position - b.position);
           const lessons = ix.orderedLessons.filter((l) => chapters.some((c) => c.id === ix.unitById.get(l.unitId)?.chapterId));
           const done = lessons.filter((l) => learner.lessons[l.id]?.completedAt).length;
           const open = levelOpen(learner, ix, code);

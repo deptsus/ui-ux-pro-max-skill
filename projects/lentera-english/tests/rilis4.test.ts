@@ -125,7 +125,7 @@ describe('PR mingguan otomatis', () => {
 describe('tugas menulis B2–C2', () => {
   const tasks = pack.homework.filter((h) => h.writing && ['B2', 'C1', 'C2'].includes(pack.chapters.find((c) => c.id === h.chapterId)!.level));
   it('setiap bab B2–C2 punya tugas menulis dengan tiga contoh bertingkat', () => {
-    for (const c of pack.chapters.filter((x) => ['B2', 'C1', 'C2'].includes(x.level))) {
+    for (const c of pack.chapters.filter((x) => ['B2', 'C1', 'C2'].includes(x.level) && !x.track)) {
       const h = tasks.find((t) => t.chapterId === c.id);
       expect(h, c.id).toBeDefined();
       expect(h!.writing!.levels!.map((l) => l.label)).toEqual(['Cukup', 'Baik', 'Sangat baik']);

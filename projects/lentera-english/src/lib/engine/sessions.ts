@@ -67,7 +67,8 @@ export function buildRetest(ix: ContentIndex, topicId: string, seed: string): Ex
 /** Unit / level exam: fixed questions plus a balanced sample of lesson pools. */
 export function buildExam(ix: ContentIndex, exam: ExamDef, attempt: number): Exercise[] {
   const fixed = exam.exerciseIds.map((id) => ix.exerciseById.get(id)).filter((e): e is Exercise => !!e);
-  const lessons = ix.orderedLessons.filter((l) => {
+  // Unit exams also exist for special-track units; level exams cover the main path only.
+  const lessons = (exam.scope === 'unit' ? [...ix.orderedLessons, ...(ix.trackLessons ?? [])] : ix.orderedLessons).filter((l) => {
     if (exam.scope === 'unit') return l.unitId === exam.ref;
     const unit = ix.unitById.get(l.unitId);
     return unit ? ix.chapterById.get(unit.chapterId)?.level === exam.ref : false;

@@ -5,7 +5,8 @@ import { buildPack } from '@content/index';
 import { checkWriting } from '@/lib/engine/writing';
 
 const pack = buildPack();
-const levelOf = new Map(pack.chapters.map((c) => [c.id, c.level]));
+// Main CEFR path only; special tracks (Rilis 11) have their own tests.
+const levelOf = new Map(pack.chapters.filter((c) => !c.track).map((c) => [c.id, c.level]));
 const unitLevel = new Map(pack.units.map((u) => [u.id, levelOf.get(u.chapterId)]));
 const lessonsAt = (level: string) => pack.lessons.filter((l) => unitLevel.get(l.unitId) === level);
 
@@ -32,7 +33,7 @@ describe('kedalaman A2 dan B1', () => {
 describe('PR menulis per bab', () => {
   const tasks = pack.homework.filter((h) => h.kind === 'writing' && h.id.endsWith('.write'));
   it('setiap bab A2 dan B1 punya tugas menulis', () => {
-    for (const c of pack.chapters.filter((x) => x.level === 'A2' || x.level === 'B1')) {
+    for (const c of pack.chapters.filter((x) => (x.level === 'A2' || x.level === 'B1') && !x.track)) {
       expect(tasks.some((h) => h.chapterId === c.id), c.id).toBe(true);
     }
   });
