@@ -28,7 +28,7 @@ const admin = r.data;
 
 const PUBLIC = ['/', '/materi', '/materi/a1-greetings', '/materi/exam-toefl-written', '/sekolah', '/privasi', '/kontak', '/masuk', '/daftar', '/sertifikat'];
 const APP = [
-  '/app', '/app/path', '/app/jalur', '/app/lesson?id=a1-to-be', '/app/practice', '/app/review', '/app/stories', '/app/stories?id=story-first-day',
+  '/app', '/app/path', '/app/jalur', '/app/lesson?id=a1-greetings', '/app/practice', '/app/review', '/app/stories', '/app/stories?id=story-first-day',
   '/app/listening', '/app/listening?id=listen-a1-intro', '/app/conversations', '/app/homework', '/app/exams', '/app/grammar', '/app/vocabulary',
   '/app/plan', '/app/shadowing', '/app/leaderboard', '/app/leaderboard?tab=teman', '/app/achievements', '/app/analytics', '/app/profile',
   '/app/settings', '/app/subscription', '/app/placement', '/app/more', '/app/kelas', '/app/guru', '/app/orang-tua',
@@ -87,7 +87,7 @@ for (const mode of ['light', 'dark']) {
       try {
         const pack = await fetchPack(p, admin.token);
         const button = (name) => p.getByRole('button', { name });
-        await p.goto(`${BASE}/app/lesson?id=a1-to-be`);
+        await p.goto(`${BASE}/app/lesson?id=a1-greetings`);
         await settle(p);
         await button('Mulai belajar').click();
         await audit(p, 'pelajaran: penjelasan', { mode, who });

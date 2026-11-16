@@ -38,14 +38,14 @@ function LessonRoom() {
   const independent = useMemo(() => lessonExercises(ix, id, 'independent'), [ix, id]);
   const mastery = useMemo(() => buildMasteryTest(ix, id, attempt), [ix, id, attempt]);
 
-  if (!lesson) return <Empty title="Pelajaran tidak ditemukan" action={<LinkButton href="/app/path">Kembali ke jalur belajar</LinkButton>} />;
+  if (!lesson) return <Empty page title="Pelajaran tidak ditemukan" action={<LinkButton href="/app/path">Kembali ke jalur belajar</LinkButton>} />;
   // Special-track lessons (Rilis 11) return to the track page, not the CEFR path.
   const track = ix.chapterById.get(ix.unitById.get(lesson.unitId)?.chapterId ?? '')?.track;
   const home = track ? `/app/jalur#${track}` : '/app/path';
   const lock = lessonLock(learner, ix, lesson, ent, now);
-  if (lock.status === 'premium') return <Empty title="Pelajaran Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat paket Premium</LinkButton>}>{lesson.title} adalah bagian dari kurikulum Premium. Tujuan belajarnya: {lesson.objectives.join(' ')}</Empty>;
-  if (lock.status === 'locked' && lock.opensAt) return <Empty title="Pelajaran ini terbuka minggu depan" action={<LinkButton href="/app/plan">Lihat rencana mingguan</LinkButton>}>{lock.reason}</Empty>;
-  if (lock.status === 'locked') return <Empty title="Pelajaran masih terkunci" action={<LinkButton href={home}>Kembali ke jalur belajar</LinkButton>}>{lock.reason}</Empty>;
+  if (lock.status === 'premium') return <Empty page title="Pelajaran Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat paket Premium</LinkButton>}>{lesson.title} adalah bagian dari kurikulum Premium. Tujuan belajarnya: {lesson.objectives.join(' ')}</Empty>;
+  if (lock.status === 'locked' && lock.opensAt) return <Empty page title="Pelajaran ini terbuka minggu depan" action={<LinkButton href="/app/plan">Lihat rencana mingguan</LinkButton>}>{lock.reason}</Empty>;
+  if (lock.status === 'locked') return <Empty page title="Pelajaran masih terkunci" action={<LinkButton href={home}>Kembali ke jalur belajar</LinkButton>}>{lock.reason}</Empty>;
 
   const hw = ix.pack.homework.find((h) => h.lessonId === id);
   const hwRec = hw ? learner.homework[hw.id] : undefined;

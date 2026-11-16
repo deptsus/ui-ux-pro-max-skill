@@ -68,12 +68,12 @@ function Practice() {
     );
   }
 
-  if ((mode === 'drill' && !tag) || ((mode === 'topic' || mode === 'retest') && !topic)) return <Empty title="Latihan tidak ditemukan" action={<LinkButton href="/app">Ke beranda</LinkButton>} />;
-  if ((mode === 'drill' || mode === 'topic') && pool.length === 0) return <Empty title="Soal untuk latihan ini termasuk Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat Premium</LinkButton>}>Bank soal untuk topik ini belum tersedia di paket gratis.</Empty>;
+  if ((mode === 'drill' && !tag) || ((mode === 'topic' || mode === 'retest') && !topic)) return <Empty page title="Latihan tidak ditemukan" action={<LinkButton href="/app">Ke beranda</LinkButton>} />;
+  if ((mode === 'drill' || mode === 'topic') && pool.length === 0) return <Empty page title="Soal untuk latihan ini termasuk Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat Premium</LinkButton>}>Bank soal untuk topik ini belum tersedia di paket gratis.</Empty>;
   if (mode === 'retest' && !retestReady(stat, now)) {
-    return <Empty title="Tes ulang belum tersedia" action={<LinkButton href="/app">Ke beranda</LinkButton>}>{stat?.stage === 'mastered' ? 'Topik ini sudah dikuasai.' : stat?.retestDueAt ? `Tes ulang dibuka ${dateTimeId(stat.retestDueAt)}. Jeda ini disengaja agar yang diuji adalah ingatan jangka panjang.` : 'Capai skor penguasaan 85% pada topik ini terlebih dahulu.'}</Empty>;
+    return <Empty page title="Tes ulang belum tersedia" action={<LinkButton href="/app">Ke beranda</LinkButton>}>{stat?.stage === 'mastered' ? 'Topik ini sudah dikuasai.' : stat?.retestDueAt ? `Tes ulang dibuka ${dateTimeId(stat.retestDueAt)}. Jeda ini disengaja agar yang diuji adalah ingatan jangka panjang.` : 'Capai skor penguasaan 85% pada topik ini terlebih dahulu.'}</Empty>;
   }
-  if (mode === 'timed' && (!fixed || fixed.length < 4)) return <Empty title="Belum cukup materi" action={<LinkButton href="/app/path">Ke jalur belajar</LinkButton>}>Selesaikan satu pelajaran dulu supaya ada bahan untuk Tantangan Kilat.</Empty>;
+  if (mode === 'timed' && (!fixed || fixed.length < 4)) return <Empty page title="Belum cukup materi" action={<LinkButton href="/app/path">Ke jalur belajar</LinkButton>}>Selesaikan satu pelajaran dulu supaya ada bahan untuk Tantangan Kilat.</Empty>;
 
   return (
     <div className="mx-auto max-w-xl">

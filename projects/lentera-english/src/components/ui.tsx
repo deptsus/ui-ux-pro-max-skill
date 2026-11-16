@@ -97,10 +97,11 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
   );
 }
 
-export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+/** `page`: the Empty is the whole page (no PageHeader), so its title is the page's h1. */
+export function Empty({ title, children, action, page }: { title: string; children?: ReactNode; action?: ReactNode; page?: boolean }) {
   return (
     <Card className="grid place-items-center gap-3 py-10 text-center">
-      <p className="text-lg font-bold">{title}</p>
+      {page ? <h1 className="text-lg font-bold">{title}</h1> : <p className="text-lg font-bold">{title}</p>}
       {children && <div className="max-w-md text-muted">{children}</div>}
       {action}
     </Card>

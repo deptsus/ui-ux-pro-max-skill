@@ -21,10 +21,10 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Skema database, RLS, fungsi SQL, sinkronisasi progres.
 - [x] Backend pembayaran Xendit + simulator + 30 tes.
 - [x] Akun lokal (mode embedded) dan alur daftar/masuk.
-- [ ] Siapkan proyek Supabase: terapkan migrasi `0001`–`0004` (bukan `test-shim.sql`), aktifkan Auth email, set env, buat admin, impor + terbitkan kurikulum. Uji ulang daftar, sync, papan peringkat di sana.
+- [x] Proyek Supabase produksi berjalan (migrasi 0001–0018 diterapkan pemilik, Auth email, admin, kurikulum terbit versi 11).
 - [x] ~~Verifikasi Xendit sandbox~~ Diganti: pemilik produk memilih QRIS milik sendiri dengan konfirmasi admin (DECISIONS A4). Kode Xendit disimpan nonaktif.
 - [x] Pembayaran QRIS manual: QR per paket, laporan "Saya sudah bayar", antrean konfirmasi/tolak di dashboard admin, harga tahunan diskon 15% (tes SQL + e2e).
-- [ ] Uji pembayaran nyata ke kedua QR dari minimal dua aplikasi berbeda, lalu konfirmasi lewat dashboard di server produksi.
+- [ ] Pemilik: uji pembayaran nyata ke kedua QR (bulanan Rp58.500 dan tahunan baru Rp561.600) dari minimal dua aplikasi berbeda, lalu konfirmasi lewat dashboard di server produksi.
 - [ ] (Lama, hanya bila Xendit dihidupkan lagi) Verifikasi Xendit sandbox dengan kredensial uji: semua titik `VERIFY` di `src/lib/server/xendit.ts`, aktivasi QRIS/DANA/GOPAY, webhook ke URL HTTPS, simulasi + transaksi uji nyata. Sesudahnya baru boleh menyebut pembayaran siap produksi.
 
 ## P1 — Fitur utama
@@ -40,7 +40,7 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [~] Tes ulang penguasaan (jeda 20 jam, dua hari berbeda), latihan per topik, dan ujian level: logikanya teruji di unit test, sesinya belum dijalankan di browser.
 - [~] Pustaka kosakata, pustaka tata bahasa, pencapaian, profil: tampil tanpa error. Analitik dengan data, tema, dan aksen sudah diuji; target harian dan reset data belum.
 - [x] Papan peringkat: SQL teruji; sejak Rilis 8 liga dan teman diuji dengan beberapa akun sekaligus (`e2e:habits`).
-- [ ] Rekaman audio penutur asli (aksen US dan UK) untuk contoh, kosakata, menyimak, fonem. Daftarkan di `audio_resources`; pemutar sudah mendukung. Saat ini fallback ke suara perangkat.
+- [x] Rekaman audio penutur asli: diputuskan pemilik (15 Nov 2026) memakai suara bawaan perangkat; tab Rekaman siap bila suatu saat ada rekaman.
 - [x] Tahap 1: 8 pelajaran A1–A2 (`content/a1-4.ts`, `content/a2-2.ts`). Sudah terbit (db-2).
 - [x] Tahap 2: 16 pelajaran B1–C2 + ujian level B1–C2 (`content/b1-2.ts`, `b2-2.ts`, `c1-2.ts`, `c2-2.ts`). Sudah terbit (db-4).
 - [x] Tahap 3: 11 materi menyimak B1–C2 (dengan dikte) dan 5 skenario percakapan B2–C2, PR menyimak per bab B1–C2 (`content/listening-upper.ts`, `content/conversations-upper.ts`; `npm run e2e:skills`). Menunggu pemeriksaan pemilik sebelum diterbitkan.
@@ -60,7 +60,7 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 10 "Kelas" + aplikasi Android 2.0.0 tanpa Chrome: lisensi sekolah di /admin → Sekolah, Ruang Guru, Kelas Saya, Pantau Anak, `/sekolah`, APK 2.0.0 WebView (`tests/rilis10.test.ts`, `e2e:classes`, `e2e:native`). `apply-0015.sql` sudah dijalankan pemilik dan diperiksa (16 Nov 2026). Pemilik: buat lisensi pertama di /admin → Sekolah bila ada sekolah yang berminat.
 - [x] APK 2.0.0 diuji pemilik di HP sungguhan (16 Nov 2026).
 - [x] Rencana mingguan untuk semua (Premium bulanan penuh; Free hanya materi gratis), kunci mingguan dengan hitungan mundur, Jalur/ujian/Beranda mengikuti rencana (`tests/plan.test.ts`, `e2e:plan`). Belum dideploy.
-- [ ] Rilis 13 "Mutu & aksesibilitas" (dijeda pemilik): audit axe semua halaman terang/gelap (`e2e/a11y.mjs`), perbaikan temuan, uji belajar offline, rapikan TODO lama.
+- [x] Rilis 13 "Mutu & aksesibilitas": audit axe semua halaman terang/gelap untuk tamu dan Premium tanpa pelanggaran WCAG 2.1 A/AA (`e2e:a11y`), hasil jawaban diumumkan ke pembaca layar dan fokus pindah ke soal berikutnya, belajar offline diuji sampai sinkron setelah kembali online (`e2e:offline`), TODO lama dirapikan.
 - [ ] Render ulang video promosi bila perlu: bab rencana mingguan masih berlabel "Premium Tahunan".
 - [x] Rilis 11 "Jalur Khusus & SEO": 3 jalur (Kerja, TOEFL ITP/IELTS, Anak) × 3 pelajaran, pelajaran pertama gratis, `/app/jalur`, halaman materi publik `/materi`, sitemap, robots, data terstruktur (`tests/rilis11.test.ts`, `e2e:tracks`). Pemilik: jalankan `apply-0016.sql`, lalu /admin → Konten → "Impor materi bawaan" → Terbitkan; daftarkan situs di Google Search Console dan kirim `sitemap.xml`.
 - [x] Rilis 12: jalur khusus 6 pelajaran per jalur; ujian level diperiksa server (migrasi 0017) + bank soal 16 per level; pengingat Premium hampir habis; batas antrean tamu; QRIS otomatis siap nyala (`PEMBAYARAN-OTOMATIS.md`); paket Play Store (`play-store/`); halaman depan dan video promosi baru. `apply-0017.sql` dijalankan dan materi diimpor + diterbitkan pemilik (versi 11), diperiksa 16 Nov 2026.
@@ -69,8 +69,8 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Bank soal ujian level 16 + 8 + 8 per level; batas waktu ujian level diperiksa server (Rilis 12).
 - [x] Tahap 4: rencana belajar mingguan untuk pelanggan tahunan (`src/lib/engine/plan.ts`, `/app/plan`, kartu di Beranda; `tests/plan.test.ts`, e2e `payment`).
 - [x] Ujian level B1, B2, C1, C2 (Rilis 3: semua level A1–C2 punya ujian empat bagian).
-- [ ] Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Sekarang hanya di klien; konten Premium sudah dipangkas di server.
-- [ ] Deploy (hosting Next.js + Supabase), domain HTTPS, env produksi.
+- [ ] (Ditunda, risiko kecil) Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Aplikasi bekerja offline sehingga batas ini dihitung di HP; yang bisa "dibobol" hanya latihan dari materi gratis, karena isi Premium sudah dipangkas di server.
+- [x] Deploy (Netlify + Supabase), HTTPS di lentera-english-app.netlify.app, env produksi.
 
 ## Ditunda pemilik (16 Nov 2026) — kerjakan bila pemilik siap
 
@@ -88,18 +88,18 @@ Semua persiapan teknis sudah selesai; yang tersisa butuh akun atau biaya pemilik
 - [ ] Alur admin untuk transaksi `NEEDS_REVIEW` (hanya relevan bila Xendit dihidupkan).
 - [ ] Rekonsiliasi berkala transaksi `PENDING` Xendit (hanya relevan bila Xendit dihidupkan).
 - [x] Pengingat masa aktif Premium hampir habis (Rilis 12: notifikasi 3 hari sebelumnya + kartu di Beranda).
-- [ ] Unggah audio dari dashboard admin (storage). Saat ini admin hanya bisa mendaftarkan URL berkas yang sudah diunggah.
+- [x] Unggah audio dari dashboard admin (tab Rekaman, Supabase Storage; Rilis 6).
 - [ ] Editor visual untuk skenario percakapan dan panduan pelafalan di dashboard admin (sekarang kolom JSON).
-- [ ] Uji mode belajar offline (IndexedDB + `public/sw.js`) di browser, termasuk sinkronisasi setelah kembali online.
+- [x] Uji mode belajar offline (IndexedDB + `public/sw.js`) di browser, termasuk sinkronisasi otomatis setelah kembali online (`e2e/offline.mjs`, Rilis 13).
 - [x] `scripts/export-content.ts`: ekspor kurikulum dari DB ke file (`npm run content:export`), teruji bolak-balik ekspor → impor.
 - [x] Outbox event tamu dibatasi 2.000 (Rilis 12).
-- [ ] README khusus proyek (ringkas, menunjuk ke empat dokumen ini).
+- [x] README khusus proyek (`README.md`, menunjuk ke dokumen lain).
 - [ ] CI untuk folder ini (workflow repo tidak mencakup `projects/**`).
 
 ## P3 — Penyempurnaan
 
-- [ ] QA visual mode gelap di semua halaman.
-- [ ] Audit aksesibilitas (pembaca layar pada `SessionRunner`, kontras, fokus).
+- [x] QA mode gelap di semua halaman: audit axe (kontras) dan tangkapan layar gelap tiap halaman (Rilis 13).
+- [x] Audit aksesibilitas (pembaca layar pada `SessionRunner`, kontras, fokus): Rilis 13, `e2e/a11y.mjs`.
 - [x] Peringatan React "script tag" dari skrip tema di `src/app/layout.tsx`: tidak muncul lagi setelah bug landing diperbaiki.
-- [ ] Rapikan ekspresi progress bar di `SessionRunner` (`items.length + (result ? 0 : 0)`; tidak salah, hanya berlebihan).
+- [x] Rapikan ekspresi progress bar di `SessionRunner` (Rilis 13).
 - [ ] Optimasi ukuran pack konten yang dikirim ke klien bila kurikulum membesar (mis. muat per level).
