@@ -41,7 +41,7 @@ export default function PathPage() {
                 {chapters.map((ch) => {
                   const units = ix.pack.units.filter((u) => u.chapterId === ch.id).sort((a, b) => a.position - b.position);
                   return (
-                    <Card key={ch.id} className={cx(ch.planned && 'opacity-80')}>
+                    <Card key={ch.id} className={cx(ch.planned && 'border-dashed')}>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg font-extrabold">Bab {ch.position}: {ch.title}</h3>
                         {ch.premium ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : <Badge tone="ok">Gratis</Badge>}
@@ -80,13 +80,13 @@ export default function PathPage() {
                                     {reachable ? (
                                       <Link href={lock.status === 'premium' ? '/app/subscription' : `/app/lesson?id=${l.id}`} className="flex items-center gap-3 rounded-2xl border border-line p-3 transition hover:border-brand hover:bg-surface-2">{body}</Link>
                                     ) : (
-                                      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3 opacity-75" aria-disabled>{body}</div>
+                                      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3" aria-disabled>{body}</div>
                                     )}
                                   </li>
                                 );
                               })}
                               {(u.plannedLessons ?? []).map((t) => (
-                                <li key={t} className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3 opacity-60">
+                                <li key={t} className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3">
                                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><Hourglass size={18} aria-hidden /></span>
                                   <span><span className="block font-bold">{t}</span><span className="block text-sm text-muted">Ada di silabus. Materinya sedang disiapkan.</span></span>
                                 </li>
@@ -94,7 +94,7 @@ export default function PathPage() {
                               {ue && (
                                 <li>
                                   {ues === 'locked' ? (
-                                    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3 opacity-75"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><GraduationCap size={18} aria-hidden /></span><span><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ueWait ? planWaitReason(ueWait, now) : 'Terbuka setelah semua pelajaran unit ini tuntas.'}</span></span></div>
+                                    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><GraduationCap size={18} aria-hidden /></span><span><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ueWait ? planWaitReason(ueWait, now) : 'Terbuka setelah semua pelajaran unit ini tuntas.'}</span></span></div>
                                   ) : (
                                     <Link href={`/app/exams?id=${ue.id}`} className="flex items-center gap-3 rounded-2xl border-2 border-accent bg-accent-soft p-3"><span className={cx('grid h-10 w-10 shrink-0 place-items-center rounded-full', ues === 'passed' ? 'bg-ok text-on-brand' : 'bg-accent text-[#1e1b3a]')}>{ues === 'passed' ? <Check size={18} aria-hidden /> : <GraduationCap size={18} aria-hidden />}</span><span className="flex-1"><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ues === 'passed' ? 'Lulus. Unit berikutnya terbuka.' : `Lulus min. ${ue.passScore}% untuk membuka unit berikutnya.`}</span></span></Link>
                                   )}

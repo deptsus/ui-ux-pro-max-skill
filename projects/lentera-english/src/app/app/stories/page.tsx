@@ -225,7 +225,7 @@ function Stories() {
               {items.map((s) => {
                 const done = learner.rewards[`story:${s.id}`];
                 return (
-                  <Card as="li" key={s.id} className={cx('flex flex-col gap-2', s.locked && 'opacity-80')}>
+                  <Card as="li" key={s.id} className={cx('flex flex-col gap-2', s.locked && 'border-dashed')}>
                     <div className="flex flex-wrap items-center gap-2"><Badge>{s.level}</Badge><Badge tone="muted">{s.branch || s.decisions ? <GitBranch size={12} aria-hidden /> : <BookHeart size={12} aria-hidden />}{s.branch || s.decisions ? 'Bercabang' : 'Cerita'}</Badge>{s.locked ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : done ? <Badge tone="ok"><Check size={12} aria-hidden />Selesai</Badge> : null}</div>
                     <h3 className="font-extrabold">{s.title}</h3>
                     <p className="text-sm text-muted">{s.summary}</p>

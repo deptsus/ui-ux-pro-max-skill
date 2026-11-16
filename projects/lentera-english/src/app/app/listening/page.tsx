@@ -87,11 +87,11 @@ function Listening() {
         {(['us', 'uk'] as const).map((a) => <Button key={a} size="sm" variant={accent === a ? 'primary' : 'secondary'} aria-pressed={accent === a} onClick={() => act((d) => { d.profile.accent = a; })}>{a === 'us' ? 'Amerika' : 'Inggris (British)'}</Button>)}
         <p className="w-full text-xs text-muted">{audioSource(ix) === 'none' ? 'Perangkat ini tidak punya pemutar suara.' : ix.pack.audio.length ? 'Rekaman suara dipakai bila sudah ada untuk teksnya, sebaiknya dalam aksen pilihanmu. Teks yang belum direkam dibacakan suara bawaan perangkatmu (tanpa AI generatif).' : 'Audio dibacakan oleh suara bawaan perangkatmu (tanpa internet, tanpa AI generatif) sesuai aksen yang kamu pilih.'}</p>
       </Card>
-      <div className="mb-4 flex gap-2" role="tablist">
+      <nav className="mb-4 flex gap-2" aria-label="Latihan suara">
         <LinkButton href="/app/listening" size="sm" variant={tab === 'menyimak' ? 'primary' : 'secondary'}>Menyimak</LinkButton>
         <LinkButton href="/app/listening?tab=pelafalan" size="sm" variant={tab === 'pelafalan' ? 'primary' : 'secondary'}>Pelafalan</LinkButton>
         <LinkButton href="/app/shadowing" size="sm" variant="secondary">Shadowing</LinkButton>
-      </div>
+      </nav>
 
       {tab === 'menyimak' ? (
         <div>
@@ -103,7 +103,7 @@ function Listening() {
                 <h2 id={`level-${level}`} className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Level {level} · {ix.pack.levels.find((x) => x.code === level)?.title}</h2>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {list.map((l) => (
-                    <Card as="li" key={l.id} className={cx('flex flex-col gap-2', l.locked && 'opacity-80')}>
+                    <Card as="li" key={l.id} className={cx('flex flex-col gap-2', l.locked && 'border-dashed')}>
                       <div className="flex flex-wrap items-center gap-2"><Badge>{l.level}</Badge><Badge tone="muted">{l.kind === 'word' ? 'Pengenalan kata' : l.kind === 'sentence' ? 'Kalimat' : 'Pemahaman'}</Badge>{l.locked && <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge>}</div>
                       <h3 className="font-extrabold">{l.title}</h3>
                       <LinkButton href={l.locked ? '/app/subscription' : `/app/listening?id=${l.id}`} size="sm" variant={l.locked ? 'accent' : 'secondary'} className="mt-auto">{l.locked ? 'Buka dengan Premium' : 'Buka latihan'}</LinkButton>

@@ -66,6 +66,7 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
   const [qLeft, setQLeft] = useState(0);
   const startedAt = useRef(Date.now());
   const finished = useRef(false);
+  const questionRef = useRef<HTMLElement>(null);
   const count = total ?? exercises?.length ?? 0;
   const heartsNow = currentHearts(learner.hearts, Date.now()).count;
 
@@ -125,7 +126,12 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
     if (current?.timeLimitSec && !result && qLeft <= 0 && Date.now() - startedAt.current > 900) submit({ timedOut: true });
   }, [qLeft, current, result, submit]);
 
+  // Screen readers (Rilis 13): each new question takes the focus, so "Lanjut" never leaves it on nothing.
+  useEffect(() => { questionRef.current?.focus({ preventScroll: true }); }, [current]);
+
   if (!current) return null;
+  const number = items.length + (result ? 0 : 1);
+  const announce = !result ? '' : result.correct ? 'Tepat, jawabanmu benar.' : `Jawabanmu belum tepat. Jawaban yang benar: ${result.correctAnswer}.`;
   const tag = result && !result.correct && result.tag ? ix?.tagById.get(result.tag) : undefined;
   const topic = ix?.topicById.get(current.topic);
   const outOfHearts = useHearts && heartsNow <= 0 && !!result;
@@ -136,7 +142,7 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
         <Link href={exitHref} aria-label="Keluar dari sesi" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-muted hover:bg-surface-2"><X size={22} aria-hidden /></Link>
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-muted">{title}</p>
-          <Progress value={items.length + (result ? 0 : 0)} max={Math.max(count, items.length + 1)} tone="ok" label="Progres sesi" />
+          <Progress value={items.length} max={Math.max(count, items.length + 1)} tone="ok" label="Progres sesi" />
         </div>
         {timeLimitSec ? (
           <Badge tone={left < 60 ? 'bad' : 'muted'}><Clock size={14} aria-hidden />{mmss(left)}</Badge>
@@ -146,7 +152,9 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
       </header>
       {current.timeLimitSec && !result ? <div className="mx-auto w-full max-w-2xl px-4"><Progress value={qLeft} max={current.timeLimitSec} tone="accent" label="Sisa waktu soal" className="h-1.5" /></div> : null}
 
-      <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-6 pt-4">
+      {/* Always present, so the verdict is announced when it changes (a live region added with its text is often missed). */}
+      <p className="sr-only" role="status" aria-live="polite">{announce}</p>
+      <section ref={questionRef} tabIndex={-1} aria-label={`Soal ${number}${count ? ` dari ${count}` : ''}`} className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-6 pt-4 focus:outline-none">
         <ExerciseCard key={`${current.id}:${items.length}`} ex={current} seed={`${seed}:${items.length}`} grade={result} onChange={setAnswer} onSubmit={() => submit()} />
         {hints && current.hint && !result && (
           <div className="mt-5">
@@ -157,12 +165,12 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
             )}
           </div>
         )}
-      </main>
+      </section>
 
       <footer className={cx('border-t-2', result ? (result.correct ? 'border-ok bg-ok-soft' : 'border-bad bg-bad-soft') : 'border-line bg-surface')}>
         <div className="mx-auto w-full max-w-2xl px-4 py-4">
           {result ? (
-            <div className="animate-rise space-y-3" role="status" aria-live="polite">
+            <div className="animate-rise space-y-3">
               <div className="flex items-start gap-3">
                 <span className="relative shrink-0">
                   <Mascot mood={result.correct ? 'cheer' : 'encourage'} size={56} decorative className="-my-2" />

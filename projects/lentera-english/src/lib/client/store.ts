@@ -140,6 +140,10 @@ export function scheduleSync(delay = 4000) {
 /** Events not yet on the server (the league and friends only need the XP events, not the snapshot). */
 export const pendingEvents = (): number => state?.outbox.length ?? 0;
 
+// Progress made offline goes to the server as soon as the connection is back (Rilis 13),
+// not only at the next answer or app start.
+if (typeof window !== 'undefined') window.addEventListener('online', () => { if ((state?.outbox.length ?? 0) > 0) scheduleSync(300); });
+
 /** Sends unsent XP and results before reading server rankings; skips the snapshot upload when nothing is pending. */
 export async function syncIfPending(): Promise<void> {
   if (pendingEvents() > 0) await syncNow();

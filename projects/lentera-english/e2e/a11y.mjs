@@ -102,6 +102,13 @@ for (const mode of ['light', 'dark']) {
         await p.getByText('Belum tepat', { exact: true }).waitFor({ timeout: 10000 });
         await audit(p, 'sesi: umpan balik', { mode, who });
         await p.screenshot({ path: path.join(SHOTS, `a11y-${mode}-sesi.png`), fullPage: true });
+        // Screen readers: the verdict is announced from a region that is always there, and the next question takes the focus.
+        const said = await p.locator('p.sr-only[role="status"]').innerText();
+        check(`${mode}: pembaca layar mendengar hasil jawaban dan jawaban yang benar`, /^Jawabanmu belum tepat\. Jawaban yang benar: .+/.test(said), said);
+        await p.getByRole('button', { name: 'Lanjut', exact: true }).click();
+        await p.waitForTimeout(300);
+        const focused = await p.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? document.activeElement?.tagName);
+        check(`${mode}: setelah "Lanjut", fokus pindah ke soal berikutnya`, /^Soal 2( dari \d+)?$/.test(focused ?? ''), focused);
       } catch (e) {
         errors.push(`${mode} sesi: ${String(e.message).split('\n')[0].slice(0, 160)}`);
       }

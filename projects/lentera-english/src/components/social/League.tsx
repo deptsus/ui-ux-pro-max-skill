@@ -46,7 +46,7 @@ export function LeagueView() {
   const ladder = (
     <ol className="flex items-end justify-center gap-1.5 sm:gap-3" aria-label="Lima divisi liga, dari bawah ke atas">
       {DIVISIONS.map((x, i) => (
-        <li key={x.name} className={cx('flex flex-col items-center gap-1', i + 1 !== league.division && 'opacity-45')} aria-current={i + 1 === league.division ? 'true' : undefined}>
+        <li key={x.name} className={cx('flex flex-col items-center gap-1', i + 1 !== league.division && 'grayscale')} aria-current={i + 1 === league.division ? 'true' : undefined}>
           <DivisionBadge n={i + 1} size={i + 1 === league.division ? 44 : 32} />
           <span className={cx('text-[11px] font-bold', i + 1 === league.division ? 'text-ink' : 'text-muted')}>{x.name}</span>
         </li>

@@ -266,7 +266,7 @@ export function PaymentsPanel({ data, loadedAt, loading, error, reload, payments
             </label>
           </div>
           {history.length === 0 ? <p className="mt-4 text-sm text-muted">{data.history.length === 0 ? 'Belum ada transaksi.' : 'Tidak ada transaksi yang cocok dengan filter.'}</p> : (
-            <div className="mt-3 overflow-x-auto">
+            <div className="mt-3 overflow-x-auto" tabIndex={0} role="region" aria-label="Tabel riwayat transaksi">
               <table className="w-full min-w-[46rem] text-sm">
                 <thead className="text-xs uppercase text-muted"><tr><th className={th}>Dibuat</th><th className={th}>Pengguna</th><th className={th}>Paket</th><th className={th}>Metode</th><th className="py-2 pr-3 text-right">Nominal</th><th className={th}>Status</th><th className={th}>Dibayar</th></tr></thead>
                 <tbody>
@@ -295,7 +295,7 @@ export function PaymentsPanel({ data, loadedAt, loading, error, reload, payments
       <Section title="Masa aktif Premium" subtitle="Pelanggan yang masih aktif, diurutkan dari yang paling cepat berakhir.">
         <Card>
           {subscribers.length === 0 ? <p className="text-sm text-muted">Belum ada pelanggan Premium aktif.</p> : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabel pelanggan Premium aktif">
               <table className="w-full min-w-[36rem] text-sm">
                 <thead className="text-xs uppercase text-muted"><tr><th className={th}>Pengguna</th><th className={th}>Paket</th><th className={th}>Mulai</th><th className={th}>Berakhir</th><th className="py-2 text-right">Sisa</th></tr></thead>
                 <tbody>
@@ -329,7 +329,7 @@ export function PaymentsPanel({ data, loadedAt, loading, error, reload, payments
           <h3 className="font-extrabold">Log event</h3>
           <p className="text-sm text-muted">Paling banyak 200 event terbaru. Data pembayar dari payload tidak disimpan.</p>
           {webhooks.log.length === 0 ? <p className="mt-3 text-sm text-muted">Belum ada event.</p> : (
-            <div className="mt-3 overflow-x-auto">
+            <div className="mt-3 overflow-x-auto" tabIndex={0} role="region" aria-label="Tabel event pembayaran">
               <table className="w-full min-w-[44rem] text-sm">
                 <thead className="text-xs uppercase text-muted"><tr><th className={th}>Diterima</th><th className={th}>Sumber</th><th className={th}>Event</th><th className={th}>Referensi</th><th className={th}>Hasil</th><th className="py-2 text-right">Duplikat</th></tr></thead>
                 <tbody>

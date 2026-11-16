@@ -36,7 +36,7 @@ export function PromoVideo() {
           Browser ini tidak bisa memutar video. Daftar fitur di samping menjelaskan isinya.
         </video>
         {!started && (
-          <button type="button" onClick={() => play()} className="absolute inset-0 grid place-items-center bg-[#1e1b3a]/15 transition hover:bg-[#1e1b3a]/25" aria-label={`Putar video promosi (${clock(PROMO_DURATION)})`}>
+          <button type="button" onClick={() => play()} className="absolute inset-0 grid place-items-center bg-[#1e1b3a]/15 transition hover:bg-[#1e1b3a]/25" aria-label={`Putar video · ${clock(PROMO_DURATION)} (video promosi Lentera English)`}>
             <span className="flex items-center gap-3 rounded-full bg-brand px-6 py-3.5 text-lg font-extrabold text-on-brand shadow-card">
               <Play size={22} fill="currentColor" aria-hidden />Putar video · {clock(PROMO_DURATION)}
             </span>

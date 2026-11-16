@@ -99,7 +99,7 @@ export function HomeworkPanel({ data: content, active }: { data: Data | null; ac
       <section>
         <h2 className="text-lg font-extrabold">Per PR</h2>
         <p className="text-sm text-muted">Diurutkan dari yang paling banyak diberikan. PR mingguan digabung jadi satu baris.</p>
-        <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-surface">
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-surface" tabIndex={0} role="region" aria-label="Tabel PR per pelajar">
           <table className="w-full min-w-[560px] text-sm">
             <thead className="border-b border-line text-muted"><tr><th className={cx(th, 'pl-4')}>PR</th><th className={th}>Diberikan</th><th className={th}>Dikumpulkan</th><th className={th}>Lewat tenggat</th><th className={th}>Terlambat</th><th className={th}>Rata-rata</th></tr></thead>
             <tbody>
@@ -123,7 +123,7 @@ export function HomeworkPanel({ data: content, active }: { data: Data | null; ac
         <h2 className="text-lg font-extrabold">Per pelajar</h2>
         <p className="text-sm text-muted">Yang paling banyak lewat tenggat di atas.</p>
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari nama pelajar" aria-label="Cari nama pelajar" className={cx(input, 'mt-3 max-w-sm')} />
-        <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-surface">
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-surface" tabIndex={0} role="region" aria-label="Tabel tugas menulis">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="border-b border-line text-muted"><tr><th className={cx(th, 'pl-4')}>Pelajar</th><th className={th}>Dikumpulkan</th><th className={th}>Berjalan</th><th className={th}>Lewat tenggat</th><th className={th}>Rata-rata</th><th className={th}>Terakhir mengumpulkan</th></tr></thead>
             <tbody>

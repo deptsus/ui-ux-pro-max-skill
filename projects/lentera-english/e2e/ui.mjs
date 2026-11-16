@@ -212,7 +212,7 @@ for (const width of [320, 390]) {
   await chapters.nth(4).click();
   await p.waitForTimeout(1500);
   const after = await video.evaluate((v) => ({ controls: v.controls, src: v.currentSrc }));
-  check('mengetuk bab menyalakan video (baru saat itu videonya diminta)', after.controls && videoHits.length > 0 && (await p.getByRole('button', { name: /^Putar video promosi/ }).count()) === 0, JSON.stringify({ after, hits: videoHits.length }));
+  check('mengetuk bab menyalakan video (baru saat itu videonya diminta)', after.controls && videoHits.length > 0 && (await p.getByRole('button', { name: /^Putar video ·/ }).count()) === 0, JSON.stringify({ after, hits: videoHits.length }));
   await p.screenshot({ path: path.join(SHOTS, 'ui-halaman-depan-video.png'), fullPage: false });
   await ctx.close();
 }

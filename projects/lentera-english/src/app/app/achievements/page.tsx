@@ -22,7 +22,7 @@ export default function AchievementsPage() {
       <section>
         <h2 className="mb-2 text-lg font-extrabold">Tonggak XP</h2>
         <ol className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-          {GAME.milestones.map((m) => <li key={m} className={cx('rounded-2xl border-2 px-2 py-3 text-center', learner.xp >= m ? 'border-accent bg-accent-soft' : 'border-line bg-surface opacity-70')}><Zap size={18} className={cx('mx-auto', learner.xp >= m ? 'text-accent-strong' : 'text-muted')} aria-hidden /><p className="mt-1 text-sm font-extrabold">{m.toLocaleString('id-ID')}</p><p className="text-[11px] text-muted">{learner.xp >= m ? 'tercapai' : 'XP'}</p></li>)}
+          {GAME.milestones.map((m) => <li key={m} className={cx('rounded-2xl border-2 px-2 py-3 text-center', learner.xp >= m ? 'border-accent bg-accent-soft' : 'border-dashed border-line bg-surface')}><Zap size={18} className={cx('mx-auto', learner.xp >= m ? 'text-accent-strong' : 'text-muted')} aria-hidden /><p className="mt-1 text-sm font-extrabold">{m.toLocaleString('id-ID')}</p><p className="text-[11px] text-muted">{learner.xp >= m ? 'tercapai' : 'XP'}</p></li>)}
         </ol>
       </section>
       <section>
@@ -39,7 +39,7 @@ export default function AchievementsPage() {
             const [cur, target] = a.progress(learner);
             const Icon = ICONS[a.icon] ?? Award;
             return (
-              <Card as="li" key={a.id} className={cx('flex items-center gap-3 p-4', !at && 'opacity-80')}>
+              <Card as="li" key={a.id} className={cx('flex items-center gap-3 p-4', !at && 'border-dashed')}>
                 <span className={cx('grid h-12 w-12 shrink-0 place-items-center rounded-2xl', at ? 'bg-accent text-[#1e1b3a]' : 'bg-surface-2 text-muted')}><Icon size={24} aria-hidden /></span>
                 <div className="min-w-0 flex-1">
                   <p className="font-extrabold">{a.title}</p><p className="text-sm text-muted">{a.desc}</p>
