@@ -10,6 +10,7 @@ import { validatePack } from '@/lib/content/validate';
 import { createState, finishMastery } from '@/lib/engine/state';
 import { FREE, type Entitlement } from '@/lib/engine/types';
 import { buildExam } from '@/lib/engine/sessions';
+import { linesByLevel, shadowLines } from '@/lib/engine/shadowing';
 import { lessonLock, nextLesson, unitsOfLevel } from '@/lib/engine/unlock';
 import { openEmbedded, type RawDb } from '@/lib/server/db';
 import { newUser } from './helpers';
@@ -70,7 +71,14 @@ describe('terpisah dari jalur CEFR', () => {
     expect(lessonLock(s, ix, third, PREMIUM, T0).status).toBe('locked');
   });
 
-  it('ujian unit jalur khusus mengambil soal dari pelajaran jalurnya', () => {
+  it('latihan shadowing tetap memakai jalur CEFR (kalimat jalur khusus tidak membuka level Premium)', () => {
+    const lines = shadowLines(packForFree(pack));
+    const trackSentences = new Set(ix.trackLessons.flatMap((l) => l.demo.map((d) => d.good)));
+    expect(lines.some((l) => trackSentences.has(l.text) && l.source.startsWith('Pelajaran'))).toBe(false);
+    expect(linesByLevel(lines).B1).toBe(0);
+  });
+
+    it('ujian unit jalur khusus mengambil soal dari pelajaran jalurnya', () => {
     const exam = pack.exams.find((e) => e.scope === 'unit' && e.ref === 'track-work-u1')!;
     const qs = buildExam(ix, exam, 1);
     expect(qs.length).toBeGreaterThan(0);

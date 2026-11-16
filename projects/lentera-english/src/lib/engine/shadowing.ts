@@ -67,7 +67,12 @@ export function shadowLines(pack: ContentPack): ShadowLine[] {
     const parts = splitSentences(item.transcript);
     for (const text of parts) add({ text, level: item.level, source: `Menyimak · ${item.title}`, translation: parts.length === 1 ? item.translation : undefined, audioKey: parts.length === 1 ? item.audioKey : undefined });
   }
-  const unitLevel = new Map(pack.units.map((u) => [u.id, pack.chapters.find((c) => c.id === u.chapterId)?.level]));
+  // Main CEFR path only: special-track lessons (Rilis 11) would open a few
+  // sentences of a Premium level to free accounts and blur the level lists.
+  const unitLevel = new Map(pack.units.map((u) => {
+    const c = pack.chapters.find((x) => x.id === u.chapterId);
+    return [u.id, c && !c.track ? c.level : undefined];
+  }));
   for (const lesson of pack.lessons) {
     if (lesson.locked) continue;
     const level = unitLevel.get(lesson.unitId);
