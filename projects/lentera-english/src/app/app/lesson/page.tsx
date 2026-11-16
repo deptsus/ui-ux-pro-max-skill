@@ -11,7 +11,8 @@ import { SRS } from '@/lib/engine/config';
 import { currentHearts } from '@/lib/engine/gamification';
 import { buildMasteryTest } from '@/lib/engine/sessions';
 import { LESSON_STEPS, assignHomework, finishMastery, finishPractice, reachStep, type LessonStep } from '@/lib/engine/state';
-import { lessonLock, lessonsOfUnit, unitExam } from '@/lib/engine/unlock';
+import { examOpensAt, lessonLock, lessonsOfUnit, unitExam } from '@/lib/engine/unlock';
+import { planWaitReason } from '@/lib/engine/plan';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
 import { Demo, Teaching } from '@/components/LessonContent';
@@ -43,6 +44,7 @@ function LessonRoom() {
   const home = track ? `/app/jalur#${track}` : '/app/path';
   const lock = lessonLock(learner, ix, lesson, ent, now);
   if (lock.status === 'premium') return <Empty title="Pelajaran Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat paket Premium</LinkButton>}>{lesson.title} adalah bagian dari kurikulum Premium. Tujuan belajarnya: {lesson.objectives.join(' ')}</Empty>;
+  if (lock.status === 'locked' && lock.opensAt) return <Empty title="Pelajaran ini terbuka minggu depan" action={<LinkButton href="/app/plan">Lihat rencana mingguan</LinkButton>}>{lock.reason}</Empty>;
   if (lock.status === 'locked') return <Empty title="Pelajaran masih terkunci" action={<LinkButton href={home}>Kembali ke jalur belajar</LinkButton>}>{lock.reason}</Empty>;
 
   const hw = ix.pack.homework.find((h) => h.lessonId === id);
@@ -211,7 +213,12 @@ function LessonRoom() {
             {learner.reviews[`topic:${lesson.topic}`] && <Notice tone="brand" title="Ulangan berikutnya">{dateId(learner.reviews[`topic:${lesson.topic}`].dueAt, { weekday: 'long', day: 'numeric', month: 'long' })}{lesson.vocab?.length ? ` · ${lesson.vocab.length} kosakata pelajaran ini ikut dijadwalkan.` : ''}</Notice>}
             <Notice tone="accent" title="Kapan topik dianggap dikuasai?">Bukan dari satu tes. Skor penguasaanmu harus mencapai 85% dari cukup banyak soal, lalu kamu harus lulus tes ulang setelah jeda minimal 20 jam.</Notice>
           </Card>
-          {nextInUnit ? <LinkButton href={`/app/lesson?id=${nextInUnit.id}`} full size="lg">Pelajaran berikutnya: {nextInUnit.title}<ArrowRight size={20} aria-hidden /></LinkButton> : exam ? <LinkButton href={`/app/exams?id=${exam.id}`} full size="lg" variant="accent">Lanjut ke {exam.title}</LinkButton> : <LinkButton href={home} full size="lg">{track ? 'Kembali ke jalur khusus' : 'Kembali ke jalur belajar'}</LinkButton>}
+          {(() => {
+            // The weekly plan (16 Nov 2026) may hold the next step until Monday: say so instead of linking to a closed page.
+            const wait = nextInUnit ? lessonLock(learner, ix, nextInUnit, ent, now).opensAt : exam ? examOpensAt(learner, ix, exam, ent, now) : undefined;
+            if (wait) return <Notice tone="accent" title={`${nextInUnit ? `Pelajaran berikutnya: ${nextInUnit.title}` : exam!.title} · minggu depan`}>{planWaitReason(wait, now)} <LinkButton href="/app/plan" size="sm" variant="secondary" className="mt-2">Lihat rencana mingguan</LinkButton></Notice>;
+            return nextInUnit ? <LinkButton href={`/app/lesson?id=${nextInUnit.id}`} full size="lg">Pelajaran berikutnya: {nextInUnit.title}<ArrowRight size={20} aria-hidden /></LinkButton> : exam ? <LinkButton href={`/app/exams?id=${exam.id}`} full size="lg" variant="accent">Lanjut ke {exam.title}</LinkButton> : <LinkButton href={home} full size="lg">{track ? 'Kembali ke jalur khusus' : 'Kembali ke jalur belajar'}</LinkButton>;
+          })()}
         </>
       )}
     </div>

@@ -5,13 +5,14 @@ import type { ContentIndex } from '@/lib/content/types';
 import { RECOMMEND } from './config';
 import { evidenceScore, retestReady } from './mastery';
 import { dueItems } from './srs';
-import { lessonLock, nextLesson, unitExamStatus, unitExam } from './unlock';
+import { learnerPlan } from './plan';
+import { examOpensAt, lessonLock, nextLesson, unitExamStatus, unitExam } from './unlock';
 import type { Entitlement, LearnerState } from './types';
 import { allHomework } from './weekly';
 
 export interface Recommendation {
   id: string;
-  kind: 'placement' | 'remediate' | 'revise' | 'practice' | 'retest' | 'review' | 'homework' | 'exam' | 'lesson';
+  kind: 'placement' | 'remediate' | 'revise' | 'practice' | 'retest' | 'review' | 'homework' | 'exam' | 'lesson' | 'plan';
   priority: number;
   title: string;
   reason: string;
@@ -30,12 +31,12 @@ export function activeTagErrors(s: LearnerState, tag: string, now: number): numb
 }
 
 /**
- * `planLocked`: the learner finished this week's share of the weekly plan, so the
- * next steps (a new lesson, a unit exam) wait until Monday; the dashboard shows the
- * countdown once nothing else is left (16 Nov 2026). Everything else is unchanged:
- * reviews, homework, retests, practice, and a lesson already in progress.
+ * Lessons and unit exams follow the weekly plan (16 Nov 2026): one whose turn is
+ * in a later week is not suggested (`planGate`, through `lessonLock` for lessons);
+ * the dashboard shows the countdown once nothing else is left. Reviews, homework,
+ * retests, practice, and a lesson already in progress are unchanged.
  */
-export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, now: number, { planLocked = false } = {}): Recommendation[] {
+export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, now: number): Recommendation[] {
   const W = RECOMMEND.weights;
   const out: Recommendation[] = [];
   const started = Object.keys(s.lessons).length > 0;
@@ -107,18 +108,26 @@ export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, n
   }
 
   // 6. Unit exams that are ready.
-  for (const unit of planLocked ? [] : ix.pack.units) {
+  for (const unit of ix.pack.units) {
     if (unitExamStatus(s, ix, unit.id) === 'available') {
       const exam = unitExam(ix, unit.id)!;
+      if (examOpensAt(s, ix, exam, ent, now)) continue;
       out.push({ id: `exam:${exam.id}`, kind: 'exam', priority: W.examReady, title: exam.title, reason: 'Semua pelajaran di unit ini sudah tuntas. Lulus ujian unit untuk membuka unit berikutnya.', cta: 'Ikuti ujian', href: `/app/exams?id=${exam.id}` });
     }
   }
 
   // 7. Continue / next lesson.
   const next = nextLesson(s, ix, ent, now);
-  const inProgress = !!next && lessonLock(s, ix, next, ent, now).status === 'in-progress';
-  if (next && (inProgress || !planLocked)) {
+  if (next) {
+    const inProgress = lessonLock(s, ix, next, ent, now).status === 'in-progress';
     out.push({ id: `lesson:${next.id}`, kind: 'lesson', priority: inProgress ? W.continueLesson : W.nextLesson, title: inProgress ? `Lanjutkan: ${next.title}` : `Pelajaran berikutnya: ${next.title}`, reason: next.summary, cta: inProgress ? 'Lanjutkan' : 'Mulai', href: `/app/lesson?id=${next.id}` });
+  }
+
+  // 8. This week's plan step when it is not a lesson or unit exam (listening, story, conversation, level exam).
+  const step = learnerPlan(ix, s, ent, now).targets.find((t) => t.doneAt === undefined)?.m;
+  if (step && step.kind !== 'lesson' && step.kind !== 'unit-exam') {
+    const label = { listening: 'Menyimak', story: 'Cerita', conversation: 'Percakapan', 'level-exam': 'Ujian level' }[step.kind];
+    out.push({ id: `plan:${step.key}`, kind: 'plan', priority: W.nextLesson - 1, title: `${label}: ${step.title}`, reason: 'Bagian dari target rencana minggu ini.', cta: 'Mulai', href: step.href });
   }
 
   return out.sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));

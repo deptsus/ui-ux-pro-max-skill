@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { AlarmClock, ArrowRight, AudioLines, CheckCircle2, Crown, Flame, Heart, Lock, Repeat, Target, Users, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
+import { AlarmClock, ArrowRight, AudioLines, CalendarCheck, CheckCircle2, Crown, Flame, Heart, Lock, Repeat, Target, Users, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
 import { GAME } from '@/lib/engine/config';
 import { activeMissions, currentHearts, liveStreak, nextMilestone, playerLevel } from '@/lib/engine/gamification';
 import { dayKey } from '@/lib/engine/mastery';
@@ -16,8 +16,8 @@ import { WeekPlanCard, openingAt, useWeekPlan } from '@/components/WeekPlan';
 import { ClassTasksCard } from '@/components/ClassTasksCard';
 import { Badge, Button, Card, LinkButton, Progress, Ring } from '@/components/ui';
 
-const REC_ICON: Record<Recommendation['kind'], typeof Wrench> = { placement: Compass, remediate: Wrench, revise: BookOpen, practice: Target, retest: CheckCircle2, review: Repeat, homework: ClipboardList, exam: GraduationCap, lesson: ArrowRight };
-const REC_LABEL: Record<Recommendation['kind'], string> = { placement: 'Mulai di sini', remediate: 'Perbaikan', revise: 'Ulangi materi', practice: 'Latihan tambahan', retest: 'Konfirmasi penguasaan', review: 'Ulangan terjadwal', homework: 'PR', exam: 'Ujian', lesson: 'Pelajaran' };
+const REC_ICON: Record<Recommendation['kind'], typeof Wrench> = { placement: Compass, remediate: Wrench, revise: BookOpen, practice: Target, retest: CheckCircle2, review: Repeat, homework: ClipboardList, exam: GraduationCap, lesson: ArrowRight, plan: CalendarCheck };
+const REC_LABEL: Record<Recommendation['kind'], string> = { placement: 'Mulai di sini', remediate: 'Perbaikan', revise: 'Ulangi materi', practice: 'Latihan tambahan', retest: 'Konfirmasi penguasaan', review: 'Ulangan terjadwal', homework: 'PR', exam: 'Ujian', lesson: 'Pelajaran', plan: 'Rencana minggu ini' };
 
 /** First open (Rilis 6): what the app is and two equal ways in; nothing is forced and it disappears after the first answer. */
 function Welcome({ guest, firstLesson }: { guest: boolean; firstLesson?: string }) {
@@ -60,9 +60,9 @@ export default function Dashboard() {
   const today = learner.daily[dayKey(now)];
   const xpToday = today?.xp ?? 0;
   const goal = learner.profile.dailyGoalXp;
-  // Weekly plan cooldown (16 Nov 2026): once this week's share is done, no new lesson or unit exam until Monday.
+  // Weekly plan (16 Nov 2026): steps whose turn is in a later week are not suggested; a cooldown card shows when all is done.
   const { plan } = useWeekPlan();
-  const recs = recommend(learner, ix, ent, now, { planLocked: !!plan?.locked });
+  const recs = recommend(learner, ix, ent, now);
   const [top, ...rest] = recs;
   const level = playerLevel(learner.xp);
   const hearts = currentHearts(learner.hearts, now);

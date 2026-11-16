@@ -254,9 +254,21 @@ scenario('exam: tiga pelajaran tuntas membuka ujian unit, lalu lulus', async () 
   await page.goto(`${BASE}/app/exams?id=${exam.id}`);
   check('ujian unit terkunci sebelum pelajarannya tuntas', await seen(page.getByText('Ujian masih terkunci')));
   for (const l of pack.lessons.filter((x) => x.unitId === unit.id).sort((a, b) => a.position - b.position)) await completeLesson(page, pack, l.id);
-  check('langkah terakhir pelajaran penutup unit menawarkan ujian unit', await link(page, new RegExp(exam.title)).count() === 1);
+  // Weekly plan (16 Nov 2026): the three lessons are this week's share; the unit exam is next week's step.
+  check('rencana mingguan: ujian unit adalah langkah minggu depan, dengan hitungan mundur', await seen(page.getByText(/Sesuai rencana mingguan, langkah ini terbuka dalam \d+ (hari|jam|menit)/)) && await link(page, new RegExp(`Lanjut ke ${exam.title}`)).count() === 0);
   await page.goto(`${BASE}/app/exams?id=${exam.id}`);
-  await button(page, /Mulai ujian/).click();
+  check('Pusat Ujian: ujian unit terbuka minggu depan', await seen(page.getByText('Ujian ini terbuka minggu depan')) && await button(page, /Mulai ujian/).count() === 0);
+  // Next Monday, same progress (separate context so the frozen clock stays there).
+  const monday = await page.evaluate(() => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + 7); return d.getTime(); });
+  const nextWeek = await newContext();
+  await nextWeek.addInitScript((saved) => { try { if (!localStorage.getItem('lentera.state.guest')) localStorage.setItem('lentera.state.guest', saved); } catch { /* about:blank has no storage */ } }, JSON.stringify(await state(page)));
+  await nextWeek.clock.setFixedTime(monday + 10 * 60_000);
+  await ctx.close();
+  return examOnMonday(await open(nextWeek, `/app/exams?id=${exam.id}`), pack, exam, nextWeek);
+});
+
+async function examOnMonday(page, pack, exam, ctx) {
+  await button(page, /Mulai ujian/).click({ timeout: 30000 });
   // Miss two on purpose: the exam still passes at 80% and reports scores per topic.
   const answered = await runSession(page, pack, { deferred: true, plan: (i) => i >= 2 });
   await page.getByRole('heading', { name: new RegExp(`Lulus: ${exam.title}`) }).waitFor({ timeout: 20000 });
@@ -268,7 +280,7 @@ scenario('exam: tiga pelajaran tuntas membuka ujian unit, lalu lulus', async () 
   await page.goto(`${BASE}/app/exams`);
   check('Pusat Ujian menandai ujian unit lulus', await seen(page.locator('li', { hasText: exam.title }).getByText('Lulus', { exact: true })));
   await ctx.close();
-});
+}
 
 scenario('drill: latihan perbaikan dan menyimak', async () => {
   const ctx = await newContext();
@@ -394,10 +406,13 @@ scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif
   const premiumLesson = free.lessons.find((l) => l.locked);
   check('akun Free menerima pelajaran Premium tanpa isi', !!premiumLesson && premiumLesson.teaching.length === 0 && !free.exercises.some((e) => e.lessonId === premiumLesson.id));
   check('klien tidak bisa menjadikan dirinya Premium lewat profil', (await fetch(`${BASE}/api/me`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess.token}` }, body: JSON.stringify({ role: 'admin', premium: true, plan: 'premium_yearly' }) }).then((r) => r.json())).profile.role === 'student' && (await api('/api/me', sess.token)).data.user.entitlement.premium === false);
-  // Weekly plan: Free accounts see what it is and where to get it.
-  await page.getByText('Rencana belajar 52 minggu').waitFor({ timeout: 20000 });
+  // Weekly plan (16 Nov 2026): Free accounts get one too, with the free material only.
+  await page.getByRole('heading', { name: 'Rencana minggu ini' }).waitFor({ timeout: 20000 });
   await page.goto(`${BASE}/app/plan`);
-  check('akun Free: rencana mingguan menjelaskan bahwa ini fitur Premium', await page.getByText('Rencana 52 minggu ada di Premium').waitFor({ timeout: 20000 }).then(() => true).catch(() => false));
+  await page.getByText(/^Materi gratis mulai level/).waitFor({ timeout: 20000 });
+  const planHrefs = await page.locator('main a[href^="/app/"]').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+  const planText = await page.locator('main').innerText();
+  check('akun Free: rencana mingguan berisi materi gratis saja (pelajaran Premium tidak terlihat)', !free.lessons.filter((l) => l.locked).some((l) => planText.includes(l.title) || planHrefs.includes(`/app/lesson?id=${l.id}`)) && planText.includes(free.lessons.find((l) => !l.locked).title), planText.slice(0, 200));
 
   // Plans: yearly shows the struck-through price and the discount; QRIS is the only method.
   await page.goto(`${BASE}/app/subscription`);

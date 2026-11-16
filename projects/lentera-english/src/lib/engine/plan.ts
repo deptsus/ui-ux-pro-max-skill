@@ -1,14 +1,16 @@
-// Weekly study plan for Premium subscribers (tahap 4; monthly too since 16 Nov
-// 2026). Deterministic: the plan is the learner's path from their level to C2
+// Weekly study plan (tahap 4), for every learner since 16 Nov 2026: Premium
+// (monthly and yearly) gets the whole path, Free learners and guests only the
+// free material at the same weekly pace (Premium items are not shown).
+// Deterministic: the plan is the learner's path from their level to C2
 // (lessons, unit exams, listening, conversations, level exams) spread evenly
 // over the weeks of the plan. Each Monday the week's share is recomputed from
 // what is still open, so a learner who falls behind gets a slightly fuller week
-// instead of an impossible backlog. Once the week's share is done, the next
-// steps stay locked until Monday 00:00 (`locked`), with a countdown.
+// instead of an impossible backlog. Steps after this week's share wait until
+// Monday 00:00, in the plan and in Jalur (`planGate`), with a countdown.
 import { CEFR_ORDER, type Cefr, type ContentIndex } from '@/lib/content/types';
 import { dayKey } from './mastery';
 import { dueItems } from './srs';
-import { isAdminPlan, type Entitlement, type LearnerState } from './types';
+import { isAdminPlan, isPremium, type Entitlement, type LearnerState } from './types';
 
 const DAY = 24 * 3600 * 1000;
 export const WEEK = 7 * DAY;
@@ -133,10 +135,23 @@ export function completedAt(s: LearnerState, m: Milestone): number | undefined {
   }
 }
 
+/** Whether a step is part of the free material (Free plans list only these). */
+export function freeMilestone(ix: ContentIndex, m: Milestone): boolean {
+  const { pack } = ix;
+  switch (m.kind) {
+    case 'lesson': { const l = ix.lessonById.get(m.ref); return !!l && !l.premium && !l.locked; }
+    case 'unit-exam':
+    case 'level-exam': return pack.exams.some((e) => e.id === m.ref && !e.premium);
+    case 'listening': return pack.listening.some((x) => x.id === m.ref && !x.premium && !x.locked);
+    case 'story': return (pack.stories ?? []).some((x) => x.id === m.ref && !x.premium && !x.locked);
+    case 'conversation': return pack.scenarios.some((x) => x.id === m.ref && !x.premium && !x.locked);
+  }
+}
+
 export interface PlanWindow {
   /** Monday of week 1. */
   start: number;
-  /** When yearly Premium ends; admins and monthly subscribers: 52 weeks after start. */
+  /** When yearly Premium ends; everyone else: 52 weeks after start. */
   end: number;
 }
 
@@ -147,30 +162,32 @@ function cycleWindow(anchor: number, now: number): PlanWindow {
   return { start, end: start + PLAN_WEEKS * WEEK };
 }
 
-/** A month of Premium (the only one left, not a month stacked in front of a year). */
-const monthlyOnly = (ent: Entitlement, now: number) => ent.plan === 'premium_monthly' && !!ent.expiresAt && ent.expiresAt > now && ent.expiresAt - now <= 31 * DAY;
+/**
+ * Plans counted from the learner's own first plan week: Free learners and
+ * guests, a single month of Premium (not a month stacked in front of a year),
+ * and a class licence ending within a month.
+ */
+const ownStart = (ent: Entitlement | undefined, now: number) =>
+  !isAdminPlan(ent) && (!isPremium(ent, now) || (ent!.plan !== 'premium_yearly' && ent!.expiresAt! - now <= 31 * DAY));
 
-/** A monthly subscriber whose plan start is not saved yet (the app saves it once, see `useWeekPlan`). */
-export const needsPlanStart = (ent: Entitlement | undefined, s: LearnerState, now: number): boolean => !!ent?.premium && monthlyOnly(ent, now) && s.planStart === undefined;
+/** A learner whose plan start is not saved yet (the app saves it once, see `useWeekPlan`). */
+export const needsPlanStart = (ent: Entitlement | undefined, s: LearnerState, now: number): boolean => ownStart(ent, now) && s.planStart === undefined;
 
 /**
- * Who gets a plan, and over which weeks. Yearly: the Premium year. A monthly
- * period stacked in front of a yearly one still counts as a year (more than a
- * month of Premium left). Monthly only (since 16 Nov 2026): the same 52-week
- * plan as a year, counted from the Monday it first opened, so renewing month by
- * month keeps the same plan. Admins: 52-week cycles from the account's first week.
+ * Over which weeks the plan runs. Yearly Premium: the Premium year (a monthly
+ * period stacked in front of a yearly one still counts as a year). Free, guests
+ * and monthly Premium (16 Nov 2026): 52 weeks counted from the Monday the plan
+ * first opened, so renewing month by month, or upgrading from Free, keeps the
+ * same plan. Admins: 52-week cycles from the account's first week.
  */
-export function planWindow(ent: Entitlement | undefined, s: LearnerState, now: number): PlanWindow | null {
-  if (!ent?.premium) return null;
+export function planWindow(ent: Entitlement | undefined, s: LearnerState, now: number): PlanWindow {
   const created = weekStart(s.createdAt);
   if (isAdminPlan(ent)) return cycleWindow(created, now);
-  if (!ent.expiresAt || ent.expiresAt <= now) return null;
-  if (monthlyOnly(ent, now)) return cycleWindow(weekStart(s.planStart ?? now), now);
-  const left = ent.expiresAt - now;
-  if (ent.plan !== 'premium_yearly' && left <= 31 * DAY) return null;
+  if (ownStart(ent, now)) return cycleWindow(weekStart(s.planStart ?? now), now);
+  const left = ent!.expiresAt! - now;
   // Whole years back from the end date, but never before the account existed.
   const years = Math.max(1, Math.ceil(left / YEAR));
-  return { start: Math.max(created, weekStart(ent.expiresAt - years * YEAR)), end: ent.expiresAt };
+  return { start: Math.max(created, weekStart(ent!.expiresAt! - years * YEAR)), end: ent!.expiresAt! };
 }
 
 export interface PlanTarget {
@@ -205,21 +222,29 @@ export interface WeekPlan {
   finished: boolean;
   /** This week's share is done: the next steps open at `weekEnd` (Monday 00:00). */
   locked: boolean;
+  /** Free plan: only the free material (Premium items are left out). */
+  free: boolean;
 }
 
 export const STUDY_DAYS_GOAL = 4;
 
-export function weekPlan(ix: ContentIndex, s: LearnerState, win: PlanWindow, now: number): WeekPlan {
-  const startLevel: Cefr = s.profile.placementDone && s.profile.placementLevel ? s.profile.placementLevel : 'A1';
-  const all = planMilestones(ix, startLevel);
+export function weekPlan(ix: ContentIndex, s: LearnerState, win: PlanWindow, now: number, { free = false } = {}): WeekPlan {
+  let startLevel: Cefr = s.profile.placementDone && s.profile.placementLevel ? s.profile.placementLevel : 'A1';
+  const path = planMilestones(ix, startLevel);
+  let all = free ? path.filter((m) => freeMilestone(ix, m)) : path;
+  // Placed above the free material (A1): the free plan still offers it.
+  if (free && !all.length) { startLevel = 'A1'; all = planMilestones(ix, 'A1').filter((m) => freeMilestone(ix, m)); }
   const ws = weekStart(now);
   const totalWeeks = Math.max(1, Math.ceil((win.end - win.start) / WEEK));
   const week = Math.min(totalWeeks, Math.max(1, Math.floor((ws - win.start) / WEEK) + 1));
   const weeksLeft = Math.max(1, totalWeeks - week + 1);
-  const stamp = new Map(all.map((m) => [m.key, completedAt(s, m)]));
+  const stamp = new Map(path.concat(all).map((m) => [m.key, completedAt(s, m)]));
+  const openOf = (list: Milestone[]) => list.filter((m) => { const at = stamp.get(m.key); return at === undefined || at >= ws; });
 
-  const openAtMonday = all.filter((m) => { const at = stamp.get(m.key); return at === undefined || at >= ws; });
-  const share = openAtMonday.length ? Math.ceil(openAtMonday.length / weeksLeft) : 0;
+  const openAtMonday = openOf(all);
+  // A free plan moves at the same pace as the whole path would (about 3 steps a week).
+  const pace = free ? Math.max(1, Math.ceil(openOf(path).length / weeksLeft)) : Math.ceil(openAtMonday.length / weeksLeft);
+  const share = openAtMonday.length ? Math.min(openAtMonday.length, pace) : 0;
   const targets = openAtMonday.slice(0, share).map((m) => ({ m, doneAt: stamp.get(m.key) }));
   const bonus = openAtMonday.slice(share).filter((m) => stamp.get(m.key) !== undefined).map((m) => ({ m, doneAt: stamp.get(m.key) }));
   const done = all.filter((m) => stamp.get(m.key) !== undefined).length;
@@ -229,7 +254,8 @@ export function weekPlan(ix: ContentIndex, s: LearnerState, win: PlanWindow, now
   const upcoming: WeekPlan['upcoming'] = [];
   let rest = later;
   for (let w = week + 1; w <= totalWeeks && rest.length; w++) {
-    const n = Math.ceil(rest.length / (totalWeeks - w + 1));
+    const even = Math.ceil(rest.length / (totalWeeks - w + 1));
+    const n = free ? Math.max(share, even) : even;
     upcoming.push({ week: w, weekStart: win.start + (w - 1) * WEEK, items: rest.slice(0, n) });
     rest = rest.slice(n);
   }
@@ -245,12 +271,56 @@ export function weekPlan(ix: ContentIndex, s: LearnerState, win: PlanWindow, now
   return {
     week, totalWeeks, weekStart: ws, weekEnd: ws + WEEK, startLevel,
     targets, bonus, total: all.length, done,
-    pace: all.length - openAtMonday.length - Math.round((all.length * (week - 1)) / totalWeeks),
+    pace: all.length - openAtMonday.length - Math.min(all.length, Math.round((path.length * (week - 1)) / totalWeeks)),
     minutes: targets.filter((t) => t.doneAt === undefined).reduce((n, t) => n + t.m.minutes, 0),
     habits, upcoming, finished: all.length > 0 && done === all.length,
     locked: done < all.length && targets.length > 0 && targets.every((t) => t.doneAt !== undefined),
+    free,
   };
 }
+
+export interface PlanGate {
+  /** Steps whose turn comes in a later week (`Milestone.key`), not open before `opensAt`. */
+  waiting: Set<string>;
+  /** Monday 00:00 of next week. */
+  opensAt: number;
+}
+
+/** The learner's plan this week, Free or Premium. */
+export const learnerPlan = (ix: ContentIndex, s: LearnerState, ent: Entitlement | undefined, now: number): WeekPlan =>
+  weekPlan(ix, s, planWindow(ent, s, now), now, { free: !isPremium(ent, now) });
+
+const gates = new WeakMap<ContentIndex, WeakMap<LearnerState, { key: string; gate: PlanGate | null }>>();
+
+/**
+ * Jalur follows the weekly plan (16 Nov 2026): a lesson or exam whose turn
+ * comes in a later week stays closed until Monday 00:00. Lessons already
+ * started stay open. Admins (checking the material), teachers and class
+ * licences (the teacher sets the pace) are not held back.
+ */
+export function planGate(ix: ContentIndex, s: LearnerState, ent: Entitlement | undefined, now: number): PlanGate | null {
+  if (ent?.premium && ['admin', 'teacher', 'class'].includes(ent.plan ?? '') && isPremium(ent, now)) return null;
+  // Cached per state: the path page asks once per lesson. The key covers what the plan depends on.
+  let n = 0;
+  for (const k in s.lessons) n += s.lessons[k].completedAt ? 1000 : 1;
+  for (const k in s.exams) if (s.exams[k].attempts.some((a) => a.passed)) n += 1_000_000;
+  const key = [weekStart(now), isPremium(ent, now), ent?.plan, ent?.expiresAt, s.planStart, s.profile.placementLevel, s.profile.placementDone, n, Object.keys(s.rewards).length, Object.keys(s.conversations).length].join('|');
+  let byState = gates.get(ix);
+  if (!byState) gates.set(ix, (byState = new WeakMap()));
+  const hit = byState.get(s);
+  if (hit?.key === key) return hit.gate;
+  const plan = learnerPlan(ix, s, ent, now);
+  const waiting = new Set(plan.upcoming.flatMap((w) => w.items).filter((m) => !(m.kind === 'lesson' && s.lessons[m.ref])).map((m) => m.key));
+  const gate = plan.finished || !waiting.size ? null : { waiting, opensAt: plan.weekEnd };
+  byState.set(s, { key, gate });
+  return gate;
+}
+
+/** "Senin, 23 Nov, 00.00". */
+export const openingAt = (at: number) => `${new Date(at).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}, 00.00`;
+
+/** Why a step is closed by the plan, with the countdown. */
+export const planWaitReason = (opensAt: number, now: number) => `Sesuai rencana mingguan, langkah ini terbuka dalam ${timeLeft(opensAt, now)} lagi (${openingAt(opensAt)}).`;
 
 /** "2 hari 5 jam", "5 jam 20 menit", "40 menit": time left until `at`. */
 export function timeLeft(at: number, now: number): string {

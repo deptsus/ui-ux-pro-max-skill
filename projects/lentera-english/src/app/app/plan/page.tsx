@@ -3,30 +3,19 @@ import { CalendarCheck, Lock } from 'lucide-react';
 import { useApp } from '@/lib/client/hooks';
 import { dateId } from '@/lib/format';
 import { timeLeft } from '@/lib/engine/plan';
-import { HabitList, KIND_LABEL, PaceBadge, PlanLockNotice, TargetList, useWeekPlan, weekRange } from '@/components/WeekPlan';
-import { Card, Empty, LinkButton, Notice, PageHeader, Progress } from '@/components/ui';
+import { FreeDoneNotice, HabitList, KIND_LABEL, PaceBadge, PlanLockNotice, TargetList, useWeekPlan, weekRange } from '@/components/WeekPlan';
+import { Card, Notice, PageHeader, Progress } from '@/components/ui';
 
 const SHOW_WEEKS = 6;
 
 export default function PlanPage() {
-  const { premium, now } = useApp();
+  const { now } = useApp();
   const { plan, end } = useWeekPlan();
-
-  if (!plan) {
-    return (
-      <div className="mx-auto max-w-xl">
-        <PageHeader title="Rencana Belajar Mingguan" subtitle="Untuk pelanggan Premium Bulanan dan Tahunan." />
-        <Empty title="Rencana 52 minggu ada di Premium" action={<LinkButton href="/app/subscription" variant="accent">{premium ? 'Lihat paket' : 'Lihat Premium'}</LinkButton>}>
-          Rencana ini membagi seluruh jalurmu, dari level hasil tes penempatan sampai C2, menjadi target setiap minggu: pelajaran, ujian, latihan menyimak, dan percakapan. Jatahnya dihitung ulang setiap Senin dari langkah yang masih tersisa dan minggu yang tersisa di rencanamu.
-        </Empty>
-      </div>
-    );
-  }
 
   const weeks = plan.upcoming;
   return (
     <div className="mx-auto max-w-2xl space-y-5">
-      <PageHeader title="Rencana Belajar Mingguan" subtitle={`Dari level ${plan.startLevel} sampai C2, dibagi rata sampai ${end ? dateId(end) : 'akhir rencana'}.`} />
+      <PageHeader title="Rencana Belajar Mingguan" subtitle={plan.free ? `Materi gratis mulai level ${plan.startLevel}, dibagi per minggu. Premium melanjutkannya sampai C2.` : `Dari level ${plan.startLevel} sampai C2, dibagi rata sampai ${dateId(end)}.`} />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Ringkasan rencana">
         <Card className="p-4"><p className="text-sm font-bold text-muted">Minggu</p><p className="mt-1 text-2xl font-extrabold">{plan.week} <span className="text-base text-muted">/ {plan.totalWeeks}</span></p></Card>
@@ -37,7 +26,9 @@ export default function PlanPage() {
       <section aria-labelledby="this-week">
         <h2 id="this-week" className="mb-2 text-lg font-extrabold">Minggu ini · {weekRange(plan.weekStart)}</h2>
         <Card className="space-y-3">
-          {plan.finished ? (
+          {plan.finished && plan.free ? (
+            <FreeDoneNotice />
+          ) : plan.finished ? (
             <p>Seluruh jalurmu sampai C2 sudah tuntas. Pertahankan dengan ulangan terjadwal, latihan perbaikan, dan Tantangan Kilat.</p>
           ) : (
             <>
@@ -76,9 +67,11 @@ export default function PlanPage() {
 
       <Notice tone="muted" title="Cara kerja rencana ini">
         <ul className="mt-1 list-disc space-y-1 pl-5">
-          <li>Isinya seluruh jalurmu dari level {plan.startLevel} sampai C2: {plan.total} langkah berupa pelajaran, ujian unit, ujian level, latihan menyimak, dan simulasi percakapan, dalam urutan kurikulum.</li>
+          {plan.free
+            ? <li>Akun Free: isinya {plan.total} langkah dari materi gratis, dengan jatah per minggu yang sama seperti Premium. Dengan Premium, rencana yang sama berlanjut sampai C2.</li>
+            : <li>Isinya seluruh jalurmu dari level {plan.startLevel} sampai C2: {plan.total} langkah berupa pelajaran, ujian unit, ujian level, latihan menyimak, dan simulasi percakapan, dalam urutan kurikulum.</li>}
           <li>Jatah tiap minggu = langkah yang masih tersisa dibagi minggu yang tersisa di rencanamu ({plan.totalWeeks} minggu), dihitung ulang setiap Senin. Tertinggal? Jatahnya naik sedikit.</li>
-          <li>Setelah jatah minggu ini selesai, langkah berikutnya terkunci sampai Senin pukul 00.00. Hitungan mundurnya tampil di atas daftar minggu ini dan di Beranda.</li>
+          <li>Jalur Belajar dan Pusat Ujian mengikuti rencana ini: pelajaran dan ujian minggu berikutnya terbuka Senin pukul 00.00. Setelah jatah minggu ini selesai, hitungan mundurnya tampil di atas daftar minggu ini dan di Beranda. Pelajaran yang sudah dimulai tetap bisa dilanjutkan.</li>
           <li>Ulangan terjadwal, PR, dan tes ulang penguasaan tidak dihitung sebagai langkah, tetapi tetap muncul di Beranda dan penting agar materi tidak terlupa.</li>
           <li>Rencana ini dihitung dari progresmu dengan aturan tetap, tanpa AI.</li>
         </ul>

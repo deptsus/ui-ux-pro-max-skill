@@ -1,7 +1,8 @@
 // End-to-end check of the weekly plan changes (16 Nov 2026): monthly Premium
 // gets the full 52-week plan; once this week's share is done the next steps
-// lock until Monday 00:00 with a countdown right above the list; and Beranda
-// stops offering new steps (cooldown card) until then.
+// lock until Monday 00:00 with a countdown right above the list; Jalur and the
+// exams follow the plan; Beranda stops offering new steps (cooldown card) until
+// then; Free learners and guests get a plan with the free material only.
 //
 // Needs a server with the embedded backend and the admin address set
 // (see e2e/admin-app.mjs).
@@ -105,13 +106,20 @@ try {
   check('Beranda: semua tugas selesai → jeda sampai minggu depan', await seen(rec.getByRole('heading', { name: 'Semua tugas minggu ini selesai' })) && /terbuka dalam \d+ (hari|jam|menit)/.test(await rec.innerText()));
   check('Beranda: tidak menawarkan pelajaran baru atau ujian unit', await p.getByText(/^Pelajaran berikutnya:/).count() === 0 && await rec.getByText(/^Ujian Unit/).count() === 0);
   await p.screenshot({ path: path.join(SHOTS, 'plan-beranda-jeda.png'), fullPage: true });
+
+  // 4. Jalur and Pusat Ujian follow the plan: next week's unit exam waits, with the countdown.
+  await p.goto(`${BASE}/app/path`);
+  check('Jalur: langkah minggu depan ditandai dengan hitungan mundur', await seen(p.getByText(/Sesuai rencana mingguan, langkah ini terbuka dalam \d+ (hari|jam|menit)/)));
+  await p.screenshot({ path: path.join(SHOTS, 'plan-jalur.png'), fullPage: true });
+  await p.goto(`${BASE}/app/exams?id=exam.a1-c1-u1`);
+  check('Pusat Ujian: ujian unit minggu depan tidak bisa dimulai', await seen(p.getByText('Ujian ini terbuka minggu depan')) && await p.getByRole('button', { name: /Mulai ujian/ }).count() === 0);
   saved = { state: JSON.stringify(await readState(p)), monday: await p.evaluate(() => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + 7); return d.getTime(); }) };
 } catch (e) {
   await p.screenshot({ path: path.join(SHOTS, 'plan-gagal.png'), fullPage: true }).catch(() => {});
   check('rencana mingguan: macet', false, String(e.message).split('\n')[0].slice(0, 200));
 }
 
-// 4. Monday 00:05: next week's steps open.
+// 5. Monday 00:05: next week's steps open.
 if (saved) {
   const { p: q } = await phone({ time: saved.monday + 5 * 60_000, state: saved.state });
   try {
@@ -122,9 +130,33 @@ if (saved) {
     const rec = q.locator('section[aria-labelledby=rec-title]');
     await rec.waitFor({ timeout: 30000 });
     check('Senin 00.05: Beranda kembali menawarkan langkah berikutnya', await rec.getByRole('heading', { name: 'Semua tugas minggu ini selesai' }).count() === 0);
+    await q.goto(`${BASE}/app/exams?id=exam.a1-c1-u1`);
+    check('Senin 00.05: ujian unit bisa dimulai', await seen(q.getByRole('button', { name: /Mulai ujian/ })));
   } catch (e) {
     check('minggu berikutnya: macet', false, String(e.message).split('\n')[0].slice(0, 200));
   }
+}
+
+// 6. A guest (Free): a plan with the free material only.
+{
+  const free = await fetch(`${BASE}/api/content`).then((r) => r.json()).then((d) => d.pack);
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const g = await ctx.newPage();
+  g.on('pageerror', (e) => issues.push(`pageerror: ${e.message}`));
+  try {
+    await g.goto(`${BASE}/app/plan`);
+    await g.getByText(/^Materi gratis mulai level A1/).waitFor({ timeout: 30000 });
+    const text = await g.locator('main').innerText();
+    const premiumTitles = free.lessons.filter((l) => l.locked).map((l) => l.title);
+    check('tamu: rencana mingguan dari materi gratis, tanpa pelajaran Premium', !premiumTitles.some((t) => text.includes(t)) && text.includes(free.lessons.find((l) => !l.locked).title), text.slice(0, 200));
+    check('tamu: catatan bahwa Premium melanjutkan rencana sampai C2', text.includes('Dengan Premium, rencana yang sama berlanjut sampai C2'));
+    await g.goto(`${BASE}/app`);
+    check('tamu: Beranda menampilkan rencana minggu ini', await seen(g.getByRole('heading', { name: 'Rencana minggu ini' })));
+    await g.screenshot({ path: path.join(SHOTS, 'plan-tamu.png'), fullPage: true });
+  } catch (e) {
+    check('rencana tamu: macet', false, String(e.message).split('\n')[0].slice(0, 200));
+  }
+  await ctx.close();
 }
 
 check('tanpa error di konsol', issues.length === 0, issues.slice(0, 3).join(' | '));

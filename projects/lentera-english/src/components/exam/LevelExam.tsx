@@ -11,7 +11,8 @@ import type { Answer, Grade } from '@/lib/engine/grading';
 import { RETAKE_HOURS, weakTopics, type SectionResult } from '@/lib/engine/levelExam';
 import { topicPool } from '@/lib/engine/sessions';
 import { recordExam } from '@/lib/engine/state';
-import { levelExamStatus } from '@/lib/engine/unlock';
+import { examOpensAt, levelExamStatus } from '@/lib/engine/unlock';
+import { planWaitReason } from '@/lib/engine/plan';
 import type { Cefr } from '@/lib/content/types';
 import { api, ApiError } from '@/lib/client/api';
 import { useApp, useNow } from '@/lib/client/hooks';
@@ -68,7 +69,10 @@ export function LevelExam({ exam }: { exam: ExamDef }) {
 
   const attempts = learner.exams[exam.id]?.attempts ?? [];
   const last = attempts.at(-1);
-  const status = levelExamStatus(learner, ix, exam.ref as Cefr, ent, now);
+  // The weekly plan holds the exam back until its week (16 Nov 2026).
+  const planWait = examOpensAt(learner, ix, exam, ent, now);
+  const rawStatus = levelExamStatus(learner, ix, exam.ref as Cefr, ent, now);
+  const status = rawStatus === 'available' && planWait ? 'locked' : rawStatus;
   const waitUntil = last && !last.passed ? last.at + RETAKE_HOURS * 3600 * 1000 : 0;
   const required = last && !last.passed ? (last.weak ?? []) : [];
   const pending = required.filter((t) => (learner.rewards[`practice:${t}`] ?? 0) <= (last?.at ?? 0));
@@ -146,7 +150,9 @@ export function LevelExam({ exam }: { exam: ExamDef }) {
       </Card>
 
       {status === 'premium' && <Notice tone="accent" title="Ujian level termasuk Premium"><LinkButton href="/app/subscription" size="sm" variant="accent" className="mt-2">Lihat paket</LinkButton></Notice>}
-      {status === 'locked' && <Notice tone="muted" title="Ujian masih terkunci">Tuntaskan semua pelajaran dan ujian unit di level {exam.ref} terlebih dahulu.</Notice>}
+      {status === 'locked' && (planWait
+        ? <Notice tone="muted" title="Ujian ini terbuka minggu depan">{planWaitReason(planWait, now)} <LinkButton href="/app/plan" size="sm" variant="secondary" className="mt-2">Lihat rencana mingguan</LinkButton></Notice>
+        : <Notice tone="muted" title="Ujian masih terkunci">Tuntaskan semua pelajaran dan ujian unit di level {exam.ref} terlebih dahulu.</Notice>)}
       {(status === 'available' || status === 'passed') && (
         <Card className="space-y-3">
           {now < waitUntil && <Notice tone="muted" title="Jeda sebelum mengulang">Ujian bisa diulang mulai {dateTimeId(waitUntil)}. Gunakan waktunya untuk latihan di bawah.</Notice>}

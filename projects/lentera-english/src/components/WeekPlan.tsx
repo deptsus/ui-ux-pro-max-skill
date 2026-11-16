@@ -3,29 +3,37 @@
 // plan page reuses. The plan itself is computed by src/lib/engine/plan.ts.
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { ArrowRight, CalendarCheck, Check, Circle, Lock } from 'lucide-react';
+import { ArrowRight, Check, Circle, Lock } from 'lucide-react';
 import { useApp } from '@/lib/client/hooks';
 import { act, getLearner } from '@/lib/client/store';
 import { dateId } from '@/lib/format';
-import { needsPlanStart, planWindow, timeLeft, weekPlan, weekStart, type Habit, type MilestoneKind, type PlanTarget, type WeekPlan } from '@/lib/engine/plan';
+import { learnerPlan, needsPlanStart, openingAt, planWindow, timeLeft, weekStart, type Habit, type MilestoneKind, type PlanTarget, type WeekPlan } from '@/lib/engine/plan';
 import { Badge, Card, LinkButton, Ring, cx } from '@/components/ui';
 
 export const KIND_LABEL: Record<MilestoneKind, string> = { lesson: 'Pelajaran', 'unit-exam': 'Ujian unit', 'level-exam': 'Ujian level', listening: 'Menyimak', conversation: 'Percakapan', story: 'Cerita' };
 
-/** The learner's plan this week, or null when they have no plan (Free, or a class licence ending within a month). */
-export function useWeekPlan(): { plan: WeekPlan | null; end?: number } {
+/** The learner's plan this week: Premium gets the whole path, Free (and guests) only the free material. */
+export function useWeekPlan(): { plan: WeekPlan; end: number } {
   const { ix, learner, ent, now } = useApp();
   const fresh = needsPlanStart(ent, learner, now);
-  // A monthly subscriber's 52 weeks count from the Monday the plan first opened; saved once, synced with progress.
+  // Free and monthly plans count their 52 weeks from the Monday the plan first opened; saved once, synced with progress.
   useEffect(() => {
     if (fresh && getLearner()?.planStart === undefined) act((d, t) => { d.planStart = weekStart(t); });
   }, [fresh]);
-  const win = planWindow(ent, learner, now);
-  return win ? { plan: weekPlan(ix, learner, win, now), end: win.end } : { plan: null };
+  return { plan: learnerPlan(ix, learner, ent, now), end: planWindow(ent, learner, now).end };
 }
 
-/** Monday 00:00 as "Senin, 23 Nov, 00.00". */
-export const openingAt = (at: number) => `${dateId(at, { weekday: 'long', day: 'numeric', month: 'short' })}, 00.00`;
+export { openingAt };
+
+/** Free plan finished: the free material is done; Premium continues the plan to C2. */
+export function FreeDoneNotice() {
+  return (
+    <div className="space-y-2">
+      <p className="text-sm"><span className="font-bold">Semua materi gratis di rencanamu sudah tuntas.</span> Dengan Premium, rencana ini berlanjut dengan jatah yang sama sampai C2.</p>
+      <LinkButton href="/app/subscription" size="sm" variant="accent">Lihat Premium</LinkButton>
+    </div>
+  );
+}
 
 /** Shown right above this week's list once the share is done: when the next steps open. */
 export function PlanLockNotice({ plan, now }: { plan: WeekPlan; now: number }) {
@@ -79,22 +87,10 @@ export function HabitList({ habits }: { habits: Habit[] }) {
   );
 }
 
-/** Dashboard card: this week's share for Premium subscribers, a short pitch for everyone else. */
+/** Dashboard card: this week's share (Free plans list only the free material). */
 export function WeekPlanCard() {
-  const { premium, now } = useApp();
+  const { now } = useApp();
   const { plan } = useWeekPlan();
-  if (!plan) {
-    return (
-      <Card className="flex flex-wrap items-center gap-3 p-4">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-strong"><CalendarCheck size={20} aria-hidden /></span>
-        <div className="min-w-0 flex-1 basis-52">
-          <p className="font-extrabold">Rencana belajar 52 minggu</p>
-          <p className="text-sm text-muted">Premium (bulanan atau tahunan) membagi jalurmu sampai C2 menjadi target mingguan, lalu menyesuaikannya setiap Senin.</p>
-        </div>
-        <LinkButton href="/app/plan" size="sm" variant={premium ? 'secondary' : 'accent'}>Lihat caranya</LinkButton>
-      </Card>
-    );
-  }
   const done = plan.targets.filter((t) => t.doneAt !== undefined).length;
   const all = plan.targets.length;
   return (
@@ -114,7 +110,9 @@ export function WeekPlanCard() {
             <div className="mt-1"><PaceBadge plan={plan} /></div>
           </div>
         </div>
-        {plan.finished ? (
+        {plan.finished && plan.free ? (
+          <div className="mt-3"><FreeDoneNotice /></div>
+        ) : plan.finished ? (
           <p className="mt-3 text-sm">Seluruh jalurmu sampai C2 sudah tuntas. Minggu ini fokus pada ulangan terjadwal dan latihan perbaikan agar tetap terjaga.</p>
         ) : plan.locked ? (
           <div className="mt-3"><PlanLockNotice plan={plan} now={now} /></div>

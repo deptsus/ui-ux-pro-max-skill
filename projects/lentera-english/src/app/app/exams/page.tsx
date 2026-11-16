@@ -5,7 +5,8 @@ import { Check, Compass, Crown, Lock } from 'lucide-react';
 import type { ExamDef } from '@/lib/content/types';
 import { buildExam, scoreExam, type ExamResult } from '@/lib/engine/sessions';
 import { recordExam } from '@/lib/engine/state';
-import { levelExamStatus, unitExamStatus } from '@/lib/engine/unlock';
+import { examOpensAt, levelExamStatus, unitExamStatus } from '@/lib/engine/unlock';
+import { planWaitReason } from '@/lib/engine/plan';
 import type { Cefr } from '@/lib/content/types';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
@@ -23,7 +24,12 @@ function Exams() {
   const exam = id ? ix.pack.exams.find((e) => e.id === id) : undefined;
   const attempt = (exam ? learner.exams[exam.id]?.attempts.length ?? 0 : 0) + (done ? 0 : 1);
   const questions = useMemo(() => (exam ? buildExam(ix, exam, attempt) : []), [ix, exam, attempt]);
-  const status = (e: ExamDef) => (e.scope === 'unit' ? unitExamStatus(learner, ix, e.ref) : levelExamStatus(learner, ix, e.ref as Cefr, ent, now));
+  // The weekly plan holds back an exam whose turn is in a later week (16 Nov 2026).
+  const opensAt = (e: ExamDef) => examOpensAt(learner, ix, e, ent, now);
+  const status = (e: ExamDef) => {
+    const st = e.scope === 'unit' ? unitExamStatus(learner, ix, e.ref) : levelExamStatus(learner, ix, e.ref as Cefr, ent, now);
+    return st === 'available' && opensAt(e) ? 'locked' : st;
+  };
 
   if (id && !exam) return <Empty title="Ujian tidak ditemukan" action={<LinkButton href="/app/exams">Pusat Ujian</LinkButton>} />;
   // Rilis 3: sectioned level exams are drawn and graded on the server.
@@ -56,7 +62,7 @@ function Exams() {
       <div className="mx-auto max-w-xl space-y-4">
         <PageHeader title={exam.title} subtitle={`${questions.length} soal · ${Math.round(exam.timeLimitSec / 60)} menit · lulus ${exam.passScore}%`} />
         {st === 'premium' ? <Notice tone="accent" title="Ujian level termasuk Premium"><LinkButton href="/app/subscription" size="sm" variant="accent" className="mt-2">Lihat paket</LinkButton></Notice>
-          : st === 'locked' ? <Notice tone="muted" title="Ujian masih terkunci">Tuntaskan semua pelajaran {exam.scope === 'unit' ? 'unit' : 'dan ujian unit di level'} ini terlebih dahulu.</Notice>
+          : st === 'locked' ? (opensAt(exam) ? <Notice tone="muted" title="Ujian ini terbuka minggu depan">{planWaitReason(opensAt(exam)!, now)} <LinkButton href="/app/plan" size="sm" variant="secondary" className="mt-2">Lihat rencana mingguan</LinkButton></Notice> : <Notice tone="muted" title="Ujian masih terkunci">Tuntaskan semua pelajaran {exam.scope === 'unit' ? 'unit' : 'dan ujian unit di level'} ini terlebih dahulu.</Notice>)
           : <Card className="space-y-3"><ul className="list-disc space-y-1 pl-5 text-sm text-muted"><li>Tidak ada petunjuk. Pembahasan lengkap muncul setelah ujian selesai.</li><li>Soal diambil merata dari semua pelajaran dalam cakupan ujian dan diacak tiap percobaan.</li><li>Saat waktu habis, soal yang belum dijawab dihitung salah.</li></ul><Button full size="lg" onClick={() => setRunning(true)}>{attempts.length ? 'Ulangi ujian' : 'Mulai ujian'}</Button></Card>}
         {attempts.length > 0 && <Card><h2 className="font-extrabold">Riwayat percobaan</h2><ul className="mt-2 divide-y divide-line">{[...attempts].reverse().map((a, i) => <li key={i} className="flex items-center justify-between py-2 text-sm"><span>{dateTimeId(a.at)}</span><Badge tone={a.passed ? 'ok' : 'bad'}>{a.score}% · {a.passed ? 'lulus' : 'belum lulus'}</Badge></li>)}</ul></Card>}
       </div>

@@ -1,5 +1,6 @@
 // Unlocking rules: learners must demonstrate competency before advancing.
 import { CEFR_ORDER, type Cefr, type Chapter, type ContentIndex, type ExamDef, type Lesson, type Unit } from '@/lib/content/types';
+import { planGate, planWaitReason } from './plan';
 import { isPremium, type Entitlement, type LearnerState } from './types';
 
 export type LessonStatus = 'premium' | 'locked' | 'available' | 'in-progress' | 'completed';
@@ -8,6 +9,8 @@ export interface LockInfo {
   status: LessonStatus;
   /** Why it is locked, in Indonesian. */
   reason?: string;
+  /** Closed by the weekly plan until this time (Monday 00:00). */
+  opensAt?: number;
 }
 
 const passedExam = (s: LearnerState, examId: string) => !!s.exams[examId]?.attempts.some((a) => a.passed);
@@ -66,7 +69,13 @@ export function lessonLock(s: LearnerState, ix: ContentIndex, lesson: Lesson, en
   }
   // Learners placed above this level may enter any lesson below their level.
   const placed = s.profile.placementLevel ? CEFR_ORDER.indexOf(s.profile.placementLevel) : 0;
-  const open = (): LockInfo => ({ status: progress ? 'in-progress' : 'available' });
+  const open = (): LockInfo => {
+    if (progress) return { status: 'in-progress' };
+    // Jalur follows the weekly plan (16 Nov 2026): a lesson whose turn is in a later week waits for Monday.
+    const gate = planGate(ix, s, ent, now);
+    if (gate?.waiting.has(`lesson:${lesson.id}`)) return { status: 'locked', reason: planWaitReason(gate.opensAt, now), opensAt: gate.opensAt };
+    return { status: 'available' };
+  };
   if (placed > CEFR_ORDER.indexOf(chapter.level)) return open();
 
   const siblings = lessonsOfUnit(ix, unit.id);
@@ -91,6 +100,12 @@ export function lessonLock(s: LearnerState, ix: ContentIndex, lesson: Lesson, en
   return open();
 }
 
+/** When the weekly plan holds an exam back (its turn is in a later week): the Monday it opens. */
+export function examOpensAt(s: LearnerState, ix: ContentIndex, exam: ExamDef, ent: Entitlement, now: number): number | undefined {
+  const gate = planGate(ix, s, ent, now);
+  return gate?.waiting.has(`${exam.scope === 'unit' ? 'unit-exam' : 'level-exam'}:${exam.id}`) ? gate.opensAt : undefined;
+}
+
 export function levelExamStatus(s: LearnerState, ix: ContentIndex, level: Cefr, ent: Entitlement, now: number): 'none' | 'premium' | 'locked' | 'available' | 'passed' {
   const exam = levelExam(ix, level);
   if (!exam) return 'none';
@@ -109,5 +124,6 @@ export function nextLesson(s: LearnerState, ix: ContentIndex, ent: Entitlement, 
     return st === 'available' || st === 'in-progress';
   });
   const levelOf = (l: Lesson) => CEFR_ORDER.indexOf(ix.chapterById.get(ix.unitById.get(l.unitId)!.chapterId)!.level);
-  return candidates.find((l) => s.lessons[l.id] && !s.lessons[l.id].completedAt) ?? candidates.find((l) => levelOf(l) >= start) ?? candidates[0];
+  // While the weekly plan holds the next lessons back, nothing outside the plan is pushed instead.
+  return candidates.find((l) => s.lessons[l.id] && !s.lessons[l.id].completedAt) ?? candidates.find((l) => levelOf(l) >= start) ?? (planGate(ix, s, ent, now) ? undefined : candidates[0]);
 }

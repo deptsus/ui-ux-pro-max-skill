@@ -243,7 +243,11 @@ describe('unlock rules', () => {
     expect(recordExam(s, ix, exam, 75, T0)).toBe(false);
     expect(lessonLock(s, ix, articles, FREE, T0).status).toBe('locked');
     expect(recordExam(s, ix, exam, 80, T0)).toBe(true);
-    expect(lessonLock(s, ix, articles, FREE, T0).status).toBe('available');
+    // Passed; the weekly plan (16 Nov 2026) then holds the lesson until next Monday, as it is next week's step.
+    const held = lessonLock(s, ix, articles, FREE, T0);
+    expect(held.status).toBe('locked');
+    expect(held.reason).toMatch(/^Sesuai rencana mingguan/);
+    expect(lessonLock(s, ix, articles, FREE, held.opensAt!).status).toBe('available');
   });
   it('keeps premium lessons locked for free and expired accounts', () => {
     const s = createState('u3', T0);

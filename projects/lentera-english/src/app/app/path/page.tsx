@@ -2,7 +2,8 @@
 import Link from 'next/link';
 import { Check, Crown, GraduationCap, Hourglass, Lock, Play } from 'lucide-react';
 import { CEFR_ORDER, type Cefr } from '@/lib/content/types';
-import { lessonLock, lessonsOfUnit, levelExam, levelExamStatus, levelOpen, unitExam, unitExamStatus } from '@/lib/engine/unlock';
+import { examOpensAt, lessonLock, lessonsOfUnit, levelExam, levelExamStatus, levelOpen, unitExam, unitExamStatus } from '@/lib/engine/unlock';
+import { planWaitReason } from '@/lib/engine/plan';
 import { useApp } from '@/lib/client/hooks';
 import { Badge, Card, LinkButton, PageHeader, Progress, cx } from '@/components/ui';
 
@@ -22,7 +23,10 @@ export default function PathPage() {
           const done = lessons.filter((l) => learner.lessons[l.id]?.completedAt).length;
           const open = levelOpen(learner, ix, code);
           const exam = levelExam(ix, code);
-          const examStatus = levelExamStatus(learner, ix, code, ent, now);
+          const examWait = exam ? examOpensAt(learner, ix, exam, ent, now) : undefined;
+          const rawStatus = levelExamStatus(learner, ix, code, ent, now);
+          // The weekly plan holds the exam back until its week (16 Nov 2026).
+          const examStatus = rawStatus === 'available' && examWait ? 'locked' : rawStatus;
           return (
             <section key={code} aria-labelledby={`level-${code}`}>
               <div className="mb-3 flex items-center gap-3">
@@ -48,7 +52,8 @@ export default function PathPage() {
                       {units.map((u) => {
                         const unitLessons = lessonsOfUnit(ix, u.id);
                         const ue = unitExam(ix, u.id);
-                        const ues = unitExamStatus(learner, ix, u.id);
+                        const ueWait = ue ? examOpensAt(learner, ix, ue, ent, now) : undefined;
+                        const ues = unitExamStatus(learner, ix, u.id) === 'available' && ueWait ? 'locked' : unitExamStatus(learner, ix, u.id);
                         return (
                           <div key={u.id} className="mt-4">
                             <p className="text-sm font-extrabold uppercase tracking-wide text-muted">Unit {u.position} · {u.title}</p>
@@ -88,7 +93,7 @@ export default function PathPage() {
                               {ue && (
                                 <li>
                                   {ues === 'locked' ? (
-                                    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3 opacity-75"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><GraduationCap size={18} aria-hidden /></span><span><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">Terbuka setelah semua pelajaran unit ini tuntas.</span></span></div>
+                                    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line p-3 opacity-75"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2 text-muted"><GraduationCap size={18} aria-hidden /></span><span><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ueWait ? planWaitReason(ueWait, now) : 'Terbuka setelah semua pelajaran unit ini tuntas.'}</span></span></div>
                                   ) : (
                                     <Link href={`/app/exams?id=${ue.id}`} className="flex items-center gap-3 rounded-2xl border-2 border-accent bg-accent-soft p-3"><span className={cx('grid h-10 w-10 shrink-0 place-items-center rounded-full', ues === 'passed' ? 'bg-ok text-on-brand' : 'bg-accent text-[#1e1b3a]')}>{ues === 'passed' ? <Check size={18} aria-hidden /> : <GraduationCap size={18} aria-hidden />}</span><span className="flex-1"><span className="block font-bold">{ue.title}</span><span className="block text-sm text-muted">{ues === 'passed' ? 'Lulus. Unit berikutnya terbuka.' : `Lulus min. ${ue.passScore}% untuk membuka unit berikutnya.`}</span></span></Link>
                                   )}
@@ -104,7 +109,7 @@ export default function PathPage() {
                 {exam && (
                   <Card className="flex flex-wrap items-center gap-3 border-2 border-brand">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-on-brand"><GraduationCap size={24} aria-hidden /></span>
-                    <div className="min-w-0 flex-1"><p className="font-extrabold">{exam.title}</p><p className="text-sm text-muted">{examStatus === 'passed' ? 'Lulus. Level berikutnya terbuka.' : examStatus === 'premium' ? 'Ujian level tersedia untuk Premium.' : examStatus === 'locked' ? 'Tuntaskan semua unit dan ujian unit di level ini dulu.' : `Lulus min. ${exam.passScore}% untuk naik level.`}</p></div>
+                    <div className="min-w-0 flex-1"><p className="font-extrabold">{exam.title}</p><p className="text-sm text-muted">{examStatus === 'passed' ? 'Lulus. Level berikutnya terbuka.' : examStatus === 'premium' ? 'Ujian level tersedia untuk Premium.' : examStatus === 'locked' ? (examWait ? planWaitReason(examWait, now) : 'Tuntaskan semua unit dan ujian unit di level ini dulu.') : `Lulus min. ${exam.passScore}% untuk naik level.`}</p></div>
                     {examStatus === 'available' && <LinkButton href={`/app/exams?id=${exam.id}`} size="sm">Ikuti ujian</LinkButton>}
                     {examStatus === 'premium' && <LinkButton href="/app/subscription" size="sm" variant="accent">Lihat Premium</LinkButton>}
                   </Card>
