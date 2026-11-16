@@ -152,7 +152,8 @@ for (const width of [320, 390]) {
   await p.getByRole('radio', { name: 'Besar', exact: true }).waitFor({ timeout: 30000 });
   check('ukuran huruf tetap setelah dimuat ulang', (await p.evaluate(() => getComputedStyle(document.documentElement).fontSize)) === '18px' && (await p.getByRole('radio', { name: 'Besar', exact: true }).getAttribute('aria-checked')) === 'true');
   await p.getByRole('radio', { name: 'Normal', exact: true }).click();
-  check('getaran: pilihan Nyala/Mati tampil di HP yang bisa bergetar', await p.getByRole('radio', { name: 'Mati', exact: true }).count() === 1);
+  check('getaran: pilihan Nyala/Mati tampil di HP yang bisa bergetar', await p.getByRole('radiogroup', { name: /Getaran saat menjawab/ }).getByRole('radio', { name: 'Mati', exact: true }).count() === 1);
+  check('efek suara: pilihan Nyala/Mati tampil, menyala sejak awal (Rilis 14)', await p.getByRole('radiogroup', { name: 'Efek suara' }).getByRole('radio', { name: 'Nyala', exact: true }).getAttribute('aria-checked') === 'true');
 
   // Vibration on answers: a tap when right, a double tap when wrong.
   await p.goto(`${BASE}/app`);

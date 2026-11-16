@@ -244,7 +244,7 @@ meyakinkan bagi orang tua untuk memasukkan anak SD–SMA, dan sepadan dengan har
 Premium. Gaya Lentera sendiri (orisinal), bukan meniru tampilan atau karakter
 aplikasi lain. Dirilis bertahap; tiap rilis satu deploy.
 
-**Rilis 14 "Wajah Baru"** (desain dan karakter):
+**Rilis 14 "Wajah Baru"** (desain dan karakter) — **SELESAI 16 November 2026**:
 - Karakter 2.5D (garis tebal, bayangan lembut, kilau): Pijar 2.0 dengan 14 ekspresi, dan teman belajar orisinal: Sari (SD, seragam merah-putih, rambut wolf cut), Bima (SMP, biru-putih, rambut comma hair), Nadia (SMA, berhijab, abu-putih), Raka (SMA, berkacamata), Bu Lina (guru, rambut pendek, berkacamata). Disetujui pemilik 16 Nov 2026 (dengan revisi rambut dan warna kulit Sari, Bima, Bu Lina); efek suara menyala sejak awal dan bisa dimatikan; urutan rilis 14→15→16→17→18. Semua berbagi 14 ekspresi yang sama dan bergerak dengan CSS (diam bila perangkat meminta gerak dikurangi). Pratinjau: `/gaya` (hanya di server lokal).
 - Desain "clay": tombol tebal yang terasa ditekan, kartu bergaris tebal, judul huruf Baloo 2 (isi tetap Plus Jakarta Sans), chip beruntun/XP/nyawa, progress bar tebal; mode gelap disesuaikan.
 - Jalur Belajar menjadi peta berliku (titik pelajaran bulat, karakter di posisi sekarang, hadiah di akhir unit).
