@@ -5,7 +5,7 @@
 import { useId } from 'react';
 import { Face, INK, MOOD_LABEL, type Mood } from './Face';
 
-export type HairStyle = 'pigtails' | 'spiky' | 'hijab' | 'wavy' | 'bun';
+export type HairStyle = 'wolf' | 'comma' | 'hijab' | 'wavy' | 'short' | 'pigtails' | 'spiky' | 'bun';
 export interface Look {
   name: string;
   /** Who they are, for alt text and the style page. */
@@ -21,11 +21,11 @@ export interface Look {
 }
 
 export const CAST = {
-  sari: { name: 'Sari', role: 'siswi SD kelas 3', skin: '#f3c9a2', hair: '#2b1d16', hairStyle: 'pigtails', top: '#ffffff', trim: '#dc2626' },
-  bima: { name: 'Bima', role: 'siswa SMP kelas 8', skin: '#d6a074', hair: '#1f1712', hairStyle: 'spiky', top: '#ffffff', trim: '#1e3a8a' },
+  sari: { name: 'Sari', role: 'siswi SD kelas 3', skin: '#f3c9a2', hair: '#2b1d16', hairStyle: 'wolf', top: '#ffffff', trim: '#dc2626' },
+  bima: { name: 'Bima', role: 'siswa SMP kelas 8', skin: '#e6b48a', hair: '#1f1712', hairStyle: 'comma', top: '#ffffff', trim: '#1e3a8a' },
   nadia: { name: 'Nadia', role: 'siswi SMA kelas 11', skin: '#efc29c', hair: '#2b1d16', hairStyle: 'hijab', top: '#ffffff', trim: '#64748b', hijab: '#f1f5f9' },
   raka: { name: 'Raka', role: 'siswa SMA kelas 12', skin: '#b67b52', hair: '#1c1410', hairStyle: 'wavy', top: '#ffffff', trim: '#64748b', glasses: true },
-  lina: { name: 'Bu Lina', role: 'guru bahasa Inggris', skin: '#e2b088', hair: '#3a2418', hairStyle: 'bun', top: '#0f766e', trim: '#fbbf24', glasses: true },
+  lina: { name: 'Bu Lina', role: 'guru bahasa Inggris', skin: '#f3c9a2', hair: '#3a2418', hairStyle: 'short', top: '#0f766e', trim: '#fbbf24', glasses: true },
 } satisfies Record<string, Look>;
 export type CastId = keyof typeof CAST;
 
@@ -87,13 +87,45 @@ export function KidFigure({ look, mood = 'happy', still = false }: { look: Look;
           <g>
             {/* neck, ears, head */}
             <path d="M41 60 L41 72 Q48 76 55 72 L55 60 Z" fill={tint(look.skin, -0.15)} stroke={INK} strokeWidth="2.4" strokeLinejoin="round" />
-            <circle cx="49" cy="38.5" r="24" fill={look.hair} stroke={INK} strokeWidth="2.6" />
-            <circle cx="26" cy="46" r="5" fill={`url(#${skin})`} stroke={INK} strokeWidth="2.4" />
-            <circle cx="70" cy="46" r="5" fill={`url(#${skin})`} stroke={INK} strokeWidth="2.4" />
+            {look.hairStyle === 'wolf' ? (
+              // Wolf cut: layered, choppy ends past the jaw; covers the ears.
+              <path d="M23 40 C21 22 33 13 48 13 C63 13 75 22 73 40 L76.5 52 L71 50 L72.5 61 L66 54.5 L64.5 63 L60 55 L36 55 L31.5 63 L30 54.5 L23.5 61 L25 50 L19.5 52 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />
+            ) : look.hairStyle === 'short' ? (
+              // Short bob: ends at the jaw; covers the ears.
+              <path d="M22.5 44 C20 26 32 15 48 15 C64 15 76 26 73.5 44 C73.5 51 71.5 55.5 68 58 L66.5 47 L29.5 47 L28 58 C24.5 55.5 22.5 51 22.5 44 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />
+            ) : (
+              <circle cx="49" cy="38.5" r="24" fill={look.hair} stroke={INK} strokeWidth="2.6" />
+            )}
+            {look.hairStyle !== 'wolf' && look.hairStyle !== 'short' && (
+              <g>
+                <circle cx="26" cy="46" r="5" fill={`url(#${skin})`} stroke={INK} strokeWidth="2.4" />
+                <circle cx="70" cy="46" r="5" fill={`url(#${skin})`} stroke={INK} strokeWidth="2.4" />
+              </g>
+            )}
             <circle cx="48" cy="42" r="22" fill={`url(#${skin})`} stroke={INK} strokeWidth="3" />
             <path d="M29 52 A20 20 0 0 0 67 52 A24 20 0 0 1 29 52 Z" fill={tint(look.skin, -0.35)} opacity="0.22" />
             {/* fringe */}
             {look.hairStyle === 'pigtails' && <path d="M27 39 C29 22 67 20 69 39 C63 31 57 28 49 31 C41 28 33 31 27 39 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />}
+            {look.hairStyle === 'wolf' && (
+              <g fill={`url(#${hair})`} stroke={INK} strokeWidth="2.4" strokeLinejoin="round">
+                {/* choppy curtain bangs and face-framing layers */}
+                <path d="M25.5 41 L27.5 30 C30 21.5 38 17 48 17 C58 17 66 21.5 68.5 30 L70.5 41 Q67.2 38.6 65.5 34.5 Q64.4 37.4 62.5 38.5 Q60.6 34 58.5 30.5 Q57 34.6 54.5 36 Q52.6 32.4 50.5 29.5 Q48.6 34 46 36 Q44.2 33.2 42 30.5 Q40.6 35.6 38 38.5 Q36.6 35.6 34.5 33.5 Q33 37.4 30.5 39.5 Q27.8 40 25.5 41 Z" />
+                <path d="M26.5 37 C24.5 45 26 51.5 29.5 56 L30.5 49 L32.8 52 L32.4 42.5 Z" />
+                <path d="M69.5 37 C71.5 45 70 51.5 66.5 56 L65.5 49 L63.2 52 L63.6 42.5 Z" />
+              </g>
+            )}
+            {look.hairStyle === 'comma' && (
+              // Comma hair: a side fringe that curls inward at the tip, like a comma.
+              <path d="M25.5 40 C24 25 34 15.5 49 15.5 C63 15.5 72 25 70.5 39 C67 31 62 26.5 56 26.5 C49.5 26.5 45 28.6 43.2 31.2 C42.4 32.6 43.4 34 45.4 33.6 C43.4 35.8 39.6 35.4 38.6 32.4 C35 33.6 30 36 25.5 40 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />
+            )}
+            {look.hairStyle === 'short' && (
+              <g fill={`url(#${hair})`} stroke={INK} strokeWidth="2.4" strokeLinejoin="round">
+                {/* side-swept bangs and bob sides over the cheeks */}
+                <path d="M25.5 43 C24.5 26 36 17.5 50 18 C62 18.5 71.5 27 70.5 43 C66.5 34 58.5 29 50 29.5 C42 30 34 33.5 29.5 38.5 C27.8 40.4 26.6 41.7 25.5 43 Z" />
+                <path d="M25.6 42 C25 49 26.4 54 29 57 L30.6 47 Z" />
+                <path d="M70.4 42 C71 49 69.6 54 67 57 L65.4 47 Z" />
+              </g>
+            )}
             {look.hairStyle === 'spiky' && <path d="M25.5 40 L27.5 25 L33.5 29 L37.5 18 L43.5 26 L49.5 16 L54.5 26 L61 19 L63.5 29 L70.5 26 L70.5 40 C63 32 56 30.5 48 32 C40 30.5 33 32 25.5 40 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />}
             {look.hairStyle === 'wavy' && <path d="M26 40 C24 24 34 15 48 16 C62 15 72 24 70 40 C66 34 63 31 59 32 C56 28 52 30 48 31 C44 28 39 30 36 32 C32 31 29 34 26 40 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />}
             {look.hairStyle === 'bun' && <path d="M26 42 C25 25 36 17 50 18 C62 19 71 27 70 42 C64 31 54 27 44 31 C36 33 30 36 26 42 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />}
