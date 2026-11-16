@@ -9,7 +9,7 @@ import path from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { backendMode, supabaseKeyHeaders, supabaseSecretKey, type ServerDb } from './db';
 
-export const BACKUP = { keep: 14, pageSize: 2000, bucket: 'backups', prefix: 'daily/' } as const;
+export const BACKUP = { keep: 14, pageSize: 2000, parallel: 6, bucket: 'backups', prefix: 'daily/' } as const;
 
 export interface BackupStore {
   put(name: string, bytes: Buffer): Promise<void>;
@@ -108,24 +108,31 @@ export async function runBackup(db: ServerDb, opts: { trigger: 'schedule' | 'adm
     format: 'lentera-backup', version: 1, created_at: now.toISOString(), release: (process.env.NEXT_PUBLIC_RELEASE ?? 'local').slice(0, 40), tables: {}, auth_users: [],
   };
   let rows = 0;
-  for (const t of tables) {
+  // Each table is read page by page; several tables at once, because every
+  // call is a round trip to the database region (one by one took ~30 s).
+  const readTable = async (t: string) => {
     const all: unknown[] = [];
     for (let offset = 0; ; offset += pageSize) {
       const page = await db.rpc<unknown[]>('backup_rows', { p_table: t, p_offset: offset, p_limit: pageSize });
       all.push(...page);
       if (page.length < pageSize) break;
     }
-    out.tables[t] = all;
-    rows += all.length;
-  }
+    return all;
+  };
+  const queue = [...tables];
+  await Promise.all(Array.from({ length: Math.min(BACKUP.parallel, queue.length) }, async () => {
+    for (let t = queue.shift(); t !== undefined; t = queue.shift()) out.tables[t] = await readTable(t);
+  }));
+  // Same order as backup_tables() in the file, whatever finished first.
+  out.tables = Object.fromEntries(tables.map((t) => [t, out.tables[t]]));
+  for (const t of tables) rows += out.tables[t].length;
   for (let offset = 0; ; offset += pageSize) {
     const page = await db.rpc<unknown[]>('backup_auth_users', { p_offset: offset, p_limit: pageSize });
     out.auth_users.push(...page);
     if (page.length < pageSize) break;
   }
   const bytes = gzipSync(Buffer.from(JSON.stringify(out)));
-  const day = new Date(now.getTime() + 7 * 3600_000).toISOString().slice(0, 10);
-  const name = `${BACKUP.prefix}${day}.json.gz`;
+  const name = `${BACKUP.prefix}${wibDay(now)}.json.gz`;
   await store.put(name, bytes);
   const files = (await store.list()).sort();
   const removed = files.slice(0, Math.max(0, files.length - (opts.keep ?? BACKUP.keep)));
@@ -134,6 +141,9 @@ export async function runBackup(db: ServerDb, opts: { trigger: 'schedule' | 'adm
   await db.rpc('record_backup', { p_name: name, p_bytes: bytes.length, p_rows: rows, p_tables: tables.length, p_ms: ms, p_trigger: opts.trigger });
   return { name, bytes: bytes.length, rows, tables: tables.length, ms, removed };
 }
+
+/** WIB calendar day, as used in backup file names. */
+export const wibDay = (now = new Date()) => new Date(now.getTime() + 7 * 3600_000).toISOString().slice(0, 10);
 
 /**
  * The scheduled function proves it is the scheduler with an HMAC of the date,

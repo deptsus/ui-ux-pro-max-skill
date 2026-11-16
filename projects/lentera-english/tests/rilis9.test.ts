@@ -8,7 +8,7 @@ import path from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { openEmbedded, type RawDb } from '@/lib/server/db';
 import { fingerprint, normalizeMessage, topFrame } from '@/lib/server/errors';
-import { BACKUP, isBackupName, runBackup, type BackupStore } from '@/lib/server/backup';
+import { BACKUP, isBackupName, runBackup, wibDay, type BackupStore } from '@/lib/server/backup';
 import { newUser } from './helpers';
 
 const ROOT = path.resolve(__dirname, '..');
@@ -120,6 +120,12 @@ describe('cadangan harian', () => {
     expect(json.auth_users.find((u: { id: string }) => u.id === ani)).toEqual(expect.objectContaining({ id: ani, name: 'Ani R9' }));
     expect(JSON.stringify(json)).not.toContain('secret-hash');
     expect(JSON.stringify(json)).not.toContain('PRIVATE');
+    // Tables are read in parallel but written in backup_tables() order, every row once.
+    const order = await db.rpc<string[]>('backup_tables');
+    expect(Object.keys(json.tables)).toEqual(order);
+    const [{ n }] = await db.query<{ n: number }>('select count(*)::int as n from profiles');
+    expect(json.tables.profiles).toHaveLength(n);
+    expect(new Set(json.tables.profiles.map((p: { id: string }) => p.id)).size).toBe(n);
     const [run] = await db.query<{ name: string; trigger: string; rows: number }>('select name, trigger, rows from backup_runs order by id desc limit 1');
     expect(run).toMatchObject({ name: r.name, trigger: 'admin' });
     expect(Number(run.rows)).toBe(r.rows);
@@ -129,6 +135,12 @@ describe('cadangan harian', () => {
     for (const day of ['2026-11-21', '2026-11-22', '2026-11-23']) await runBackup(db, { trigger: 'schedule', store, now: new Date(`${day}T10:00:00Z`), keep: 2 });
     expect(await store.list()).toEqual(['daily/2026-11-22.json.gz', 'daily/2026-11-23.json.gz']);
     expect(BACKUP.keep).toBe(14);
+  });
+
+  it('cadangan terjadwal hanya sekali per hari WIB walau pemicunya terpanggil ulang', async () => {
+    const claim = () => db.rpc<boolean>('claim_job', { p_job: `backup:${wibDay(new Date('2026-11-24T19:00:00Z'))}`, p_min_seconds: 20 * 3600 });
+    expect(wibDay(new Date('2026-11-24T19:00:00Z'))).toBe('2026-11-25');
+    expect([await claim(), await claim()]).toEqual([true, false]);
   });
 
   it('fungsi ekspor menolak tabel di luar daftar', async () => {
