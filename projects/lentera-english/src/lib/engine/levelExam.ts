@@ -131,3 +131,10 @@ export function nextAttemptAt(status: { attempts: number; last_at: string | null
 export function weakTopics(res: Pick<LevelExamResult, 'byTopic'>, hasPool: (topic: string) => boolean): string[] {
   return res.byTopic.filter((t) => t.score < 60 && !t.topic.startsWith('skill.') && hasPool(t.topic)).sort((a, b) => a.score - b.score).slice(0, 2).map((t) => t.topic);
 }
+
+/** Network and clock slack on top of a level exam's own time limit (Rilis 12). */
+export const LATE_GRACE_SEC = 120;
+/** True when a submission arrives after the time limit plus the grace period. Unknown start: not late. */
+export function isLateSubmission(startedAt: number | null, now: number, timeLimitSec: number): boolean {
+  return startedAt !== null && now - startedAt > (timeLimitSec + LATE_GRACE_SEC) * 1000;
+}

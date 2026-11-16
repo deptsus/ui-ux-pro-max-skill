@@ -6,7 +6,7 @@
 import { randomInt } from 'node:crypto';
 import { indexContent, type ExamDef } from '@/lib/content/types';
 import type { Answer } from '@/lib/engine/grading';
-import { buildLevelExam, examSeed, gradeLevelExam, isSectioned, nextAttemptAt, sanitize } from '@/lib/engine/levelExam';
+import { buildLevelExam, examSeed, gradeLevelExam, isLateSubmission, isSectioned, nextAttemptAt, sanitize } from '@/lib/engine/levelExam';
 import { HttpError, json, readJson, requireUser, route } from '@/lib/server/api';
 import { loadContent } from '@/lib/server/content';
 import type { ServerDb } from '@/lib/server/db';
@@ -17,6 +17,12 @@ interface Body { action?: 'start' | 'submit'; id?: string; attempt?: number; ans
 interface Status { attempts: number; last_at: string | null; last_passed: boolean | null; certificate: string | null }
 
 const NEEDS_0009 = 'Ujian level sedang diperbarui. Coba lagi nanti.';
+/** When this attempt was first started, recorded on the server (migration 0017); null before 0017. */
+async function begun(db: ServerDb, userId: string, examId: string, attempt: number): Promise<number | null> {
+  const at = await db.rpc<string | null>('level_exam_begin', { p_user: userId, p_exam: examId, p_attempt: attempt }).catch(() => null);
+  const ms = at ? Date.parse(at) : NaN;
+  return Number.isFinite(ms) ? ms : null;
+}
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const newCode = () => Array.from({ length: 10 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join('');
 
@@ -45,8 +51,12 @@ export const POST = route(async (req) => {
     const wait = nextAttemptAt(st);
     if (wait) return json({ error: 'Tunggu jeda sebelum mengulang ujian.', code: 'cooldown', nextAt: wait }, 409);
     const built = buildLevelExam(ix, exam, examSeed(userId, exam.id, attempt));
+    // The clock starts at the first start of this attempt and keeps running,
+    // even if the learner closes the page or starts again on another device.
+    const startedAt = await begun(db, userId, exam.id, attempt);
     return json({
       attempt,
+      startedAt,
       timeLimitSec: exam.timeLimitSec,
       certificate: st.certificate,
       sections: built.sections.map((s) => ({
@@ -62,7 +72,12 @@ export const POST = route(async (req) => {
     const built = buildLevelExam(ix, exam, examSeed(userId, exam.id, attempt));
     const answers = b.answers && typeof b.answers === 'object' ? b.answers : {};
     const writing = typeof b.writing === 'string' ? b.writing.slice(0, 5000) : '';
-    const result = gradeLevelExam(exam, built, answers, writing);
+    const graded = gradeLevelExam(exam, built, answers, writing);
+    const startedAt = await begun(db, userId, exam.id, attempt);
+    const late = isLateSubmission(startedAt, Date.now(), exam.timeLimitSec);
+    // Answers sent after the time is up are still scored (the learner sees the
+    // review) but cannot pass or earn a certificate.
+    const result = late ? { ...graded, passed: false } : graded;
     const sections = result.sections.map(({ id, title, score, passScore, passed }) => ({ id, title, score, passScore, passed }));
     let recorded: { id: number; certificate: string | null };
     try {
@@ -83,6 +98,7 @@ export const POST = route(async (req) => {
       // After grading the learner sees this attempt's questions with their keys and explanations.
       items: result.items.map((i) => ({ sectionId: i.sectionId, ex: i.ex, grade: i.grade })),
       certificate: recorded.certificate,
+      late,
       nextAt: result.passed ? null : Date.now() + 20 * 3600 * 1000,
     });
   }

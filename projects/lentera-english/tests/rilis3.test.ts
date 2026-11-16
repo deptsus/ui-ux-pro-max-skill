@@ -44,7 +44,8 @@ describe('bank soal ujian level', () => {
   });
 
   it('soal bank hanya untuk ujian: bertahap "exam", tanpa pelajaran, tidak dipakai di PR, cerita, atau ujian lain', () => {
-    expect(bank.size).toBe(CEFR_ORDER.length * (12 + 8 + 8));
+    // Per level: 16 grammar & vocabulary items (12 from Rilis 3, 4 from Rilis 12), 2×4 reading, 2×4 listening.
+    expect(bank.size).toBe(CEFR_ORDER.length * (16 + 8 + 8));
     for (const id of bank) {
       const e = ix.exerciseById.get(id)!;
       expect(e.stage, id).toBe('exam');

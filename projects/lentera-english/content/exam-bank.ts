@@ -3,7 +3,7 @@
 // the server never sends their keys to a device: the exam is drawn and graded
 // on the server (src/lib/engine/levelExam.ts, /api/exams/level).
 //
-// Per level: grammar & vocabulary (12, 8 drawn per attempt), reading (2
+// Per level: grammar & vocabulary (16, 8 drawn per attempt), reading (2
 // passages of 4 questions, 1 drawn), listening (2 recordings of 4 questions,
 // 1 drawn) and writing (2 tasks, 1 drawn, checked against a checklist).
 // Items avoid answers that are arguably correct in another variety of English
@@ -483,7 +483,75 @@ const C2: LevelBank = {
   ],
 };
 
-export const EXAM_BANK: Record<Cefr, LevelBank> = { A1, A2, B1, B2, C1, C2 };
+// ═════════════════════════════════════════════════════════════════ Rilis 12
+// Four more grammar & vocabulary items per level (16 in the bank, 8 drawn), so
+// retakes see more different questions. Same rules: exam-only, undisputable keys.
+const EXTRA: Record<Cefr, Draft[]> = {
+  A1: [
+    mc(1, 'Pilih kata yang tepat.', 'There ___ two cats under the table.', [['are', true], ['is', '"two cats" jamak, jadi "There are".'], ['am', '"am" hanya untuk I.']],
+      'There is + satu benda; there are + benda jamak: There are two cats.', t('a1.there-is')),
+    mc(1, 'Pilih kata yang tepat.', 'This is Rina and ___ brother, Adi.', [['her', true], ['she', '"she" adalah subjek. Untuk kepemilikan pakai "her".'], ['his', '"his" untuk milik laki-laki; Rina perempuan.']],
+      'Milik Rina (perempuan): her brother.', t('a1.possessives')),
+    fill(1, 'My grandmother can ___ very well. (cook)', ['cook'], 'can + bentuk dasar, tanpa -s dan tanpa to: can cook.',
+      { cooks: ['Setelah can, kata kerja tidak diberi -s.'], 'to cook': ['Setelah can, tanpa to.'] }, t('a1.can')),
+    mc(1, 'Pilih kata yang tepat.', 'We have English class ___ Monday.', [['on', true], ['at', '"at" untuk jam: at 8 o\'clock.'], ['in', '"in" untuk bulan atau tahun: in May.']],
+      'Hari memakai "on": on Monday.', t('a1.prep-time')),
+  ],
+  A2: [
+    mc(2, 'Pilih bentuk yang tepat.', "She ___ her keys yesterday, so she couldn't open the door.", [['lost', true], ['losed', '"lose" tidak beraturan; bentuk lampaunya "lost".'], ['loses', '"yesterday" menuntut bentuk lampau.']],
+      'Kata kerja tak beraturan: lose → lost.', t('a2.past-irregular')),
+    mc(2, 'Pilih bentuk yang tepat.', 'This bag is ___ than that one.', [['heavier', true], ['more heavy', 'Kata sifat pendek berakhiran -y: heavy → heavier.'], ['heaviest', 'Membandingkan dua benda dengan "than" memakai bentuk -er.']],
+      'heavy → heavier (y menjadi i + er).', t('a2.comparatives')),
+    fill(2, 'While I ___ home, it started to rain. (walk)', ['was walking'], 'Kegiatan yang sedang berlangsung ketika kejadian lain terjadi: past continuous, was walking.',
+      { walked: ['Kegiatan latar yang sedang berlangsung memakai was walking.'], 'were walking': ['Untuk I, pakai was.'] }, t('a2.past-continuous')),
+    mc(2, 'Pilih kata yang tepat.', "You ___ smoke here. It isn't allowed.", [["mustn't", true], ["don't have to", '"don\'t have to" berarti tidak wajib, bukan dilarang.'], ['must', 'Maknanya terbalik: merokok tidak diizinkan.']],
+      'Larangan: must not (mustn\'t).', t('a2.must')),
+  ],
+  B1: [
+    mc(3, 'Pilih question tag yang tepat.', "She doesn't eat meat, ___?", [['does she', true], ["doesn't she", 'Kalimat negatif diikuti tag positif.'], ['is she', 'Kata kerja bantu kalimatnya "does", bukan "is".']],
+      'Kalimat negatif → tag positif dengan kata kerja bantu yang sama: does she?', t('b1.question-tags')),
+    mc(3, 'Pilih kata yang tepat.', 'I have lived in Medan ___ 2018.', [['since', true], ['for', '"for" diikuti lamanya waktu (for six years), bukan tahun.'], ['from', 'Present perfect dengan titik awal memakai since.']],
+      'Titik awal: since 2018.', t('b1.present-perfect')),
+    mc(3, 'Pilih kata yang tepat.', 'I have a friend ___ father is a pilot.', [['whose', true], ['who', 'Ayah milik teman itu: kepemilikan memakai whose.'], ['which', '"which" untuk benda, dan tidak menyatakan kepemilikan.']],
+      'Kepemilikan dalam klausa relatif: whose father.', t('b1.relative')),
+    fill(3, 'I enjoy ___ detective stories. (read)', ['reading'], 'enjoy + -ing: enjoy reading.',
+      { 'to read': ['"enjoy" diikuti -ing, bukan to + kata kerja.'], read: ['"enjoy" diikuti -ing.'] }, t('b1.gerund-infinitive')),
+  ],
+  B2: [
+    mc(4, 'Pilih bentuk yang tepat.', 'The new bridge ___ next year.', [['will be completed', true], ['will complete', 'Jembatan tidak menyelesaikan dirinya sendiri; perlu bentuk pasif.'], ['is completing', 'Bentuk aktif tidak bermakna di sini.']],
+      'Pasif masa depan: will be + bentuk ketiga.', t('b2.passive')),
+    mc(4, 'Pilih bentuk yang tepat.', 'If she had left earlier, she ___ the train.', [["wouldn't have missed", true], ["wouldn't miss", 'Pengandaian tentang masa lalu: would have + bentuk ketiga.'], ["didn't miss", 'Klausa utama third conditional memakai would have.']],
+      'Third conditional: if + had + V3, would have + V3.', t('b2.third-conditional')),
+    mc(4, 'Pilih bentuk yang tepat.', "I'm going to have my car ___ tomorrow.", [['serviced', true], ['service', 'Kausatif: have + objek + bentuk ketiga.'], ['to service', 'Kausatif "have" tidak memakai to.']],
+      'Kausatif: have something done (serviced).', t('b2.causative')),
+    mc(4, 'Pilih kata yang tepat dalam kalimat tidak langsung.', 'She asked me ___ I liked spicy food.', [['whether', true], ['that', 'Pertanyaan ya/tidak dalam kalimat tidak langsung memakai if atau whether.'], ['what', 'Pertanyaannya ya/tidak, bukan "apa".']],
+      'Pertanyaan ya/tidak tidak langsung: asked whether/if + subjek + kata kerja.', t('b2.reported')),
+  ],
+  C1: [
+    mc(5, 'Pilih bentuk yang tepat.', 'Not only ___ late, but he also forgot the documents.', [['was he', true], ['he was', 'Setelah "Not only" di awal kalimat, kata kerja bantu dan subjek dibalik.'], ['did he', 'Kata kerjanya "be" (late), jadi "was he", bukan "did he".']],
+      'Inversi setelah Not only: Not only was he late ...', t('c1.inversion')),
+    mc(5, 'Pilih ungkapan yang paling tepat.', 'The results ___ that the treatment is effective, although more research is needed.', [['appear to suggest', true], ['prove', 'Terlalu pasti untuk hasil yang masih butuh penelitian.'], ['are absolutely proving', 'Berlebihan dan tidak berhati-hati.']],
+      'Hedging dalam tulisan akademik: appear to suggest.', t('c1.hedging')),
+    mc(5, 'Pilih kata yang tepat.', "___ I need is a good night's sleep.", [['What', true], ['That', '"That" tidak membentuk kalimat cleft ini.'], ['Which', '"Which" butuh kata benda yang diterangkan.']],
+      'Pseudo-cleft: What I need is ...', t('c1.cleft')),
+    mc(5, 'Pilih penghubung yang tepat.', 'The plan is expensive. ___, it would take years to complete.', [['Moreover', true], ['However', 'Kalimat kedua menambah kekurangan, tidak bertentangan.'], ['Therefore', 'Lamanya pengerjaan bukan akibat dari mahalnya rencana.']],
+      'Menambah poin yang searah: Moreover.', t('c1.discourse')),
+  ],
+  C2: [
+    mc(5, 'Pilih bentuk yang tepat.', 'The committee recommended that the proposal ___ rejected.', [['be', true], ['is being', 'Setelah "recommend that", pakai subjungtif: be + bentuk ketiga.'], ['will be', 'Subjungtif tidak memakai will.']],
+      'Subjungtif setelah recommend that: the proposal be rejected.', t('c2.subjunctive')),
+    mc(5, 'Pilih kolokasi yang tepat.', 'The report ___ serious concerns about safety.', [['raises', true], ['rises', '"rise" tidak punya objek.'], ['makes', '"make concerns" bukan kolokasi yang lazim.']],
+      'Kolokasi: raise concerns.', t('c2.collocations')),
+    mc(5, 'Pilih bentuk yang tepat.', 'She might have been delayed. Or she ___ simply forgotten.', [['may have', true], ['may', 'Tanpa "have", "may forgotten" tidak lengkap.'], ['may has', 'Setelah modal, pakai "have", bukan "has".']],
+      'Dugaan tentang masa lalu: may/might have + bentuk ketiga.', t('c2.modality')),
+    mc(5, 'Pilih ungkapan understatement yang tepat.', 'After paying two million rupiah for one dinner, he said, "Well, it was ___ cheap."', [['not exactly', true], ['very', 'Bertentangan dengan harganya dan bukan understatement.'], ['extremely', 'Penekanan, bukan understatement, dan bertentangan dengan harganya.']],
+      'Understatement: not exactly cheap = mahal sekali.', t('c2.understatement')),
+  ],
+};
+
+export const EXAM_BANK: Record<Cefr, LevelBank> = Object.fromEntries(
+  (Object.entries({ A1, A2, B1, B2, C1, C2 }) as [Cefr, LevelBank][]).map(([level, bank]) => [level, { ...bank, grammar: [...bank.grammar, ...EXTRA[level]] }]),
+) as Record<Cefr, LevelBank>;
 
 /** Minutes per level exam: longer texts and writing tasks at higher levels. */
 export const EXAM_MINUTES: Record<Cefr, number> = { A1: 30, A2: 30, B1: 35, B2: 40, C1: 40, C2: 45 };

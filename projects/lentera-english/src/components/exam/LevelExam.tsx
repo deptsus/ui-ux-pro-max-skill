@@ -22,7 +22,7 @@ import { Mascot } from '@/components/Mascot';
 import { Badge, Button, Card, LinkButton, Notice, PageHeader, Progress, Ring, cx, dateTimeId, inputClass } from '@/components/ui';
 
 interface StartSection { id: string; kind: ExamSectionKind; title: string; passScore: number; questions: Exercise[]; writing?: { prompt: string; minWords: number } }
-interface Started { attempt: number; timeLimitSec: number; certificate: string | null; sections: StartSection[] }
+interface Started { attempt: number; startedAt?: number | null; timeLimitSec: number; certificate: string | null; sections: StartSection[] }
 interface Draft { attempt: number; startedAt: number; data: Started; answers: Record<string, Answer>; writing: string }
 export interface Submitted {
   attempt: number;
@@ -32,6 +32,8 @@ export interface Submitted {
   byTopic: { topic: string; correct: number; total: number; score: number }[];
   items: { sectionId: string; ex: Exercise; grade: Grade }[];
   certificate: string | null;
+  /** Sent after the time limit (checked on the server): scored but not passed. */
+  late?: boolean;
   nextAt: number | null;
   /** Kept on the device for the review page. */
   writing?: string;
@@ -78,7 +80,8 @@ export function LevelExam({ exam }: { exam: ExamDef }) {
     setError('');
     try {
       const data = await api<Started>('/api/exams/level', { body: { action: 'start', id: exam.id } });
-      const d: Draft = { attempt: data.attempt, startedAt: Date.now(), data, answers: {}, writing: '' };
+      // The server's start time wins, so the clock is the same on every device.
+      const d: Draft = { attempt: data.attempt, startedAt: data.startedAt ?? Date.now(), data, answers: {}, writing: '' };
       write(draftKey(user, exam.id), d);
       setDraft(d);
       setView('run');
@@ -135,7 +138,7 @@ export function LevelExam({ exam }: { exam: ExamDef }) {
         <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
           <li>Lulus bila <b>setiap bagian</b> mencapai batasnya dan <b>rata-rata keempat bagian</b> minimal {exam.passScore}%.</li>
           <li>Soal diambil dari bank khusus ujian yang tidak muncul di pelajaran, dan dinilai di server. Kunci dan pembahasan muncul setelah kamu mengumpulkan.</li>
-          <li>Jawaban tersimpan otomatis di perangkat ini. Kalau halaman tertutup, buka lagi ujian ini untuk melanjutkan; waktunya tetap berjalan.</li>
+          <li>Waktu dihitung server sejak kamu menekan Mulai dan terus berjalan walau halaman tertutup atau kamu pindah perangkat. Jawaban tersimpan otomatis; buka lagi ujian ini untuk melanjutkan. Jawaban yang dikumpulkan setelah waktu habis tidak bisa lulus.</li>
           <li>Bagian menulis diperiksa dengan daftar periksa (panjang, unsur wajib, tanda baca), bukan dinilai oleh guru.</li>
           <li>Belum lulus? Kamu bisa mengulang setelah jeda {RETAKE_HOURS} jam dan setelah menuntaskan latihan wajib untuk topik yang lemah.</li>
           <li>Lulus pertama kali memberimu sertifikat penyelesaian dari Lentera English dengan kode verifikasi. Ini bukan sertifikat CEFR resmi.</li>
@@ -316,6 +319,7 @@ export function ExamResult({ exam, res, onBack }: { exam: ExamDef; res: Submitte
         <Ring value={res.score} tone={res.passed ? 'ok' : 'bad'} size={120}><span className="text-3xl font-extrabold">{res.score}%</span></Ring>
         <p className="text-muted">Rata-rata keempat bagian · batas lulus {exam.passScore}% dan setiap bagian mencapai batasnya</p>
         {res.certificate && <LinkButton href={`/sertifikat?kode=${res.certificate}`} variant="accent"><Printer size={16} aria-hidden /> Lihat & cetak sertifikat</LinkButton>}
+        {res.late && <Notice tone="bad" title="Dikumpulkan setelah waktu habis">Nilainya tetap dihitung untuk pembahasan, tetapi percobaan yang melewati batas waktu tidak bisa lulus.</Notice>}
         {!res.passed && <p className="text-sm text-muted">Ujian bisa diulang setelah jeda {RETAKE_HOURS} jam{res.nextAt ? ` (mulai ${dateTimeId(res.nextAt)})` : ''}, setelah latihan wajib untuk topik terlemah.</p>}
         <div className="flex w-full flex-col gap-2 sm:flex-row">
           <Button variant="secondary" full onClick={onBack}>Kembali ke ujian</Button>
