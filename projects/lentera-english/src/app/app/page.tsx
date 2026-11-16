@@ -1,17 +1,18 @@
 'use client';
 import Link from 'next/link';
-import { AlarmClock, ArrowRight, AudioLines, CheckCircle2, Crown, Flame, Heart, Repeat, Target, Users, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
+import { AlarmClock, ArrowRight, AudioLines, CheckCircle2, Crown, Flame, Heart, Lock, Repeat, Target, Users, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
 import { GAME } from '@/lib/engine/config';
 import { activeMissions, currentHearts, liveStreak, nextMilestone, playerLevel } from '@/lib/engine/gamification';
 import { dayKey } from '@/lib/engine/mastery';
 import { recommend, type Recommendation } from '@/lib/engine/recommend';
+import { timeLeft } from '@/lib/engine/plan';
 import { dueItems } from '@/lib/engine/srs';
 import { claimMission } from '@/lib/engine/state';
 import { useApp } from '@/lib/client/hooks';
 import { useSession } from '@/lib/client/session';
 import { act } from '@/lib/client/store';
 import { Mascot } from '@/components/Mascot';
-import { WeekPlanCard } from '@/components/WeekPlan';
+import { WeekPlanCard, openingAt, useWeekPlan } from '@/components/WeekPlan';
 import { ClassTasksCard } from '@/components/ClassTasksCard';
 import { Badge, Button, Card, LinkButton, Progress, Ring } from '@/components/ui';
 
@@ -59,7 +60,9 @@ export default function Dashboard() {
   const today = learner.daily[dayKey(now)];
   const xpToday = today?.xp ?? 0;
   const goal = learner.profile.dailyGoalXp;
-  const recs = recommend(learner, ix, ent, now);
+  // Weekly plan cooldown (16 Nov 2026): once this week's share is done, no new lesson or unit exam until Monday.
+  const { plan } = useWeekPlan();
+  const recs = recommend(learner, ix, ent, now, { planLocked: !!plan?.locked });
   const [top, ...rest] = recs;
   const level = playerLevel(learner.xp);
   const hearts = currentHearts(learner.hearts, now);
@@ -124,6 +127,23 @@ export default function Dashboard() {
               })}
             </ul>
           )}
+        </section>
+      )}
+
+      {!top && plan?.locked && (
+        <section aria-labelledby="rec-title">
+          <h2 id="rec-title" className="mb-2 text-lg font-extrabold">Langkah berikutnya untukmu</h2>
+          <Card className="border-2 border-accent">
+            <div className="flex items-start gap-4">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent text-[#1e1b3a]"><Lock size={24} aria-hidden /></span>
+              <div className="min-w-0 flex-1">
+                <Badge tone="accent">Jeda sampai minggu depan</Badge>
+                <h3 className="mt-1 text-xl font-extrabold">Semua tugas minggu ini selesai</h3>
+                <p className="mt-1 text-sm text-muted">Langkah berikutnya dari rencana mingguanmu terbuka dalam <span className="font-extrabold text-ink">{timeLeft(plan.weekEnd, now)}</span> lagi ({openingAt(plan.weekEnd)}). Ulangan terjadwal yang jatuh tempo tetap muncul di sini.</p>
+              </div>
+            </div>
+            <LinkButton href="/app/plan" full size="lg" variant="secondary" className="mt-4">Lihat rencana mingguan<ArrowRight size={20} aria-hidden /></LinkButton>
+          </Card>
         </section>
       )}
 

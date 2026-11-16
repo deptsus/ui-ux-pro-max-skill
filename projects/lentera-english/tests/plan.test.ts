@@ -1,8 +1,10 @@
-// Weekly study plan for yearly subscribers (tahap 4).
+// Weekly study plan for Premium subscribers (tahap 4; monthly too, with the weekly lock, since 16 Nov 2026).
 import { describe, expect, it } from 'vitest';
 import { buildPack } from '@content/index';
 import { indexContent } from '@/lib/content/types';
-import { completedAt, planMilestones, planWindow, weekPlan, weekStart, WEEK, type Milestone } from '@/lib/engine/plan';
+import { completedAt, needsPlanStart, PLAN_WEEKS, planMilestones, planWindow, timeLeft, weekPlan, weekStart, WEEK, type Milestone } from '@/lib/engine/plan';
+import { recommend } from '@/lib/engine/recommend';
+import { unitExamStatus } from '@/lib/engine/unlock';
 import { completeConversation, completeListening, completeStory, createState } from '@/lib/engine/state';
 import { dayKey } from '@/lib/engine/mastery';
 import type { Entitlement, LearnerState } from '@/lib/engine/types';
@@ -83,9 +85,10 @@ describe('urutan rencana', () => {
 
 describe('siapa yang mendapat rencana', () => {
   const s = createState('u', NOW - 30 * DAY);
-  it('Free dan paket bulanan tidak, tahunan dan admin ya', () => {
+  it('Free tidak; bulanan, tahunan, dan admin ya', () => {
     expect(planWindow({ premium: false }, s, NOW)).toBeNull();
-    expect(planWindow({ premium: true, plan: 'premium_monthly', expiresAt: NOW + 20 * DAY }, s, NOW)).toBeNull();
+    expect(planWindow({ premium: true, plan: 'premium_monthly', expiresAt: NOW + 20 * DAY }, s, NOW)).not.toBeNull();
+    expect(planWindow({ premium: true, plan: 'premium_monthly', expiresAt: NOW - DAY }, s, NOW)).toBeNull();
     expect(planWindow({ premium: true, plan: 'premium_yearly', expiresAt: NOW - DAY }, s, NOW)).toBeNull();
     const w = planWindow(yearly(NOW - 10 * DAY), s, NOW)!;
     expect(w.end).toBe(NOW + 355 * DAY);
@@ -197,5 +200,104 @@ describe('cap waktu tuntas', () => {
     s.conversations.press = { best: 90, plays: 2, lastAt: NOW - DAY };
     const [talkM] = planMilestones(ix, 'C2').filter((m) => m.ref === 'press');
     expect(completedAt(s, talkM)).toBe(NOW - DAY);
+  });
+});
+
+describe('paket bulanan (16 Nov 2026)', () => {
+  const monthly = (left = 20 * DAY): Entitlement => ({ premium: true, plan: 'premium_monthly', expiresAt: NOW + left });
+
+  it('rencana 52 minggu seperti tahunan, dihitung dari Senin saat rencana pertama dibuka', () => {
+    const s = createState('m', NOW - 40 * WEEK);
+    expect(needsPlanStart(monthly(), s, NOW)).toBe(true);
+    const w = planWindow(monthly(), s, NOW)!;
+    expect(w.start).toBe(weekStart(NOW));
+    expect(w.end - w.start).toBe(PLAN_WEEKS * WEEK);
+    // An old account does not get a crammed plan: week 1 of 52, about three steps.
+    const plan = weekPlan(ix, s, w, NOW);
+    expect(plan.week).toBe(1);
+    expect(plan.totalWeeks).toBe(52);
+    expect(plan.targets.length).toBe(Math.ceil(plan.total / 52));
+  });
+
+  it('awal rencana tersimpan; perpanjangan bulan berikutnya tetap di rencana yang sama', () => {
+    const s = createState('m', NOW - 40 * WEEK);
+    s.planStart = weekStart(NOW - 3 * WEEK);
+    expect(needsPlanStart(monthly(), s, NOW)).toBe(false);
+    const now = weekPlan(ix, s, planWindow(monthly(5 * DAY), s, NOW)!, NOW);
+    const later = NOW + 5 * WEEK;
+    const renewed = weekPlan(ix, s, planWindow({ premium: true, plan: 'premium_monthly', expiresAt: later + 25 * DAY }, s, later)!, later);
+    expect(now.week).toBe(4);
+    expect(renewed.week).toBe(9);
+    expect(renewed.totalWeeks).toBe(52);
+  });
+
+  it('bulanan yang disusul tahunan memakai masa Premium seperti sebelumnya; paket lain tidak berubah', () => {
+    const s = createState('m', NOW - 30 * DAY);
+    expect(needsPlanStart({ premium: true, plan: 'premium_monthly', expiresAt: NOW + 380 * DAY }, s, NOW)).toBe(false);
+    expect(needsPlanStart(yearly(), s, NOW)).toBe(false);
+    expect(planWindow({ premium: true, plan: 'class', expiresAt: NOW + 20 * DAY }, s, NOW)).toBeNull();
+  });
+});
+
+describe('kunci mingguan', () => {
+  it('jatah minggu ini selesai: terkunci sampai Senin 00.00, lalu minggu berikutnya terbuka', () => {
+    const s = createState('u', NOW - DAY);
+    const win = planWindow(yearly(NOW - DAY), s, NOW)!;
+    const before = weekPlan(ix, s, win, NOW);
+    expect(before.locked).toBe(false);
+    for (const t of before.targets.slice(0, -1)) finish(s, t.m, NOW);
+    expect(weekPlan(ix, s, win, NOW).locked).toBe(false);
+    finish(s, before.targets.at(-1)!.m, NOW);
+    const after = weekPlan(ix, s, win, NOW + 3600_000);
+    expect(after.locked).toBe(true);
+    expect(after.weekEnd).toBe(weekStart(NOW) + WEEK);
+    expect(new Date(after.weekEnd).getDay()).toBe(1);
+    expect(new Date(after.weekEnd).getHours()).toBe(0);
+    const monday = weekPlan(ix, s, win, after.weekEnd);
+    expect(monday.locked).toBe(false);
+    expect(monday.targets.every((t) => t.doneAt === undefined)).toBe(true);
+  });
+
+  it('jalur yang sudah tuntas tidak dikunci', () => {
+    const s = createState('u', NOW - DAY);
+    for (const m of planMilestones(ix, 'A1')) finish(s, m, NOW - 2 * WEEK);
+    expect(weekPlan(ix, s, planWindow(yearly(NOW - DAY), s, NOW)!, NOW).locked).toBe(false);
+  });
+
+  it('hitungan mundur dalam hari, jam, dan menit', () => {
+    expect(timeLeft(NOW + 2 * DAY + 5 * 3600_000 + 20 * 60_000, NOW)).toBe('2 hari 5 jam');
+    expect(timeLeft(NOW + 3 * DAY, NOW)).toBe('3 hari');
+    expect(timeLeft(NOW + 5 * 3600_000 + 20 * 60_000, NOW)).toBe('5 jam 20 menit');
+    expect(timeLeft(NOW + 4 * 3600_000, NOW)).toBe('4 jam');
+    expect(timeLeft(NOW + 40 * 60_000 - 5000, NOW)).toBe('40 menit');
+    expect(timeLeft(NOW + 10_000, NOW)).toBe('1 menit');
+  });
+});
+
+describe('Beranda saat rencana terkunci', () => {
+  const ent = yearly(NOW - DAY);
+  const kinds = (s: LearnerState, planLocked: boolean) => recommend(s, ix, ent, NOW, { planLocked }).map((r) => r.kind);
+
+  it('tidak menawarkan pelajaran baru atau ujian unit; ulangan tetap muncul', () => {
+    const s = createState('u', NOW - DAY);
+    s.profile.placementDone = true;
+    const unit = ix.orderedLessons[0].unitId;
+    for (const l of ix.orderedLessons.filter((x) => x.unitId === unit)) finish(s, { kind: 'lesson', ref: l.id } as Milestone, NOW - DAY);
+    expect(unitExamStatus(s, ix, unit)).toBe('available');
+    expect(kinds(s, false)).toContain('exam');
+    expect(kinds(s, true)).not.toContain('exam');
+    const fresh = createState('v', NOW - DAY);
+    fresh.profile.placementDone = true;
+    expect(kinds(fresh, false)).toContain('lesson');
+    expect(kinds(fresh, true)).not.toContain('lesson');
+    s.reviews['topic:x'] = { key: 'topic:x', step: 1, intervalDays: 1, dueAt: NOW - DAY, lapses: 0, history: [] };
+    expect(kinds(s, true)).toContain('review');
+  });
+
+  it('pelajaran yang sudah dimulai tetap bisa dilanjutkan', () => {
+    const s = createState('u', NOW - DAY);
+    s.profile.placementDone = true;
+    s.lessons[ix.orderedLessons[0].id] = { startedAt: NOW - 3600_000, step: 2, masteryBest: 0, masteryAttempts: 0 };
+    expect(recommend(s, ix, ent, NOW, { planLocked: true }).find((r) => r.kind === 'lesson')?.cta).toBe('Lanjutkan');
   });
 });

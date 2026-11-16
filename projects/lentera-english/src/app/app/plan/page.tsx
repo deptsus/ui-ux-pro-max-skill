@@ -1,22 +1,23 @@
 'use client';
-import { CalendarCheck } from 'lucide-react';
+import { CalendarCheck, Lock } from 'lucide-react';
 import { useApp } from '@/lib/client/hooks';
 import { dateId } from '@/lib/format';
-import { HabitList, KIND_LABEL, PaceBadge, TargetList, useWeekPlan, weekRange } from '@/components/WeekPlan';
+import { timeLeft } from '@/lib/engine/plan';
+import { HabitList, KIND_LABEL, PaceBadge, PlanLockNotice, TargetList, useWeekPlan, weekRange } from '@/components/WeekPlan';
 import { Card, Empty, LinkButton, Notice, PageHeader, Progress } from '@/components/ui';
 
 const SHOW_WEEKS = 6;
 
 export default function PlanPage() {
-  const { premium } = useApp();
+  const { premium, now } = useApp();
   const { plan, end } = useWeekPlan();
 
   if (!plan) {
     return (
       <div className="mx-auto max-w-xl">
-        <PageHeader title="Rencana Belajar Mingguan" subtitle="Untuk pelanggan Premium Tahunan." />
-        <Empty title="Rencana 52 minggu ada di paket tahunan" action={<LinkButton href="/app/subscription" variant="accent">{premium ? 'Lihat paket tahunan' : 'Lihat Premium'}</LinkButton>}>
-          Rencana ini membagi seluruh jalurmu, dari level hasil tes penempatan sampai C2, menjadi target setiap minggu: pelajaran, ujian, latihan menyimak, dan percakapan. Jatahnya dihitung ulang setiap Senin dari langkah yang masih tersisa dan minggu yang tersisa sampai paketmu berakhir.
+        <PageHeader title="Rencana Belajar Mingguan" subtitle="Untuk pelanggan Premium Bulanan dan Tahunan." />
+        <Empty title="Rencana 52 minggu ada di Premium" action={<LinkButton href="/app/subscription" variant="accent">{premium ? 'Lihat paket' : 'Lihat Premium'}</LinkButton>}>
+          Rencana ini membagi seluruh jalurmu, dari level hasil tes penempatan sampai C2, menjadi target setiap minggu: pelajaran, ujian, latihan menyimak, dan percakapan. Jatahnya dihitung ulang setiap Senin dari langkah yang masih tersisa dan minggu yang tersisa di rencanamu.
         </Empty>
       </div>
     );
@@ -40,6 +41,7 @@ export default function PlanPage() {
             <p>Seluruh jalurmu sampai C2 sudah tuntas. Pertahankan dengan ulangan terjadwal, latihan perbaikan, dan Tantangan Kilat.</p>
           ) : (
             <>
+              {plan.locked && <PlanLockNotice plan={plan} now={now} />}
               <p className="text-sm text-muted">{plan.targets.length} langkah{plan.minutes ? `, sekitar ${plan.minutes} menit lagi` : ', semuanya sudah selesai'}.</p>
               <TargetList targets={plan.targets} />
             </>
@@ -61,7 +63,7 @@ export default function PlanPage() {
         <section aria-labelledby="next-weeks">
           <h2 id="next-weeks" className="mb-2 text-lg font-extrabold">Minggu-minggu berikutnya</h2>
           <Card className="p-0">
-            <WeekRows weeks={weeks.slice(0, SHOW_WEEKS)} />
+            <WeekRows weeks={weeks.slice(0, SHOW_WEEKS)} next={plan.week + 1} opensIn={timeLeft(plan.weekEnd, now)} />
             {weeks.length > SHOW_WEEKS && (
               <details className="border-t border-line">
                 <summary className="cursor-pointer px-5 py-3 text-sm font-bold text-brand">Tampilkan {weeks.length - SHOW_WEEKS} minggu lainnya</summary>
@@ -75,7 +77,8 @@ export default function PlanPage() {
       <Notice tone="muted" title="Cara kerja rencana ini">
         <ul className="mt-1 list-disc space-y-1 pl-5">
           <li>Isinya seluruh jalurmu dari level {plan.startLevel} sampai C2: {plan.total} langkah berupa pelajaran, ujian unit, ujian level, latihan menyimak, dan simulasi percakapan, dalam urutan kurikulum.</li>
-          <li>Jatah tiap minggu = langkah yang masih tersisa dibagi minggu yang tersisa sampai paketmu berakhir, dihitung ulang setiap Senin. Tertinggal? Jatahnya naik sedikit. Lebih cepat? Minggu berikutnya lebih ringan.</li>
+          <li>Jatah tiap minggu = langkah yang masih tersisa dibagi minggu yang tersisa di rencanamu ({plan.totalWeeks} minggu), dihitung ulang setiap Senin. Tertinggal? Jatahnya naik sedikit.</li>
+          <li>Setelah jatah minggu ini selesai, langkah berikutnya terkunci sampai Senin pukul 00.00. Hitungan mundurnya tampil di atas daftar minggu ini dan di Beranda.</li>
           <li>Ulangan terjadwal, PR, dan tes ulang penguasaan tidak dihitung sebagai langkah, tetapi tetap muncul di Beranda dan penting agar materi tidak terlupa.</li>
           <li>Rencana ini dihitung dari progresmu dengan aturan tetap, tanpa AI.</li>
         </ul>
@@ -84,14 +87,15 @@ export default function PlanPage() {
   );
 }
 
-function WeekRows({ weeks }: { weeks: { week: number; weekStart: number; items: { key: string; kind: keyof typeof KIND_LABEL; title: string }[] }[] }) {
+function WeekRows({ weeks, next, opensIn }: { weeks: { week: number; weekStart: number; items: { key: string; kind: keyof typeof KIND_LABEL; title: string }[] }[]; next?: number; opensIn?: string }) {
   return (
     <ul className="divide-y divide-line">
       {weeks.map((w) => (
         <li key={w.week} className="flex gap-3 px-5 py-3">
-          <CalendarCheck size={18} className="mt-0.5 shrink-0 text-muted" aria-hidden />
+          {w.week === next ? <Lock size={18} className="mt-0.5 shrink-0 text-muted" aria-hidden /> : <CalendarCheck size={18} className="mt-0.5 shrink-0 text-muted" aria-hidden />}
           <div className="min-w-0">
             <p className="text-sm font-extrabold">Minggu {w.week} <span className="font-semibold text-muted">· {weekRange(w.weekStart)}</span></p>
+            {w.week === next && opensIn && <p className="text-xs font-bold text-muted">Terkunci · terbuka dalam {opensIn}</p>}
             <p className="text-sm text-muted">{w.items.map((m) => `${KIND_LABEL[m.kind]}: ${m.title}`).join(' · ')}</p>
           </div>
         </li>

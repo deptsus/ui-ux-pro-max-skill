@@ -2,19 +2,42 @@
 // Weekly study plan (tahap 4): the dashboard card, and the pieces the full
 // plan page reuses. The plan itself is computed by src/lib/engine/plan.ts.
 import Link from 'next/link';
-import { ArrowRight, CalendarCheck, Check, Circle } from 'lucide-react';
+import { useEffect } from 'react';
+import { ArrowRight, CalendarCheck, Check, Circle, Lock } from 'lucide-react';
 import { useApp } from '@/lib/client/hooks';
+import { act, getLearner } from '@/lib/client/store';
 import { dateId } from '@/lib/format';
-import { planWindow, weekPlan, type Habit, type MilestoneKind, type PlanTarget, type WeekPlan } from '@/lib/engine/plan';
+import { needsPlanStart, planWindow, timeLeft, weekPlan, weekStart, type Habit, type MilestoneKind, type PlanTarget, type WeekPlan } from '@/lib/engine/plan';
 import { Badge, Card, LinkButton, Ring, cx } from '@/components/ui';
 
 export const KIND_LABEL: Record<MilestoneKind, string> = { lesson: 'Pelajaran', 'unit-exam': 'Ujian unit', 'level-exam': 'Ujian level', listening: 'Menyimak', conversation: 'Percakapan', story: 'Cerita' };
 
-/** The learner's plan this week, or null when they are not on a yearly plan. */
+/** The learner's plan this week, or null when they have no plan (Free, or a class licence ending within a month). */
 export function useWeekPlan(): { plan: WeekPlan | null; end?: number } {
   const { ix, learner, ent, now } = useApp();
+  const fresh = needsPlanStart(ent, learner, now);
+  // A monthly subscriber's 52 weeks count from the Monday the plan first opened; saved once, synced with progress.
+  useEffect(() => {
+    if (fresh && getLearner()?.planStart === undefined) act((d, t) => { d.planStart = weekStart(t); });
+  }, [fresh]);
   const win = planWindow(ent, learner, now);
   return win ? { plan: weekPlan(ix, learner, win, now), end: win.end } : { plan: null };
+}
+
+/** Monday 00:00 as "Senin, 23 Nov, 00.00". */
+export const openingAt = (at: number) => `${dateId(at, { weekday: 'long', day: 'numeric', month: 'short' })}, 00.00`;
+
+/** Shown right above this week's list once the share is done: when the next steps open. */
+export function PlanLockNotice({ plan, now }: { plan: WeekPlan; now: number }) {
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border-2 border-accent bg-accent/15 p-3" role="status">
+      <Lock size={20} className="mt-0.5 shrink-0 text-accent-strong" aria-hidden />
+      <p className="min-w-0 text-sm">
+        <span className="block font-extrabold">Target minggu ini selesai. Langkah berikutnya terkunci.</span>
+        Terbuka dalam <span className="font-extrabold">{timeLeft(plan.weekEnd, now)}</span> lagi ({openingAt(plan.weekEnd)}). Sambil menunggu, kerjakan ulangan terjadwal agar materinya tidak terlupa.
+      </p>
+    </div>
+  );
 }
 
 export const weekRange = (start: number) => `${dateId(start, { day: 'numeric', month: 'short' })} – ${dateId(start + 6 * 24 * 3600 * 1000, { day: 'numeric', month: 'short' })}`;
@@ -56,9 +79,9 @@ export function HabitList({ habits }: { habits: Habit[] }) {
   );
 }
 
-/** Dashboard card: this week's share for yearly subscribers, a short pitch for everyone else. */
+/** Dashboard card: this week's share for Premium subscribers, a short pitch for everyone else. */
 export function WeekPlanCard() {
-  const { premium } = useApp();
+  const { premium, now } = useApp();
   const { plan } = useWeekPlan();
   if (!plan) {
     return (
@@ -66,7 +89,7 @@ export function WeekPlanCard() {
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-strong"><CalendarCheck size={20} aria-hidden /></span>
         <div className="min-w-0 flex-1 basis-52">
           <p className="font-extrabold">Rencana belajar 52 minggu</p>
-          <p className="text-sm text-muted">Paket Premium Tahunan membagi jalurmu sampai C2 menjadi target mingguan, lalu menyesuaikannya setiap Senin.</p>
+          <p className="text-sm text-muted">Premium (bulanan atau tahunan) membagi jalurmu sampai C2 menjadi target mingguan, lalu menyesuaikannya setiap Senin.</p>
         </div>
         <LinkButton href="/app/plan" size="sm" variant={premium ? 'secondary' : 'accent'}>Lihat caranya</LinkButton>
       </Card>
@@ -93,11 +116,8 @@ export function WeekPlanCard() {
         </div>
         {plan.finished ? (
           <p className="mt-3 text-sm">Seluruh jalurmu sampai C2 sudah tuntas. Minggu ini fokus pada ulangan terjadwal dan latihan perbaikan agar tetap terjaga.</p>
-        ) : all && done === all ? (
-          <div className="mt-3 space-y-2">
-            <p className="text-sm"><span className="font-bold">Target minggu ini tercapai.</span> Mau lanjut? Setiap langkah tambahan meringankan minggu-minggu berikutnya.</p>
-            {plan.upcoming[0] && <LinkButton href={plan.upcoming[0].items[0].href} size="sm" variant="secondary">Lanjut: {plan.upcoming[0].items[0].title}</LinkButton>}
-          </div>
+        ) : plan.locked ? (
+          <div className="mt-3"><PlanLockNotice plan={plan} now={now} /></div>
         ) : null}
         {all > 0 && <div className="mt-2"><TargetList targets={plan.targets} limit={4} /></div>}
         <div className="mt-3"><HabitList habits={plan.habits} /></div>

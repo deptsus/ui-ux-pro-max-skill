@@ -88,6 +88,8 @@ export interface LearnerState {
   userId: string;
   createdAt: number;
   updatedAt: number;
+  /** Monday the weekly plan first opened for a monthly subscriber (16 Nov 2026); their 52-week plan counts from it. */
+  planStart?: number;
   profile: Profile;
   topics: Record<string, TopicStat>;
   tags: Record<string, TagStat>;

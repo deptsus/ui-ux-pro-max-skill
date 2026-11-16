@@ -397,7 +397,7 @@ scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif
   // Weekly plan: Free accounts see what it is and where to get it.
   await page.getByText('Rencana belajar 52 minggu').waitFor({ timeout: 20000 });
   await page.goto(`${BASE}/app/plan`);
-  check('akun Free: rencana mingguan menjelaskan bahwa ini fitur paket tahunan', await page.getByText('Rencana 52 minggu ada di paket tahunan').waitFor({ timeout: 20000 }).then(() => true).catch(() => false));
+  check('akun Free: rencana mingguan menjelaskan bahwa ini fitur Premium', await page.getByText('Rencana 52 minggu ada di Premium').waitFor({ timeout: 20000 }).then(() => true).catch(() => false));
 
   // Plans: yearly shows the struck-through price and the discount; QRIS is the only method.
   await page.goto(`${BASE}/app/subscription`);

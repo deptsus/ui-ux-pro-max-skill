@@ -29,7 +29,13 @@ export function activeTagErrors(s: LearnerState, tag: string, now: number): numb
   return t.recent.filter((at) => at > since).length;
 }
 
-export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, now: number): Recommendation[] {
+/**
+ * `planLocked`: the learner finished this week's share of the weekly plan, so the
+ * next steps (a new lesson, a unit exam) wait until Monday; the dashboard shows the
+ * countdown once nothing else is left (16 Nov 2026). Everything else is unchanged:
+ * reviews, homework, retests, practice, and a lesson already in progress.
+ */
+export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, now: number, { planLocked = false } = {}): Recommendation[] {
   const W = RECOMMEND.weights;
   const out: Recommendation[] = [];
   const started = Object.keys(s.lessons).length > 0;
@@ -101,7 +107,7 @@ export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, n
   }
 
   // 6. Unit exams that are ready.
-  for (const unit of ix.pack.units) {
+  for (const unit of planLocked ? [] : ix.pack.units) {
     if (unitExamStatus(s, ix, unit.id) === 'available') {
       const exam = unitExam(ix, unit.id)!;
       out.push({ id: `exam:${exam.id}`, kind: 'exam', priority: W.examReady, title: exam.title, reason: 'Semua pelajaran di unit ini sudah tuntas. Lulus ujian unit untuk membuka unit berikutnya.', cta: 'Ikuti ujian', href: `/app/exams?id=${exam.id}` });
@@ -110,8 +116,8 @@ export function recommend(s: LearnerState, ix: ContentIndex, ent: Entitlement, n
 
   // 7. Continue / next lesson.
   const next = nextLesson(s, ix, ent, now);
-  if (next) {
-    const inProgress = lessonLock(s, ix, next, ent, now).status === 'in-progress';
+  const inProgress = !!next && lessonLock(s, ix, next, ent, now).status === 'in-progress';
+  if (next && (inProgress || !planLocked)) {
     out.push({ id: `lesson:${next.id}`, kind: 'lesson', priority: inProgress ? W.continueLesson : W.nextLesson, title: inProgress ? `Lanjutkan: ${next.title}` : `Pelajaran berikutnya: ${next.title}`, reason: next.summary, cta: inProgress ? 'Lanjutkan' : 'Mulai', href: `/app/lesson?id=${next.id}` });
   }
 

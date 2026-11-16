@@ -1,9 +1,10 @@
-// Weekly study plan for yearly subscribers (tahap 4). Deterministic: the plan
-// is the learner's path from their level to C2 (lessons, unit exams, listening,
-// conversations, level exams) spread evenly over the weeks left in their
-// Premium period. Each Monday the week's share is recomputed from what is still
-// open, so a learner who falls behind gets a slightly fuller week instead of an
-// impossible backlog, and a learner who works ahead gets lighter weeks.
+// Weekly study plan for Premium subscribers (tahap 4; monthly too since 16 Nov
+// 2026). Deterministic: the plan is the learner's path from their level to C2
+// (lessons, unit exams, listening, conversations, level exams) spread evenly
+// over the weeks of the plan. Each Monday the week's share is recomputed from
+// what is still open, so a learner who falls behind gets a slightly fuller week
+// instead of an impossible backlog. Once the week's share is done, the next
+// steps stay locked until Monday 00:00 (`locked`), with a countdown.
 import { CEFR_ORDER, type Cefr, type ContentIndex } from '@/lib/content/types';
 import { dayKey } from './mastery';
 import { dueItems } from './srs';
@@ -135,23 +136,36 @@ export function completedAt(s: LearnerState, m: Milestone): number | undefined {
 export interface PlanWindow {
   /** Monday of week 1. */
   start: number;
-  /** When Premium ends (admins: 52 weeks after start). */
+  /** When yearly Premium ends; admins and monthly subscribers: 52 weeks after start. */
   end: number;
 }
 
+/** Back-to-back 52-week plans counted from `anchor` (a Monday). */
+function cycleWindow(anchor: number, now: number): PlanWindow {
+  const cycles = Math.max(0, Math.floor((weekStart(now) - anchor) / (PLAN_WEEKS * WEEK)));
+  const start = anchor + cycles * PLAN_WEEKS * WEEK;
+  return { start, end: start + PLAN_WEEKS * WEEK };
+}
+
+/** A month of Premium (the only one left, not a month stacked in front of a year). */
+const monthlyOnly = (ent: Entitlement, now: number) => ent.plan === 'premium_monthly' && !!ent.expiresAt && ent.expiresAt > now && ent.expiresAt - now <= 31 * DAY;
+
+/** A monthly subscriber whose plan start is not saved yet (the app saves it once, see `useWeekPlan`). */
+export const needsPlanStart = (ent: Entitlement | undefined, s: LearnerState, now: number): boolean => !!ent?.premium && monthlyOnly(ent, now) && s.planStart === undefined;
+
 /**
- * The plan belongs to yearly subscribers. A monthly period stacked in front of a
- * yearly one still counts: more than a month of Premium left means a year was bought.
+ * Who gets a plan, and over which weeks. Yearly: the Premium year. A monthly
+ * period stacked in front of a yearly one still counts as a year (more than a
+ * month of Premium left). Monthly only (since 16 Nov 2026): the same 52-week
+ * plan as a year, counted from the Monday it first opened, so renewing month by
+ * month keeps the same plan. Admins: 52-week cycles from the account's first week.
  */
 export function planWindow(ent: Entitlement | undefined, s: LearnerState, now: number): PlanWindow | null {
   if (!ent?.premium) return null;
   const created = weekStart(s.createdAt);
-  if (isAdminPlan(ent)) {
-    const cycles = Math.max(0, Math.floor((weekStart(now) - created) / (PLAN_WEEKS * WEEK)));
-    const start = created + cycles * PLAN_WEEKS * WEEK;
-    return { start, end: start + PLAN_WEEKS * WEEK };
-  }
+  if (isAdminPlan(ent)) return cycleWindow(created, now);
   if (!ent.expiresAt || ent.expiresAt <= now) return null;
+  if (monthlyOnly(ent, now)) return cycleWindow(weekStart(s.planStart ?? now), now);
   const left = ent.expiresAt - now;
   if (ent.plan !== 'premium_yearly' && left <= 31 * DAY) return null;
   // Whole years back from the end date, but never before the account existed.
@@ -189,6 +203,8 @@ export interface WeekPlan {
   /** Projection for the coming weeks, from what is still open after this week's share. */
   upcoming: { week: number; weekStart: number; items: Milestone[] }[];
   finished: boolean;
+  /** This week's share is done: the next steps open at `weekEnd` (Monday 00:00). */
+  locked: boolean;
 }
 
 export const STUDY_DAYS_GOAL = 4;
@@ -232,5 +248,17 @@ export function weekPlan(ix: ContentIndex, s: LearnerState, win: PlanWindow, now
     pace: all.length - openAtMonday.length - Math.round((all.length * (week - 1)) / totalWeeks),
     minutes: targets.filter((t) => t.doneAt === undefined).reduce((n, t) => n + t.m.minutes, 0),
     habits, upcoming, finished: all.length > 0 && done === all.length,
+    locked: done < all.length && targets.length > 0 && targets.every((t) => t.doneAt !== undefined),
   };
+}
+
+/** "2 hari 5 jam", "5 jam 20 menit", "40 menit": time left until `at`. */
+export function timeLeft(at: number, now: number): string {
+  const min = Math.max(1, Math.ceil((at - now) / 60_000));
+  const d = Math.floor(min / 1440);
+  const h = Math.floor((min % 1440) / 60);
+  const m = min % 60;
+  if (d > 0) return h > 0 ? `${d} hari ${h} jam` : `${d} hari`;
+  if (h > 0) return m > 0 ? `${h} jam ${m} menit` : `${h} jam`;
+  return `${m} menit`;
 }

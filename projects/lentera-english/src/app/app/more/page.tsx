@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/ui';
 
 const DESC: Record<string, string> = {
   '/app/jalur': 'TOEFL ITP/IELTS, bahasa Inggris untuk kerja, dan jalur anak.',
-  '/app/plan': 'Target tiap minggu sampai C2 untuk paket tahunan.',
+  '/app/plan': 'Target tiap minggu sampai C2 untuk Premium.',
   '/app/homework': 'Tugas tiap pelajaran dan bab, lengkap dengan tenggat.',
   '/app/exams': 'Tes penempatan, ujian unit, dan ujian level CEFR.',
   '/app/vocabulary': 'Kata, IPA, arti, contoh, dan audio.',
