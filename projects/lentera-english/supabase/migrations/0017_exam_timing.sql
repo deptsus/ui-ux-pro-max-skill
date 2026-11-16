@@ -1,4 +1,5 @@
--- 0017 (Rilis 12): level-exam time limits are checked on the server. The
+-- 0017 (Rilis 12): level-exam time limits are checked on the server, and
+-- learners get one reminder before their Premium ends. The
 -- first "start" of an attempt is recorded once; a submission later than the
 -- time limit plus a short grace period is recorded but cannot pass, so
 -- certificates stay trustworthy. No learner data is changed.
@@ -21,6 +22,16 @@ begin
   select started_at into v from level_exam_starts where user_id = p_user and exam_id = p_exam and attempt = p_attempt;
   return v;
 end $$;
+
+-- Premium ending soon (Rilis 12): learners whose latest paid period ends
+-- within p_days and who have a device for reminders. Sent once per period.
+create or replace function premium_expiry_targets(p_days int) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select coalesce(jsonb_agg(jsonb_build_object('user_id', s.user_id, 'subscription_id', s.id, 'expires_at', s.expires_at) order by s.expires_at), '[]'::jsonb)
+  from (select distinct on (user_id) id, user_id, expires_at from subscriptions where expires_at > now() order by user_id, expires_at desc) s
+  where s.expires_at <= now() + make_interval(days => p_days)
+    and exists (select 1 from reminder_subscriptions r where r.user_id = s.user_id);
+$$;
 
 create or replace function content_features() returns jsonb
 language sql immutable set search_path = public as $$ select '["stories","content_notes","level_exams","homework_reminders","branching_stories","audio_uploads","habits","ops","classes","tracks","exam_timing"]'::jsonb $$;

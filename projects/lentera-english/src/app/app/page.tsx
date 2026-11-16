@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { AlarmClock, ArrowRight, AudioLines, CheckCircle2, Flame, Heart, Repeat, Target, Users, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
+import { AlarmClock, ArrowRight, AudioLines, CheckCircle2, Crown, Flame, Heart, Repeat, Target, Users, Wrench, BookOpen, GraduationCap, ClipboardList, Compass } from 'lucide-react';
 import { GAME } from '@/lib/engine/config';
 import { activeMissions, currentHearts, liveStreak, nextMilestone, playerLevel } from '@/lib/engine/gamification';
 import { dayKey } from '@/lib/engine/mastery';
@@ -127,6 +127,13 @@ export default function Dashboard() {
         </section>
       )}
 
+      {ent.premium && ent.expiresAt && (ent.plan === 'premium_monthly' || ent.plan === 'premium_yearly') && ent.expiresAt - now < 3 * 86_400_000 && ent.expiresAt > now && (
+        <Link href="/app/subscription" className="flex items-center gap-3 rounded-2xl border-2 border-accent bg-accent/15 p-4">
+          <Crown size={22} className="shrink-0 text-accent-strong" aria-hidden />
+          <span className="min-w-0 flex-1"><span className="block font-extrabold">Premium-mu berakhir {new Date(ent.expiresAt).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span><span className="block text-sm text-muted">Perpanjang agar semua materi, nyawa tak terbatas, dan ujian level tetap terbuka. Tidak ada tagihan otomatis.</span></span>
+          <ArrowRight size={18} className="shrink-0" aria-hidden />
+        </Link>
+      )}
       <ClassTasksCard plan={ent.plan} />
 
       <WeekPlanCard />

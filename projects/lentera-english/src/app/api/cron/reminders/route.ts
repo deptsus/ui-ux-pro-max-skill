@@ -5,7 +5,7 @@
 // does nothing if it ran less than 50 minutes ago, so an extra call cannot
 // spam anyone.
 import { json, requireDb, route } from '@/lib/server/api';
-import { runDailyReminders, runHomeworkReminders } from '@/lib/server/reminders';
+import { runDailyReminders, runExpiryReminders, runHomeworkReminders } from '@/lib/server/reminders';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +14,8 @@ const run = route(async (req) => {
   const origin = new URL(req.url).origin;
   const homework = await runHomeworkReminders(db, { origin });
   const daily = await runDailyReminders(db, { origin });
-  return json({ ...homework, daily });
+  const expiry = await runExpiryReminders(db, { origin });
+  return json({ ...homework, daily, expiry });
 });
 export const GET = run;
 export const POST = run;

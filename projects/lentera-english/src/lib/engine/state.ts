@@ -41,9 +41,26 @@ export function createState(userId: string, now: number, name = 'Pelajar'): Lear
   };
 }
 
+/**
+ * A guest's events wait on the device until they sign up, so the queue is
+ * capped (Rilis 12): per-question attempts and reviews go first (the snapshot
+ * keeps their effect), lessons, exams, XP and achievements are kept longest.
+ */
+export const GUEST_OUTBOX_MAX = 2000;
+function capGuestOutbox(s: LearnerState) {
+  let extra = s.outbox.length - GUEST_OUTBOX_MAX;
+  if (extra <= 0) return;
+  s.outbox = s.outbox.filter((e) => {
+    if (extra > 0 && (e.kind === 'attempt' || e.kind === 'review')) { extra--; return false; }
+    return true;
+  });
+  if (extra > 0) s.outbox.splice(0, extra);
+}
+
 function emit(s: LearnerState, kind: SyncEvent['kind'], at: number, data: Record<string, unknown>) {
   s.seq += 1;
   s.outbox.push({ id: `${s.userId}:${s.createdAt.toString(36)}:${s.seq}`, kind, at, data });
+  if (s.userId === 'guest') capGuestOutbox(s);
 }
 
 function today(s: LearnerState, at: number): DailyStat {

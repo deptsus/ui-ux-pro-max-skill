@@ -104,3 +104,44 @@ export async function runDailyReminders(db: ServerDb, opts: { now?: number; orig
   }
   return report;
 }
+
+/** Premium ending soon (Rilis 12): once per paid period, 3 days before, in the daytime. */
+export const EXPIRY = { days: 3, minIntervalSec: 5 * 3600, maxLearners: 500 } as const;
+
+export function expiryMessage(expiresAt: string, now: number): PushMessage {
+  const end = Date.parse(expiresAt);
+  const left = Math.max(0, Math.ceil((end - now) / 86_400_000));
+  const date = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', timeZone: REMINDER.timeZone }).format(end);
+  return {
+    title: left <= 1 ? 'Premium-mu berakhir besok' : `Premium-mu berakhir ${left} hari lagi`,
+    body: `Masa aktif sampai ${date}. Perpanjang agar semua materi, nyawa tak terbatas, dan ujian level tetap terbuka.`,
+    url: '/app/subscription',
+    tag: 'lentera-premium-expiry',
+  };
+}
+
+export async function runExpiryReminders(db: ServerDb, opts: { now?: number; origin?: string } = {}): Promise<ReminderReport> {
+  const now = opts.now ?? Date.now();
+  const hour = jakartaHour(now);
+  if (hour < REMINDER.startHour || hour >= REMINDER.endHour) return { skipped: 'quiet-hours' };
+  let targets: { user_id: string; subscription_id: string; expires_at: string }[];
+  try {
+    if (!(await db.rpc<boolean>('claim_job', { p_job: 'expiry-reminders', p_min_seconds: EXPIRY.minIntervalSec }))) return { skipped: 'ran-recently' };
+    targets = await db.rpc('premium_expiry_targets', { p_days: EXPIRY.days });
+  } catch {
+    // Migration 0017 not applied yet.
+    return { skipped: 'not-ready' };
+  }
+  targets = targets.slice(0, EXPIRY.maxLearners);
+  const report: ReminderReport = { learners: targets.length, reminded: 0, sent: 0, failed: 0, removed: 0 };
+  for (const t of targets) {
+    // One reminder per paid period, even when the job runs again.
+    if (!(await db.rpc<boolean>('claim_job', { p_job: `expiry:${t.subscription_id}`, p_min_seconds: 40 * 86_400 }))) continue;
+    const r = await notifyLearner(db, t.user_id, expiryMessage(t.expires_at, now), { origin: opts.origin });
+    report.sent! += r.sent;
+    report.failed! += r.failed;
+    report.removed! += r.removed;
+    if (r.sent > 0) report.reminded!++;
+  }
+  return report;
+}
