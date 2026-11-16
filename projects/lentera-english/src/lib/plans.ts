@@ -9,8 +9,8 @@ export const PLANS = {
 } as const;
 export type PlanId = keyof typeof PLANS;
 
-export const FREE_FEATURES = ['Pelajaran pengantar A1 (2 bab)', 'Aktivitas belajar harian dan misi', 'Kosakata dan tata bahasa dasar', 'Latihan harian terbatas (5 nyawa, 10 ulangan per hari)', 'Latihan shadowing level A1', 'Liga mingguan, teman, dan tantangan XP', 'Pengingat belajar harian di HP', 'Pelacakan progres dasar'];
-export const PREMIUM_FEATURES = ['Seluruh kurikulum CEFR A1 sampai C2', 'Latihan tanpa batas nyawa', 'Ujian level CEFR', 'Seluruh pustaka PR', 'Analitik belajar lengkap', 'Seluruh pustaka kosakata', 'Ulangan terjadwal tanpa batas', 'Semua skenario percakapan', 'Unduh pelajaran dan belajar offline', 'Latihan shadowing A1 sampai C2', 'Tanpa iklan dan tanpa banner promosi'];
+export const FREE_FEATURES = ['Pelajaran pengantar A1 (2 bab)', 'Aktivitas belajar harian dan misi', 'Kosakata dan tata bahasa dasar', 'Latihan harian terbatas (5 nyawa, 10 ulangan per hari)', 'Latihan shadowing level A1', 'Liga mingguan, teman, dan tantangan XP', 'Pengingat belajar harian di HP', 'Pelacakan progres dasar', 'Rencana belajar mingguan dari materi gratis'];
+export const PREMIUM_FEATURES = ['Seluruh kurikulum CEFR A1 sampai C2', 'Rencana belajar mingguan sampai C2', 'Latihan tanpa batas nyawa', 'Ujian level CEFR', 'Seluruh pustaka PR', 'Analitik belajar lengkap', 'Seluruh pustaka kosakata', 'Ulangan terjadwal tanpa batas', 'Semua skenario percakapan', 'Unduh pelajaran dan belajar offline', 'Latihan shadowing A1 sampai C2', 'Tanpa iklan dan tanpa banner promosi'];
 // Xendit channels, used only when PAYMENT_PROVIDER=xendit. The default is the owner's own QRIS.
 export const CHANNELS = [
   { id: 'QRIS', name: 'QRIS', desc: 'Pindai dengan aplikasi bank atau e-wallet apa pun' },

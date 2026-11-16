@@ -11,7 +11,7 @@ import { SRS } from '@/lib/engine/config';
 import { currentHearts } from '@/lib/engine/gamification';
 import { buildMasteryTest } from '@/lib/engine/sessions';
 import { LESSON_STEPS, assignHomework, finishMastery, finishPractice, reachStep, type LessonStep } from '@/lib/engine/state';
-import { examOpensAt, lessonLock, lessonsOfUnit, unitExam } from '@/lib/engine/unlock';
+import { examOpensAt, lessonLock, lessonsOfUnit, unitExam, unitExamStatus } from '@/lib/engine/unlock';
 import { planWaitReason } from '@/lib/engine/plan';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
@@ -215,7 +215,7 @@ function LessonRoom() {
           </Card>
           {(() => {
             // The weekly plan (16 Nov 2026) may hold the next step until Monday: say so instead of linking to a closed page.
-            const wait = nextInUnit ? lessonLock(learner, ix, nextInUnit, ent, now).opensAt : exam ? examOpensAt(learner, ix, exam, ent, now) : undefined;
+            const wait = nextInUnit ? lessonLock(learner, ix, nextInUnit, ent, now).opensAt : exam && unitExamStatus(learner, ix, lesson.unitId) === 'available' ? examOpensAt(learner, ix, exam, ent, now) : undefined;
             if (wait) return <Notice tone="accent" title={`${nextInUnit ? `Pelajaran berikutnya: ${nextInUnit.title}` : exam!.title} · minggu depan`}>{planWaitReason(wait, now)} <LinkButton href="/app/plan" size="sm" variant="secondary" className="mt-2">Lihat rencana mingguan</LinkButton></Notice>;
             return nextInUnit ? <LinkButton href={`/app/lesson?id=${nextInUnit.id}`} full size="lg">Pelajaran berikutnya: {nextInUnit.title}<ArrowRight size={20} aria-hidden /></LinkButton> : exam ? <LinkButton href={`/app/exams?id=${exam.id}`} full size="lg" variant="accent">Lanjut ke {exam.title}</LinkButton> : <LinkButton href={home} full size="lg">{track ? 'Kembali ke jalur khusus' : 'Kembali ke jalur belajar'}</LinkButton>;
           })()}

@@ -62,7 +62,7 @@ const scenes = [
     beats: [beat('homework', 3.6, { scroll: 650, tap: false }), beat('writing', 3.0, { scroll: 450, tap: false })] },
   { chip: 'Ujian & sertifikat', title: 'Ujian level yang sungguhan', sub: 'Empat bagian dinilai di server: tata bahasa, membaca, menyimak, menulis. Lulus? Dapat sertifikat dengan kode verifikasi.',
     beats: [beat('exam-intro', 3.0, { scroll: 380, tap: false }), beat('exam-passed', 2.6), beat('certificate', 3.4, { scroll: 520, tap: false, overlays: false })] },
-  { chip: 'Premium Tahunan', title: 'Rencana belajar mingguan', sub: 'Jalurmu sampai C2 dibagi menjadi target tiap minggu, lalu disesuaikan setiap Senin.',
+  { chip: 'Free & Premium', title: 'Rencana belajar mingguan', sub: 'Jalurmu sampai C2 dibagi menjadi target tiap minggu, lalu disesuaikan setiap Senin.',
     beats: [beat('plan', 3.2, { tap: false })] },
   { chip: 'Profil', title: 'Pilih avatar karaktermu', sub: 'Delapan karakter Lentera. Avatarmu tampil di liga dan di daftar teman.',
     beats: [beat('profile-avatar', 2.8)] },

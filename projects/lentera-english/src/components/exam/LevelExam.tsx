@@ -70,9 +70,9 @@ export function LevelExam({ exam }: { exam: ExamDef }) {
   const attempts = learner.exams[exam.id]?.attempts ?? [];
   const last = attempts.at(-1);
   // The weekly plan holds the exam back until its week (16 Nov 2026).
-  const planWait = examOpensAt(learner, ix, exam, ent, now);
   const rawStatus = levelExamStatus(learner, ix, exam.ref as Cefr, ent, now);
-  const status = rawStatus === 'available' && planWait ? 'locked' : rawStatus;
+  const planWait = rawStatus === 'available' ? examOpensAt(learner, ix, exam, ent, now) : undefined;
+  const status = planWait ? 'locked' : rawStatus;
   const waitUntil = last && !last.passed ? last.at + RETAKE_HOURS * 3600 * 1000 : 0;
   const required = last && !last.passed ? (last.weak ?? []) : [];
   const pending = required.filter((t) => (learner.rewards[`practice:${t}`] ?? 0) <= (last?.at ?? 0));

@@ -70,7 +70,7 @@ export const PROMO_CHAPTERS: { t: number; chip: string; title: string; sub: stri
   },
   {
     "t": 82.5,
-    "chip": "Premium Tahunan",
+    "chip": "Free & Premium",
     "title": "Rencana belajar mingguan",
     "sub": "Jalurmu sampai C2 dibagi menjadi target tiap minggu, lalu disesuaikan setiap Senin."
   },

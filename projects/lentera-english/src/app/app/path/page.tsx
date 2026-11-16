@@ -23,10 +23,10 @@ export default function PathPage() {
           const done = lessons.filter((l) => learner.lessons[l.id]?.completedAt).length;
           const open = levelOpen(learner, ix, code);
           const exam = levelExam(ix, code);
-          const examWait = exam ? examOpensAt(learner, ix, exam, ent, now) : undefined;
           const rawStatus = levelExamStatus(learner, ix, code, ent, now);
-          // The weekly plan holds the exam back until its week (16 Nov 2026).
-          const examStatus = rawStatus === 'available' && examWait ? 'locked' : rawStatus;
+          // The weekly plan holds a ready exam back until its week (16 Nov 2026).
+          const examWait = exam && rawStatus === 'available' ? examOpensAt(learner, ix, exam, ent, now) : undefined;
+          const examStatus = examWait ? 'locked' : rawStatus;
           return (
             <section key={code} aria-labelledby={`level-${code}`}>
               <div className="mb-3 flex items-center gap-3">
@@ -52,8 +52,9 @@ export default function PathPage() {
                       {units.map((u) => {
                         const unitLessons = lessonsOfUnit(ix, u.id);
                         const ue = unitExam(ix, u.id);
-                        const ueWait = ue ? examOpensAt(learner, ix, ue, ent, now) : undefined;
-                        const ues = unitExamStatus(learner, ix, u.id) === 'available' && ueWait ? 'locked' : unitExamStatus(learner, ix, u.id);
+                        const ueRaw = unitExamStatus(learner, ix, u.id);
+                        const ueWait = ue && ueRaw === 'available' ? examOpensAt(learner, ix, ue, ent, now) : undefined;
+                        const ues = ueWait ? 'locked' : ueRaw;
                         return (
                           <div key={u.id} className="mt-4">
                             <p className="text-sm font-extrabold uppercase tracking-wide text-muted">Unit {u.position} · {u.title}</p>

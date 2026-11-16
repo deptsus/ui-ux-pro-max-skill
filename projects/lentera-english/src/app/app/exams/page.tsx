@@ -25,11 +25,10 @@ function Exams() {
   const attempt = (exam ? learner.exams[exam.id]?.attempts.length ?? 0 : 0) + (done ? 0 : 1);
   const questions = useMemo(() => (exam ? buildExam(ix, exam, attempt) : []), [ix, exam, attempt]);
   // The weekly plan holds back an exam whose turn is in a later week (16 Nov 2026).
-  const opensAt = (e: ExamDef) => examOpensAt(learner, ix, e, ent, now);
-  const status = (e: ExamDef) => {
-    const st = e.scope === 'unit' ? unitExamStatus(learner, ix, e.ref) : levelExamStatus(learner, ix, e.ref as Cefr, ent, now);
-    return st === 'available' && opensAt(e) ? 'locked' : st;
-  };
+  const base = (e: ExamDef) => (e.scope === 'unit' ? unitExamStatus(learner, ix, e.ref) : levelExamStatus(learner, ix, e.ref as Cefr, ent, now));
+  /** Set only when the plan is the one thing keeping a ready exam closed. */
+  const opensAt = (e: ExamDef) => (base(e) === 'available' ? examOpensAt(learner, ix, e, ent, now) : undefined);
+  const status = (e: ExamDef) => (opensAt(e) ? 'locked' : base(e));
 
   if (id && !exam) return <Empty title="Ujian tidak ditemukan" action={<LinkButton href="/app/exams">Pusat Ujian</LinkButton>} />;
   // Rilis 3: sectioned level exams are drawn and graded on the server.
