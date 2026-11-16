@@ -1,0 +1,35 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'id.lenteraenglish.app'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'id.lenteraenglish.app'
+        minSdk 24
+        targetSdk 36
+        // Must match src/lib/android.ts on the site (update notice).
+        versionCode 5
+        versionName '2.0.0'
+        buildConfigField 'String', 'SITE', '"https://lentera-english-app.netlify.app"'
+    }
+    buildFeatures { buildConfig true }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    // Release lint needs extra tools from Maven Central; run `./gradlew lint` separately.
+    lint { abortOnError false; checkReleaseBuilds false }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+    implementation 'androidx.core:core:1.17.0'
+    testImplementation 'junit:junit:4.13.2'
+}

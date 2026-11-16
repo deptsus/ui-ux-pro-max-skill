@@ -3,14 +3,18 @@
 // an outdated Lentera Android app (never in a normal browser).
 import { useEffect, useState } from 'react';
 import { Download, X } from 'lucide-react';
-import { ANDROID_APP, installedApk, shouldOfferUpdate } from '@/lib/android';
+import Link from 'next/link';
+import { ANDROID_APP, installedApk, needsRelogin, shouldOfferUpdate } from '@/lib/android';
+import { useSession } from '@/lib/client/session';
 
 const SESSION_KEY = 'lentera.apk';
 const DISMISS_KEY = 'lentera.apk.dismissed';
 
 export function AppUpdateBanner() {
   const [show, setShow] = useState(false);
+  const [relogin, setRelogin] = useState(false);
   const [tapped, setTapped] = useState(false);
+  const session = useSession();
 
   useEffect(() => {
     try {
@@ -18,6 +22,7 @@ export function AppUpdateBanner() {
       // Remember for the rest of this app session: later pages have no ?apk= or referrer.
       if (installed !== null) sessionStorage.setItem(SESSION_KEY, String(installed));
       setShow(shouldOfferUpdate(installed, localStorage.getItem(DISMISS_KEY)));
+      setRelogin(needsRelogin(installed));
     } catch {
       setShow(false);
     }
@@ -38,9 +43,10 @@ export function AppUpdateBanner() {
       <p className="min-w-0 flex-1">
         <span className="font-extrabold">Versi baru aplikasi Lentera ({ANDROID_APP.versionName}) tersedia.</span>{' '}
         {tapped
-          ? 'Buka file yang terunduh, lalu pilih Perbarui. Login dan progresmu tetap aman.'
-          : `${ANDROID_APP.news} Perbarui agar fitur terbaru di HP berjalan dengan baik.`}
+          ? relogin ? 'Buka file yang terunduh, pilih Perbarui, lalu masuk lagi dengan akunmu.' : 'Buka file yang terunduh, lalu pilih Perbarui. Login dan progresmu tetap aman.'
+          : `${ANDROID_APP.news} ${relogin ? (session ? 'Setelah memperbarui, masuk sekali lagi dengan akun ini.' : 'Kamu belajar sebagai tamu: buat akun dulu agar progresmu ikut pindah, karena progres tamu hanya tersimpan di aplikasi lama.') : 'Perbarui agar fitur terbaru di HP berjalan dengan baik.'}`}
       </p>
+      {relogin && !session && !tapped && <Link href="/daftar" className="rounded-full border-2 border-brand px-3 py-1 font-extrabold text-brand">Buat akun</Link>}
       <a href={ANDROID_APP.url} download onClick={() => setTapped(true)} className="rounded-full bg-brand px-3 py-1.5 font-extrabold text-on-brand">Perbarui</a>
       <button type="button" onClick={later} className="text-muted" aria-label="Nanti saja"><X size={18} aria-hidden /></button>
     </div>

@@ -1,8 +1,10 @@
-// The Android app (Trusted Web Activity) and its update notice.
+// The Android app and its update notice.
 // No 'use client': the landing page (server) and the app shell both use it.
 //
-// The APK cannot tell the site its version by itself, so from 1.2.0 on it
-// opens /app?apk=<versionCode> (startUrl in android/generate.cjs). Older
+// 1.x was a Trusted Web Activity (needs Chrome, android/generate.cjs); 2.0 is
+// the app's own WebView (android/native, no Chrome). Both share the package
+// name and signing key, so 2.0 installs as an update of 1.x. The APK tells the
+// site its version by opening /app?apk=<versionCode> (from 1.2.0 on). Older
 // installs (1.0.0, 1.1.0) open /app without it; Chrome then marks the page
 // with document.referrer "android-app://id.lenteraenglish.app/", which is how
 // they are recognised as an outdated app.
@@ -10,12 +12,20 @@
 export const ANDROID_APP = {
   packageId: 'id.lenteraenglish.app',
   /** Must match appVersionCode / appVersion of the APK in public/download. */
-  versionCode: 4,
-  versionName: '1.3.0',
+  versionCode: 5,
+  versionName: '2.0.0',
   /** One line for the update notice: what the new APK brings. */
-  news: 'Ikon lentera baru di layar HP-mu.',
+  news: 'Tidak perlu Chrome lagi: suara, pengingat, dan berbagi langsung dari aplikasinya.',
   url: '/download/lentera-english.apk',
 } as const;
+
+/**
+ * Versions before this one kept the login and progress in Chrome, which the
+ * 2.0 WebView cannot read: after updating from them, learners sign in again,
+ * and guests lose progress that was only on the phone.
+ */
+export const RELOGIN_BELOW = 5;
+export const needsRelogin = (installed: number | null) => installed !== null && installed < RELOGIN_BELOW;
 
 /** Installs that predate the ?apk= parameter (1.0.0 and 1.1.0). */
 const UNVERSIONED = 1;

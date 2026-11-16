@@ -71,3 +71,8 @@ export async function nativeShareFile(name: string, mime: string, content: strin
   bytes.forEach((b) => { bin += String.fromCharCode(b); });
   return send({ type: 'share-file', name, mime, base64: btoa(bin) });
 }
+
+/** window.print() does nothing inside a WebView; the app opens Android's print dialog instead (also "Save as PDF"). */
+export function printPage(title: string) {
+  if (!isNativeApp() || !nativePrint(title)) window.print();
+}

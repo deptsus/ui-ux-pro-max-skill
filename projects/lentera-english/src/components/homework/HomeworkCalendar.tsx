@@ -2,6 +2,7 @@
 // Homework calendar (Rilis 4): a month view of due dates, the PR due on the
 // chosen day, and an .ics download so the deadlines can go into the phone's own
 // calendar (with an alarm the evening before) without any notification permission.
+import { isNativeApp, nativeShareFile } from '@/lib/client/native';
 import { useMemo, useState } from 'react';
 import { CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { dayKey } from '@/lib/engine/mastery';
@@ -39,7 +40,10 @@ export function HomeworkCalendar({ items, now }: { items: CalendarItem[]; now: n
   const chosen = byDay.get(picked) ?? [];
 
   function download() {
-    const blob = new Blob([homeworkIcs(items, window.location.origin, Date.now())], { type: 'text/calendar;charset=utf-8' });
+    const ics = homeworkIcs(items, window.location.origin, Date.now());
+    // In the Android app the file goes through the share sheet (calendar apps accept it).
+    if (isNativeApp()) { void nativeShareFile('tenggat-pr-lentera.ics', 'text/calendar', ics); return; }
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'tenggat-pr-lentera.ics';

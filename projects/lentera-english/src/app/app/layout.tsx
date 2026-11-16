@@ -15,6 +15,7 @@ import { act, loadLearner, onPremiumChange, useEntitlement, useLearner, useRole,
 import { weekStart } from '@/lib/engine/plan';
 import { buildWeekly, ensureWeekly, weeklyId } from '@/lib/engine/weekly';
 import { AppUpdateBanner } from '@/components/AppUpdateBanner';
+import { NativeSync } from '@/components/NativeSync';
 import { Logo, Mascot } from '@/components/Mascot';
 import { Button, cx } from '@/components/ui';
 
@@ -130,6 +131,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <main className="mx-auto max-w-5xl px-4 pb-28 pt-5 lg:pb-12">
         <AppUpdateBanner />
+        <NativeSync />
         {admin && alert && (
           <div role="status" className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-bad bg-bad-soft p-3 text-sm">
             <BellRing size={20} className="shrink-0 text-bad" aria-hidden />

@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ANDROID_APP, installedApk, shouldOfferUpdate } from '@/lib/android';
+import { ANDROID_APP, installedApk, needsRelogin, shouldOfferUpdate } from '@/lib/android';
 
 const TWA_REFERRER = 'android-app://id.lenteraenglish.app/';
 
@@ -37,13 +37,32 @@ describe('shouldOfferUpdate', () => {
   });
 });
 
+describe('pindah dari 1.x (Chrome) ke 2.0 (WebView sendiri)', () => {
+  it('versi 1.x perlu masuk lagi setelah memperbarui; 2.0 dan browser biasa tidak', () => {
+    expect(needsRelogin(1)).toBe(true);
+    expect(needsRelogin(4)).toBe(true);
+    expect(needsRelogin(5)).toBe(false);
+    expect(needsRelogin(null)).toBe(false);
+  });
+});
+
 describe('site and APK agree on the version', () => {
-  const generator = fs.readFileSync(path.resolve(__dirname, '../android/generate.cjs'), 'utf8');
-  it('generate.cjs builds the version the site announces', () => {
-    expect(generator).toMatch(new RegExp(`appVersionCode: ${ANDROID_APP.versionCode},`));
-    expect(generator).toMatch(new RegExp(`appVersion: '${ANDROID_APP.versionName.replace(/\./g, '\\.')}',`));
-    expect(generator).toMatch(new RegExp(`startUrl: '/app\\?apk=${ANDROID_APP.versionCode}',`));
-    expect(generator).toContain(`packageId: '${ANDROID_APP.packageId}'`);
+  const root = path.resolve(__dirname, '../android/native');
+  const gradle = fs.readFileSync(path.join(root, 'app/build.gradle'), 'utf8');
+  const activity = fs.readFileSync(path.join(root, 'app/src/main/java/id/lenteraenglish/app/MainActivity.java'), 'utf8');
+  it('the native app builds the version the site announces and opens /app?apk=<versionCode>', () => {
+    expect(gradle).toMatch(new RegExp(`versionCode ${ANDROID_APP.versionCode}\\b`));
+    expect(gradle).toContain(`versionName '${ANDROID_APP.versionName}'`);
+    expect(gradle).toContain(`applicationId '${ANDROID_APP.packageId}'`);
+    expect(activity).toContain('"/app?apk=" + BuildConfig.VERSION_CODE');
+  });
+  it('the app only talks to the site it was built for', () => {
+    expect(gradle).toContain(`buildConfigField 'String', 'SITE', '"https://lentera-english-app.netlify.app"'`);
+    const bridge = fs.readFileSync(path.join(root, 'app/src/main/java/id/lenteraenglish/app/Bridge.java'), 'utf8');
+    expect(bridge).toMatch(/isMainFrame/);
+    expect(bridge).toMatch(/"https"\.equals\(sourceOrigin\.getScheme\(\)\)/);
+    const net = fs.readFileSync(path.join(root, 'app/src/main/res/xml/network_security_config.xml'), 'utf8');
+    expect(net).toMatch(/cleartextTrafficPermitted="false"/);
   });
   it('the download link points at a file in public/', () => {
     expect(fs.existsSync(path.resolve(__dirname, '../public', `.${ANDROID_APP.url}`))).toBe(true);

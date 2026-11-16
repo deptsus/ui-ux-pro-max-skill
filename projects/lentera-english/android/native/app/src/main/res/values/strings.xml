@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lentera</string>
+    <string name="offline_title">Tidak ada koneksi internet</string>
+    <string name="offline_body">Lentera butuh internet untuk membuka pelajaran. Periksa data seluler atau Wi-Fi, lalu coba lagi.</string>
+    <string name="retry">Coba lagi</string>
+    <string name="channel_daily">Pengingat belajar harian</string>
+    <string name="channel_daily_desc">Satu pengingat pada jam pilihanmu, hanya di hari kamu belum belajar.</string>
+    <string name="channel_homework">Pengingat tenggat PR</string>
+    <string name="channel_homework_desc">Sekali, sekitar sehari sebelum tenggat PR yang belum dikumpulkan.</string>
+    <string name="download_started">Mengunduh… Lihat notifikasi untuk membukanya.</string>
+    <string name="mic_denied">Izin mikrofon ditolak. Izinkan di Pengaturan HP → Aplikasi → Lentera → Izin.</string>
+</resources>

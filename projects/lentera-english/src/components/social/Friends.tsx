@@ -2,6 +2,7 @@
 // Friends and friend challenges (Rilis 8). Friends are added with a six-
 // character invite code (or an invite link that fills it in); a challenge is
 // "who earns more XP in 3 or 7 days", scored from server XP only.
+import { isNativeApp, nativeShare } from '@/lib/client/native';
 import { useEffect, useState } from 'react';
 import { Check, Copy, Flame, Share2, Swords, Trophy, UserPlus, X } from 'lucide-react';
 import { getSocial, inviteUrl, socialAction, timeLeft, type Challenge, type Social } from '@/lib/client/habits';
@@ -110,7 +111,8 @@ export function FriendsView({ initialCode = '' }: { initialCode?: string }) {
     }
   };
   const share = async () => {
-    if (navigator.share) {
+    if (isNativeApp()) nativeShare('Belajar bareng di Lentera English', shareText);
+    else if (navigator.share) {
       try { await navigator.share({ title: 'Belajar bareng di Lentera English', text: shareText }); } catch { /* cancelled */ }
     } else await copy();
   };

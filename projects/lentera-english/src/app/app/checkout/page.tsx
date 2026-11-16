@@ -3,6 +3,7 @@
 // is activated on the server, by an admin confirming a manual QRIS payment
 // (default) or, with Xendit enabled, by a verified webhook or the official
 // status API. Never by reaching this page.
+import { printPage } from '@/lib/client/native';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import QRCode from 'qrcode';
@@ -126,7 +127,7 @@ function Checkout() {
           <div className="flex flex-col items-center gap-2 text-center"><Mascot mood="cheer" size={88} /><CheckCircle2 size={32} className="text-ok" aria-hidden /><h2 className="text-xl font-extrabold">Pembayaran berhasil</h2><p className="text-muted">{data.entitlement.premium && data.entitlement.expires_at ? `Premium aktif sampai ${dateId(data.entitlement.expires_at)}.` : 'Premium sedang diaktifkan.'}</p></div>
           <div className="rounded-2xl border border-line p-4"><p className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Bukti pembayaran</p>{summary}</div>
           <p className="text-xs text-muted">Tidak ada perpanjangan otomatis. Kamu bisa memperpanjang sendiri dari halaman paket sebelum masa aktif berakhir.</p>
-          <div className="flex flex-col gap-2 sm:flex-row"><Button variant="secondary" full onClick={() => window.print()}>Cetak bukti</Button><LinkButton href="/app/path" full>Lanjut belajar</LinkButton></div>
+          <div className="flex flex-col gap-2 sm:flex-row"><Button variant="secondary" full onClick={() => printPage(document.title)}>Cetak bukti</Button><LinkButton href="/app/path" full>Lanjut belajar</LinkButton></div>
         </Card>
       )}
 

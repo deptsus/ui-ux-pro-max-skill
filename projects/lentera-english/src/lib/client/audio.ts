@@ -3,6 +3,7 @@
 // when one exists for the text being played, matched by audio key or by the
 // text itself. Otherwise the device's built-in speech engine
 // reads the text, and the UI says so. Nothing is sent to any service.
+import { isNativeApp, speakNative, stopNativeSpeech } from './native';
 import type { AudioResource, ContentIndex } from '@/lib/content/types';
 import { spokenKey } from '@/lib/content/spoken';
 
@@ -41,13 +42,14 @@ export function recordingFor(ix: ContentIndex | null, text: string, accent: 'us'
 
 export function audioSource(ix: ContentIndex | null, audioKey?: string, text = '', accent: 'us' | 'uk' = 'us'): AudioSource {
   if (recordingFor(ix, text, accent, audioKey)) return 'recording';
-  return typeof window !== 'undefined' && 'speechSynthesis' in window ? 'device' : 'none';
+  return typeof window !== 'undefined' && ('speechSynthesis' in window || isNativeApp()) ? 'device' : 'none';
 }
 
 export function stopAudio() {
   current?.pause();
   current = null;
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  if (isNativeApp()) stopNativeSpeech();
 }
 
 export function play(ix: ContentIndex | null, text: string, opts: PlayOptions): Promise<AudioSource> {
@@ -63,7 +65,9 @@ export function play(ix: ContentIndex | null, text: string, opts: PlayOptions): 
       el.play().catch(() => resolve('none'));
     });
   }
-  if (!('speechSynthesis' in window)) return Promise.resolve('none');
+  // The Android app's WebView has no speechSynthesis: the app reads aloud with
+  // the phone's own text-to-speech engine instead.
+  if (!('speechSynthesis' in window)) return isNativeApp() ? speakNative(text, opts.accent, !!opts.slow).then((ok) => (ok ? 'device' : 'none')) : Promise.resolve('none');
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text);
     const lang = opts.accent === 'uk' ? 'en-GB' : 'en-US';

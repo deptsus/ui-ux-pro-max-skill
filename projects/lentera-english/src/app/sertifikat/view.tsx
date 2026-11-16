@@ -2,6 +2,7 @@
 // Public certificate page: anyone with the code can verify it, no account needed.
 // Printable on A4 landscape. Worded honestly: a completion certificate issued by
 // Lentera English, not an official CEFR certificate.
+import { printPage } from '@/lib/client/native';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -41,7 +42,7 @@ export function CertificateView() {
     <main className="mx-auto max-w-4xl px-4 py-8 print:max-w-none print:p-0">
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Link href="/" className="text-xl"><Logo /></Link>
-        {state === 'found' && <Button variant="secondary" size="sm" onClick={() => window.print()}><Printer size={16} aria-hidden /> Cetak / simpan PDF</Button>}
+        {state === 'found' && <Button variant="secondary" size="sm" onClick={() => printPage(document.title)}><Printer size={16} aria-hidden /> Cetak / simpan PDF</Button>}
       </div>
 
       <Card className="mb-6 space-y-3 print:hidden">

@@ -7,7 +7,9 @@ import { useEffect, useState } from 'react';
 import { AlarmClock, BellOff, BellRing } from 'lucide-react';
 import { deviceTimeZone, getReminderPrefs, hourLabel, REMINDER_HOURS, saveReminderPrefs, zoneLabel, type ReminderPrefs } from '@/lib/client/habits';
 import { disableReminders, enableReminders, sendTestReminder, useReminderStatus } from '@/lib/client/reminders';
+import { askNativeNotifications, isNativeApp, nativeInfo, setNativeDaily, type NativeInfo } from '@/lib/client/native';
 import { useServerInfo, useSession } from '@/lib/client/session';
+import { rememberNativeHomework } from '@/components/NativeSync';
 import { Button, Card, LinkButton, Notice, inputClass } from '@/components/ui';
 
 export function ReminderSettings() {
@@ -20,6 +22,11 @@ export function ReminderSettings() {
   // Feedback appears next to the control that caused it.
   const [msg, setMsg] = useState<{ tone: 'ok' | 'bad'; text: string; where: 'daily' | 'homework' | 'device' } | null>(null);
   const zone = zoneLabel(prefs?.time_zone ?? deviceTimeZone());
+  // Android app 2.0: reminders are scheduled on the phone itself (no Web Push in the app).
+  const [native, setNative] = useState<NativeInfo['notifications'] | null>(null);
+  useEffect(() => {
+    if (isNativeApp()) nativeInfo().then((i) => setNative(i?.notifications ?? 'default'), () => setNative('default'));
+  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -41,7 +48,12 @@ export function ReminderSettings() {
     setSaving(true);
     setMsg(null);
     try {
-      setPrefs(await saveReminderPrefs(patch));
+      const saved = await saveReminderPrefs(patch);
+      setPrefs(saved);
+      if (native) {
+        if ('daily_hour' in patch) await setNativeDaily(saved.daily_hour);
+        if ('homework' in patch) rememberNativeHomework(saved.homework);
+      }
       setMsg({ tone: 'ok', text: ok, where });
     } catch (e) {
       setMsg({ tone: 'bad', text: (e as Error).message, where });
@@ -100,26 +112,41 @@ export function ReminderSettings() {
         <p className="text-sm text-muted">Sekali, sekitar sehari sebelum tenggat PR yang belum dikumpulkan (07.00–20.00 WIB).</p>
       </section>
 
-      <section className="space-y-2 rounded-2xl bg-surface-2 p-3" aria-labelledby="notif-perangkat">
-        <h3 id="notif-perangkat" className="flex items-center gap-2 font-bold">
-          {status === 'on' ? <BellRing size={16} className="text-ok" aria-hidden /> : <BellOff size={16} className="text-muted" aria-hidden />}
-          Notifikasi di HP ini: {status === 'on' ? 'aktif' : status === 'busy' ? 'memeriksa…' : status === 'denied' ? 'diblokir' : status === 'unsupported' ? 'tidak didukung' : 'mati'}
-        </h3>
-        <p className="text-sm text-muted">
-          {status === 'denied' ? 'Notifikasi untuk Lentera diblokir. Izinkan di pengaturan HP atau browser, lalu muat ulang halaman ini.'
-            : status === 'unsupported' ? 'Perangkat atau browser ini belum mendukung notifikasi. Di HP Android, pakai aplikasi Lentera atau Chrome.'
-            : status === 'on' ? `Pengingat dikirim ke HP ini${prefs && prefs.devices > 1 ? ` dan ${prefs.devices - 1} perangkat lain` : ''}.`
-            : 'Nyalakan agar pengingat bisa sampai ke HP ini.'}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {status === 'off' && <Button size="sm" onClick={() => void device(enableReminders, 'Notifikasi aktif di perangkat ini.')}>Nyalakan notifikasi</Button>}
-          {status === 'on' && <Button size="sm" variant="secondary" onClick={() => void device(async () => { const r = await sendTestReminder(); if (!r.sent) throw new Error('Pengingat uji belum terkirim. Coba matikan lalu nyalakan lagi.'); }, 'Pengingat uji dikirim. Periksa notifikasi HP-mu.')}>Kirim pengingat uji</Button>}
-          {status === 'on' && <Button size="sm" variant="ghost" onClick={() => void device(disableReminders, 'Notifikasi dimatikan di perangkat ini.')}>Matikan di HP ini</Button>}
-        </div>
-        {msg?.where === 'device' && <div role="status"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
-      </section>
+      {native ? (
+        <section className="space-y-2 rounded-2xl bg-surface-2 p-3" aria-labelledby="notif-perangkat">
+          <h3 id="notif-perangkat" className="flex items-center gap-2 font-bold">
+            {native === 'granted' ? <BellRing size={16} className="text-ok" aria-hidden /> : <BellOff size={16} className="text-muted" aria-hidden />}
+            Notifikasi aplikasi Lentera: {native === 'granted' ? 'diizinkan' : native === 'denied' ? 'diblokir' : 'belum diizinkan'}
+          </h3>
+          <p className="text-sm text-muted">
+            {native === 'granted' ? 'Pengingat dijadwalkan langsung di HP ini, tetap berbunyi walau sedang tanpa internet.'
+              : native === 'denied' ? 'Notifikasi untuk aplikasi Lentera dimatikan. Izinkan di Pengaturan HP → Aplikasi → Lentera English → Notifikasi.'
+              : 'Izinkan notifikasi agar pengingat bisa muncul di HP ini.'}
+          </p>
+          {native !== 'granted' && <Button size="sm" onClick={async () => { const r = await askNativeNotifications(); setNative(r?.state ?? native); }}>{native === 'denied' ? 'Buka pengaturan notifikasi' : 'Izinkan notifikasi'}</Button>}
+        </section>
+      ) : (
+        <section className="space-y-2 rounded-2xl bg-surface-2 p-3" aria-labelledby="notif-perangkat">
+          <h3 id="notif-perangkat" className="flex items-center gap-2 font-bold">
+            {status === 'on' ? <BellRing size={16} className="text-ok" aria-hidden /> : <BellOff size={16} className="text-muted" aria-hidden />}
+            Notifikasi di HP ini: {status === 'on' ? 'aktif' : status === 'busy' ? 'memeriksa…' : status === 'denied' ? 'diblokir' : status === 'unsupported' ? 'tidak didukung' : 'mati'}
+          </h3>
+          <p className="text-sm text-muted">
+            {status === 'denied' ? 'Notifikasi untuk Lentera diblokir. Izinkan di pengaturan HP atau browser, lalu muat ulang halaman ini.'
+              : status === 'unsupported' ? 'Perangkat atau browser ini belum mendukung notifikasi. Di HP Android, pakai aplikasi Lentera atau Chrome.'
+              : status === 'on' ? `Pengingat dikirim ke HP ini${prefs && prefs.devices > 1 ? ` dan ${prefs.devices - 1} perangkat lain` : ''}.`
+              : 'Nyalakan agar pengingat bisa sampai ke HP ini.'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {status === 'off' && <Button size="sm" onClick={() => void device(enableReminders, 'Notifikasi aktif di perangkat ini.')}>Nyalakan notifikasi</Button>}
+            {status === 'on' && <Button size="sm" variant="secondary" onClick={() => void device(async () => { const r = await sendTestReminder(); if (!r.sent) throw new Error('Pengingat uji belum terkirim. Coba matikan lalu nyalakan lagi.'); }, 'Pengingat uji dikirim. Periksa notifikasi HP-mu.')}>Kirim pengingat uji</Button>}
+            {status === 'on' && <Button size="sm" variant="ghost" onClick={() => void device(disableReminders, 'Notifikasi dimatikan di perangkat ini.')}>Matikan di HP ini</Button>}
+          </div>
+          {msg?.where === 'device' && <div role="status"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
+        </section>
+      )}
 
-      {wantsSome && status === 'off' && prefs && prefs.devices === 0 && <Notice tone="accent">Pengingat sudah diatur, tapi belum ada HP yang menerima notifikasi. Tekan <strong>Nyalakan notifikasi</strong> di atas.</Notice>}
+      {!native && wantsSome && status === 'off' && prefs && prefs.devices === 0 && <Notice tone="accent">Pengingat sudah diatur, tapi belum ada HP yang menerima notifikasi. Tekan <strong>Nyalakan notifikasi</strong> di atas.</Notice>}
     </Card>
   );
 }

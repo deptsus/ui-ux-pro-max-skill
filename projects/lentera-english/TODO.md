@@ -56,7 +56,9 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 8 "Kebiasaan Belajar": pengingat belajar harian pada jam pilihan pelajar, liga mingguan 5 divisi, teman lewat kode/tautan undangan, tantangan XP 3/7 hari, latihan shadowing, APK 1.3.0 dengan ikon lentera (`tests/rilis8.test.ts`, `e2e:habits`). `apply-0013.sql` sudah dijalankan pemilik dan diperiksa (15 Nov 2026).
 - [x] Penghematan Liga & Teman (sinkron hanya bila ada event, indeks XP per pelajar, penempatan liga massal per 5 menit): selesai di Rilis 9.
 - [x] Rilis 9 "Aman & Terukur": header keamanan + CSP, batas permintaan, verifikasi 2 langkah admin, privasi + hapus akun + Hubungi Kami, pemantauan error, cadangan harian, Analitik dan Kesehatan di /admin, `SCALING.md` (`tests/rilis9.test.ts`, `e2e:ops`). Pemilik: jalankan `apply-0014.sql`, lalu aktifkan verifikasi 2 langkah di /admin → Kesehatan dan nyalakan auto recharge Netlify.
-- [ ] Rilis 10 "Kelas" + aplikasi Android 2.0.0 tanpa Chrome.
+- [x] `apply-0014.sql` dijalankan pemilik dan diperiksa; verifikasi 2 langkah admin aktif (16 Nov 2026). Sisa: nyalakan auto recharge Netlify.
+- [x] Rilis 10 "Kelas" + aplikasi Android 2.0.0 tanpa Chrome: lisensi sekolah di /admin → Sekolah, Ruang Guru, Kelas Saya, Pantau Anak, `/sekolah`, APK 2.0.0 WebView (`tests/rilis10.test.ts`, `e2e:classes`, `e2e:native`). Pemilik: jalankan `apply-0015.sql`.
+- [ ] Uji APK 2.0.0 di HP sungguhan (suara, pengingat harian pada jamnya, izin mikrofon untuk shadowing, berbagi, cetak sertifikat).
 - [ ] Rilis 11 "Jalur Khusus & SEO".
 - [ ] Sesudah Rilis 11: Rilis 7 "Siap Tumbuh" (Play Store, QRIS otomatis) bila pemilik siap.
 - [x] Pengingat PR terbukti sampai di HP sungguhan (15 Nov 2026, HP Android pemilik). Fungsi terjadwal Netlify `homework-reminders` terdaftar (`@hourly`).

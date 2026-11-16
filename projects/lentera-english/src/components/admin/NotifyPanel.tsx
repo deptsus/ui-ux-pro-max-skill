@@ -1,5 +1,6 @@
 'use client';
 // Phone notifications for this admin device: turn on, send a test, turn off.
+import { isNativeApp } from '@/lib/client/native';
 import { useState } from 'react';
 import { Bell, BellOff, BellRing } from 'lucide-react';
 import { disablePush, enablePush, sendTestPush, usePushStatus } from '@/lib/client/admin';
@@ -55,7 +56,7 @@ export function NotifyPanel() {
           {status === 'denied'
             ? 'Notifikasi untuk Lentera diblokir. Buka pengaturan HP → Aplikasi → Lentera (atau Chrome) → Notifikasi, izinkan, lalu muat ulang halaman ini.'
             : status === 'unsupported'
-              ? 'Browser ini tidak bisa menerima notifikasi. Pakai aplikasi Android Lentera atau Chrome terbaru.'
+              ? isNativeApp() ? 'Aplikasi Lentera 2.0 tidak memakai notifikasi web. Untuk notifikasi pembayaran dan error, buka /admin sekali di Chrome HP ini lalu aktifkan di sana.' : 'Browser ini tidak bisa menerima notifikasi. Pakai Chrome terbaru di HP atau komputer.'
               : 'Setiap pelajar menekan "Saya sudah bayar", HP ini berbunyi walau aplikasi sedang ditutup. Aktifkan di setiap HP admin.'}
         </p>
         {message && <p role="status" className={cx('mt-1 text-sm font-bold', message.tone === 'ok' ? 'text-ok' : 'text-bad')}>{message.text}</p>}

@@ -2,6 +2,7 @@
 // Checkout for the owner's own QRIS. The learner pays, then reports it; an admin
 // matches the payment in the merchant app and confirms it. Only that
 // confirmation (on the server) grants Premium: nothing on this page does.
+import { printPage } from '@/lib/client/native';
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { CheckCircle2, Clock, Download, Hourglass, XCircle } from 'lucide-react';
@@ -83,7 +84,7 @@ export function ManualQrisCheckout({ tx, premiumUntil, reload }: { tx: ManualTx;
         <div className="flex flex-col items-center gap-2 text-center"><Mascot mood="cheer" size={88} /><CheckCircle2 size={32} className="text-ok" aria-hidden /><h2 className="text-xl font-extrabold">Pembayaran dikonfirmasi</h2><p className="text-muted">{premiumUntil ? `Premium aktif sampai ${dateId(premiumUntil)}.` : 'Premium sedang diaktifkan.'}</p></div>
         <div className="rounded-2xl border border-line p-4"><p className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Bukti pembayaran</p>{summary}</div>
         <p className="text-xs text-muted">Tidak ada perpanjangan otomatis. Kamu bisa memperpanjang sendiri dari halaman paket sebelum masa aktif berakhir.</p>
-        <div className="flex flex-col gap-2 sm:flex-row"><Button variant="secondary" full onClick={() => window.print()}>Cetak bukti</Button><LinkButton href="/app/path" full>Lanjut belajar</LinkButton></div>
+        <div className="flex flex-col gap-2 sm:flex-row"><Button variant="secondary" full onClick={() => printPage(document.title)}>Cetak bukti</Button><LinkButton href="/app/path" full>Lanjut belajar</LinkButton></div>
       </Card>
     );
   }
