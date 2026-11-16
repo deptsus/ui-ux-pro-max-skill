@@ -56,13 +56,11 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Rilis 8 "Kebiasaan Belajar": pengingat belajar harian pada jam pilihan pelajar, liga mingguan 5 divisi, teman lewat kode/tautan undangan, tantangan XP 3/7 hari, latihan shadowing, APK 1.3.0 dengan ikon lentera (`tests/rilis8.test.ts`, `e2e:habits`). `apply-0013.sql` sudah dijalankan pemilik dan diperiksa (15 Nov 2026).
 - [x] Penghematan Liga & Teman (sinkron hanya bila ada event, indeks XP per pelajar, penempatan liga massal per 5 menit): selesai di Rilis 9.
 - [x] Rilis 9 "Aman & Terukur": header keamanan + CSP, batas permintaan, verifikasi 2 langkah admin, privasi + hapus akun + Hubungi Kami, pemantauan error, cadangan harian, Analitik dan Kesehatan di /admin, `SCALING.md` (`tests/rilis9.test.ts`, `e2e:ops`). Pemilik: jalankan `apply-0014.sql`, lalu aktifkan verifikasi 2 langkah di /admin → Kesehatan dan nyalakan auto recharge Netlify.
-- [x] `apply-0014.sql` dijalankan pemilik dan diperiksa; verifikasi 2 langkah admin aktif (16 Nov 2026). Sisa: nyalakan auto recharge Netlify.
+- [x] `apply-0014.sql` dijalankan pemilik dan diperiksa; verifikasi 2 langkah admin aktif (16 Nov 2026).
 - [x] Rilis 10 "Kelas" + aplikasi Android 2.0.0 tanpa Chrome: lisensi sekolah di /admin → Sekolah, Ruang Guru, Kelas Saya, Pantau Anak, `/sekolah`, APK 2.0.0 WebView (`tests/rilis10.test.ts`, `e2e:classes`, `e2e:native`). `apply-0015.sql` sudah dijalankan pemilik dan diperiksa (16 Nov 2026). Pemilik: buat lisensi pertama di /admin → Sekolah bila ada sekolah yang berminat.
-- [ ] Uji APK 2.0.0 di HP sungguhan (suara, pengingat harian pada jamnya, izin mikrofon untuk shadowing, berbagi, cetak sertifikat).
+- [x] APK 2.0.0 diuji pemilik di HP sungguhan (16 Nov 2026).
 - [x] Rilis 11 "Jalur Khusus & SEO": 3 jalur (Kerja, TOEFL ITP/IELTS, Anak) × 3 pelajaran, pelajaran pertama gratis, `/app/jalur`, halaman materi publik `/materi`, sitemap, robots, data terstruktur (`tests/rilis11.test.ts`, `e2e:tracks`). Pemilik: jalankan `apply-0016.sql`, lalu /admin → Konten → "Impor materi bawaan" → Terbitkan; daftarkan situs di Google Search Console dan kirim `sitemap.xml`.
 - [x] Rilis 12: jalur khusus 6 pelajaran per jalur; ujian level diperiksa server (migrasi 0017) + bank soal 16 per level; pengingat Premium hampir habis; batas antrean tamu; QRIS otomatis siap nyala (`PEMBAYARAN-OTOMATIS.md`); paket Play Store (`play-store/`); halaman depan dan video promosi baru. `apply-0017.sql` dijalankan dan materi diimpor + diterbitkan pemilik (versi 11), diperiksa 16 Nov 2026.
-- [ ] Pemilik: akun Play Console dan uji tertutup 12 penguji × 14 hari (`play-store/README.md`); akun Xendit bila ingin QRIS otomatis.
-- [ ] Bila ingin menjual Premium di dalam aplikasi Play Store: integrasi Google Play Billing (atau program pembayaran alternatif di Indonesia).
 - [x] Rilis 7 "Siap Tumbuh" disiapkan di Rilis 12 (sisa langkah pemilik di atas).
 - [x] Pengingat PR terbukti sampai di HP sungguhan (15 Nov 2026, HP Android pemilik). Fungsi terjadwal Netlify `homework-reminders` terdaftar (`@hourly`).
 - [x] Bank soal ujian level 16 + 8 + 8 per level; batas waktu ujian level diperiksa server (Rilis 12).
@@ -70,6 +68,15 @@ Bukti dan detail setiap item ada di `PROJECT_STATUS.md`. Jangan membangun ulang 
 - [x] Ujian level B1, B2, C1, C2 (Rilis 3: semua level A1–C2 punya ujian empat bagian).
 - [ ] Tegakkan batas paket Free di server (nyawa, 10 ulangan per hari). Sekarang hanya di klien; konten Premium sudah dipangkas di server.
 - [ ] Deploy (hosting Next.js + Supabase), domain HTTPS, env produksi.
+
+## Ditunda pemilik (16 Nov 2026) — kerjakan bila pemilik siap
+
+Semua persiapan teknis sudah selesai; yang tersisa butuh akun atau biaya pemilik.
+
+- [ ] **Google Play Store**: akun Play Console (US$25), uji tertutup 12 penguji × 14 hari, keputusan target usia. Paket siap di `play-store/` (panduan `play-store/README.md`).
+- [ ] **QRIS otomatis (Xendit)**: akun Xendit terverifikasi, kunci di Netlify (`PEMBAYARAN-OTOMATIS.md`). Sampai itu, QRIS manual tetap berjalan.
+- [ ] **Isi ulang otomatis kredit Netlify** (auto recharge): Usage & billing → Configure auto recharge (`SCALING.md`).
+- [ ] (Sesudah Play Store) Bila ingin menjual Premium di dalam aplikasi Play Store: integrasi Google Play Billing atau program pembayaran alternatif di Indonesia.
 
 ## P2 — Fitur tambahan
 
