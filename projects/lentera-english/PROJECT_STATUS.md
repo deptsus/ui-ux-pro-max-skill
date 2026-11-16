@@ -28,7 +28,7 @@ pengantar, materi, contoh benar/salah, latihan terbimbing, latihan mandiri, PR,
 tes penguasaan, jadwal ulangan.
 
 Model bisnis: Free (Rp0), Premium Bulanan (Rp58.500 / 30 hari), Premium Tahunan
-(Rp585.000 dicoret, diskon 15%, dibayar Rp497.250 / 365 hari). Pembayaran hanya
+(Rp702.000 dicoret, diskon 20%, dibayar Rp561.600 / 365 hari sejak 16 Nov 2026, migrasi 0018). Pembayaran hanya
 lewat QRIS milik pemilik produk; Premium aktif setelah admin mengonfirmasi
 pembayaran. Tidak ada perpanjangan otomatis. Lihat DECISIONS A3, A4, B6.
 
@@ -85,6 +85,7 @@ Repo `ui-ux-pro-max-skill` adalah produk lain (toolkit desain). Aplikasi ini han
 - CMS di sisi database: impor, edit sebagian, gerbang kualitas sebelum terbit, versi kurikulum, rollback (diuji).
 - Sinkronisasi progres: event idempoten, batas XP di server (200 per event, 3000 per hari), snapshot lama tidak menimpa yang baru (diuji).
 - Papan peringkat mingguan dari ledger XP (diuji).
+- **Harga baru Premium Tahunan (16 Nov 2026; migrasi 0018)**: Rp702.000 dicoret, diskon 20%, dibayar Rp561.600 (±Rp46.800 per bulan), di aplikasi dan di halaman depan. QR tahunan baru dari pemilik dibaca dari foto dan diperiksa `src/lib/qris.ts` (DANA, merchant "Lentera english, Service", NMID ID1026639132426, nominal 561600, CRC 610A valid). Nominal yang ditagih dan QR-nya ada di `subscription_plans`, jadi butuh `supabase/manual/apply-0018.sql` (hanya baris paket tahunan; pembayaran yang sudah dibuka tetap memakai nominal dan QR-nya sendiri). Teruji: `tests/db.test.ts` (harga tampilan = harga basis data), `tests/manual-payments.test.ts` (QR Rp561.600), `e2e/run.mjs` dan `e2e/admin.mjs`.
 - **Rencana mingguan untuk semua + Jalur mengikuti rencana (diuji, 16 Nov 2026; tanpa migrasi, tanpa impor materi)**, permintaan pemilik dari rekaman layar:
   - **Premium Bulanan mendapat rencana 52 minggu penuh** seperti Tahunan. Untuk bulanan, Free, dan tamu, 52 minggu dihitung dari Senin saat rencana pertama dibuka (`planStart` di progres pelajar, ikut sinkron), jadi perpanjangan bulan berikutnya atau naik dari Free ke Premium melanjutkan rencana yang sama dan akun lama tidak mendapat rencana yang dijejalkan. Tahunan tetap sepanjang masa Premium; admin tetap siklus 52 minggu dari akun dibuat (`planWindow`).
   - **Kunci mingguan dengan hitungan mundur**: setelah jatah minggu ini (sekitar 3 langkah) tuntas, langkah berikutnya terkunci sampai Senin 00.00. Pemberitahuan tepat di atas daftar minggu ini ("Terbuka dalam 2 hari 5 jam lagi (Senin, 23 Nov, 00.00)"), di kartu rencana Beranda, dan baris minggu berikutnya ditandai "Terkunci". Tombol "Lanjut: …" ke minggu berikutnya dihapus.
@@ -208,10 +209,10 @@ Repo `ui-ux-pro-max-skill` adalah produk lain (toolkit desain). Aplikasi ini han
 
 ### 2d-1. Pembayaran QRIS manual (aktif; Teruji: `tests/manual-payments.test.ts`, 17 tes, dan e2e)
 
-- Dua QR dari pemilik produk (QRIS dinamis DANA, NMID ID1026639132426) tersimpan per paket. Isi kodenya sudah dibaca dari foto: nominal Rp58.500 dan Rp497.250, mata uang rupiah, checksum benar.
+- Dua QR dari pemilik produk (QRIS dinamis DANA, NMID ID1026639132426) tersimpan per paket. Isi kodenya sudah dibaca dari foto: nominal Rp58.500 dan Rp561.600 (QR tahunan diganti 16 Nov 2026, migrasi 0018; sebelumnya Rp497.250), mata uang rupiah, checksum benar.
 - Aplikasi menggambar QR dari isi kodenya; hasil gambar dipindai ulang dan **identik** dengan QR asli.
 - Server menolak menampilkan QR bila nominal di dalamnya berbeda dari harga paket (diuji).
-- Alur diuji di browser (`e2e/run.mjs` skenario `payment`, `e2e/admin.mjs`): pilih paket tahunan (harga coret + diskon tampil) → QR Rp497.250 + tombol simpan gambar → "Saya sudah bayar" dengan nama pembayar → antrean admin → admin konfirmasi → halaman pelajar berubah sendiri menjadi "Pembayaran dikonfirmasi", Premium 365 hari, isi Premium dikirim server. Penolakan dengan alasan tampil ke pelajar.
+- Alur diuji di browser (`e2e/run.mjs` skenario `payment`, `e2e/admin.mjs`): pilih paket tahunan (harga coret + diskon tampil) → QR Rp561.600 + tombol simpan gambar → "Saya sudah bayar" dengan nama pembayar → antrean admin → admin konfirmasi → halaman pelajar berubah sendiri menjadi "Pembayaran dikonfirmasi", Premium 365 hari, isi Premium dikirim server. Penolakan dengan alasan tampil ke pelajar.
 - Diuji di SQL: hanya admin yang bisa konfirmasi/tolak; konfirmasi ganda dan bersamaan hanya memberi satu periode; perpanjangan ditumpuk; checkout tak dilaporkan kedaluwarsa 24 jam tetapi tetap bisa dikonfirmasi; laporan tidak pernah kedaluwarsa sendiri; peran API tidak bisa memanggil fungsi pembayaran.
 - **Belum diuji dengan uang sungguhan.** Sebelum dibuka ke publik: bayar kedua QR dengan nominal sebenarnya dari minimal dua aplikasi berbeda, lalu konfirmasi lewat dashboard di server produksi.
 

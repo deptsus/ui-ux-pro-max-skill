@@ -25,12 +25,12 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
 - Jangan ada tombol kosong atau fungsi palsu.
 
 ### A3. Paket dan harga
-- Free: Rp0. Premium Bulanan: Rp58.500 untuk 30 hari. Premium Tahunan: Rp585.000 dicoret, **diskon 15%**, dibayar **Rp497.250** untuk 365 hari (diubah 14 November 2026). Tampilan selalu menunjukkan harga coret dan label diskon.
+- Free: Rp0. Premium Bulanan: Rp58.500 untuk 30 hari. Premium Tahunan: Rp702.000 dicoret, **diskon 20%**, dibayar **Rp561.600** untuk 365 hari (diubah 16 November 2026, migrasi 0018; sebelumnya Rp585.000 dicoret, diskon 15%, Rp497.250). Tampilan selalu menunjukkan harga coret dan label diskon.
 - Posisi harga sekitar 70% di bawah patokan Rp195.000 per bulan.
 - Manfaat Free dan Premium sesuai daftar di `src/lib/plans.ts`.
 
 ### A4. Pembayaran (diubah pemilik produk, 14 November 2026)
-- **Satu metode: QRIS milik pemilik produk** (QRIS dinamis dari DANA, merchant "Lentera english, Service", NMID ID1026639132426). Satu QR per paket, nominal sudah tertanam di QR: Rp58.500 dan Rp497.250. Tanpa gateway; DANA dan GoPay sebagai metode terpisah serta Xendit tidak dipakai.
+- **Satu metode: QRIS milik pemilik produk** (QRIS dinamis dari DANA, merchant "Lentera english, Service", NMID ID1026639132426). Satu QR per paket, nominal sudah tertanam di QR: Rp58.500 dan Rp561.600 (QR tahunan baru dari pemilik, 16 November 2026). Tanpa gateway; DANA dan GoPay sebagai metode terpisah serta Xendit tidak dipakai.
 - Nominal tetap, **tanpa kode unik**.
 - Alur: pilih paket → server membuat transaksi dengan harga dari database → aplikasi menampilkan QR paket itu (bisa disimpan sebagai gambar) → pelajar membayar → pelajar menekan "Saya sudah bayar" dan mengisi nama pemilik akun pembayar → **admin mencocokkan dengan mutasi di aplikasi merchant lalu menekan Konfirmasi** → Premium aktif → bukti dan riwayat tampil di akun.
 - Premium **hanya** aktif oleh konfirmasi admin. Membuka halaman pembayaran atau menekan "Saya sudah bayar" tidak mengaktifkan apa pun.

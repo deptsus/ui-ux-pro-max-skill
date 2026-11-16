@@ -49,7 +49,7 @@ describe('QRIS payloads', () => {
   });
   it('rejects a QR with the wrong amount, a broken checksum, or no amount', async () => {
     const [{ qris_payload: monthly }] = await db.query<{ qris_payload: string }>("select qris_payload from subscription_plans where id = 'premium_monthly'");
-    expect(qrisProblems(monthly, 497250).join(' ')).toMatch(/berbeda dengan harga paket/);
+    expect(qrisProblems(monthly, 561600).join(' ')).toMatch(/berbeda dengan harga paket/);
     expect(qrisProblems(monthly.slice(0, -1) + (monthly.endsWith('A') ? 'B' : 'A'), 58500).join(' ')).toMatch(/Checksum/);
     // Same QR with the amount (tag 54) removed and a fresh checksum: a static QR.
     const noAmount = monthly.replace('540558500', '').slice(0, -4);
@@ -70,8 +70,8 @@ describe('QRIS payloads', () => {
 describe('checkout and report', () => {
   it('charges the server price and copies the plan QR into the transaction', async () => {
     const tx = await createManualCheckout(db, user, 'premium_yearly');
-    expect(tx).toMatchObject({ status: 'PENDING', amount_idr: 497250, channel: 'QRIS', method: 'manual_qris', plan_id: 'premium_yearly' });
-    expect(readQris(tx.checkout!.value).amount).toBe(497250);
+    expect(tx).toMatchObject({ status: 'PENDING', amount_idr: 561600, channel: 'QRIS', method: 'manual_qris', plan_id: 'premium_yearly' });
+    expect(readQris(tx.checkout!.value).amount).toBe(561600);
     expect(new Date(tx.expires_at!).getTime() - Date.now()).toBeGreaterThan(23.9 * 3600_000);
     expect(tx).not.toHaveProperty('reviewed_by');
   });

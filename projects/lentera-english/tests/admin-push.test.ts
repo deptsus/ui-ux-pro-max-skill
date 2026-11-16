@@ -151,7 +151,7 @@ describe('notifications on a payment report', () => {
   it('encrypts the payload so the phone can read it, with VAPID and urgency headers', async () => {
     const d = device('phone');
     const keys = await pushKeys(db);
-    const msg = { title: 'Pembayaran baru menunggu konfirmasi', body: 'Premium Tahunan · Rp497.250', url: '/admin', tag: 't' };
+    const msg = { title: 'Pembayaran baru menunggu konfirmasi', body: 'Premium Tahunan · Rp561.600', url: '/admin', tag: 't' };
     const req = webpush.generateRequestDetails({ endpoint: d.endpoint, keys: { p256dh: d.p256dh, auth: d.authKey } }, JSON.stringify(msg), {
       vapidDetails: { subject: vapidSubject(undefined), publicKey: keys.public_key, privateKey: keys.private_key },
       TTL: 86400,

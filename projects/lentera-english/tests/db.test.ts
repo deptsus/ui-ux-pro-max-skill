@@ -39,14 +39,14 @@ describe('schema and reference data', () => {
     }
   });
   it('prices the plans as specified', async () => {
-    // Yearly: Rp585.000 shown struck through, 15% off, Rp497.250 charged (owner decision, Nov 2026).
+    // Yearly: Rp702.000 shown struck through, 20% off, Rp561.600 charged (owner decision, 16 Nov 2026; migration 0018).
     const plans = await db.query('select id, price_idr, list_price_idr, duration_days from subscription_plans order by price_idr');
     expect(plans).toEqual([
       { id: 'free', price_idr: 0, list_price_idr: null, duration_days: 0 },
       { id: 'premium_monthly', price_idr: 58500, list_price_idr: null, duration_days: 30 },
-      { id: 'premium_yearly', price_idr: 497250, list_price_idr: 585000, duration_days: 365 },
+      { id: 'premium_yearly', price_idr: 561600, list_price_idr: 702000, duration_days: 365 },
     ]);
-    expect(Math.round(585000 * 0.85)).toBe(497250);
+    expect(Math.round(702000 * 0.8)).toBe(561600);
   });
   it('enables row level security on every table', async () => {
     const off = await db.query("select tablename from pg_tables where schemaname = 'public' and not rowsecurity");

@@ -1,11 +1,11 @@
 // Display copy for plans. Prices shown here are informational; the amount
 // actually charged always comes from the subscription_plans table.
 export const BENCHMARK_MONTHLY = 195_000;
-// Yearly: Rp585.000 shown struck through, 15% off, Rp497.250 charged.
+// Yearly (owner decision, 16 Nov 2026): Rp702.000 shown struck through, 20% off, Rp561.600 charged.
 // Must match subscription_plans (checked in tests/db.test.ts).
 export const PLANS = {
   premium_monthly: { id: 'premium_monthly', name: 'Premium Bulanan', price: 58_500, listPrice: null, discountPct: 0, days: 30, note: 'Aktif 30 hari sejak pembayaran dikonfirmasi' },
-  premium_yearly: { id: 'premium_yearly', name: 'Premium Tahunan', price: 497_250, listPrice: 585_000, discountPct: 15, days: 365, note: 'Aktif 365 hari · setara ±Rp41.438 per bulan' },
+  premium_yearly: { id: 'premium_yearly', name: 'Premium Tahunan', price: 561_600, listPrice: 702_000, discountPct: 20, days: 365, note: 'Aktif 365 hari · setara ±Rp46.800 per bulan' },
 } as const;
 export type PlanId = keyof typeof PLANS;
 

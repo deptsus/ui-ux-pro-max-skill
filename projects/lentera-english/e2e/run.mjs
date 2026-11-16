@@ -418,15 +418,15 @@ scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif
   await page.goto(`${BASE}/app/subscription`);
   const yearly = page.locator('label', { has: page.getByRole('radio', { name: /Premium Tahunan/ }) });
   await yearly.waitFor({ timeout: 20000 });
-  check('paket tahunan menampilkan Rp585.000 dicoret, diskon 15%, dan Rp497.250', await yearly.locator('.line-through', { hasText: 'Rp585.000' }).count() === 1 && await yearly.getByText('Diskon 15%').count() === 1 && await yearly.getByText('Rp497.250', { exact: true }).count() === 1);
+  check('paket tahunan menampilkan Rp702.000 dicoret, diskon 20%, dan Rp561.600', await yearly.locator('.line-through', { hasText: 'Rp702.000' }).count() === 1 && await yearly.getByText('Diskon 20%').count() === 1 && await yearly.getByText('Rp561.600', { exact: true }).count() === 1);
   check('hanya QRIS yang ditawarkan sebagai metode pembayaran', await page.getByRole('radio', { name: /DANA|GoPay/ }).count() === 0 && await page.getByText('QRIS', { exact: true }).count() >= 1);
   await page.getByRole('radio', { name: /Premium Tahunan/ }).check();
-  await button(page, /Bayar Rp497\.250 dengan QRIS/).click();
+  await button(page, /Bayar Rp561\.600 dengan QRIS/).click();
   await page.waitForURL(/\/app\/checkout\?tx=/, { timeout: 30000 });
   const txId = new URL(page.url()).searchParams.get('tx');
-  await page.getByAltText(/Kode QRIS pembayaran Premium Tahunan, Rp497\.250/).waitFor({ timeout: 30000 });
+  await page.getByAltText(/Kode QRIS pembayaran Premium Tahunan, Rp561\.600/).waitFor({ timeout: 30000 });
   const tx = (await api(`/api/payments/${txId}`, sess.token)).data.transaction;
-  check('QR yang ditampilkan berisi nominal Rp497.250 dari server', tx.amount_idr === 497250 && tx.checkout.value.includes('5406497250') && tx.method === 'manual_qris');
+  check('QR yang ditampilkan berisi nominal Rp561.600 dari server', tx.amount_idr === 561600 && tx.checkout.value.includes('5406561600') && tx.method === 'manual_qris');
   check('gambar QR bisa disimpan untuk dipindai dari galeri', await page.getByRole('link', { name: 'Simpan gambar QR' }).getAttribute('download') === 'qris-lentera-premium_yearly.png');
   check('membuka halaman pembayaran tidak mengaktifkan Premium', (await api('/api/me', sess.token)).data.user.entitlement.premium === false);
   await page.screenshot({ path: path.join(SHOTS, 'checkout-qris.png'), fullPage: true });
@@ -490,7 +490,7 @@ scenario('payment: daftar, bayar QRIS, laporkan, admin konfirmasi, Premium aktif
   await page.goto(`${BASE}/app/subscription`);
   const history = page.locator('table tbody tr');
   await history.first().waitFor({ timeout: 20000 });
-  check('riwayat transaksi memuat keduanya dengan status yang benar', await history.filter({ hasText: 'Rp497.250' }).filter({ hasText: 'Berhasil' }).count() === 1 && await history.filter({ hasText: 'Rp58.500' }).filter({ hasText: 'Gagal' }).count() === 1);
+  check('riwayat transaksi memuat keduanya dengan status yang benar', await history.filter({ hasText: 'Rp561.600' }).filter({ hasText: 'Berhasil' }).count() === 1 && await history.filter({ hasText: 'Rp58.500' }).filter({ hasText: 'Gagal' }).count() === 1);
   check('endpoint webhook Xendit tidak aktif', (await api('/api/webhooks/xendit', null, { event: 'payment.capture', data: {} })).status === 404);
   check('simulasi pembayaran Xendit tidak tersedia', (await api(`/api/payments/${txId}`, sess.token, { action: 'simulate' })).status === 403);
   await ctx.close();
