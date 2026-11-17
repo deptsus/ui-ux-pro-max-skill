@@ -71,8 +71,8 @@ function TrackCard({ t, mine }: { t: TrackInfo; mine?: boolean }) {
       <div id={t.id} className="flex items-start gap-3">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand"><Icon size={24} aria-hidden /></span>
         <div className="min-w-0 flex-1">
-          <h3 className="flex flex-wrap items-center gap-2 text-xl font-extrabold">{t.title}{mine && <Badge tone="brand">Jenjangmu</Badge>}</h3>
-          <p className="text-sm font-bold text-muted">{t.school ? `${t.school.grades} · ${t.school.fase} · ` : ''}{t.audience} · {t.level}</p>
+          <div className="flex flex-wrap items-center gap-2"><h3 className="text-xl font-extrabold">{t.title}</h3>{mine && <Badge tone="brand">Jenjangmu</Badge>}</div>
+          <p className="text-sm font-bold text-muted">{t.school ? `${t.school.grades} · ${t.school.fase} · ${t.level}` : `${t.audience} · ${t.level}`}</p>
           <p className="mt-1 text-sm">{t.pitch}</p>
           {lessons.length > 0 && <div className="mt-2 flex items-center gap-2"><Progress value={done} max={lessons.length} tone="ok" className="h-2 max-w-48" label={`Progres ${t.title}`} /><span className="text-xs font-bold text-muted">{done}/{lessons.length} pelajaran</span></div>}
         </div>
@@ -128,12 +128,14 @@ function TrackCard({ t, mine }: { t: TrackInfo; mine?: boolean }) {
         );
       })}
       {final && (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-dashed border-accent bg-accent-soft p-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent text-[#1e1b3a]"><Award size={20} aria-hidden /></span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-bold">{final.title}</span>
-            <span className="block text-sm text-muted">Membaca, menyimak, tata bahasa, dan menulis. Lulus mendapat sertifikat yang bisa diperiksa keasliannya.</span>
-          </span>
+        <div className="flex flex-col gap-3 rounded-2xl border-2 border-dashed border-accent bg-accent-soft p-3 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent text-[#1e1b3a]"><Award size={20} aria-hidden /></span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-bold">{final.title}</span>
+              <span className="block text-sm text-muted">Membaca, menyimak, tata bahasa, dan menulis. Lulus mendapat sertifikat yang bisa diperiksa keasliannya.</span>
+            </span>
+          </div>
           {fs === 'passed' ? <Badge tone="ok"><Check size={12} aria-hidden />Lulus</Badge>
             : fs === 'premium' ? <LinkButton size="sm" variant="accent" href="/app/subscription"><Crown size={14} aria-hidden />Premium</LinkButton>
             : fs === 'available' ? <LinkButton size="sm" href={`/app/exams?id=${final.id}`}>Mulai ujian</LinkButton>

@@ -183,6 +183,17 @@ describe('migrasi 0020', () => {
     await expect(db.rpc('update_profile', { p_user: u, p_patch: { school_level: 'tk' } })).rejects.toThrow();
   });
 
+  it('lulus ujian akhir jalur menerbitkan sertifikat dengan level CEFR jenjangnya', async () => {
+    const u = await newUser(db, 'Laras SMP');
+    const rec = await db.rpc<{ certificate: string | null }>('record_level_exam', {
+      p_user: u, p_exam: 'exam.track.smp', p_level: certificateLevel('smp'), p_attempt: 0, p_score: 88, p_passed: true,
+      p_sections: [{ id: 'grammar', title: 'Tata Bahasa & Kosakata', score: 88, passScore: 60, passed: true }], p_questions: [], p_writing: '', p_code: 'SMPTEST234',
+    });
+    expect(rec.certificate).toBe('SMPTEST234');
+    const cert = await db.rpc<{ level: string; exam: string; name: string }>('get_certificate', { p_code: 'smptest234' });
+    expect(cert).toMatchObject({ level: 'A2', exam: 'exam.track.smp', name: 'Laras SMP' });
+  });
+
   it('nama pelajar SD tampil "Pelajar SD" di papan peringkat, kecuali bagi teman dan dirinya sendiri', async () => {
     const kid = await newUser(db, 'Bima Kecil');
     const other = await newUser(db, 'Penonton');

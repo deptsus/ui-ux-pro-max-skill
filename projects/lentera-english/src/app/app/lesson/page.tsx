@@ -19,6 +19,7 @@ import { Demo, Teaching } from '@/components/LessonContent';
 import { Mascot } from '@/components/Mascot';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
 import { Badge, Button, Card, Empty, LinkButton, Notice, cx, dateId } from '@/components/ui';
+import { isSchoolTrack, normTrack, trackInfo } from '@/lib/content/tracks';
 
 const STEP_LABEL: Record<LessonStep, string> = { intro: 'Pengantar', teaching: 'Materi', demo: 'Contoh', guided: 'Latihan terbimbing', independent: 'Latihan mandiri', homework: 'PR', mastery: 'Tes penguasaan', review: 'Jadwal ulangan' };
 
@@ -40,12 +41,14 @@ function LessonRoom() {
 
   if (!lesson) return <Empty page title="Pelajaran tidak ditemukan" action={<LinkButton href="/app/path">Kembali ke jalur belajar</LinkButton>} />;
   // Special-track lessons (Rilis 11) return to the track page, not the CEFR path.
-  const track = ix.chapterById.get(ix.unitById.get(lesson.unitId)?.chapterId ?? '')?.track;
+  const track = normTrack(ix.chapterById.get(ix.unitById.get(lesson.unitId)?.chapterId ?? '')?.track);
   const home = track ? `/app/jalur#${track}` : '/app/path';
+  // Rilis 16: school tracks name themselves ("Jalur SD"); special tracks stay "Jalur khusus".
+  const trackName = track ? (isSchoolTrack(track) ? trackInfo(track)!.title : 'Jalur khusus') : 'Jalur belajar';
   const lock = lessonLock(learner, ix, lesson, ent, now);
   if (lock.status === 'premium') return <Empty page title="Pelajaran Premium" action={<LinkButton href="/app/subscription" variant="accent">Lihat paket Premium</LinkButton>}>{lesson.title} adalah bagian dari kurikulum Premium. Tujuan belajarnya: {lesson.objectives.join(' ')}</Empty>;
   if (lock.status === 'locked' && lock.opensAt) return <Empty page title="Pelajaran ini terbuka minggu depan" action={<LinkButton href="/app/plan">Lihat rencana mingguan</LinkButton>}>{lock.reason}</Empty>;
-  if (lock.status === 'locked') return <Empty page title="Pelajaran masih terkunci" action={<LinkButton href={home}>Kembali ke jalur belajar</LinkButton>}>{lock.reason}</Empty>;
+  if (lock.status === 'locked') return <Empty page title="Pelajaran masih terkunci" action={<LinkButton href={home}>{`Kembali ke ${trackName.charAt(0).toLowerCase()}${trackName.slice(1)}`}</LinkButton>}>{lock.reason}</Empty>;
 
   const hw = ix.pack.homework.find((h) => h.lessonId === id);
   const hwRec = hw ? learner.homework[hw.id] : undefined;
@@ -106,7 +109,7 @@ function LessonRoom() {
   return (
     <div className="mx-auto max-w-2xl space-y-5">
       <div>
-        <Link href={home} className="inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-ink"><ArrowLeft size={16} aria-hidden />{track ? 'Jalur khusus' : 'Jalur belajar'}</Link>
+        <Link href={home} className="inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-ink"><ArrowLeft size={16} aria-hidden />{trackName}</Link>
         <h1 className="mt-2 text-2xl font-extrabold tracking-tight">{lesson.title}</h1>
         <ol className="mt-3 flex gap-1.5" aria-label="Langkah pelajaran">
           {LESSON_STEPS.map((s, i) => {
@@ -217,7 +220,7 @@ function LessonRoom() {
             // The weekly plan (16 Nov 2026) may hold the next step until Monday: say so instead of linking to a closed page.
             const wait = nextInUnit ? lessonLock(learner, ix, nextInUnit, ent, now).opensAt : exam && unitExamStatus(learner, ix, lesson.unitId) === 'available' ? examOpensAt(learner, ix, exam, ent, now) : undefined;
             if (wait) return <Notice tone="accent" title={`${nextInUnit ? `Pelajaran berikutnya: ${nextInUnit.title}` : exam!.title} · minggu depan`}>{planWaitReason(wait, now)} <LinkButton href="/app/plan" size="sm" variant="secondary" className="mt-2">Lihat rencana mingguan</LinkButton></Notice>;
-            return nextInUnit ? <LinkButton href={`/app/lesson?id=${nextInUnit.id}`} full size="lg">Pelajaran berikutnya: {nextInUnit.title}<ArrowRight size={20} aria-hidden /></LinkButton> : exam ? <LinkButton href={`/app/exams?id=${exam.id}`} full size="lg" variant="accent">Lanjut ke {exam.title}</LinkButton> : <LinkButton href={home} full size="lg">{track ? 'Kembali ke jalur khusus' : 'Kembali ke jalur belajar'}</LinkButton>;
+            return nextInUnit ? <LinkButton href={`/app/lesson?id=${nextInUnit.id}`} full size="lg">Pelajaran berikutnya: {nextInUnit.title}<ArrowRight size={20} aria-hidden /></LinkButton> : exam ? <LinkButton href={`/app/exams?id=${exam.id}`} full size="lg" variant="accent">Lanjut ke {exam.title}</LinkButton> : <LinkButton href={home} full size="lg">{`Kembali ke ${trackName.charAt(0).toLowerCase()}${trackName.slice(1)}`}</LinkButton>;
           })()}
         </>
       )}

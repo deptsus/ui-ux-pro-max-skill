@@ -3,7 +3,7 @@
 // when one exists for the text being played, matched by audio key or by the
 // text itself. Otherwise the device's built-in speech engine
 // reads the text, and the UI says so. Nothing is sent to any service.
-import { isNativeApp, speakNativeLang, speakNative, stopNativeSpeech } from './native';
+import { isNativeApp, speakNative, stopNativeSpeech } from './native';
 import type { AudioResource, ContentIndex } from '@/lib/content/types';
 import { spokenKey } from '@/lib/content/spoken';
 
@@ -84,13 +84,17 @@ export function play(ix: ContentIndex | null, text: string, opts: PlayOptions): 
   });
 }
 
-/** Can this device read Indonesian aloud (Mode SD, Rilis 16)? */
-export const canSpeakIndonesian = () => typeof window !== 'undefined' && ('speechSynthesis' in window || isNativeApp());
+/**
+ * Can this device read Indonesian aloud (Mode SD, Rilis 16)? Browsers only: the
+ * Android app 2.0.0 reads every language with an English voice (Speech.java),
+ * so the button stays hidden there until an app update supports id-ID.
+ */
+export const canSpeakIndonesian = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
 /** Reads an instruction aloud in Indonesian with the device voice. */
 export function speakIndonesian(text: string): Promise<boolean> {
   stopAudio();
   if (typeof window === 'undefined') return Promise.resolve(false);
-  if (!('speechSynthesis' in window)) return isNativeApp() ? speakNativeLang(text, 'id-ID') : Promise.resolve(false);
+  if (!('speechSynthesis' in window)) return Promise.resolve(false);
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'id-ID';

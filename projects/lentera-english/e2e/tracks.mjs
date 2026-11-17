@@ -29,14 +29,14 @@ const fail = async (page, name, e) => {
 const g = await phone();
 try {
   await g.goto(`${BASE}/app/jalur`);
-  await g.getByRole('heading', { name: 'Jalur Khusus', level: 1 }).waitFor({ timeout: 30000 });
-  for (const t of ['Bahasa Inggris untuk Kerja', 'Persiapan TOEFL ITP dan IELTS', 'Jalur Anak']) check(`jalur "${t}" tampil`, await g.getByRole('heading', { name: t }).isVisible());
+  await g.getByRole('heading', { name: 'Jalur Sekolah & Khusus', level: 1 }).waitFor({ timeout: 30000 });
+  for (const t of ['Jalur SD', 'Jalur SMP', 'Jalur SMA', 'Bahasa Inggris untuk Kerja', 'Persiapan TOEFL ITP dan IELTS']) check(`jalur "${t}" tampil`, await g.getByRole('heading', { name: t, exact: true }).isVisible());
   check('jalur TOEFL/IELTS memuat catatan tidak berafiliasi', await g.getByText(/Lentera tidak berafiliasi/).first().isVisible());
   const work = g.locator('section').filter({ has: g.getByRole('heading', { name: 'Bahasa Inggris untuk Kerja' }) });
   const first = work.getByRole('link', { name: /Wawancara Kerja: Memperkenalkan Diri/ });
   check('pelajaran pertama jalur kerja gratis dan bisa dibuka tamu', (await first.getAttribute('href')) === '/app/lesson?id=work-interview-intro' && (await first.innerText()).includes('Gratis'));
   check('pelajaran kedua jalur kerja mengarah ke Premium', (await work.getByRole('link', { name: /Email Kerja yang Sopan/ }).getAttribute('href')) === '/app/subscription');
-  check('Jalur Khusus muat di layar 390 px', (await overflow(g)) <= 0);
+  check('Jalur Sekolah & Khusus muat di layar 390 px', (await overflow(g)) <= 0);
   await g.screenshot({ path: path.join(SHOTS, 'jalur-app.png'), fullPage: true });
 
   await first.click();
@@ -50,10 +50,10 @@ try {
   check('jalur CEFR tidak memuat pelajaran jalur khusus', (await g.getByText('Wawancara Kerja').count()) === 0 && (await g.getByText('Warna dan Hewan').count()) === 0);
 
   await g.goto(`${BASE}/app`);
-  const card = g.getByRole('link', { name: /Jalur Khusus/ }).filter({ hasText: 'Pelajaran pertama gratis' });
-  check('beranda menautkan Jalur Khusus', await card.waitFor({ timeout: 30000 }).then(() => true, () => false));
+  const card = g.getByRole('link', { name: /Jalur Sekolah & Khusus/ }).filter({ hasText: 'unit pertama gratis' });
+  check('beranda menautkan Jalur Sekolah & Khusus', await card.waitFor({ timeout: 30000 }).then(() => true, () => false));
   await g.goto(`${BASE}/app/more`);
-  check('menu Lainnya memuat Jalur Khusus', await g.locator('main').getByRole('link', { name: /Jalur Khusus/ }).waitFor({ timeout: 30000 }).then(() => true, () => false));
+  check('menu Lainnya memuat Jalur Sekolah & Khusus', await g.locator('main').getByRole('link', { name: /Jalur Sekolah & Khusus/ }).waitFor({ timeout: 30000 }).then(() => true, () => false));
 } catch (e) {
   await fail(g, 'jalur di aplikasi', e);
 }
@@ -64,7 +64,7 @@ try {
   const res = await p.goto(`${BASE}/materi`);
   check('/materi terbuka (200)', res.status() === 200);
   await p.getByRole('heading', { name: 'Materi Bahasa Inggris', level: 1 }).waitFor({ timeout: 30000 });
-  check('/materi: semua level dan jalur khusus', await p.getByRole('heading', { name: /^A1 · Pemula/ }).isVisible() && await p.getByRole('heading', { name: /^C2 · Sangat Mahir/ }).isVisible() && await p.getByRole('heading', { name: 'Jalur khusus' }).isVisible());
+  check('/materi: semua level dan jalur khusus', await p.getByRole('heading', { name: /^A1 · Pemula/ }).isVisible() && await p.getByRole('heading', { name: /^C2 · Sangat Mahir/ }).isVisible() && await p.getByRole('heading', { name: 'Jalur sekolah dan jalur khusus' }).isVisible());
   check('/materi muat di layar 360 px', (await overflow(p)) <= 0);
   check('/materi punya tautan kanonis', (await p.locator('link[rel="canonical"]').getAttribute('href')) === 'https://lentera-english-app.netlify.app/materi');
 
@@ -93,12 +93,12 @@ try {
 
 // ───────────── 3. Sitemap and robots ─────────────
 const sitemap = await fetch(`${BASE}/sitemap.xml`).then((r) => r.text());
-check('sitemap.xml memuat halaman materi dan jalur khusus', sitemap.includes('/materi/a1-greetings') && sitemap.includes('/materi/kids-family') && sitemap.includes('/sekolah'));
+check('sitemap.xml memuat halaman materi, jalur sekolah, dan jalur khusus', sitemap.includes('/materi/a1-greetings') && sitemap.includes('/materi/kids-family') && sitemap.includes('/materi/sma-snbt') && sitemap.includes('/sekolah'));
 check('sitemap.xml tidak memuat aplikasi atau admin', !/\/app[/<]|\/admin/.test(sitemap));
 const robots = await fetch(`${BASE}/robots.txt`).then((r) => r.text());
 check('robots.txt menutup /app, /admin, /api dan menunjuk sitemap', /Disallow: \/app/.test(robots) && /Disallow: \/admin/.test(robots) && /Disallow: \/api/.test(robots) && robots.includes('Sitemap: https://lentera-english-app.netlify.app/sitemap.xml'));
 const landing = await fetch(`${BASE}/`).then((r) => r.text());
-check('halaman depan menautkan Materi gratis dan memuat Jalur khusus', landing.includes('href="/materi"') && landing.includes('Jalur khusus'));
+check('halaman depan menautkan Materi gratis dan memuat Jalur sekolah dan jalur khusus', landing.includes('href="/materi"') && landing.includes('Jalur sekolah dan jalur khusus'));
 
 check('tanpa error di konsol', issues.length === 0, issues.slice(0, 3).join(' | '));
 await browser.close();

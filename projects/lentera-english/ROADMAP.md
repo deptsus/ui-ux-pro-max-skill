@@ -257,13 +257,15 @@ aplikasi lain. Dirilis bertahap; tiap rilis satu deploy.
 - 43 soal interaktif (16 pilih gambar, 7 adegan, 10 garis waktu, 10 eja) ditambahkan ke 16 pelajaran A1–A2 dan Jalur Anak; pelajaran gratis (Warna dan Hewan, Articles, This/That, Simple Present) memuat keempat jenisnya.
 - **Pasangan Kilat**: permainan memori kata ↔ gambar (12 kartu, waktu, poin kombo, bonus waktu, rekor per tema di perangkat, +5 XP untuk 3 papan pertama tiap hari). Free: Hewan, Warna, Makanan & Minuman; Premium: Angka, Tubuh, Sekolah, Rumah, Kendaraan, Alam & Pakaian, Campur Semua.
 
-**Rilis 16 "Jalur Sekolah SD–SMA"** (materi baru):
-- Satu jalur per jenjang, selaras tema Kurikulum Merdeka (Fase A–F):
-  - SD kelas 1–6: salam, angka, warna, keluarga, tubuh, hewan, benda di kelas, kegiatan harian, jam, makanan, cuaca, hobi.
-  - SMP kelas 7–9: mendeskripsikan orang/tempat, teks prosedur, recount, pengumuman, pesan singkat, narrative, kartu ucapan.
-  - SMA kelas 10–12: report, exposition, discussion, explanation, news item, saran dan pendapat, surat lamaran, persiapan SNBT Literasi dalam Bahasa Inggris.
-- Mode SD: instruksi dibacakan dalam bahasa Indonesia, tombol lebih besar, nama tidak tampil di liga publik, pembelian lewat gerbang orang tua.
-- Free: unit pertama tiap jenjang; Premium: semua unit, latihan SNBT, ujian jenjang dan sertifikat.
+**Rilis 16 "Jalur Sekolah SD–SMA"** — **SELESAI 17 November 2026** (migrasi 0020, konten 2027.7.0):
+- Tiga jalur sekolah, selaras tema Kurikulum Merdeka. Jalur Anak digabung ke Jalur SD atas keputusan pemilik; ID pelajaran tetap, jadi progres anak yang sudah belajar tidak hilang.
+  - **Jalur SD** (kelas 1–6, Fase A–C), 13 pelajaran dalam 4 unit: salam dan perkenalan, warna dan hewan, tubuhku; keluarga, rumahku, makanan; di sekolah, angka dan mainan, jam dan hari, kegiatan sehari-hari; cuaca, hobi, cita-cita. Tujuh pelajaran baru, enam dari Jalur Anak.
+  - **Jalur SMP** (kelas 7–9, Fase D), 7 pelajaran: mendeskripsikan orang dan tempat; pesan singkat dan pengumuman, kartu ucapan, teks prosedur; recount, narrative (Si Kancil).
+  - **Jalur SMA/SMK** (kelas 10–12, Fase E–F), 8 pelajaran: saran dan pendapat, explanation; report, analytical exposition, discussion; news item, surat lamaran magang/kerja, Literasi Bahasa Inggris gaya SNBT (bacaan dan soal buatan sendiri, bukan soal resmi).
+- **Ujian akhir tiap jenjang** (Premium): tata bahasa, membaca, menyimak, dan menulis; diambil dan dinilai di server seperti ujian level, dengan sertifikat yang bisa diperiksa (setara A1/A2/B1).
+- **Mode SD** (bila pelajar memilih jenjang SD): huruf lebih besar, tombol "Bacakan" untuk mendengar petunjuk soal dalam bahasa Indonesia, nama tampil sebagai "Pelajar SD" di liga dan papan umum kecuali bagi teman, dan pembayaran Premium dibuka orang tua lewat pertanyaan hitungan.
+- **Gambar orang** di pustaka gambar (keluarga dan profesi) memakai figur para karakter: total 112 gambar.
+- Free: seluruh unit pertama tiap jenjang (termasuk ujian unitnya); Premium: unit lain dan ujian akhir bersertifikat.
 
 **Rilis 17 "Untuk Orang Tua"**:
 - Halaman `/orang-tua`: alasan memilih Lentera, keselarasan dengan kurikulum sekolah, keamanan anak, contoh laporan, harga dibanding les.

@@ -103,4 +103,6 @@ Semua persiapan teknis sudah selesai; yang tersisa butuh akun atau biaya pemilik
 - [x] Peringatan React "script tag" dari skrip tema di `src/app/layout.tsx`: tidak muncul lagi setelah bug landing diperbaiki.
 - [x] Rapikan ekspresi progress bar di `SessionRunner` (Rilis 13).
 - [ ] Optimasi ukuran pack konten yang dikirim ke klien bila kurikulum membesar (mis. muat per level).
-- [ ] Pustaka gambar kosakata menuju ±150 kata: keluarga, profesi, dan anggota tubuh lainnya (memakai para karakter Rilis 14; bersama Rilis 16).
+- [x] Gambar keluarga dan profesi memakai figur para karakter (Rilis 16; pustaka 112 gambar).
+- [ ] Aplikasi Android: `Speech.java` membaca semua bahasa selain en-GB dengan suara en-US. Tambahkan id-ID agar tombol "Bacakan" (Mode SD) bisa tampil juga di aplikasi (sekarang disembunyikan di aplikasi, tampil di browser).
+- [ ] Pustaka gambar menuju ±150 kata: anggota tubuh lain (kepala, kaki, rambut), lebih banyak benda dan makanan lokal.
