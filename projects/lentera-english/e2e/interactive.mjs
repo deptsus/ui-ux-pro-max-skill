@@ -65,6 +65,24 @@ const onQuestion = async (id, phase) => {
   await axe(`${t} (${phase === 'question' ? 'soal' : phase === 'right' ? 'jawaban benar' : 'jawaban salah'})`);
 };
 try {
+  // Rilis 16: "Warna dan Hewan" is the second lesson of Jalur SD; finish the first one ("Halo!") to open it.
+  await page.goto(`${BASE}/app/lesson?id=sd-greetings`);
+  await button('Mulai belajar').click({ timeout: 30000 });
+  await button('Lihat contoh benar dan salah').click();
+  await button('Lanjut ke latihan').click();
+  await button('Mulai latihan').click();
+  await runSession(page, pack);
+  await page.getByRole('heading', { name: 'Latihan terbimbing selesai' }).waitFor({ timeout: 15000 });
+  await button(/Lanjut ke latihan mandiri/).click();
+  await button('Mulai latihan mandiri').click();
+  await runSession(page, pack);
+  await page.getByRole('heading', { name: 'Latihan mandiri selesai' }).waitFor({ timeout: 15000 });
+  await button(/Lanjut ke pr/i).click();
+  await button(/Terima PR/).click();
+  await button('Lanjut ke tes penguasaan').click();
+  await button('Mulai tes').click();
+  await runSession(page, pack, { deferred: true });
+  await page.getByRole('heading', { name: 'Lulus tes penguasaan!' }).waitFor({ timeout: 15000 });
   await page.goto(`${BASE}/app/lesson?id=kids-colors-animals`);
   await button('Mulai belajar').click({ timeout: 30000 });
   await button('Lihat contoh benar dan salah').click();
