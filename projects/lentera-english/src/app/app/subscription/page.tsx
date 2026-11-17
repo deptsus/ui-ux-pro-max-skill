@@ -8,6 +8,7 @@ import { isAdminPlan } from '@/lib/engine/types';
 import { api } from '@/lib/client/api';
 import { useApp } from '@/lib/client/hooks';
 import { useServerInfo, useSession } from '@/lib/client/session';
+import { ParentGate } from '@/components/school/SchoolLevel';
 import { BENCHMARK_MONTHLY, CHANNELS, FREE_FEATURES, PLANS, PREMIUM_FEATURES, type PlanId } from '@/lib/plans';
 import { Badge, Button, Card, LinkButton, Notice, PageHeader, cx, dateId, dateTimeId, rupiah } from '@/components/ui';
 
@@ -83,6 +84,7 @@ export default function SubscriptionPage() {
       {play ? (
         <Notice tone="muted" title="Pembelian tidak tersedia di aplikasi ini">Status Premium mengikuti akunmu: bila Premium aktif di akunmu, semua manfaatnya juga berlaku di sini.</Notice>
       ) : (
+      <ParentGate>
       <Card className="space-y-4">
         <h2 className="text-lg font-extrabold">{premium ? 'Perpanjang Premium' : 'Berlangganan Premium'}</h2>
         <fieldset>
@@ -132,6 +134,7 @@ export default function SubscriptionPage() {
           ? 'Setelah membayar, laporkan pembayaranmu di halaman berikutnya. Premium aktif setelah pembayaran kami cocokkan dan konfirmasi. Kami tidak menyimpan data rekening atau e-wallet.'
           : 'Pembayaran diproses oleh Xendit. Kami tidak menyimpan data rekening atau e-wallet. Premium aktif otomatis setelah Xendit mengonfirmasi pembayaran ke server kami.'}</p>
       </Card>
+      </ParentGate>
       )}
 
       {session && (

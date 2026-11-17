@@ -16,6 +16,8 @@ export interface LockInfo {
 const passedExam = (s: LearnerState, examId: string) => !!s.exams[examId]?.attempts.some((a) => a.passed);
 export const unitExam = (ix: ContentIndex, unitId: string): ExamDef | undefined => ix.pack.exams.find((e) => e.scope === 'unit' && e.ref === unitId);
 export const levelExam = (ix: ContentIndex, level: Cefr): ExamDef | undefined => ix.pack.exams.find((e) => e.scope === 'level' && e.ref === level);
+/** Final exam of a school track (Rilis 16). */
+export const trackExam = (ix: ContentIndex, track: string): ExamDef | undefined => ix.pack.exams.find((e) => e.scope === 'track' && e.ref === track);
 
 /** Units of the main CEFR path at one level (special tracks are not part of it). */
 export function unitsOfLevel(ix: ContentIndex, level: Cefr): Unit[] {
@@ -60,7 +62,8 @@ export function lessonLock(s: LearnerState, ix: ContentIndex, lesson: Lesson, en
   if (chapter.track) {
     const inTrack = ix.pack.units.filter((u) => u.chapterId === chapter.id).sort((a, b) => a.position - b.position).flatMap((u) => lessonsOfUnit(ix, u.id));
     const prev = inTrack[inTrack.findIndex((l) => l.id === lesson.id) - 1];
-    if (prev && !s.lessons[prev.id]?.completedAt) return { status: 'locked', reason: `Lulus tes penguasaan "${prev.title}" (min. ${prev.passScore}%) terlebih dahulu.` };
+    // A lesson already started stays open (Rilis 16 put new lessons before some Jalur Anak lessons).
+    if (prev && !s.lessons[prev.id]?.completedAt && !progress) return { status: 'locked', reason: `Lulus tes penguasaan "${prev.title}" (min. ${prev.passScore}%) terlebih dahulu.` };
     return { status: progress ? 'in-progress' : 'available' };
   }
   if (!levelOpen(s, ix, chapter.level)) {
@@ -114,6 +117,23 @@ export function levelExamStatus(s: LearnerState, ix: ContentIndex, level: Cefr, 
   const units = unitsOfLevel(ix, level).filter((u) => lessonsOfUnit(ix, u.id).length > 0);
   const ready = units.length > 0 && units.every((u) => ['passed', 'none'].includes(unitExamStatus(s, ix, u.id)) && lessonsOfUnit(ix, u.id).every((l) => s.lessons[l.id]?.completedAt));
   return ready ? 'available' : 'locked';
+}
+
+/** Final exam of a school track: open once every lesson and unit exam of the track is done. */
+export function trackExamStatus(s: LearnerState, ix: ContentIndex, track: string, ent: Entitlement, now: number): 'none' | 'premium' | 'locked' | 'available' | 'passed' {
+  const exam = trackExam(ix, track);
+  if (!exam) return 'none';
+  if (passedExam(s, exam.id)) return 'passed';
+  if (exam.premium && !isPremium(ent, now)) return 'premium';
+  const chapter = ix.pack.chapters.find((c) => c.track === track || (track === 'sd' && c.track === 'kids'));
+  const units = chapter ? ix.pack.units.filter((u) => u.chapterId === chapter.id && lessonsOfUnit(ix, u.id).length > 0) : [];
+  const ready = units.length > 0 && units.every((u) => ['passed', 'none'].includes(unitExamStatus(s, ix, u.id)) && lessonsOfUnit(ix, u.id).every((l) => s.lessons[l.id]?.completedAt));
+  return ready ? 'available' : 'locked';
+}
+
+/** Status of a sectioned final exam: a CEFR level exam or a school track's final exam. */
+export function finalExamStatus(s: LearnerState, ix: ContentIndex, exam: ExamDef, ent: Entitlement, now: number) {
+  return exam.scope === 'track' ? trackExamStatus(s, ix, exam.ref, ent, now) : levelExamStatus(s, ix, exam.ref as Cefr, ent, now);
 }
 
 /** The next lesson the learner should take, in curriculum order. */

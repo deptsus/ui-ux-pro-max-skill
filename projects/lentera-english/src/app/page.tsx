@@ -177,8 +177,8 @@ export default function Landing() {
         </section>
 
         <section className="mx-auto max-w-6xl px-5 py-14" aria-labelledby="jalur-title">
-          <h2 id="jalur-title" className="flex items-center gap-2 text-3xl font-extrabold tracking-tight"><Compass className="text-brand" aria-hidden />Jalur khusus</h2>
-          <p className="mt-2 max-w-2xl text-muted">Di samping jalur CEFR, ada jalur untuk tujuan tertentu. Pelajaran pertama tiap jalur gratis.</p>
+          <h2 id="jalur-title" className="flex items-center gap-2 text-3xl font-extrabold tracking-tight"><Compass className="text-brand" aria-hidden />Jalur sekolah dan jalur khusus</h2>
+          <p className="mt-2 max-w-2xl text-muted">Di samping jalur CEFR: Jalur SD, SMP, dan SMA yang mengikuti tema pelajaran bahasa Inggris di sekolah (unit pertama gratis, ujian akhir bersertifikat), serta jalur untuk tujuan tertentu (pelajaran pertama gratis).</p>
           <ul className="mt-6 grid gap-4 md:grid-cols-3">
             {TRACKS.map((t) => (
               <li key={t.id}><Card className="h-full"><p className="text-lg font-extrabold">{t.title}</p><p className="mt-1 text-sm font-bold text-muted">{t.audience}</p><p className="mt-2 text-sm">{t.pitch}</p></Card></li>

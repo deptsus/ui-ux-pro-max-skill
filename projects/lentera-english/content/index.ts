@@ -32,8 +32,13 @@ import { ieltsReading, ieltsSpeaking, ieltsWriting, toeflListening, toeflStructu
 import { kidsColors, kidsFamily, kidsFood, kidsNumbers, kidsRoutine, kidsSchool } from './track-kids';
 import { workCv, workEmail, workInterview, workMeeting, workPhone, workPresentation } from './track-work';
 import { INTERACTIVE } from './interactive';
+import { sdBody, sdGreetings, sdHobbies, sdHouse, sdJobs, sdTime, sdWeather } from './school-sd';
+import { smpCards, smpMessages, smpNarrative, smpPeople, smpPlaces, smpProcedure, smpRecount } from './school-smp';
+import { smaDiscussion, smaExplanation, smaExposition, smaLetter, smaNews, smaOpinions, smaReport, smaSnbt } from './school-sma';
+import { SCHOOL_LEVELS, isSchoolTrack, trackInfo } from '@/lib/content/tracks';
+import { SCHOOL_BANK, SCHOOL_MINUTES } from './school-exams';
 
-export const CONTENT_VERSION = '2027.6.0';
+export const CONTENT_VERSION = '2027.7.0';
 
 const levels: Level[] = [
   { code: 'A1', title: 'Pemula', description: 'Memahami dan memakai ungkapan sehari-hari yang sangat dasar.', position: 1, examPassScore: 80 },
@@ -45,7 +50,8 @@ const levels: Level[] = [
 ];
 
 interface UnitSpec { id: string; title: string; description?: string; lessons: Built[]; planned?: string[]; examExtras?: Draft[] }
-/** track: a special track (Rilis 11) outside the CEFR path; its first lesson is free, the rest Premium. */
+/** track: a track outside the CEFR path. Special tracks (Rilis 11): the first lesson is free.
+ *  School tracks SD/SMP/SMA (Rilis 16): the whole first unit is free. */
 interface ChapterSpec { id: string; level: Cefr; title: string; description: string; premium: boolean; units: UnitSpec[]; track?: TrackId }
 
 const syllabus: ChapterSpec[] = [
@@ -119,8 +125,22 @@ const syllabus: ChapterSpec[] = [
   { id: 'track-exam', level: 'B2', track: 'exam', title: 'Persiapan TOEFL ITP dan IELTS', description: 'Strategi dan tata bahasa yang paling sering diuji. Latihan bergaya ujian, bukan soal resmi; Lentera tidak berafiliasi dengan ETS, British Council, IDP, atau Cambridge.', premium: false, units: [
     { id: 'track-exam-u1', title: 'Strategi Ujian', description: 'Structure, Written Expression, Listening, Reading, Writing Task 2, dan Speaking.', lessons: [toeflStructure, toeflWritten, ieltsWriting, toeflListening, ieltsReading, ieltsSpeaking] },
   ] },
-  { id: 'track-kids', level: 'A1', track: 'kids', title: 'Jalur Anak', description: 'Bahasa Inggris untuk anak 7–12 tahun: kalimat pendek dan kata sehari-hari.', premium: false, units: [
-    { id: 'track-kids-u1', title: 'Dunia di Sekitarku', description: 'Warna, hewan, keluarga, angka, mainan, makanan, sekolah, dan kegiatan sehari-hari.', lessons: [kidsColors, kidsFamily, kidsNumbers, kidsFood, kidsSchool, kidsRoutine] },
+  // ───────── Jalur Sekolah (Rilis 16): SD absorbs Jalur Anak (ids kept, so progress stays); first unit free ─────────
+  { id: 'track-kids', level: 'A1', track: 'sd', title: 'Jalur SD', description: 'Bahasa Inggris untuk SD kelas 1–6 (Fase A–C): kalimat pendek, banyak gambar, kata sehari-hari.', premium: false, units: [
+    { id: 'track-kids-u1', title: 'Halo, Teman Baru!', description: 'Salam dan perkenalan, warna dan hewan, tubuhku.', lessons: [sdGreetings, kidsColors, sdBody] },
+    { id: 'track-sd-u2', title: 'Keluarga dan Rumahku', description: 'Keluarga, ruangan dan letak benda, makanan kesukaan.', lessons: [kidsFamily, sdHouse, kidsFood] },
+    { id: 'track-sd-u3', title: 'Sekolah dan Hariku', description: 'Benda di sekolah, angka dan mainan, jam dan hari, kegiatan sehari-hari.', lessons: [kidsSchool, kidsNumbers, sdTime, kidsRoutine] },
+    { id: 'track-sd-u4', title: 'Dunia di Luar', description: 'Cuaca, hobi, dan cita-cita.', lessons: [sdWeather, sdHobbies, sdJobs] },
+  ] },
+  { id: 'track-smp', level: 'A2', track: 'smp', title: 'Jalur SMP', description: 'Teks bahasa Inggris SMP kelas 7–9 (Fase D): deskripsi, teks pendek, prosedur, recount, dan narrative.', premium: false, units: [
+    { id: 'track-smp-u1', title: 'Aku dan Sekitarku', description: 'Mendeskripsikan orang dan tempat.', lessons: [smpPeople, smpPlaces] },
+    { id: 'track-smp-u2', title: 'Teks Pendek Sehari-hari', description: 'Pesan singkat, pengumuman, kartu ucapan, dan teks prosedur.', lessons: [smpMessages, smpCards, smpProcedure] },
+    { id: 'track-smp-u3', title: 'Bercerita', description: 'Recount dan narrative (cerita rakyat).', lessons: [smpRecount, smpNarrative] },
+  ] },
+  { id: 'track-sma', level: 'B1', track: 'sma', title: 'Jalur SMA', description: 'Teks bahasa Inggris SMA/SMK kelas 10–12 (Fase E–F) dan latihan Literasi Bahasa Inggris gaya SNBT.', premium: false, units: [
+    { id: 'track-sma-u1', title: 'Berpendapat dan Menjelaskan', description: 'Saran dan pendapat, teks explanation.', lessons: [smaOpinions, smaExplanation] },
+    { id: 'track-sma-u2', title: 'Teks Faktual dan Argumen', description: 'Report, analytical exposition, dan discussion.', lessons: [smaReport, smaExposition, smaDiscussion] },
+    { id: 'track-sma-u3', title: 'Dunia Nyata dan SNBT', description: 'News item, surat lamaran, dan Literasi Bahasa Inggris gaya SNBT.', lessons: [smaNews, smaLetter, smaSnbt] },
   ] },
 ];
 
@@ -204,6 +224,29 @@ const topics: Topic[] = [
   { id: 'kids.food', kind: 'vocabulary', level: 'A1', title: 'Makanan', summary: "I like ..., I don't like ..., Do you like ...?", lessonId: 'kids-food' },
   { id: 'kids.school', kind: 'vocabulary', level: 'A1', title: 'Di sekolah', summary: 'This is / These are, Can I borrow your ...?', lessonId: 'kids-school' },
   { id: 'kids.routine', kind: 'vocabulary', level: 'A1', title: 'Kegiatan sehari-hari', summary: 'I wake up at six. First, ... Then, ...', lessonId: 'kids-routine' },
+  // Jalur Sekolah (Rilis 16).
+  { id: 'sd.greetings', kind: 'vocabulary', level: 'A1', title: 'Salam dan perkenalan', summary: 'Good morning! My name is ... How are you?', lessonId: 'sd-greetings' },
+  { id: 'sd.body', kind: 'vocabulary', level: 'A1', title: 'Tubuhku', summary: 'I have two eyes. feet, teeth.', lessonId: 'sd-body' },
+  { id: 'sd.house', kind: 'vocabulary', level: 'A1', title: 'Rumahku', summary: 'There is a bed in my bedroom. in, on, under, next to.', lessonId: 'sd-house' },
+  { id: 'sd.time', kind: 'vocabulary', level: 'A1', title: 'Jam dan hari', summary: "It's seven o'clock. half past. on Monday.", lessonId: 'sd-time' },
+  { id: 'sd.weather', kind: 'vocabulary', level: 'A1', title: 'Cuaca', summary: "It's sunny/rainy/cloudy today.", lessonId: 'sd-weather' },
+  { id: 'sd.hobbies', kind: 'vocabulary', level: 'A1', title: 'Hobi', summary: "I like drawing. Do you like ...? Yes, I do.", lessonId: 'sd-hobbies' },
+  { id: 'sd.jobs', kind: 'vocabulary', level: 'A1', title: 'Pekerjaan dan cita-cita', summary: 'She is a teacher. I want to be a doctor.', lessonId: 'sd-jobs' },
+  { id: 'smp.describe-people', kind: 'skill', level: 'A2', title: 'Mendeskripsikan orang', summary: 'is + sifat, has + rambut/mata.', lessonId: 'smp-describe-people' },
+  { id: 'smp.describe-places', kind: 'skill', level: 'A2', title: 'Mendeskripsikan tempat', summary: 'is located in, is famous for, There is/are.', lessonId: 'smp-describe-places' },
+  { id: 'smp.messages', kind: 'skill', level: 'A2', title: 'Pesan singkat dan pengumuman', summary: "Please ..., Don't forget to ..., Attention, please.", lessonId: 'smp-messages' },
+  { id: 'smp.greeting-cards', kind: 'skill', level: 'A2', title: 'Kartu ucapan', summary: 'Congratulations on ...!, Get well soon!', lessonId: 'smp-greeting-cards' },
+  { id: 'smp.procedure', kind: 'skill', level: 'A2', title: 'Teks prosedur', summary: 'Kalimat perintah; First, Next, Then, Finally.', lessonId: 'smp-procedure' },
+  { id: 'smp.recount', kind: 'skill', level: 'A2', title: 'Teks recount', summary: 'Pengalaman lampau: went, visited, was/were.', lessonId: 'smp-recount' },
+  { id: 'smp.narrative', kind: 'skill', level: 'A2', title: 'Teks narrative', summary: 'Cerita rakyat: orientation, complication, resolution.', lessonId: 'smp-narrative' },
+  { id: 'sma.opinions', kind: 'skill', level: 'B1', title: 'Saran dan pendapat', summary: 'In my opinion, You should, How about + -ing.', lessonId: 'sma-opinions' },
+  { id: 'sma.explanation', kind: 'skill', level: 'B1', title: 'Teks explanation', summary: 'Proses dengan passive voice dan sebab-akibat.', lessonId: 'sma-explanation' },
+  { id: 'sma.report', kind: 'skill', level: 'B1', title: 'Teks report', summary: 'Klasifikasi umum dan deskripsi ilmiah.', lessonId: 'sma-report' },
+  { id: 'sma.exposition', kind: 'skill', level: 'B1', title: 'Analytical exposition', summary: 'Thesis, arguments, reiteration.', lessonId: 'sma-exposition' },
+  { id: 'sma.discussion', kind: 'skill', level: 'B1', title: 'Discussion text', summary: 'Dua sisi masalah: However, On the other hand.', lessonId: 'sma-discussion' },
+  { id: 'sma.news', kind: 'skill', level: 'B1', title: 'News item', summary: 'Headline, newsworthy event, sources; said that.', lessonId: 'sma-news' },
+  { id: 'sma.application-letter', kind: 'skill', level: 'B1', title: 'Surat lamaran', summary: 'I am writing to apply for ..., look forward to + -ing.', lessonId: 'sma-application-letter' },
+  { id: 'sma.snbt', kind: 'skill', level: 'B1', title: 'Literasi Bahasa Inggris gaya SNBT', summary: 'Gagasan utama, detail, inference, makna kata, tujuan penulis.', lessonId: 'sma-snbt' },
   { id: 'skill.listening', kind: 'skill', level: 'A1', title: 'Menyimak', summary: 'Menangkap kata, angka, dan informasi dari audio.' },
   { id: 'skill.reading', kind: 'skill', level: 'A1', title: 'Membaca', summary: 'Menangkap gagasan utama, detail, dan maksud penulis dari teks.' },
   { id: 'skill.story', kind: 'skill', level: 'A1', title: 'Cerita bergambar', summary: 'Memahami alur, tokoh, dan detail dari cerita pendek beranimasi.' },
@@ -433,7 +476,9 @@ export function buildPack(): ContentPack {
       units.push({ id: u.id, chapterId: c.id, position: ui + 1, title: u.title, description: u.description, examPassScore: 80, ...(u.planned ? { plannedLessons: u.planned } : {}) });
       u.lessons.forEach((b, li) => {
         // Tracks: the first lesson is free so anyone can try the track.
-        lessons.push({ ...b.lesson, unitId: u.id, position: li + 1, premium: c.track ? li > 0 || ui > 0 : c.premium });
+        // Special tracks: the first lesson is free. School tracks: the whole first unit.
+        const school = isSchoolTrack(c.track);
+        lessons.push({ ...b.lesson, unitId: u.id, position: li + 1, premium: c.track ? (school ? ui > 0 : li > 0 || ui > 0) : c.premium });
         exercises.push(...b.exercises);
         // Rilis 15: interactive items go after the stage's authored ones.
         const extra = INTERACTIVE[b.lesson.id] ?? {};
@@ -446,7 +491,8 @@ export function buildPack(): ContentPack {
       if (u.lessons.length) {
         const extras = stamp(u.examExtras ?? [], `exam.${u.id}`, 'exam', u.lessons[0].lesson.topic, null);
         exercises.push(...extras);
-        exams.push({ id: `exam.${u.id}`, scope: 'unit', ref: u.id, title: `Ujian Unit: ${u.title}`, passScore: 80, timeLimitSec: 15 * 60, premium: c.premium || !!c.track, exerciseIds: extras.map((e) => e.id), sampleSize: Math.min(12, u.lessons.length * 4) });
+        const freeUnit = isSchoolTrack(c.track) && ui === 0;
+        exams.push({ id: `exam.${u.id}`, scope: 'unit', ref: u.id, title: `Ujian Unit: ${u.title}`, passScore: 80, timeLimitSec: 15 * 60, premium: c.premium || (!!c.track && !freeUnit), exerciseIds: extras.map((e) => e.id), sampleSize: Math.min(12, u.lessons.length * 4) });
       }
     });
   }
@@ -527,6 +573,27 @@ export function buildPack(): ContentPack {
       id: prefix, scope: 'level', ref: level, title: `Ujian Level ${level}`, passScore: 80, timeLimitSec: EXAM_MINUTES[level] * 60, premium: true,
       // Older clients (before Rilis 3) still run the lesson-pool format with these two fields.
       exerciseIds: [], sampleSize: sampleSizes[level],
+      sections: [
+        { id: 'grammar', kind: 'grammar', title: 'Tata Bahasa & Kosakata', passScore: 60, take: 8, pool: grammar.map((e) => [e.id]) },
+        { id: 'reading', kind: 'reading', title: 'Membaca', passScore: 60, take: 1, pool: reading.map((p) => p.map((e) => e.id)) },
+        { id: 'listening', kind: 'listening', title: 'Menyimak', passScore: 60, take: 1, pool: heard.map((p) => p.map((e) => e.id)) },
+        { id: 'writing', kind: 'writing', title: 'Menulis', passScore: 60, take: 1, pool: [], writing: bank.writing },
+      ],
+    });
+  }
+
+  // Ujian Akhir Jalur Sekolah (Rilis 16): sectioned like a level exam, graded on the server, with a certificate.
+  for (const track of SCHOOL_LEVELS) {
+    if (!chapters.some((c) => c.track === track)) continue;
+    const bank = SCHOOL_BANK[track];
+    const prefix = `exam.track.${track}`;
+    const grammar = stamp(bank.grammar, `${prefix}.grammar`, 'exam', 'skill.reading', null);
+    const reading = bank.reading.map((p, i) => stamp(p, `${prefix}.read${i + 1}`, 'exam', 'skill.reading', null));
+    const heard = bank.listening.map((p, i) => stamp(p, `${prefix}.listen${i + 1}`, 'exam', 'skill.listening', null));
+    exercises.push(...grammar, ...reading.flat(), ...heard.flat());
+    exams.push({
+      id: prefix, scope: 'track', ref: track, title: `Ujian Akhir ${trackInfo(track)!.title}`, passScore: 80, timeLimitSec: SCHOOL_MINUTES[track] * 60, premium: true,
+      exerciseIds: [], sampleSize: 12,
       sections: [
         { id: 'grammar', kind: 'grammar', title: 'Tata Bahasa & Kosakata', passScore: 60, take: 8, pool: grammar.map((e) => [e.id]) },
         { id: 'reading', kind: 'reading', title: 'Membaca', passScore: 60, take: 1, pool: reading.map((p) => p.map((e) => e.id)) },

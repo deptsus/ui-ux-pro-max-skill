@@ -11,9 +11,8 @@ import type { Answer, Grade } from '@/lib/engine/grading';
 import { RETAKE_HOURS, weakTopics, type SectionResult } from '@/lib/engine/levelExam';
 import { topicPool } from '@/lib/engine/sessions';
 import { recordExam } from '@/lib/engine/state';
-import { examOpensAt, levelExamStatus } from '@/lib/engine/unlock';
+import { examOpensAt, finalExamStatus } from '@/lib/engine/unlock';
 import { planWaitReason } from '@/lib/engine/plan';
-import type { Cefr } from '@/lib/content/types';
 import { api, ApiError } from '@/lib/client/api';
 import { useApp, useNow } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
@@ -70,7 +69,7 @@ export function LevelExam({ exam }: { exam: ExamDef }) {
   const attempts = learner.exams[exam.id]?.attempts ?? [];
   const last = attempts.at(-1);
   // The weekly plan holds the exam back until its week (16 Nov 2026).
-  const rawStatus = levelExamStatus(learner, ix, exam.ref as Cefr, ent, now);
+  const rawStatus = finalExamStatus(learner, ix, exam, ent, now);
   const planWait = rawStatus === 'available' ? examOpensAt(learner, ix, exam, ent, now) : undefined;
   const status = planWait ? 'locked' : rawStatus;
   const waitUntil = last && !last.passed ? last.at + RETAKE_HOURS * 3600 * 1000 : 0;

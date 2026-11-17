@@ -67,6 +67,12 @@ export const INTERACTIVE: Record<string, Partial<Record<Stage, Draft[]>>> = {
     ],
   },
   'kids-family': {
+    guided: [
+      picture(1, 'Ketuk gambar yang sesuai dengan kata ini.', 'grandmother', [['grandmother', 'nenek', true], ['mother', 'ibu', notThis('mother', 'ibu')], ['sister', 'saudara perempuan', notThis('sister', 'saudara perempuan')], ['grandfather', 'kakek', notThis('grandfather', 'kakek')]], '"Grandmother" artinya nenek.'),
+    ],
+    mastery: [
+      picture(1, 'Dengarkan kata ini, lalu ketuk gambarnya.', null, [['brother', 'saudara laki-laki', true], ['father', 'ayah', notThis('father', 'ayah')], ['grandfather', 'kakek', notThis('grandfather', 'kakek')], ['sister', 'saudara perempuan', notThis('sister', 'saudara perempuan')]], '"Brother" artinya saudara laki-laki.', { audioText: 'brother' }),
+    ],
     independent: [
       spell(1, 'mom', '"Mom" dieja m-o-m. Ini panggilan akrab untuk ibu.', { meaning: 'ibu (panggilan akrab)' }),
     ],

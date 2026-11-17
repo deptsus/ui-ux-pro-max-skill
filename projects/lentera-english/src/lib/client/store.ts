@@ -90,15 +90,17 @@ export async function loadLearner(): Promise<void> {
   const guest = read('guest');
   let accountName: string | undefined;
   let serverAvatar: number | undefined;
+  let serverSchool: string | null | undefined;
   try {
     const { snapshot } = await api<{ snapshot: { state: Partial<LearnerState>; client_updated_at: number } | null }>('/api/sync');
     if (snapshot && (!local || snapshot.client_updated_at > local.updatedAt)) local = hydrate({ ...snapshot.state, outbox: [] }, uid);
-    const me = await api<{ user: { profile?: { display_name?: string; role?: string; avatar?: number }; entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
+    const me = await api<{ user: { profile?: { display_name?: string; role?: string; avatar?: number; school_level?: string | null }; entitlement: { premium: boolean; plan: string; expires_at: string | null } } | null }>('/api/me');
     setEntitlement(me.user?.entitlement, uid);
     role = me.user?.profile?.role === 'admin' ? 'admin' : 'student';
     localStorage.setItem(roleKey(uid), role);
     accountName = me.user?.profile?.display_name || undefined;
     serverAvatar = me.user?.profile?.avatar;
+    serverSchool = me.user?.profile?.school_level ?? null;
   } catch {
     syncState = 'offline';
   }
@@ -118,10 +120,12 @@ export async function loadLearner(): Promise<void> {
   scheduleSync(500);
   // The leaderboard reads the avatar from the account profile, which sync does not copy.
   if (serverAvatar !== undefined && state.profile.avatar !== serverAvatar) void pushProfile({ avatar: state.profile.avatar });
+  // Rilis 16: the league hides SD learners' names using the account's school level.
+  if (serverSchool !== undefined && state.profile.schoolLevel && state.profile.schoolLevel !== serverSchool) void pushProfile({ school_level: state.profile.schoolLevel });
 }
 
 /** Saves name and avatar on the account (leaderboard); offline is fine, the next sign-in load retries the avatar. */
-export async function pushProfile(patch: { display_name?: string; avatar?: number }): Promise<boolean> {
+export async function pushProfile(patch: { display_name?: string; avatar?: number; school_level?: string }): Promise<boolean> {
   if (!currentSession()) return false;
   try {
     await api('/api/me', { method: 'PATCH', body: patch });

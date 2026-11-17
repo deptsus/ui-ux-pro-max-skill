@@ -5,6 +5,7 @@
 //           attempt and, on the first pass, issues a certificate.
 import { randomInt } from 'node:crypto';
 import { indexContent, type ExamDef } from '@/lib/content/types';
+import { certificateLevel } from '@/lib/content/tracks';
 import type { Answer } from '@/lib/engine/grading';
 import { buildLevelExam, examSeed, gradeLevelExam, isLateSubmission, isSectioned, nextAttemptAt, sanitize } from '@/lib/engine/levelExam';
 import { HttpError, json, readJson, requireUser, route } from '@/lib/server/api';
@@ -38,10 +39,11 @@ export const POST = route(async (req) => {
   const { db, userId } = await requireUser(req);
   const b = await readJson<Body>(req, 200_000);
   const content = await loadContent(db);
-  const exam = content.full.exams.find((x) => x.id === b.id && x.scope === 'level') as ExamDef | undefined;
+  // Level exams (Rilis 3) and the final exams of the school tracks (Rilis 16) work the same way.
+  const exam = content.full.exams.find((x) => x.id === b.id && (x.scope === 'level' || x.scope === 'track')) as ExamDef | undefined;
   if (!exam || !isSectioned(exam)) throw new HttpError(404, 'Ujian level tidak ditemukan.', 'not_found');
   const account = await db.rpc<{ entitlement: { premium: boolean } }>('get_account', { p_user: userId });
-  if (exam.premium && !account.entitlement?.premium) throw new HttpError(403, 'Ujian level termasuk Premium.', 'premium');
+  if (exam.premium && !account.entitlement?.premium) throw new HttpError(403, exam.scope === 'track' ? 'Ujian akhir jalur sekolah termasuk Premium.' : 'Ujian level termasuk Premium.', 'premium');
 
   const st = await status(db, userId, exam.id);
   const ix = indexContent(content.full);
@@ -82,7 +84,8 @@ export const POST = route(async (req) => {
     let recorded: { id: number; certificate: string | null };
     try {
       recorded = await db.rpc('record_level_exam', {
-        p_user: userId, p_exam: exam.id, p_level: exam.ref, p_attempt: attempt, p_score: result.score, p_passed: result.passed,
+        // Certificates name a CEFR level; a school track's exam uses its track's level (SD A1, SMP A2, SMA B1).
+        p_user: userId, p_exam: exam.id, p_level: exam.scope === 'track' ? certificateLevel(exam.ref) : exam.ref, p_attempt: attempt, p_score: result.score, p_passed: result.passed,
         p_sections: sections, p_questions: result.items.map((i) => i.ex.id), p_writing: writing, p_code: newCode(),
       });
     } catch (e) {

@@ -22,6 +22,8 @@ export const PATCH = route(async (req) => {
   const { db, userId } = await requireUser(req);
   await rateLimit(db, 'profile', userId, 60, 3600);
   const patch = await readJson<Record<string, unknown>>(req, 2000);
+  // School level (Rilis 16): one of the known values, or '' to clear.
+  if ('school_level' in patch && !['', 'sd', 'smp', 'sma', 'umum'].includes(String(patch.school_level))) throw new HttpError(400, 'Jenjang sekolah tidak dikenal.', 'bad_school_level');
   return json({ profile: await db.rpc('update_profile', { p_user: userId, p_patch: patch }) });
 });
 

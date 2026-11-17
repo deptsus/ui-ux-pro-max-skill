@@ -1,5 +1,6 @@
-// Rilis 11 "Jalur Khusus": TOEFL ITP/IELTS, English for work and the kids'
-// track live next to the CEFR path (chapters with `track`, migration 0016).
+// Rilis 11 "Jalur Khusus": TOEFL ITP/IELTS and English for work live next to
+// the CEFR path (chapters with `track`, migration 0016). The kids' track became
+// Jalur SD in Rilis 16 (tests/rilis16.test.ts).
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import path from 'node:path';
 import { buildPack } from '@content/index';
@@ -23,16 +24,17 @@ const trackChapters = pack.chapters.filter((c) => c.track);
 const lessonsOfTrack = (id: string) => ix.trackLessons.filter((l) => ix.chapterById.get(ix.unitById.get(l.unitId)!.chapterId)!.track === id);
 
 describe('isi jalur khusus', () => {
-  it('tiga jalur, masing-masing enam pelajaran (Rilis 12 menambah tiga); pelajaran pertama gratis, sisanya dan ujian unitnya Premium', () => {
-    expect(trackChapters.map((c) => c.track).sort()).toEqual(['exam', 'kids', 'work']);
-    for (const t of ['work', 'exam', 'kids']) {
+  it('jalur khusus Kerja dan TOEFL/IELTS: enam pelajaran, pelajaran pertama gratis, sisanya dan ujian unitnya Premium', () => {
+    // Rilis 16 merged Jalur Anak into Jalur SD and added Jalur SMP and SMA (tests/rilis16.test.ts).
+    expect(trackChapters.map((c) => c.track).sort()).toEqual(['exam', 'sd', 'sma', 'smp', 'work']);
+    for (const t of ['work', 'exam']) {
       const lessons = lessonsOfTrack(t);
       expect(lessons, t).toHaveLength(6);
       expect(lessons.map((l) => l.premium), t).toEqual([false, true, true, true, true, true]);
       const unit = ix.unitById.get(lessons[0].unitId)!;
       expect(pack.exams.find((e) => e.scope === 'unit' && e.ref === unit.id)?.premium, t).toBe(true);
     }
-    expect(TRACKS.map((t) => t.id).sort()).toEqual(['exam', 'kids', 'work']);
+    expect(TRACKS.map((t) => t.id).sort()).toEqual(['exam', 'sd', 'sma', 'smp', 'work']);
     expect(TRACKS.find((t) => t.id === 'exam')!.note).toMatch(/tidak berafiliasi/);
     expect(trackChapters.find((c) => c.track === 'exam')!.description).toMatch(/tidak berafiliasi/);
   });
@@ -44,7 +46,7 @@ describe('isi jalur khusus', () => {
 
 describe('terpisah dari jalur CEFR', () => {
   it('jalur belajar, rencana mingguan, dan "pelajaran berikutnya" tidak memuat pelajaran jalur khusus', () => {
-    expect(ix.trackLessons).toHaveLength(18);
+    expect(ix.trackLessons).toHaveLength(6 + 6 + 13 + 7 + 8);
     expect(ix.orderedLessons.some((l) => ix.trackLessons.includes(l))).toBe(false);
     expect(ix.orderedLessons.length + ix.trackLessons.length).toBe(pack.lessons.length);
     for (const level of ['A1', 'B1', 'B2'] as const) expect(unitsOfLevel(ix, level).some((u) => u.id.startsWith('track-')), level).toBe(false);
@@ -54,7 +56,7 @@ describe('terpisah dari jalur CEFR', () => {
 
   it('pelajaran pertama tiap jalur terbuka untuk semua, tanpa syarat level CEFR', () => {
     const s = createState('baru', T0);
-    for (const t of ['work', 'exam', 'kids']) {
+    for (const t of ['work', 'exam']) {
       const [first, second] = lessonsOfTrack(t);
       expect(lessonLock(s, ix, first, FREE, T0).status, t).toBe('available');
       expect(lessonLock(s, ix, second, FREE, T0).status, t).toBe('premium');
@@ -89,15 +91,15 @@ describe('terpisah dari jalur CEFR', () => {
 describe('paket materi dan basis data', () => {
   it('kolom track ikut ke baris basis data dan kembali utuh', () => {
     const rows = packToRows(pack);
-    expect(rows.chapters!.filter((c) => (c as { track?: string }).track).length).toBe(3);
+    expect(rows.chapters!.filter((c) => (c as { track?: string }).track).length).toBe(5);
     const back = rowsToPack(rows, 'db-test');
-    expect(back.chapters.filter((c) => c.track).map((c) => c.id).sort()).toEqual(['track-exam', 'track-kids', 'track-work']);
+    expect(back.chapters.filter((c) => c.track).map((c) => c.id).sort()).toEqual(['track-exam', 'track-kids', 'track-sma', 'track-smp', 'track-work']);
     expect(back.chapters.find((c) => c.id === 'a1-c1')!.track).toBeUndefined();
   });
 
   it('paket gratis memuat isi pelajaran pertama tiap jalur; pelajaran Premium tanpa isi', () => {
     const free = packForFree(pack);
-    for (const t of ['work', 'exam', 'kids']) {
+    for (const t of ['work', 'exam']) {
       const [first, second] = lessonsOfTrack(t);
       const f = free.lessons.find((l) => l.id === first.id)!;
       const p = free.lessons.find((l) => l.id === second.id)!;
@@ -120,14 +122,15 @@ describe('paket materi dan basis data', () => {
       const admin = await newUser(db, 'Admin R11', 'admin');
       expect(await db.rpc('content_features')).toContain('tracks');
       await db.rpc('import_content', { p_actor: admin, p_rows: packToRows(pack) });
+      // Rilis 16: the old Jalur Anak chapter keeps its id and becomes Jalur SD.
       const [row] = await db.query<{ track: string }>("select track from chapters where id = 'track-kids'");
-      expect(row.track).toBe('kids');
+      expect(row.track).toBe('sd');
       await expect(db.query("update chapters set track = 'sports' where id = 'track-kids'")).rejects.toThrow();
       await db.rpc('publish_curriculum', { p_actor: admin, p_label: 'r11', p_notes: '' });
       const published = await db.rpc<{ rows: Rows; version: number }>('get_published_content');
       const live = rowsToPack(published.rows, `db-${published.version}`);
-      expect(live.chapters.filter((c) => c.track).map((c) => c.track).sort()).toEqual(['exam', 'kids', 'work']);
-      expect(indexContent(live).trackLessons).toHaveLength(18);
+      expect(live.chapters.filter((c) => c.track).map((c) => c.track).sort()).toEqual(['exam', 'sd', 'sma', 'smp', 'work']);
+      expect(indexContent(live).trackLessons).toHaveLength(40);
     });
   });
 });

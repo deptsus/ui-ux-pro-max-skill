@@ -11,6 +11,7 @@ import { Avatar } from '@/components/Avatar';
 import { FriendsView } from '@/components/social/Friends';
 import { LeagueView } from '@/components/social/League';
 import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId } from '@/components/ui';
+import { useSdMode } from '@/components/school/SchoolLevel';
 
 interface Board { week_start: string; top: { rank: number; name: string; avatar: number; xp: number; me: boolean }[]; me: { rank: number; xp: number } | null }
 
@@ -71,10 +72,12 @@ function Leaderboard() {
   const info = useServerInfo();
   const tab = TABS.find((t) => t.id === params.get('tab'))?.id ?? 'liga';
   const invite = params.get('kode') ?? '';
+  const sd = useSdMode();
 
   return (
     <div>
       <PageHeader title="Liga & Teman" subtitle="Bersaing sehat setiap minggu. XP hanya datang dari kegiatan belajar, jadi yang rajin yang menang." />
+      {sd && <p className="mb-4 rounded-2xl bg-brand-soft px-4 py-3 text-sm"><b>Mode SD:</b> di liga dan papan umum, namamu tampil sebagai "Pelajar SD". Hanya teman yang kamu tambahkan yang melihat namamu.</p>}
       <nav className="mb-4 flex gap-2" aria-label="Bagian papan peringkat">
         {TABS.map((t) => <LinkButton key={t.id} href={t.id === 'liga' ? '/app/leaderboard' : `/app/leaderboard?tab=${t.id}`} size="sm" variant={tab === t.id ? 'primary' : 'secondary'}>{t.label}</LinkButton>)}
       </nav>

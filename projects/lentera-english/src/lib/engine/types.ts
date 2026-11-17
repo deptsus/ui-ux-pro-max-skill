@@ -81,6 +81,8 @@ export interface Profile {
   placementDone: boolean;
   placementLevel?: Cefr;
   placementAt?: number;
+  /** School level chosen by the learner (Rilis 16); 'sd' turns on Mode SD. */
+  schoolLevel?: 'sd' | 'smp' | 'sma' | 'umum';
 }
 
 export interface LearnerState {

@@ -3,7 +3,7 @@ import { AudioLines, Shapes, Compass, Award, BarChart3, BookHeart, BookOpen, Cal
 export const NAV = [
   { href: '/app', label: 'Beranda', icon: Home },
   { href: '/app/path', label: 'Jalur Belajar', icon: Map },
-  { href: '/app/jalur', label: 'Jalur Khusus', icon: Compass },
+  { href: '/app/jalur', label: 'Jalur Sekolah & Khusus', icon: Compass },
   { href: '/app/plan', label: 'Rencana Mingguan', icon: CalendarCheck },
   { href: '/app/review', label: 'Ulangan', icon: Repeat },
   { href: '/app/homework', label: 'PR', icon: ClipboardList, desc: 'Tugas tiap pelajaran dan bab, lengkap dengan tenggat.' },

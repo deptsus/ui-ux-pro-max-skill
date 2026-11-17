@@ -4,6 +4,7 @@
 import type { ReactNode } from 'react';
 import { COLOR_PICS, PICS, type PicKey } from '@/lib/content/pics';
 import { INK } from '../cast/Face';
+import { CAST, KidFigure, type Look } from '../cast/Kid';
 
 const o = { stroke: INK, strokeWidth: 2.6, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const };
 const thin = { stroke: INK, strokeWidth: 1.8, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const };
@@ -11,6 +12,11 @@ const shine = (cx: number, cy: number, rx: number, ry: number, rot = -25) => <el
 const ground = (rx = 18) => <ellipse cx="32" cy="59" rx={rx} ry="2.8" fill={INK} opacity="0.13" />;
 const eye = (x: number, y: number, r = 2) => <g><circle cx={x} cy={y} r={r} fill={INK} /><circle cx={x + r * 0.35} cy={y - r * 0.35} r={r * 0.35} fill="#fff" /></g>;
 const SKIN = '#f3c9a2';
+/** A person (Rilis 16): the cast figure (96×96) scaled into the 64 box, with a hat or tool on top. */
+const person = (look: Omit<Look, 'name' | 'role'>, extra?: ReactNode) => (
+  <g transform="scale(0.6667)"><KidFigure look={{ name: '', role: '', ...look }} still />{extra}</g>
+);
+const hatCap = (crown: string, badge: string) => <><path d="M24 25 C23 9 73 9 72 25 Z" fill={crown} stroke={INK} strokeWidth="2.6" strokeLinejoin="round" /><path d="M22 25 H74 L68 31 H28 Z" fill="#1f2937" stroke={INK} strokeWidth="2.4" strokeLinejoin="round" /><circle cx="48" cy="17" r="4.2" fill={badge} stroke={INK} strokeWidth="1.8" /></>;
 /** A number tile (one … ten). */
 const num = (n: number, fill: string) => <>{ground(18)}<rect x="9" y="8" width="46" height="46" rx="12" fill={fill} {...o} />{shine(18, 16, 3, 5)}<text x="32" y="44" textAnchor="middle" fontSize={n > 9 ? 28 : 34} fontWeight="800" fill="#fff" stroke={INK} strokeWidth="1.8" paintOrder="stroke" fontFamily="var(--font-display), system-ui, sans-serif">{n}</text></>;
 const wheel = (x: number, y: number, r = 6.5) => <g><circle cx={x} cy={y} r={r} fill="#374151" {...o} /><circle cx={x} cy={y} r={r * 0.4} fill="#d1d5db" /></g>;
@@ -111,6 +117,21 @@ const DRAW: Record<Exclude<PicKey, keyof typeof COLOR_PICS>, () => ReactNode> = 
   television: () => <>{ground(20)}<path d="M24 16 L16 5 M40 16 L48 5" {...o} /><path d="M18 50 L14 58 M46 50 L50 58" {...o} /><rect x="6" y="16" width="52" height="34" rx="7" fill="#6d5ff0" {...o} /><rect x="11" y="21" width="34" height="24" rx="4" fill="#7dd3fc" {...thin} /><circle cx="51" cy="27" r="3" fill="#fde047" {...thin} /><circle cx="51" cy="38" r="3" fill="#fde047" {...thin} /><path d="M15 26 L22 33" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" opacity="0.8" /></>,
   computer: () => <>{ground(24)}<rect x="12" y="10" width="40" height="30" rx="3.5" fill="#374151" {...o} /><rect x="16" y="14" width="32" height="22" rx="1.5" fill="#93c5fd" /><path d="M20 19 L27 26" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" opacity="0.8" /><path d="M5 44 H59 L55 52 H9 Z" fill="#9ca3af" {...o} /><path d="M26 47 H38" stroke={INK} strokeWidth="1.8" strokeLinecap="round" /></>,
   toothbrush: () => <>{ground(24)}<path d="M6 44 H40" stroke={INK} strokeWidth="10" strokeLinecap="round" /><path d="M6 44 H40" stroke="#38bdf8" strokeWidth="6" strokeLinecap="round" /><rect x="38" y="39" width="20" height="10" rx="3" fill="#38bdf8" {...o} /><rect x="40" y="28" width="16" height="11" fill="#fff" {...thin} /><path d="M44 29 V38 M48 29 V38 M52 29 V38" stroke="#cbd5e1" strokeWidth="1.6" /><path d="M38 26 C42 18 48 24 52 18 C56 22 60 20 60 26 C56 29 44 30 38 26 Z" fill="#a5f3fc" {...thin} /></>,
+
+  // Rilis 16: keluarga dan profesi, memakai figur para karakter.
+  mother: () => person({ skin: '#efc29c', hair: '#2b1d16', hairStyle: 'hijab', hijab: '#f9a8d4', top: '#db2777', trim: '#fde68a' }),
+  father: () => person({ skin: '#d9a273', hair: '#1c1410', hairStyle: 'wavy', top: '#2563eb', trim: '#93c5fd' }, <path d="M40.5 51 Q44.5 47.4 48 50 Q51.5 47.4 55.5 51 Q51.5 53.2 48 51.4 Q44.5 53.2 40.5 51 Z" fill="#1c1410" />),
+  grandmother: () => person({ skin: '#f0c7a0', hair: '#d1d5db', hairStyle: 'bun', top: '#a855f7', trim: '#f5d0fe', glasses: true }),
+  grandfather: () => person({ skin: '#d9a273', hair: '#e5e7eb', hairStyle: 'wavy', top: '#78716c', trim: '#e7e5e4', glasses: true }, <path d="M27 28 L29 13 Q48 8.5 67 13 L69 28 Q48 23 27 28 Z" fill="#1f2937" stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />),
+  sister: () => person({ skin: '#f3c9a2', hair: '#2b1d16', hairStyle: 'pigtails', top: '#f97316', trim: '#fed7aa' }),
+  brother: () => person({ skin: '#e6b48a', hair: '#1f1712', hairStyle: 'spiky', top: '#22c55e', trim: '#bbf7d0' }),
+  teacher: () => person(CAST.lina, <g><rect x="62" y="66" width="22" height="16" rx="2" fill="#fde68a" stroke={INK} strokeWidth="2.2" transform="rotate(-10 73 74)" /><path d="M66 72 h13 M66 77 h9" stroke={INK} strokeWidth="1.6" strokeLinecap="round" transform="rotate(-10 73 74)" /></g>),
+  doctor: () => person({ skin: '#efc29c', hair: '#2b1d16', hairStyle: 'short', top: '#ffffff', trim: '#0ea5e9' }, <g fill="none" stroke="#334155" strokeWidth="2.6" strokeLinecap="round"><path d="M36 73 C31 84 37 92 44 92" /><path d="M60 73 C65 84 59 92 52 92" /><circle cx="48" cy="92" r="4" fill="#94a3b8" /></g>),
+  nurse: () => person({ skin: '#f3c9a2', hair: '#3a2418', hairStyle: 'bun', top: '#bae6fd', trim: '#0284c7' }, <g><path d="M33 22 L35 11 H61 L63 22 Q48 18 33 22 Z" fill="#fff" stroke={INK} strokeWidth="2.4" strokeLinejoin="round" /><path d="M48 12.5 V20 M44.2 16.2 H51.8" stroke="#ef4444" strokeWidth="2.6" strokeLinecap="round" /></g>),
+  police: () => person({ skin: '#d9a273', hair: '#1c1410', hairStyle: 'comma', top: '#7c5a3a', trim: '#facc15' }, hatCap('#6b4f2e', '#facc15')),
+  farmer: () => person({ skin: '#c98f60', hair: '#1c1410', hairStyle: 'comma', top: '#16a34a', trim: '#bbf7d0' }, <g><path d="M6 31 L48 4 L90 31 Q48 37 6 31 Z" fill="#eab308" stroke={INK} strokeWidth="2.6" strokeLinejoin="round" /><path d="M20 28 L48 9 L76 28 M34 31 L48 9 L62 31" fill="none" stroke="#a16207" strokeWidth="1.6" /></g>),
+  chef: () => person({ skin: '#efc29c', hair: '#2b1d16', hairStyle: 'comma', top: '#ffffff', trim: '#ef4444' }, <g><path d="M31 25 C21 24 21 9 32 10 C34 1 48 0 50 8 C57 1 72 5 66 13 C76 13 75 26 65 25 Z" fill="#fff" stroke={INK} strokeWidth="2.6" strokeLinejoin="round" /><rect x="30" y="20" width="36" height="9" rx="2" fill="#fff" stroke={INK} strokeWidth="2.4" /></g>),
+  pilot: () => person({ skin: '#e6b48a', hair: '#1f1712', hairStyle: 'comma', top: '#ffffff', trim: '#1e3a8a' }, <g>{hatCap('#1e3a8a', '#facc15')}<path d="M26 24.5 H70" stroke="#facc15" strokeWidth="2" /></g>),
 };
 
 /** A vocabulary picture. `label` (the Indonesian meaning by default) is read by screen readers. */

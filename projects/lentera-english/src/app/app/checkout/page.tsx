@@ -16,6 +16,7 @@ import { syncNow } from '@/lib/client/store';
 import { ManualQrisCheckout, type ManualTx } from '@/components/ManualQrisCheckout';
 import { Mascot } from '@/components/Mascot';
 import { Badge, Button, Card, Empty, LinkButton, Notice, dateId, dateTimeId, rupiah } from '@/components/ui';
+import { ParentGate } from '@/components/school/SchoolLevel';
 
 interface Tx { id: string; reference_id: string; plan_id: string; plan_name: string; duration_days: number; amount_idr: number; currency: string; channel: 'QRIS' | 'DANA' | 'GOPAY'; status: string; checkout: { kind: 'qr' | 'redirect' | 'none'; value: string; deeplink?: string } | null; expires_at: string | null; paid_at: string | null; failure_code: string | null; created_at: string }
 interface Res { transaction: Tx; entitlement: { premium: boolean; expires_at: string | null }; mode: 'manual' | 'live' | 'test' | 'mock' | 'off' }
@@ -148,5 +149,6 @@ function Checkout() {
 export default function CheckoutPage() {
   // Google Play build: no payment screens inside the app (Rilis 12).
   if (usePlayBuild()) return <Empty title="Pembelian tidak tersedia di aplikasi ini" action={<LinkButton href="/app/subscription" variant="secondary">Lihat status Premium</LinkButton>}>Status Premium mengikuti akunmu.</Empty>;
-  return <Suspense><Checkout /></Suspense>;
+  // Mode SD (Rilis 16): the payment screen opens after a grown-up's check.
+  return <Suspense><div className="mx-auto max-w-xl"><ParentGate><Checkout /></ParentGate></div></Suspense>;
 }

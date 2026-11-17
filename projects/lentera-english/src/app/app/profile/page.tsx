@@ -9,6 +9,7 @@ import { act, pushProfile, syncNow, useRole, useSyncStatus } from '@/lib/client/
 import { AVATARS, Avatar } from '@/components/Avatar';
 import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
 import { ParentLinkCard } from '@/components/ParentLinkCard';
+import { SchoolLevelPicker, chooseSchoolLevel } from '@/components/school/SchoolLevel';
 
 export default function ProfilePage() {
   const { ix, learner, ent, now, premium } = useApp();
@@ -68,6 +69,13 @@ export default function ProfilePage() {
         {stats.map(([label, value]) => <Card key={label} className="p-4"><p className="text-xs font-bold text-muted">{label}</p><p className="mt-1 text-xl font-extrabold">{value}</p></Card>)}
       </section>
 
+      <Card className="space-y-3" as="section">
+        <h2 className="text-lg font-extrabold">Jenjang sekolah</h2>
+        <p className="text-sm text-muted">Pilih jenjangmu agar Lentera menyarankan Jalur Sekolah yang sesuai.</p>
+        <SchoolLevelPicker value={learner.profile.schoolLevel} onPick={chooseSchoolLevel} />
+        {learner.profile.schoolLevel === 'sd' && <Notice tone="accent" title="Mode SD aktif">Huruf lebih besar, petunjuk soal bisa dibacakan (tombol "Bacakan"), nama tidak tampil di liga umum kecuali bagi teman, dan pembelian Premium perlu dibuka orang tua.</Notice>}
+        {learner.profile.schoolLevel && learner.profile.schoolLevel !== 'umum' && <LinkButton href={`/app/jalur#${learner.profile.schoolLevel}`} variant="secondary" size="sm">Buka Jalur {learner.profile.schoolLevel.toUpperCase()}</LinkButton>}
+      </Card>
       <Card className="space-y-4">
         <h2 className="font-extrabold">Ubah profil</h2>
         <Field label="Nama tampilan" hint="Nama ini muncul di papan peringkat."><input value={name} maxLength={40} onChange={(e) => { edited.current = true; setSaved(false); setName(e.target.value); }} className={inputClass} /></Field>

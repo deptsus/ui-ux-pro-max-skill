@@ -202,7 +202,7 @@ export function validatePack(pack: ContentPack): string[] {
   for (const x of pack.exams) {
     if (!x.sections?.length) continue;
     const p = `ujian ${x.id}`;
-    if (x.scope !== 'level') errs.push(`${p}: bagian ujian hanya untuk ujian level`);
+    if (x.scope !== 'level' && x.scope !== 'track') errs.push(`${p}: bagian ujian hanya untuk ujian level dan ujian akhir jalur sekolah`);
     const kinds = x.sections.map((s) => s.kind);
     for (const k of ['grammar', 'reading', 'listening', 'writing'] as const) if (!kinds.includes(k)) errs.push(`${p}: bagian ${k} tidak ada`);
     if (new Set(x.sections.map((s) => s.id)).size !== x.sections.length) errs.push(`${p}: ID bagian ganda`);

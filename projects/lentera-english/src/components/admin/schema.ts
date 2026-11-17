@@ -234,10 +234,10 @@ export const TABLES: TableDef[] = [
   {
     id: 'exams', label: 'Ujian', singular: 'ujian', group: 'Latihan dan penilaian', pk: 'id', idHint: 'Contoh: exam.a1-c1-u1 atau exam.level.B1',
     title: (r) => r.title,
-    subtitle: (r) => `${r.scope === 'unit' ? 'Ujian unit' : r.scope === 'level' ? 'Ujian level' : 'Tes penempatan'} ${r.ref} · lulus ${r.passing_score}% · ${Math.round(r.time_limit_sec / 60)} menit`,
+    subtitle: (r) => `${r.scope === 'unit' ? 'Ujian unit' : r.scope === 'level' ? 'Ujian level' : r.scope === 'track' ? 'Ujian akhir jalur' : 'Tes penempatan'} ${r.ref} · lulus ${r.passing_score}% · ${Math.round(r.time_limit_sec / 60)} menit`,
     badges: (r) => [[r.is_premium ? 'Premium' : 'Gratis', r.is_premium ? 'accent' : 'ok']],
     fields: [
-      { key: 'scope', label: 'Cakupan', kind: 'select', choices: [['unit', 'Ujian unit'], ['level', 'Ujian level CEFR'], ['placement', 'Tes penempatan']], required: true, filter: true },
+      { key: 'scope', label: 'Cakupan', kind: 'select', choices: [['unit', 'Ujian unit'], ['level', 'Ujian level CEFR'], ['track', 'Ujian akhir jalur sekolah'], ['placement', 'Tes penempatan']], required: true, filter: true },
       { key: 'ref', label: 'Unit atau level yang diuji', kind: 'text', required: true, hint: 'ID unit (mis. a1-c1-u1) untuk ujian unit, atau kode level (mis. B1) untuk ujian level.' },
       { key: 'title', label: 'Judul', kind: 'text', required: true },
       { key: 'passing_score', label: 'Skor lulus (%)', kind: 'number', min: 50, max: 100, required: true },
@@ -245,7 +245,7 @@ export const TABLES: TableDef[] = [
       { key: 'sample_size', label: 'Jumlah soal yang diambil otomatis', kind: 'number', min: 0, max: 60, required: true, hint: 'Diambil dari soal pelajaran dalam cakupan ujian, di luar soal tetap di bawah.' },
       { key: 'is_premium', label: 'Hanya untuk Premium', kind: 'bool' },
       { key: 'question_ids', label: 'Soal tetap', kind: 'lines', linesRef: 'questions', hint: 'Satu ID soal per baris. Boleh kosong.' },
-      { key: 'sections', label: 'Bagian ujian level (JSON)', kind: 'json', rows: 16, nullable: true, when: (r) => r.scope === 'level' || !!r.sections,
+      { key: 'sections', label: 'Bagian ujian level (JSON)', kind: 'json', rows: 16, nullable: true, when: (r) => r.scope === 'level' || r.scope === 'track' || !!r.sections,
         hint: 'Hanya untuk ujian level bergaya CEFR. Daftar { "id", "kind": grammar|reading|listening|writing, "title", "passScore", "take", "pool": [["id soal", ...], ...], "writing": [{ "prompt", "minWords", "checklist": ["label::kata1|kata2"] }] }. Soal di "pool" memakai tahap "exam" (bank soal khusus ujian, tidak pernah dikirim ke perangkat). Kosongkan untuk ujian acak gaya lama.' },
     ],
     blank: () => ({ scope: 'unit', passing_score: 80, time_limit_sec: 900, sample_size: 10, is_premium: false, question_ids: [] }),

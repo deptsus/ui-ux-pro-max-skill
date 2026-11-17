@@ -29,6 +29,9 @@ export const PICS = {
   grape: ['grape', 'anggur'], strawberry: ['strawberry', 'stroberi'], pineapple: ['pineapple', 'nanas'], coconut: ['coconut', 'kelapa'], icecream: ['ice cream', 'es krim'], tea: ['tea', 'teh'],
   // more things at home
   cup: ['cup', 'cangkir'], spoon: ['spoon', 'sendok'], key: ['key', 'kunci'], television: ['television', 'televisi'], computer: ['computer', 'komputer'], toothbrush: ['toothbrush', 'sikat gigi'],
+  // people (Rilis 16)
+  mother: ['mother', 'ibu'], father: ['father', 'ayah'], grandmother: ['grandmother', 'nenek'], grandfather: ['grandfather', 'kakek'], sister: ['sister', 'saudara perempuan'], brother: ['brother', 'saudara laki-laki'],
+  teacher: ['teacher', 'guru'], doctor: ['doctor', 'dokter'], nurse: ['nurse', 'perawat'], police: ['police officer', 'polisi'], farmer: ['farmer', 'petani'], chef: ['chef', 'koki'], pilot: ['pilot', 'pilot'],
   // colours
   red: ['red', 'merah'], blue: ['blue', 'biru'], green: ['green', 'hijau'], yellow: ['yellow', 'kuning'], black: ['black', 'hitam'], white: ['white', 'putih'], purple: ['purple', 'ungu'], pink: ['pink', 'merah muda'], brown: ['brown', 'cokelat'],
 } as const satisfies Record<string, readonly [en: string, id: string]>;

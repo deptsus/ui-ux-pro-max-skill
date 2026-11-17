@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Exercise } from '@/lib/content/types';
 import { shuffle, type Answer, type Grade } from '@/lib/engine/grading';
 import { AudioButton } from './AudioButton';
+import { ReadAloud } from './school/SchoolLevel';
 import { CastMember, type CastId } from './cast/Kid';
 import { PictureChoice, SceneChoice, SpellTiles, TimelineChoice } from './interactive/Interactive';
 import type { Mood } from './cast/Face';
@@ -113,6 +114,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
         <div className={cx(host && 'relative min-w-0 flex-1 rounded-2xl border-[2.5px] border-outline bg-surface px-4 py-3 shadow-[0_3px_0_var(--outline)] before:absolute before:-left-[9px] before:bottom-4 before:h-4 before:w-4 before:rotate-45 before:border-b-[2.5px] before:border-l-[2.5px] before:border-outline before:bg-surface before:content-[\'\']')}>
           <p className="font-display text-xs font-bold uppercase tracking-wider text-brand">{ex.type === 'fill' && ex.audioText ? 'Dikte' : TYPE_LABEL[ex.type]}</p>
           <h2 className="mt-0.5 text-lg font-bold leading-snug sm:text-xl">{ex.prompt}</h2>
+          <ReadAloud text={ex.prompt} className="mt-2" />
         </div>
       </div>
 

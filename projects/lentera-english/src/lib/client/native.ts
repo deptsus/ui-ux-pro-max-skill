@@ -55,6 +55,12 @@ export async function speakNative(text: string, accent: 'us' | 'uk', slow: boole
   const r = await request({ type: 'speak', id, text, lang: accent === 'uk' ? 'en-GB' : 'en-US', slow }, (m) => m.type === 'spoken' && m.id === id, Math.max(8000, text.length * 220));
   return !!r?.ok;
 }
+/** Reads Indonesian text (Mode SD instructions, Rilis 16). */
+export async function speakNativeLang(text: string, lang: string): Promise<boolean> {
+  const id = `s${Date.now().toString(36)}${++seq}`;
+  const r = await request({ type: 'speak', id, text, lang, slow: false }, (m) => m.type === 'spoken' && m.id === id, Math.max(8000, text.length * 220));
+  return !!r?.ok;
+}
 export const stopNativeSpeech = () => send({ type: 'stop-speech' });
 
 export const askNativeNotifications = () => request({ type: 'notify-permission' }, (r) => r.type === 'notify-permission', 60_000) as Promise<{ state: NativeInfo['notifications'] } & Msg | null>;

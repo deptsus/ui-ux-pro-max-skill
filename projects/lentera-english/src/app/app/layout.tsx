@@ -18,6 +18,7 @@ import { AppUpdateBanner } from '@/components/AppUpdateBanner';
 import { NativeSync } from '@/components/NativeSync';
 import { Logo, Mascot } from '@/components/Mascot';
 import { Button, cx } from '@/components/ui';
+import { applySdMode } from '@/lib/client/prefs';
 
 function Splash({ error, onRetry }: { error?: string | null; onRetry?: () => void }) {
   return (
@@ -65,6 +66,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       off();
     };
   }, []);
+  // Mode SD (Rilis 16): larger text for primary-school learners, remembered for the first paint.
+  const sdMode = learner.profile.schoolLevel === 'sd';
+  useEffect(() => { if (booted) applySdMode(sdMode); }, [booted, sdMode]);
   // Weekly PR (Rilis 4): put together once per week, as soon as there is recent work to build it from.
   const weekId = weeklyId(weekStart(now));
   const hasWeekly = !!learner.homework[weekId];

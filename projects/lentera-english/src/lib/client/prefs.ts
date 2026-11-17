@@ -19,6 +19,21 @@ export function setFontScale(scale: FontScale) {
   if (FONT_CLASS[scale]) el.classList.add(FONT_CLASS[scale]);
 }
 
+/**
+ * Mode SD (Rilis 16): for primary-school learners the text is larger by default
+ * (unless a size was chosen in Settings). Remembered per device so the script
+ * in app/layout.tsx can apply it before the first paint.
+ */
+export const SD_KEY = 'lentera.sdMode';
+export function applySdMode(on: boolean) {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem(SD_KEY, on ? '1' : '0');
+  const el = document.documentElement;
+  el.classList.toggle('sd-mode', on);
+  if (localStorage.getItem(FONT_KEY)) return;
+  el.classList.toggle('fs-lg', on);
+}
+
 /** Android phones (and the Android app) can vibrate; iPhones and most desktops cannot. */
 export const hapticsSupported = () => typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
 export const hapticsOn = () => typeof localStorage !== 'undefined' && localStorage.getItem(HAPTICS_KEY) !== '0';

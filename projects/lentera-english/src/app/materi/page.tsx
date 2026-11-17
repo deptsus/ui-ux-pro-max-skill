@@ -8,7 +8,7 @@ import { SITE, mainLessonsByLevel, trackLessonsOf } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'Materi Bahasa Inggris Gratis A1–C2',
-  description: 'Ringkasan tata bahasa dan keterampilan bahasa Inggris dari A1 sampai C2 dalam bahasa Indonesia, plus persiapan TOEFL ITP/IELTS, bahasa Inggris untuk kerja, dan jalur anak.',
+  description: 'Ringkasan tata bahasa dan keterampilan bahasa Inggris dari A1 sampai C2 dalam bahasa Indonesia, plus Jalur SD, SMP, dan SMA, persiapan TOEFL ITP/IELTS, dan bahasa Inggris untuk kerja.',
   alternates: { canonical: `${SITE}/materi` },
   openGraph: { title: 'Materi Bahasa Inggris Gratis A1–C2 · Lentera English', url: `${SITE}/materi`, type: 'website', locale: 'id_ID' },
 };
@@ -34,7 +34,7 @@ export default function MateriIndex() {
           </section>
         ))}
         <section id="jalur" className="scroll-mt-4">
-          <h2 className="text-2xl font-extrabold">Jalur khusus</h2>
+          <h2 className="text-2xl font-extrabold">Jalur sekolah dan jalur khusus</h2>
           {TRACKS.map((t) => (
             <div key={t.id} className="mt-4">
               <h3 className="text-lg font-extrabold">{t.title}</h3>

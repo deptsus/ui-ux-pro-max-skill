@@ -230,7 +230,7 @@ export function recordExam(s: LearnerState, ix: ContentIndex, exam: ExamDef, sco
   rec.attempts.push({ at, score: scorePct, passed, ...(!passed && weak?.length ? { weak } : {}) });
   s.streak = nextStreak(s.streak, at);
   if (firstPass) {
-    addXp(s, exam.scope === 'level' ? GAME.xp.levelExamPass : GAME.xp.unitExamPass, 'exam', at, exam.id);
+    addXp(s, exam.scope === 'level' || exam.scope === 'track' ? GAME.xp.levelExamPass : GAME.xp.unitExamPass, 'exam', at, exam.id);
     if (exam.scope === 'unit') checkChapterReward(s, ix, exam.ref, at);
   }
   emit(s, 'exam', at, { id: exam.id, score: scorePct, passed });

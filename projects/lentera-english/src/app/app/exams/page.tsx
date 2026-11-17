@@ -5,9 +5,8 @@ import { Check, Compass, Crown, Lock } from 'lucide-react';
 import type { ExamDef } from '@/lib/content/types';
 import { buildExam, scoreExam, type ExamResult } from '@/lib/engine/sessions';
 import { recordExam } from '@/lib/engine/state';
-import { examOpensAt, levelExamStatus, unitExamStatus } from '@/lib/engine/unlock';
+import { examOpensAt, finalExamStatus, unitExamStatus } from '@/lib/engine/unlock';
 import { planWaitReason } from '@/lib/engine/plan';
-import type { Cefr } from '@/lib/content/types';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
@@ -25,7 +24,7 @@ function Exams() {
   const attempt = (exam ? learner.exams[exam.id]?.attempts.length ?? 0 : 0) + (done ? 0 : 1);
   const questions = useMemo(() => (exam ? buildExam(ix, exam, attempt) : []), [ix, exam, attempt]);
   // The weekly plan holds back an exam whose turn is in a later week (16 Nov 2026).
-  const base = (e: ExamDef) => (e.scope === 'unit' ? unitExamStatus(learner, ix, e.ref) : levelExamStatus(learner, ix, e.ref as Cefr, ent, now));
+  const base = (e: ExamDef) => (e.scope === 'unit' ? unitExamStatus(learner, ix, e.ref) : finalExamStatus(learner, ix, e, ent, now));
   /** Set only when the plan is the one thing keeping a ready exam closed. */
   const opensAt = (e: ExamDef) => (base(e) === 'available' ? examOpensAt(learner, ix, e, ent, now) : undefined);
   const status = (e: ExamDef) => (opensAt(e) ? 'locked' : base(e));
@@ -68,7 +67,7 @@ function Exams() {
     );
   }
 
-  const groups: [string, ExamDef[]][] = [['Ujian unit', ix.pack.exams.filter((e) => e.scope === 'unit')], ['Ujian level CEFR', ix.pack.exams.filter((e) => e.scope === 'level')]];
+  const groups: [string, ExamDef[]][] = [['Ujian unit', ix.pack.exams.filter((e) => e.scope === 'unit')], ['Ujian level CEFR', ix.pack.exams.filter((e) => e.scope === 'level')], ['Ujian akhir jalur sekolah', ix.pack.exams.filter((e) => e.scope === 'track')]];
   return (
     <div>
       <PageHeader title="Pusat Ujian" subtitle="Tiga tingkat ujian: tes penguasaan di tiap pelajaran, ujian unit, dan ujian level CEFR. Kamu naik hanya setelah membuktikan kemampuan." />

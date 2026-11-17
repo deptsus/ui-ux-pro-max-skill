@@ -13,6 +13,8 @@ import { Button, Card, Notice, inputClass } from '@/components/ui';
 interface Cert { code: string; name: string; level: string; exam: string; score: number; sections: { id: string; title: string; score: number }[]; issued_at: string }
 
 const LEVEL_NAME: Record<string, string> = { A1: 'Pemula (Beginner)', A2: 'Dasar (Elementary)', B1: 'Menengah (Intermediate)', B2: 'Menengah Atas (Upper-Intermediate)', C1: 'Mahir (Advanced)', C2: 'Sangat Mahir (Proficiency)' };
+/** School track final exams (Rilis 16): exam id exam.track.sd|smp|sma. */
+const TRACK_NAME: Record<string, string> = { 'exam.track.sd': 'Jalur SD', 'exam.track.smp': 'Jalur SMP', 'exam.track.sma': 'Jalur SMA' };
 const longDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
 export function CertificateView() {
@@ -62,10 +64,10 @@ export function CertificateView() {
           <div className="pointer-events-none absolute inset-3 rounded-2xl border-2 border-brand/30 print:rounded-none" aria-hidden />
           <div className="relative space-y-4">
             <div className="flex justify-center text-2xl"><Logo size={36} /></div>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-muted">Sertifikat Penyelesaian Level</p>
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-muted">{TRACK_NAME[cert.exam] ? 'Sertifikat Penyelesaian Jalur Sekolah' : 'Sertifikat Penyelesaian Level'}</p>
             <p className="text-muted">diberikan kepada</p>
             <p className="text-3xl font-extrabold sm:text-4xl">{cert.name}</p>
-            <p className="mx-auto max-w-xl text-muted">yang telah lulus <b className="text-ink">Ujian Level {cert.level}</b> · {LEVEL_NAME[cert.level] ?? cert.level} di Lentera English, dengan nilai akhir</p>
+            <p className="mx-auto max-w-xl text-muted">yang telah lulus {TRACK_NAME[cert.exam] ? <><b className="text-ink">Ujian Akhir {TRACK_NAME[cert.exam]}</b> (setara level {cert.level})</> : <><b className="text-ink">Ujian Level {cert.level}</b> · {LEVEL_NAME[cert.level] ?? cert.level}</>} di Lentera English, dengan nilai akhir</p>
             <p className="text-5xl font-extrabold text-brand">{cert.score}%</p>
             {cert.sections?.length > 0 && (
               <ul className="mx-auto grid max-w-xl grid-cols-2 gap-2 text-sm sm:grid-cols-4">
@@ -78,7 +80,7 @@ export function CertificateView() {
             </div>
             <p className="flex items-center justify-center gap-1 text-xs text-muted"><ShieldCheck size={14} aria-hidden /> Periksa keaslian di {verifyUrl || '/sertifikat'}</p>
             <p className="mx-auto max-w-2xl text-xs leading-relaxed text-muted">
-              Sertifikat ini diterbitkan oleh Lentera English sebagai bukti menyelesaikan ujian level {cert.level} di aplikasi Lentera.
+              Sertifikat ini diterbitkan oleh Lentera English sebagai bukti menyelesaikan {TRACK_NAME[cert.exam] ? `ujian akhir ${TRACK_NAME[cert.exam]}` : `ujian level ${cert.level}`} di aplikasi Lentera.{TRACK_NAME[cert.exam] ? ' Jalur Sekolah mengikuti tema pelajaran bahasa Inggris di sekolah; ini bukan rapor atau ijazah sekolah.' : ''}
               Level mengikuti kerangka CEFR, tetapi ini <b>bukan sertifikat CEFR resmi</b> dan bukan hasil tes standar internasional seperti IELTS, TOEFL, atau Cambridge English.
             </p>
           </div>

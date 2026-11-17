@@ -3,7 +3,7 @@
 // when one exists for the text being played, matched by audio key or by the
 // text itself. Otherwise the device's built-in speech engine
 // reads the text, and the UI says so. Nothing is sent to any service.
-import { isNativeApp, speakNative, stopNativeSpeech } from './native';
+import { isNativeApp, speakNativeLang, speakNative, stopNativeSpeech } from './native';
 import type { AudioResource, ContentIndex } from '@/lib/content/types';
 import { spokenKey } from '@/lib/content/spoken';
 
@@ -80,6 +80,27 @@ export function play(ix: ContentIndex | null, text: string, opts: PlayOptions): 
     u.onerror = done;
     // Some engines never fire "end"; never leave the UI stuck.
     setTimeout(done, Math.max(4000, text.length * 180));
+    window.speechSynthesis.speak(u);
+  });
+}
+
+/** Can this device read Indonesian aloud (Mode SD, Rilis 16)? */
+export const canSpeakIndonesian = () => typeof window !== 'undefined' && ('speechSynthesis' in window || isNativeApp());
+/** Reads an instruction aloud in Indonesian with the device voice. */
+export function speakIndonesian(text: string): Promise<boolean> {
+  stopAudio();
+  if (typeof window === 'undefined') return Promise.resolve(false);
+  if (!('speechSynthesis' in window)) return isNativeApp() ? speakNativeLang(text, 'id-ID') : Promise.resolve(false);
+  return new Promise((resolve) => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'id-ID';
+    const voice = window.speechSynthesis.getVoices().find((v) => v.lang === 'id-ID' || v.lang === 'id_ID' || v.lang.startsWith('id'));
+    if (voice) u.voice = voice;
+    u.rate = 0.95;
+    const done = () => resolve(true);
+    u.onend = done;
+    u.onerror = () => resolve(false);
+    setTimeout(done, Math.max(4000, text.length * 120));
     window.speechSynthesis.speak(u);
   });
 }

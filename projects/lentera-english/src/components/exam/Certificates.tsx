@@ -5,7 +5,7 @@ import { Award } from 'lucide-react';
 import { api } from '@/lib/client/api';
 import { Card, LinkButton, dateTimeId } from '@/components/ui';
 
-interface Cert { code: string; level: string; score: number; issued_at: string }
+interface Cert { code: string; level: string; exam?: string; score: number; issued_at: string }
 
 export function CertificatesCard() {
   const [list, setList] = useState<Cert[]>([]);
@@ -20,7 +20,7 @@ export function CertificatesCard() {
       <ul className="divide-y divide-line">
         {list.map((c) => (
           <li key={c.code} className="flex flex-wrap items-center gap-2 py-2">
-            <span className="min-w-0 flex-1"><b>Level {c.level}</b> <span className="text-sm text-muted">· nilai {c.score}% · {dateTimeId(new Date(c.issued_at).getTime())}</span></span>
+            <span className="min-w-0 flex-1"><b>{c.exam?.startsWith('exam.track.') ? `Jalur ${c.exam.slice('exam.track.'.length).toUpperCase()}` : `Level ${c.level}`}</b> <span className="text-sm text-muted">· nilai {c.score}% · {dateTimeId(new Date(c.issued_at).getTime())}</span></span>
             <LinkButton href={`/sertifikat?kode=${c.code}`} size="sm" variant="secondary">Lihat</LinkButton>
           </li>
         ))}

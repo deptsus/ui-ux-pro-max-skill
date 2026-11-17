@@ -117,7 +117,8 @@ export interface Chapter {
   track?: TrackId;
 }
 
-export type TrackId = 'exam' | 'work' | 'kids';
+/** 'kids' is the old id of the SD track (Rilis 11); curricula published before Rilis 16 still carry it. */
+export type TrackId = 'exam' | 'work' | 'kids' | 'sd' | 'smp' | 'sma';
 
 export interface Unit {
   id: string;
@@ -387,8 +388,9 @@ export interface ExamSection {
 
 export interface ExamDef {
   id: string;
-  scope: 'unit' | 'level' | 'placement';
-  ref: string; // unit id or level code
+  /** 'track': the final exam of a school track (Rilis 16), sectioned and server-graded like a level exam. */
+  scope: 'unit' | 'level' | 'placement' | 'track';
+  ref: string; // unit id, level code, or track id
   title: string;
   passScore: number;
   timeLimitSec: number;

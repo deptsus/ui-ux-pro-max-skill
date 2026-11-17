@@ -4,7 +4,7 @@ import { NAV } from '@/components/nav';
 import { PageHeader } from '@/components/ui';
 
 const DESC: Record<string, string> = {
-  '/app/jalur': 'TOEFL ITP/IELTS, bahasa Inggris untuk kerja, dan jalur anak.',
+  '/app/jalur': 'Jalur SD, SMP, SMA sesuai kurikulum sekolah, TOEFL ITP/IELTS, dan bahasa Inggris untuk kerja.',
   '/app/plan': 'Target tiap minggu sampai C2 untuk Premium.',
   '/app/homework': 'Tugas tiap pelajaran dan bab, lengkap dengan tenggat.',
   '/app/exams': 'Tes penempatan, ujian unit, dan ujian level CEFR.',
