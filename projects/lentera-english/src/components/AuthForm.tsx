@@ -47,6 +47,7 @@ export function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
       <Link href="/" className="mx-auto text-xl"><Logo /></Link>
       <Card className="space-y-4">
         <div className="flex items-center gap-3"><Mascot size={56} /><div><h1 className="text-2xl font-extrabold">{signup ? 'Buat akun gratis' : 'Masuk'}</h1><p className="text-sm text-muted">{signup ? 'Progresmu tersimpan dan bisa dilanjutkan di perangkat lain.' : 'Lanjutkan belajarmu.'}</p></div></div>
+        {signup && ready && info.trial && <Notice tone="ok" title="Bonus akun baru: Premium uji coba 3 hari">Semua materi, nyawa tak terbatas, ujian level, dan belajar offline langsung terbuka. Gratis, tanpa pembayaran dan tanpa tagihan otomatis. Setelah 3 hari akun kembali ke Free; progresmu tetap tersimpan.</Notice>}
         {ready && info.backend === 'none' && <Notice tone="accent" title="Akun belum tersedia di server ini">Server berjalan tanpa backend akun. Kamu tetap bisa memakai semua fitur belajar sebagai tamu.</Notice>}
         {ready && info.backend === 'embedded' && <Notice tone="muted">Mode pengembangan: akun disimpan di basis data lokal server ini.</Notice>}
         <form onSubmit={submit} className="space-y-3" noValidate>

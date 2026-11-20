@@ -142,7 +142,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Link href="/app/profile" className={CHIP} aria-label={`Beruntun ${streak} hari`}><Flame size={16} className="text-accent-strong" fill="var(--accent)" aria-hidden />{streak}</Link>
           <Link href="/app/achievements" className={CHIP} aria-label={`${learner.xp} XP`}><Zap size={16} className="text-brand" fill="currentColor" aria-hidden />{learner.xp}</Link>
           {premium ? (
-            <Link href="/app/subscription" className={cx(CHIP_BASE, 'border-accent bg-accent text-on-accent')}><Crown size={16} aria-hidden /><span className={admin ? 'sr-only min-[420px]:not-sr-only' : undefined}>Premium</span></Link>
+            <Link href="/app/subscription" className={cx(CHIP_BASE, 'border-accent bg-accent text-on-accent')}><Crown size={16} aria-hidden /><span className={admin ? 'sr-only min-[420px]:not-sr-only' : undefined}>{ent.plan === 'trial' ? 'Uji coba' : 'Premium'}</span>{ent.plan === 'trial' && <span className="sr-only"> Premium</span>}</Link>
           ) : (
             <Link href="/app/subscription" className={CHIP} aria-label={`${hearts} nyawa`}><Heart size={16} className="text-bad" fill="currentColor" aria-hidden />{hearts}</Link>
           )}

@@ -102,7 +102,12 @@ function checkPassword(password: string, stored: string): boolean {
 
 export interface DevSession { token: string; userId: string; email: string }
 
-export async function devSignUp(email: string, password: string, name: string): Promise<DevSession> {
+/**
+ * Local test accounts start WITHOUT the 3-day Premium trial (migration 0021) unless `trial` is
+ * asked for, so the end-to-end suites keep testing a Free account by default. Real sign-ups on
+ * Supabase always get the trial from the database trigger.
+ */
+export async function devSignUp(email: string, password: string, name: string, trial = false): Promise<DevSession> {
   if (backendMode() !== 'embedded') throw new Error('unavailable');
   const db = await embeddedDb();
   const clean = email.trim().toLowerCase();
@@ -110,6 +115,7 @@ export async function devSignUp(email: string, password: string, name: string): 
   if (password.length < 8) throw new Error('Kata sandi minimal 8 karakter.');
   if ((await db.query('select 1 from auth.users where email = $1', [clean])).length) throw new Error('Email ini sudah terdaftar. Silakan masuk.');
   const [u] = await db.query<{ id: string }>('insert into auth.users (email, encrypted_password, raw_user_meta_data) values ($1, $2, $3) returning id', [clean, hash(password), JSON.stringify({ display_name: name.trim().slice(0, 40) })]);
+  if (!trial) await db.query('update profiles set trial_ends_at = null where id = $1', [u.id]);
   // Convenience for local testing of the CMS: one configured address is admin.
   if (process.env.LENTERA_DEV_ADMIN_EMAIL && clean === process.env.LENTERA_DEV_ADMIN_EMAIL.toLowerCase()) await db.query("update profiles set role = 'admin' where id = $1", [u.id]);
   return { token: devToken(u.id), userId: u.id, email: clean };

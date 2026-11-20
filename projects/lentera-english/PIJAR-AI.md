@@ -1,6 +1,12 @@
 # Chatbot Pijar: analisis arsitektur AI hybrid
 
-**Status: analisis saja; belum ada kode aplikasi yang diubah.** Implementasi dimulai setelah pemilik menjawab keputusan di bagian 9.
+**Status: DITUNDA (disimpan).** Pemilik memutuskan pada 20 November 2026 untuk menyimpan rencana chatbot ini dan mengerjakan hal lain dulu. Belum ada kode chatbot yang dibuat.
+
+Yang sudah dikerjakan dari permintaan yang sama: **trial Premium 3 hari untuk akun baru**. Lihat migrasi `0021_premium_trial.sql` dan `DECISIONS.md` B7. Bila chatbot dilanjutkan, kuota trial di bagian 4 tinggal dipakai karena hak trial sudah ada.
+
+Catatan untuk uji di HP pemilik (Infinix Zero 5G 2023):
+- Termux + Ollama + Llama 3.2 1B + cloudflared (opsi A).
+- Hanya untuk menguji alur, bukan mutu jawaban dan bukan untuk pengguna.
 
 - Tanggal: 20 November 2026
 - Basis: branch `ccr-17d3d5e4-jx43zs` (redesign 2026 sudah live)

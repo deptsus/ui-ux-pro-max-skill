@@ -9,7 +9,7 @@ import { timeLeft } from '@/lib/engine/plan';
 import { dueItems } from '@/lib/engine/srs';
 import { claimMission } from '@/lib/engine/state';
 import { useApp } from '@/lib/client/hooks';
-import { useSession } from '@/lib/client/session';
+import { useServerInfo, useSession } from '@/lib/client/session';
 import { act } from '@/lib/client/store';
 import { Mascot } from '@/components/Mascot';
 import { CastMember } from '@/components/cast/Kid';
@@ -66,6 +66,7 @@ export default function Dashboard() {
   // Rilis 16: the learner's school track, when a school level is chosen.
   const school = trackInfo(learner.profile.schoolLevel === 'umum' ? undefined : learner.profile.schoolLevel);
   const session = useSession();
+  const info = useServerInfo();
   const today = learner.daily[dayKey(now)];
   const xpToday = today?.xp ?? 0;
   const goal = learner.profile.dailyGoalXp;
@@ -91,6 +92,13 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {ent.premium && ent.expiresAt && ent.plan === 'trial' && ent.expiresAt > now && (
+        <ListGroup>
+          <ListRow href="/app/subscription" icon={<Crown size={20} />} iconTone="accent"
+            title={`Premium uji coba · sisa ${Math.max(1, Math.ceil((ent.expiresAt - now) / 86_400_000))} hari`}
+            subtitle={`Berlaku sampai ${new Date(ent.expiresAt).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}. Semua materi, nyawa tak terbatas, dan ujian level terbuka. Setelah itu akun kembali ke Free; progresmu tetap tersimpan.`} />
+        </ListGroup>
+      )}
       {isNew ? <Welcome guest={!session} firstLesson={ix.orderedLessons[0]?.id} /> : (
         <section aria-labelledby="hello" className="space-y-4">
           <div className="flex items-center gap-3">
@@ -113,7 +121,7 @@ export default function Dashboard() {
 
       {!session && !isNew && (
         <Notice title="Kamu belajar sebagai tamu.">
-          <p>Progres tersimpan di perangkat ini saja.</p>
+          <p>Progres tersimpan di perangkat ini saja.{info.trial && ' Buat akun gratis dan langsung dapat Premium uji coba 3 hari.'}</p>
           <LinkButton href="/daftar" size="sm" className="mt-2">Buat akun gratis</LinkButton>
         </Notice>
       )}

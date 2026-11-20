@@ -126,6 +126,14 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
   - Jalur A1–C2: navigasi level di atas, level yang sedang dipelajari terbuka, level lain bisa dibuka; peta berliku R14 diganti jejak vertikal.
   - Komponen bersama di `src/components/ui.tsx` (+ `learn/PathParts.tsx`); `merge()` memastikan kelas yang dikirim pemanggil menang atas kelas bawaan komponen. Galeri komponen di `/gaya` (server lokal saja).
   - ESLint hanya alat pengembangan (`npm run lint`); aturan React Compiler lama diturunkan ke peringatan karena memperbaikinya berarti mengubah logika.
+- **Trial Premium 3 hari (permintaan pemilik, 20 Nov 2026, migrasi 0021):**
+  - Siapa: akun yang dibuat setelah migrasi mendapat Premium penuh 3 hari (`profiles.trial_ends_at`, diisi trigger `handle_new_user`). Akun lama dan tamu tidak.
+  - Urutan hak di `get_entitlement`: admin > berbayar > lisensi sekolah > trial (`plan: 'trial'`).
+  - Pembayaran tidak diubah: membayar saat trial memulai masa berbayar saat dikonfirmasi, dan sisa hari trial tidak ditambahkan (dijelaskan di halaman Premium).
+  - Statistik admin tetap menghitung pelanggan berbayar saja.
+  - Akun uji lokal (`/api/dev-auth`, `tests/helpers.newUser`) dibuat tanpa trial kecuali diminta, supaya suite lama tetap menguji akun Free.
+  - Layar daftar menyebut trial hanya bila server Supabase sudah punya fitur `trial`.
+  - Chatbot Pijar ditunda (`PIJAR-AI.md`).
 - *(Sebelum redesign 2026)*
 - Warna brand ungu `#4b3fd6`, aksen amber `#f59e0b`, font Plus Jakarta Sans, sudut membulat besar, tombol bergaya "tekan" (border bawah tebal).
 - Maskot Pijar (kunang-kunang berlentera) dalam SVG, dengan suasana happy/cheer/think/sad.

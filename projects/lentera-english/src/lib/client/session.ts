@@ -14,6 +14,8 @@ export interface Session {
 export interface ServerInfo {
   backend: 'supabase' | 'embedded' | 'none';
   payments: 'manual' | 'live' | 'test' | 'mock' | 'off';
+  /** New accounts get a 3-day Premium trial (migration 0021 applied on Supabase). */
+  trial?: boolean;
 }
 
 const SESSION_KEY = 'lentera.session';
@@ -45,7 +47,7 @@ export async function initSession(): Promise<Session | null> {
     const res = await fetch('/api/me');
     if (res.ok) {
       const data = await res.json();
-      info = { backend: data.backend, payments: data.payments };
+      info = { backend: data.backend, payments: data.payments, trial: data.trial === true };
       localStorage.setItem('lentera.info', JSON.stringify(info));
       latestContent = typeof data.contentVersion === 'string' ? data.contentVersion : null;
     }

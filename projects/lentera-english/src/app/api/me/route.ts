@@ -2,16 +2,27 @@ import { deleteAuthUser, userIdFromRequest } from '@/lib/server/auth';
 import { HttpError, json, paymentMode, readJson, requireUser, route } from '@/lib/server/api';
 import { rateLimit } from '@/lib/server/security';
 import { contentVersion } from '@/lib/server/content';
-import { backendMode, getDb } from '@/lib/server/db';
+import { backendMode, getDb, type ServerDb } from '@/lib/server/db';
 
 export const dynamic = 'force-dynamic';
+
+// Whether new Supabase accounts get the 3-day Premium trial (migration 0021). Cached per
+// function instance; the app only uses it to mention the trial on sign-up screens.
+let trialCache: { at: number; on: boolean } | null = null;
+async function trialOffered(db: ServerDb | null, backend: string): Promise<boolean> {
+  if (!db || backend !== 'supabase') return false;
+  if (trialCache && Date.now() - trialCache.at < 10 * 60_000) return trialCache.on;
+  const on = await db.rpc<string[]>('content_features', {}).then((f) => Array.isArray(f) && f.includes('trial')).catch(() => false);
+  trialCache = { at: Date.now(), on };
+  return on;
+}
 
 export const GET = route(async (req) => {
   const backend = backendMode();
   const db = await getDb();
   // The curriculum version rides along, so an app that already holds it
   // does not need a separate content request at all.
-  const base = { backend, payments: paymentMode(), contentVersion: await contentVersion(db).catch(() => null) };
+  const base = { backend, payments: paymentMode(), trial: await trialOffered(db, backend), contentVersion: await contentVersion(db).catch(() => null) };
   const userId = db ? await userIdFromRequest(req) : null;
   if (!db || !userId) return json({ ...base, user: null });
   const account = await db.rpc<{ profile: Record<string, unknown>; entitlement: Record<string, unknown> }>('get_account', { p_user: userId });

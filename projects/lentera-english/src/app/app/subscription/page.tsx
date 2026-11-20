@@ -55,6 +55,12 @@ export default function SubscriptionPage() {
           <div className="min-w-[12rem] flex-1"><p className="text-lg font-extrabold">Premium aktif gratis untuk admin</p><p className="text-sm text-muted">Tanpa batas waktu, selama akun ini berperan admin. Tidak tercatat sebagai pembayaran atau pelanggan.</p></div>
           <LinkButton href="/admin" variant="secondary" size="sm">Dashboard admin</LinkButton>
         </Card>
+      ) : premium && ent.plan === 'trial' ? (
+        <Card className="flex flex-wrap items-center gap-3 border-accent/60 bg-accent-soft/40">
+          <Crown className="text-accent" size={28} aria-hidden />
+          <div className="min-w-[12rem] flex-1"><p className="text-lg font-extrabold">Premium uji coba sampai {dateId(ent.expiresAt!)}</p><p className="text-sm text-muted">Sisa {daysLeft} hari, bonus untuk akun baru. Setelah itu akun kembali ke Free tanpa tagihan; progresmu tetap tersimpan. Membayar sekarang langsung memulai masa Premium berbayar (sisa hari uji coba tidak ditambahkan).</p></div>
+          <Badge tone="accent">Uji coba</Badge>
+        </Card>
       ) : premium ? (
         <Card className="flex flex-wrap items-center gap-3 border-accent/60 bg-accent-soft/40">
           <Crown className="text-accent" size={28} aria-hidden />
@@ -86,7 +92,7 @@ export default function SubscriptionPage() {
       ) : (
       <ParentGate>
       <Card className="space-y-4">
-        <h2 className="text-lg font-extrabold">{premium ? 'Perpanjang Premium' : 'Berlangganan Premium'}</h2>
+        <h2 className="text-lg font-extrabold">{premium && ent.plan !== 'trial' ? 'Perpanjang Premium' : 'Berlangganan Premium'}</h2>
         <fieldset>
           <legend className="mb-2 text-sm font-bold">1. Pilih paket</legend>
           <div className="grid gap-2 sm:grid-cols-2">
