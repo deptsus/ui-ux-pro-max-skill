@@ -55,7 +55,7 @@ function Welcome({ guest, firstLesson }: { guest: boolean; firstLesson?: string 
           <LinkButton href="/app/placement" size="lg" full>Ikuti tes penempatan<ArrowRight size={20} aria-hidden /></LinkButton>
           {firstLesson && <LinkButton href={`/app/lesson?id=${firstLesson}`} size="lg" variant="secondary" full>Lewati, mulai dari A1</LinkButton>}
         </div>
-        {guest && <p className="text-sm text-muted">Sudah punya akun? <Link href="/masuk?next=/app" className="inline-flex min-h-11 items-center font-bold text-brand underline">Masuk</Link></p>}
+        {guest && <p className="text-sm text-muted">Sudah punya akun? <Link href="/masuk?next=/app" className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 font-bold text-brand underline">Masuk</Link></p>}
       </Card>
     </section>
   );

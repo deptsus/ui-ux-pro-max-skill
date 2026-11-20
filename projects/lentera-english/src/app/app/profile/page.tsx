@@ -61,7 +61,8 @@ export default function ProfilePage() {
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-2xl font-extrabold">{learner.profile.name}</h2>
           <p className="text-sm text-muted">{session ? <span className="break-all">{session.email}</span> : 'Tamu · progres hanya di perangkat ini'} · bergabung {dateId(learner.createdAt)}</p>
-          <div className="mt-2 flex flex-wrap gap-2">{premium ? <Badge tone="accent"><Crown size={12} aria-hidden />{isAdminPlan(ent) ? 'Premium · Admin' : `Premium sampai ${dateId(ent.expiresAt!)}`}</Badge> : <Badge tone="muted">Paket Free</Badge>}{session && <Badge tone={sync === 'idle' ? 'ok' : sync === 'syncing' ? 'brand' : 'bad'}>{sync === 'idle' ? `Tersinkron${learner.outbox.length ? ` · ${learner.outbox.length} menunggu` : ''}` : sync === 'syncing' ? 'Menyinkronkan...' : sync === 'offline' ? 'Offline · disimpan di perangkat' : 'Sinkronisasi gagal'}</Badge>}</div>
+          {/* Plan and sync status on their own rows, so a changing status never reflows the page. */}
+          <div className="mt-2 flex flex-col items-start gap-1.5">{premium ? <Badge tone="accent"><Crown size={12} aria-hidden />{isAdminPlan(ent) ? 'Premium · Admin' : `Premium sampai ${dateId(ent.expiresAt!)}`}</Badge> : <Badge tone="muted">Paket Free</Badge>}{session && <Badge tone={sync === 'idle' ? 'ok' : sync === 'syncing' ? 'brand' : 'bad'}>{sync === 'idle' ? `Tersinkron${learner.outbox.length ? ` · ${learner.outbox.length} menunggu` : ''}` : sync === 'syncing' ? 'Menyinkronkan…' : sync === 'offline' ? 'Offline · disimpan di perangkat' : 'Sinkronisasi gagal'}</Badge>}</div>
         </div>
       </Card>
 
