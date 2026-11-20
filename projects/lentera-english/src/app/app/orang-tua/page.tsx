@@ -6,7 +6,7 @@ import { Award, BookOpen, CalendarCheck, ClipboardList, Flame, HeartHandshake, S
 import { dueText, KIND_LABEL, parentAction, parentData, type Child } from '@/lib/client/classes';
 import { useServerInfo, useSession } from '@/lib/client/session';
 import { Avatar } from '@/components/Avatar';
-import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
+import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx, dateId, inputClass, Loading } from '@/components/ui';
 
 function Stat({ icon: Icon, label, value, tone }: { icon: typeof Flame; label: string; value: string; tone?: 'bad' | 'ok' }) {
   return (
@@ -106,7 +106,7 @@ export default function ParentPage() {
           <Button type="submit" disabled={busy || code.length !== 8}>Hubungkan</Button>
         </form>
       </Card>
-      {error ? <Notice tone="bad">{error}</Notice> : !children ? <Card className="text-muted"><span role="status">Memuat...</span></Card>
+      {error ? <Notice tone="bad">{error}</Notice> : !children ? <Loading label="Memuat data anak…" lines={2} />
         : children.length === 0 ? <Card className="text-center text-muted">Belum ada akun anak yang terhubung.</Card>
         : children.map((c) => <ChildCard key={c.id} c={c} onUnlink={() => void act({ action: 'unlink', id: c.id })} />)}
       <p className="text-xs text-muted">Orang tua hanya melihat ringkasan progres, bukan jawaban latihan. Anak bisa melihat siapa yang terhubung dan memutuskannya di Profil.</p>

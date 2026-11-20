@@ -1,6 +1,7 @@
 'use client';
 // Renders any of the 14 exercise types and reports the learner's answer.
 import { useEffect, useMemo, useState } from 'react';
+import { Check, X } from 'lucide-react';
 import type { Exercise } from '@/lib/content/types';
 import { shuffle, type Answer, type Grade } from '@/lib/engine/grading';
 import { AudioButton } from './AudioButton';
@@ -8,7 +9,7 @@ import { ReadAloud } from './school/SchoolLevel';
 import { CastMember, type CastId } from './cast/Kid';
 import { PictureChoice, SceneChoice, SpellTiles, TimelineChoice } from './interactive/Interactive';
 import type { Mood } from './cast/Face';
-import { cx, inputClass } from './ui';
+import { cx, inputClass, merge } from './ui';
 
 interface Props {
   ex: Exercise;
@@ -111,15 +112,15 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
     <div className="space-y-5" data-ex={ex.id} data-type={ex.type}>
       <div className={cx(host && 'flex items-end gap-3')}>
         {host && <CastMember who={host.who} mood={host.mood} size={76} decorative className="shrink-0" />}
-        <div className={cx(host && 'relative min-w-0 flex-1 rounded-2xl border-[2.5px] border-outline bg-surface px-4 py-3 shadow-[0_3px_0_var(--outline)] before:absolute before:-left-[9px] before:bottom-4 before:h-4 before:w-4 before:rotate-45 before:border-b-[2.5px] before:border-l-[2.5px] before:border-outline before:bg-surface before:content-[\'\']')}>
-          <p className="font-display text-xs font-bold uppercase tracking-wider text-brand">{ex.type === 'fill' && ex.audioText ? 'Dikte' : TYPE_LABEL[ex.type]}</p>
+        <div className={cx(host && 'relative min-w-0 flex-1 rounded-2xl border border-line bg-surface px-4 py-3 shadow-e1 before:absolute before:-left-[7px] before:bottom-4 before:h-3 before:w-3 before:rotate-45 before:border-b before:border-l before:border-line before:bg-surface before:content-[\'\']')}>
+          <p className="text-xs font-bold text-brand-ink dark:text-brand">{ex.type === 'fill' && ex.audioText ? 'Dikte' : TYPE_LABEL[ex.type]}</p>
           <h2 className="mt-0.5 text-lg font-bold leading-snug sm:text-xl">{ex.prompt}</h2>
           <ReadAloud text={ex.prompt} className="mt-2" />
         </div>
       </div>
 
       {(ex.type === 'listen' || ex.type === 'fill' || ex.type === 'picture' || ex.type === 'spell') && ex.audioText && (
-        <div className="flex flex-col items-start gap-2 rounded-2xl bg-surface-2 p-4">
+        <div className="flex flex-col items-start gap-2 rounded-xl bg-surface-2 p-4 dark:bg-line/60">
           <AudioButton text={ex.audioText} audioKey={ex.audioKey} size="lg" showSource />
           {locked && <p className="en text-sm text-muted">Transkrip: {ex.audioText}</p>}
         </div>
@@ -128,7 +129,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
 
       {ex.text && ex.type === 'fill' && <Blanked text={ex.text} />}
       {ex.text && ex.options && (ex.text.includes('___') ? <Blanked text={ex.text} /> : <p className={cx('text-xl font-bold leading-relaxed', ex.type !== 'tf' && 'en', (ex.type === 'picture' || ex.type === 'timeline') && 'text-center text-2xl')}>{ex.text}</p>)}
-      {ex.text && ex.type === 'spell' && <p className="text-center font-display text-2xl font-bold">{ex.text}</p>}
+      {ex.text && ex.type === 'spell' && <p className="text-center text-2xl font-extrabold">{ex.text}</p>}
 
       {/* Rilis 15 interactive types */}
       {ex.type === 'picture' && ex.options && <PictureChoice ex={ex} order={optionOrder} choice={choice} locked={locked} onPick={(i) => { setChoice(i); onChange({ choice: i }); }} />}
@@ -138,13 +139,13 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
       {ex.text && ex.type === 'construct' && (
         <div className="flex flex-wrap gap-2" aria-label="Kata kunci">
           {ex.text.split(' / ').map((w, i) => (
-            <span key={i} className="en rounded-xl bg-surface-2 px-3 py-1.5 font-bold">{w}</span>
+            <span key={i} className="en rounded-lg bg-surface-2 px-3 py-1.5 font-bold dark:bg-line/60">{w}</span>
           ))}
         </div>
       )}
-      {ex.text && ex.type === 'translate' && <p className="rounded-2xl bg-surface-2 p-4 text-xl font-bold">{ex.text}</p>}
-      {ex.text && ex.type === 'fix' && <p className="en rounded-2xl border-2 border-dashed border-bad bg-bad-soft [--edge:var(--bad)] p-4 text-xl font-bold">{ex.text}</p>}
-      {ex.text && (ex.type === 'arrange') && <p className="rounded-2xl bg-surface-2 p-4 text-lg font-semibold">{ex.text}</p>}
+      {ex.text && ex.type === 'translate' && <p className="rounded-xl bg-surface-2 p-4 text-xl font-bold dark:bg-line/60">{ex.text}</p>}
+      {ex.text && ex.type === 'fix' && <p className="en rounded-xl border-2 border-dashed border-bad/60 bg-bad-soft p-4 text-xl font-bold">{ex.text}</p>}
+      {ex.text && (ex.type === 'arrange') && <p className="rounded-xl bg-surface-2 p-4 text-lg font-semibold dark:bg-line/60">{ex.text}</p>}
 
       {ex.options && !['picture', 'scene', 'timeline'].includes(ex.type) && (
         <div className={cx('grid gap-3', ex.type === 'tf' ? 'grid-cols-2' : 'grid-cols-1')} role="radiogroup" aria-label="Pilihan jawaban">
@@ -156,9 +157,13 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
             return (
               <button key={i} type="button" role="radio" aria-checked={isChosen} disabled={locked}
                 onClick={() => { setChoice(i); onChange({ choice: i }); }}
-                className={cx('rounded-2xl tile min-h-14 px-4 py-3 text-left font-display text-lg font-bold', ex.type !== 'tf' && 'en',
+                className={cx('flex min-h-14 items-center gap-3 rounded-xl tile px-4 py-3 text-left text-lg font-bold', ex.type !== 'tf' && 'en',
                   showRight ? 'border-ok bg-ok-soft [--edge:var(--ok)]' : showWrong ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : isChosen ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface hover:bg-surface-2')}>
-                {o.text}
+                {/* The state is never colour alone: a radio dot, then a tick or a cross once checked. */}
+                <span aria-hidden className={cx('grid h-6 w-6 shrink-0 place-items-center rounded-full border-2', showRight ? 'border-ok bg-ok text-on-brand' : showWrong ? 'border-bad bg-bad text-on-brand' : isChosen ? 'border-brand' : 'border-line-strong')}>
+                  {showRight ? <Check size={14} strokeWidth={3} /> : showWrong ? <X size={14} strokeWidth={3} /> : isChosen ? <span className="h-2.5 w-2.5 rounded-full bg-brand" /> : null}
+                </span>
+                <span className="min-w-0 flex-1">{o.text}</span>
               </button>
             );
           })}
@@ -170,22 +175,22 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
           aria-label="Jawabanmu" placeholder={ex.type === 'fill' ? 'Ketik kata yang hilang' : 'Ketik jawabanmu dalam bahasa Inggris'}
           onChange={(e) => { setText(e.target.value); onChange(e.target.value.trim() ? { text: e.target.value } : null); }}
           onKeyDown={(e) => { if (e.key === 'Enter' && text.trim()) onSubmit?.(); }}
-          className={cx(inputClass, 'en text-lg font-semibold', locked && (grade!.correct ? 'border-ok bg-ok-soft [--edge:var(--ok)]' : 'border-bad bg-bad-soft [--edge:var(--bad)]'))} />
+          className={merge(inputClass, cx('en text-lg font-semibold', locked && (grade!.correct ? 'border-ok bg-ok-soft' : 'border-bad bg-bad-soft')))} />
       )}
 
       {ex.type === 'arrange' && (
         <div className="space-y-4">
-          <div className="en flex min-h-16 flex-wrap items-start gap-2 rounded-2xl border-2 border-dashed border-line p-3" aria-label="Kalimatmu">
+          <div className="en flex min-h-16 flex-wrap items-start gap-2 rounded-xl border-2 border-dashed border-line-strong/60 p-3" aria-label="Kalimatmu">
             {picked.map((ti, pos) => (
               <button key={pos} type="button" disabled={locked} onClick={() => { const next = picked.filter((_, p) => p !== pos); setPicked(next); onChange(next.length ? { text: next.map((t) => tiles[t]).join(' ') } : null); }}
-                className="rounded-xl tile border-brand bg-brand-soft [--edge:var(--brand)] px-3 py-1.5 font-bold">{tiles[ti]}</button>
+                className="min-h-11 rounded-xl tile border-brand bg-brand-soft [--edge:var(--brand)] px-3 py-1.5 font-bold">{tiles[ti]}</button>
             ))}
             {!picked.length && <span className="px-1 py-1.5 text-muted">Ketuk kata di bawah untuk menyusun kalimat.</span>}
           </div>
           <div className="en flex flex-wrap gap-2">
             {tiles.map((t, ti) => (
               <button key={ti} type="button" disabled={locked || picked.includes(ti)} onClick={() => { const next = [...picked, ti]; setPicked(next); onChange({ text: next.map((x) => tiles[x]).join(' ') }); }}
-                className={cx('rounded-xl tile border-line bg-surface px-3 py-1.5 font-bold transition', picked.includes(ti) && 'invisible')}>{t}</button>
+                className={cx('min-h-11 rounded-xl tile border-line bg-surface px-3 py-1.5 font-bold transition', picked.includes(ti) && 'invisible')}>{t}</button>
             ))}
           </div>
         </div>
@@ -200,7 +205,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
               <li key={t}>
                 <button type="button" disabled={locked}
                   onClick={() => { const next = pos >= 0 ? picked.filter((p) => p !== si) : [...picked, si]; setPicked(next); onChange(next.length === tiles.length ? { order: next } : null); }}
-                  className={cx('en flex w-full items-start gap-3 rounded-2xl tile px-4 py-3 text-left font-semibold transition', pos >= 0 ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>
+                  className={cx('en flex w-full items-start gap-3 rounded-xl tile px-4 py-3 text-left font-semibold transition', pos >= 0 ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>
                   <span className={cx('grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm font-extrabold', pos >= 0 ? 'bg-brand text-on-brand' : 'bg-surface-2 text-muted')}>{pos >= 0 ? pos + 1 : '·'}</span>
                   {ex.sentences![si]}
                 </button>
@@ -217,7 +222,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
             const isWrongWord = w.replace(/[.,!?;:"]/g, '') === ex.wrongWord;
             return (
               <button key={i} type="button" disabled={locked} onClick={() => { setWordIndex(i); onChange({ wordIndex: i }); }}
-                className={cx('rounded-xl tile px-3 py-2 transition', locked && isWrongWord ? 'border-ok bg-ok-soft [--edge:var(--ok)]' : locked && wordIndex === i ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : wordIndex === i ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>{w}</button>
+                className={cx('min-h-11 rounded-xl tile px-3 py-2 transition', locked && isWrongWord ? 'border-ok bg-ok-soft [--edge:var(--ok)]' : locked && wordIndex === i ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : wordIndex === i ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>{w}</button>
             );
           })}
         </div>
@@ -228,7 +233,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
           <div className="space-y-2">
             {ex.pairs!.map(([l], i) => (
               <button key={i} type="button" disabled={locked || matchState.doneL.includes(i)} onClick={() => setMatchState((m) => ({ ...m, left: i, flash: null }))}
-                className={cx('en w-full rounded-2xl tile px-3 py-3 text-left font-bold transition', matchState.doneL.includes(i) ? 'border-ok bg-ok-soft [--edge:var(--ok)] opacity-70' : matchState.left === i ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>{l}</button>
+                className={cx('en min-h-12 w-full rounded-xl tile px-3 py-3 text-left font-bold transition', matchState.doneL.includes(i) ? 'border-ok bg-ok-soft [--edge:var(--ok)] opacity-70' : matchState.left === i ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>{l}</button>
             ))}
           </div>
           <div className="space-y-2">
@@ -245,7 +250,7 @@ export function ExerciseCard({ ex, seed, grade, onChange, onSubmit, initial, hos
                     setMatchState({ ...m, left: null, mistakes: m.mistakes + 1, flash: ri });
                   }
                 }}
-                className={cx('w-full rounded-2xl tile px-3 py-3 text-left font-bold transition', matchState.doneR.includes(ri) ? 'border-ok bg-ok-soft [--edge:var(--ok)] opacity-70' : matchState.flash === ri ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : 'border-line bg-surface')}>{ex.pairs![ri][1]}</button>
+                className={cx('min-h-12 w-full rounded-xl tile px-3 py-3 text-left font-bold transition', matchState.doneR.includes(ri) ? 'border-ok bg-ok-soft [--edge:var(--ok)] opacity-70' : matchState.flash === ri ? 'border-bad bg-bad-soft [--edge:var(--bad)]' : 'border-line bg-surface')}>{ex.pairs![ri][1]}</button>
             ))}
           </div>
           <p className="col-span-2 text-sm text-muted">Ketuk satu kata di kiri, lalu pasangannya di kanan.{matchState.mistakes > 0 && ` Salah pasang: ${matchState.mistakes}.`}</p>

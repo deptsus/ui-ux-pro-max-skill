@@ -7,7 +7,7 @@ import { CheckCircle2, Clock, School, Users } from 'lucide-react';
 import { assignmentHref, classAction, dueText, KIND_LABEL, myClasses, type Assignment, type MyClass } from '@/lib/client/classes';
 import { useServerInfo, useSession } from '@/lib/client/session';
 import { rememberInClass } from '@/components/ClassTasksCard';
-import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx, inputClass } from '@/components/ui';
+import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx, inputClass, Loading } from '@/components/ui';
 
 const CHARS = /[^A-HJ-NP-Z2-9]/g;
 
@@ -79,7 +79,7 @@ function Classes() {
         <p className="text-xs text-muted">Dengan bergabung, guru kelas itu bisa melihat nama, avatar, dan progres belajarmu (XP, pelajaran, nilai tugas). Kamu bisa keluar kapan saja.</p>
       </Card>
 
-      {error ? <Notice tone="bad">{error}</Notice> : !classes ? <Card className="text-muted"><span role="status">Memuat kelas...</span></Card> : classes.length === 0 ? (
+      {error ? <Notice tone="bad">{error}</Notice> : !classes ? <Loading label="Memuat kelas…" lines={2} /> : classes.length === 0 ? (
         <Card className="text-center text-muted">Belum ada kelas. Minta kode kelas ke gurumu.</Card>
       ) : (
         <>

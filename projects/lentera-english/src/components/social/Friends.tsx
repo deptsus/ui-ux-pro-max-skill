@@ -8,7 +8,7 @@ import { Check, Copy, Flame, Share2, Swords, Trophy, UserPlus, X } from 'lucide-
 import { getSocial, inviteUrl, socialAction, timeLeft, type Challenge, type Social } from '@/lib/client/habits';
 import { syncIfPending } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
-import { Button, Card, Empty, Notice, Progress, cx, inputClass } from '@/components/ui';
+import { Button, Card, Empty, Notice, Progress, cx, inputClass, Loading } from '@/components/ui';
 
 const CODE_CHARS = /[^A-HJ-NP-Z2-9]/g;
 
@@ -97,7 +97,7 @@ export function FriendsView({ initialCode = '' }: { initialCode?: string }) {
   }
 
   if (error) return <Empty title="Daftar teman belum bisa dimuat" action={<Button onClick={load}>Coba lagi</Button>}>{error}</Empty>;
-  if (!social) return <Card className="text-muted"><span role="status">Memuat teman...</span></Card>;
+  if (!social) return <Loading label="Memuat teman…" lines={3} />;
 
   const link = typeof window === 'undefined' ? '' : inviteUrl(window.location.origin, social.code);
   const shareText = `Ayo belajar bahasa Inggris bareng di Lentera English! Tambahkan aku sebagai teman dengan kode ${social.code}: ${link}`;

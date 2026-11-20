@@ -257,10 +257,10 @@ function ExamRunner({ exam, draft, storageKey, onDone, onStale }: { exam: ExamDe
       {sections.map((s, i) => (
         <section key={s.id} hidden={i !== current} aria-label={s.title} className="space-y-4">
           <h2 className="text-xl font-extrabold">Bagian {i + 1}: {s.title}</h2>
-          {s.kind === 'reading' && s.questions[0]?.context && <Card><p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand">Teks bacaan</p><div className="en whitespace-pre-line leading-relaxed">{s.questions[0].context}</div></Card>}
+          {s.kind === 'reading' && s.questions[0]?.context && <Card><p className="mb-2 text-xs font-bold text-brand-ink dark:text-brand">Teks bacaan</p><div className="en whitespace-pre-line leading-relaxed">{s.questions[0].context}</div></Card>}
           {s.kind === 'listening' && s.questions[0]?.audioText && (
             <Card className="space-y-2">
-              <p className="text-xs font-bold uppercase tracking-wide text-brand">Rekaman</p>
+              <p className="text-xs font-bold text-brand-ink dark:text-brand">Rekaman</p>
               <AudioButton text={s.questions[0].audioText} size="lg" label="Putar rekaman" showSource />
               <p className="text-sm text-muted">Dengarkan dulu sampai selesai, lalu jawab keempat pertanyaan. Kamu boleh memutarnya lagi.</p>
             </Card>
@@ -341,7 +341,7 @@ export function ExamResult({ exam, res, onBack }: { exam: ExamDef; res: Submitte
               <Progress value={s.score} tone={s.passed ? 'ok' : 'accent'} className="h-2" label={s.title} />
               {s.checklist && (
                 <ul className="mt-2 space-y-1 text-sm">
-                  {s.checklist.map((c, i) => <li key={i} className={c.ok ? 'text-ok' : 'text-bad'}>{c.ok ? '✓' : '✗'} {c.label}</li>)}
+                  {s.checklist.map((c, i) => <li key={i} className={cx('flex items-start gap-1.5', c.ok ? 'text-ok' : 'text-bad')}>{c.ok ? <Check size={16} className="mt-0.5 shrink-0" aria-label="Terpenuhi" /> : <X size={16} className="mt-0.5 shrink-0" aria-label="Belum terpenuhi" />}<span>{c.label}</span></li>)}
                 </ul>
               )}
             </li>
@@ -382,18 +382,18 @@ export function ExamResult({ exam, res, onBack }: { exam: ExamDef; res: Submitte
               <section key={s.id} className="mt-4">
                 <h3 className="font-bold">{s.title}</h3>
                 <p className="mt-1 text-sm text-muted">Tulisanmu:</p>
-                <p className="en mt-1 whitespace-pre-line rounded-2xl bg-surface-2 p-3 text-sm">{res.writing?.trim() || '(kosong)'}</p>
+                <p className="en mt-1 whitespace-pre-line rounded-xl bg-surface-2 p-3 dark:bg-line/60 text-sm">{res.writing?.trim() || '(kosong)'}</p>
               </section>
             );
           }
           return (
             <section key={s.id} className="mt-4">
               <h3 className="font-bold">{s.title} · {s.correct}/{s.total}</h3>
-              {s.kind === 'reading' && items[0]?.ex.context && <details className="mt-1 text-sm"><summary className="cursor-pointer font-bold text-brand">Teks bacaan</summary><p className="en mt-1 rounded-2xl bg-surface-2 p-3">{items[0].ex.context}</p></details>}
-              {s.kind === 'listening' && items[0]?.ex.audioText && <details className="mt-1 text-sm"><summary className="cursor-pointer font-bold text-brand">Transkrip rekaman</summary><p className="en mt-1 rounded-2xl bg-surface-2 p-3">{items[0].ex.audioText}</p></details>}
-              <ol className="mt-2 space-y-3">
+              {s.kind === 'reading' && items[0]?.ex.context && <details className="mt-1 text-sm"><summary className="cursor-pointer font-bold text-brand">Teks bacaan</summary><p className="en mt-1 rounded-xl bg-surface-2 p-3 dark:bg-line/60">{items[0].ex.context}</p></details>}
+              {s.kind === 'listening' && items[0]?.ex.audioText && <details className="mt-1 text-sm"><summary className="cursor-pointer font-bold text-brand">Transkrip rekaman</summary><p className="en mt-1 rounded-xl bg-surface-2 p-3 dark:bg-line/60">{items[0].ex.audioText}</p></details>}
+              <ol className="mt-2 divide-y divide-line">
                 {items.map(({ ex, grade }, i) => (
-                  <li key={ex.id} className={cx('rounded-2xl border-2 p-3 text-sm', grade.correct ? 'border-ok/40' : 'border-bad/50')}>
+                  <li key={ex.id} className={cx('border-l-4 py-3 pl-3 text-sm', grade.correct ? 'border-l-ok' : 'border-l-bad')}>
                     <p className="font-bold">{i + 1}. {ex.prompt}</p>
                     {ex.text && <p className="en mt-1 text-muted">{ex.text}</p>}
                     <p className="mt-2"><span className="font-bold">Jawabanmu: </span><span className={cx('en font-bold', grade.correct ? 'text-ok' : 'text-bad')}>{grade.given || '(kosong)'}</span></p>

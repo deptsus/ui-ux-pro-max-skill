@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Belajar bahasa Inggris dari nol sampai mahir dengan kurikulum CEFR, latihan interaktif, dan ulangan terjadwal. Semua materi diperiksa dan dikembangkan.',
   manifest: '/manifest.webmanifest',
 };
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: [{ media: '(prefers-color-scheme: light)', color: '#f6f5fb' }, { media: '(prefers-color-scheme: dark)', color: '#121022' }] };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: [{ media: '(prefers-color-scheme: light)', color: '#f7f7fa' }, { media: '(prefers-color-scheme: dark)', color: '#0e0d16' }] };
 
 // Applies the saved theme before first paint to avoid a flash.
 const themeScript = `try{var t=localStorage.getItem('lentera.theme')||'system';var d=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);var f=localStorage.getItem('lentera.fontScale');if(f==='large')document.documentElement.classList.add('fs-lg');if(f==='xlarge')document.documentElement.classList.add('fs-xl');if(localStorage.getItem('lentera.sdMode')==='1'){document.documentElement.classList.add('sd-mode');if(!f)document.documentElement.classList.add('fs-lg')}}catch(e){}`;

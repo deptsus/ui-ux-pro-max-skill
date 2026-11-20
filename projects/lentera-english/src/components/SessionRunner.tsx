@@ -2,7 +2,7 @@
 // Runs a practice session: one exercise at a time, feedback, hearts, timers.
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BookOpen, Check, Clock, Heart, Lightbulb, X, Zap } from 'lucide-react';
+import { BookOpen, Check, ChevronDown, Clock, Heart, Lightbulb, X, Zap } from 'lucide-react';
 import type { Exercise } from '@/lib/content/types';
 import { grade as gradeAnswer, type Answer, type Grade } from '@/lib/engine/grading';
 import { currentHearts } from '@/lib/engine/gamification';
@@ -152,8 +152,8 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
   const hostMood: Mood = !result ? 'happy' : result.correct ? CHEERS[items.length % CHEERS.length] : COMFORT[items.length % COMFORT.length];
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-bg">
-      <header className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 pb-2 pt-4">
+    <div className="fixed inset-0 z-40 flex flex-col bg-bg pt-[env(safe-area-inset-top)]">
+      <header className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 pb-2 pt-3">
         <Link href={exitHref} aria-label="Keluar dari sesi" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-muted hover:bg-surface-2"><X size={22} aria-hidden /></Link>
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-muted">{title}</p>
@@ -174,7 +174,7 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
         {hints && current.hint && !result && (
           <div className="mt-5">
             {hintShown ? (
-              <div className="animate-pop rounded-2xl bg-accent-soft px-4 py-3 text-sm"><span className="font-bold text-accent-strong">Petunjuk: </span>{current.hint}</div>
+              <div className="animate-pop rounded-xl bg-accent-soft px-4 py-3 text-sm"><span className="font-bold text-accent-strong">Petunjuk: </span>{current.hint}</div>
             ) : (
               <Button variant="ghost" size="sm" onClick={() => setHintShown(true)}><Lightbulb size={16} aria-hidden />Lihat petunjuk</Button>
             )}
@@ -182,31 +182,42 @@ export function SessionRunner({ title, ctx, exercises, next, total, feedback, hi
         )}
       </section>
 
-      <footer className={cx('border-t-2', result ? (result.correct ? 'border-ok bg-ok-soft' : 'border-bad bg-bad-soft') : 'border-line bg-surface')}>
+      <footer className={cx('border-t bg-surface pb-[env(safe-area-inset-bottom)] shadow-e2', result ? (result.correct ? 'border-t-4 border-ok' : 'border-t-4 border-bad') : 'border-line')}>
         <div className="mx-auto w-full max-w-2xl px-4 py-4">
           {result ? (
             <div className="animate-rise space-y-3">
-              <div className="flex items-start gap-3">
-                <span className="relative shrink-0">
-                  <Mascot mood={result.correct ? 'cheer' : 'encourage'} size={56} decorative className="-my-2" />
-                  <span className={cx('absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full text-on-brand ring-2 ring-surface', result.correct ? 'bg-ok' : 'bg-bad')}>{result.correct ? <Check size={14} aria-hidden /> : <X size={14} aria-hidden />}</span>
-                </span>
-                <div className="min-w-0 space-y-1.5 text-sm">
-                  <p className={cx('font-display text-xl font-extrabold', result.correct ? 'text-ok' : 'text-bad')}>{result.correct ? 'Benar!' : 'Belum tepat'}</p>
-                  {combo >= 3 && <p className="combo-pop inline-flex items-center gap-1 rounded-full border-2 border-outline bg-accent px-2.5 py-0.5 font-display text-sm font-bold text-[#1e1b3a] shadow-[0_2px_0_var(--outline)]"><Zap size={14} fill="currentColor" aria-hidden />Kombo ×{combo}!</p>}
-                  {!result.correct && <p><span className="font-bold">Kenapa salah: </span>{result.feedback}</p>}
-                  {!result.correct && <p><span className="font-bold">Jawaban benar: </span><span className="en font-bold">{result.correctAnswer}</span></p>}
-                  <p><span className="font-bold">Penjelasan: </span>{result.explanation}</p>
-                  {tag && <p className="rounded-xl bg-surface/70 px-3 py-2"><span className="font-bold">Pola kesalahan: {tag.title}. </span>{tag.tip}</p>}
-                  {!result.correct && topic?.lessonId && (
-                    <Link href={`/app/grammar?topic=${encodeURIComponent(topic.id)}`} target="_blank" className="inline-flex items-center gap-1 font-bold text-brand underline"><BookOpen size={14} aria-hidden />Buka materi: {topic.title}</Link>
-                  )}
+              <div className="max-h-[45dvh] space-y-3 overflow-y-auto">
+                <div className="flex items-center gap-3">
+                  <span className="relative shrink-0">
+                    <Mascot mood={result.correct ? 'cheer' : 'encourage'} size={48} decorative className="-my-1" />
+                    <span className={cx('absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full text-on-brand ring-2 ring-surface', result.correct ? 'bg-ok' : 'bg-bad')}>{result.correct ? <Check size={14} aria-hidden /> : <X size={14} aria-hidden />}</span>
+                  </span>
+                  <p className={cx('text-xl font-extrabold', result.correct ? 'text-ok' : 'text-bad')}>{result.correct ? 'Benar!' : 'Belum tepat'}</p>
+                  {combo >= 3 && <p className="combo-pop ml-auto inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-sm font-extrabold text-on-accent"><Zap size={14} fill="currentColor" aria-hidden />Kombo ×{combo}!</p>}
                 </div>
+                {!result.correct && (
+                  <div className="rounded-xl bg-ok-soft px-3 py-2.5 text-sm">
+                    <p><span className="font-bold">Jawaban benar: </span><span className="en text-base font-extrabold">{result.correctAnswer}</span></p>
+                    <p className="mt-1"><span className="font-bold">Kenapa salah: </span>{result.feedback}</p>
+                  </div>
+                )}
+                <details className="group text-sm" open={!result.correct && !!tag}>
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 font-bold text-brand-ink dark:text-brand [&::-webkit-details-marker]:hidden">
+                    {result.correct ? 'Lihat penjelasan' : 'Penjelasan lengkap'}<ChevronDown size={16} className="transition-transform group-open:rotate-180" aria-hidden />
+                  </summary>
+                  <div className="space-y-2 pb-1">
+                    <p><span className="font-bold">Penjelasan: </span>{result.explanation}</p>
+                    {tag && <p className="rounded-xl bg-surface-2 px-3 py-2 dark:bg-line/60"><span className="font-bold">Pola kesalahan: {tag.title}. </span>{tag.tip}</p>}
+                    {!result.correct && topic?.lessonId && (
+                      <Link href={`/app/grammar?topic=${encodeURIComponent(topic.id)}`} target="_blank" className="inline-flex min-h-11 items-center gap-1 font-bold text-brand underline"><BookOpen size={14} aria-hidden />Buka materi: {topic.title}</Link>
+                    )}
+                  </div>
+                </details>
               </div>
               {outOfHearts ? (
-                <Button full variant="danger" onClick={() => finish(items, true)}>Nyawa habis. Lihat hasil</Button>
+                <Button full size="lg" variant="danger" onClick={() => finish(items, true)}>Nyawa habis. Lihat hasil</Button>
               ) : (
-                <Button full variant={result.correct ? 'success' : 'danger'} onClick={() => advance(items)} autoFocus>Lanjut</Button>
+                <Button full size="lg" variant={result.correct ? 'success' : 'primary'} onClick={() => advance(items)} autoFocus>Lanjut</Button>
               )}
             </div>
           ) : (
@@ -258,10 +269,10 @@ export function SessionSummary({ result, title, passScore, children, onRetry, do
     <div className="mx-auto max-w-2xl space-y-5 pb-10">
       <Card className="relative flex flex-col items-center gap-3 overflow-hidden text-center">
         {passed && <Confetti />}
-        <Mascot mood={result.score >= 90 ? 'dance' : passed ? 'cheer' : 'encourage'} size={104} />
-        <h1 className="text-3xl font-extrabold">{title}</h1>
+        <Mascot mood={result.score >= 90 ? 'dance' : passed ? 'cheer' : 'encourage'} size={96} />
+        <h1 className="text-2xl font-extrabold">{title}</h1>
         <Ring value={shown} tone={passed ? 'ok' : 'bad'} size={128} stroke={12}>
-          <span className="font-display text-4xl font-extrabold" aria-hidden>{shown}%</span>
+          <span className="font-display text-3xl font-extrabold" aria-hidden>{shown}%</span>
           <span className="sr-only">{result.score}%</span>
         </Ring>
         <p className="text-muted">{result.correct} dari {result.total} benar{passScore !== undefined && ` · batas lulus ${passScore}%`}</p>
@@ -282,7 +293,7 @@ export function SessionSummary({ result, title, passScore, children, onRetry, do
               const t = ix.tagById.get(id);
               if (!t) return null;
               return (
-                <li key={id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-surface-2 p-3">
+                <li key={id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-2 p-3 dark:bg-line/60">
                   <div className="min-w-0 flex-1"><p className="font-bold">{t.title} <span className="text-muted">({n}×)</span></p><p className="text-sm text-muted">{t.tip}</p></div>
                   <LinkButton href={`/app/practice?mode=drill&tag=${encodeURIComponent(id)}`} size="sm" variant="accent">Latihan perbaikan</LinkButton>
                 </li>
@@ -294,10 +305,10 @@ export function SessionSummary({ result, title, passScore, children, onRetry, do
 
       <Card>
         <h2 className="font-extrabold">Pembahasan</h2>
-        <ol className="mt-3 space-y-3">
+        <ol className="mt-2 divide-y divide-line">
           {result.items.map((it, i) => (
-            <li key={i} className={cx('rounded-2xl border-2 p-3 text-sm', it.grade.correct ? 'border-ok/40' : 'border-bad/50')}>
-              <p className="font-bold">{i + 1}. {it.ex.prompt}</p>
+            <li key={i} className={cx('border-l-4 py-3 pl-3 text-sm', it.grade.correct ? 'border-l-ok' : 'border-l-bad')}>
+              <p className="font-bold">{i + 1}. {it.ex.prompt} <span className="sr-only">{it.grade.correct ? '(benar)' : '(belum tepat)'}</span></p>
               {it.ex.text && <p className="en mt-1 text-muted">{it.ex.text}</p>}
               <p className="mt-2"><span className="font-bold">Jawabanmu: </span><span className={cx('en font-bold', it.grade.correct ? 'text-ok' : 'text-bad')}>{it.grade.given || '(kosong)'}</span></p>
               {!it.grade.correct && <p><span className="font-bold">Jawaban benar: </span><span className="en font-bold">{it.grade.correctAnswer}</span></p>}

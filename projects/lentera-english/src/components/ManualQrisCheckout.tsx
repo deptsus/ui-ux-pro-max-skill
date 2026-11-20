@@ -72,7 +72,7 @@ export function ManualQrisCheckout({ tx, premiumUntil, reload }: { tx: ManualTx;
   const qrCard = (
     <div className="grid place-items-center gap-2 rounded-2xl bg-white p-4 text-center">
       <p className="text-sm font-bold text-[#5b5878]">{info?.merchantName ?? 'Lentera English'}</p>
-      <p className="text-3xl font-extrabold text-[#1e1b3a]">{rupiah(tx.amount_idr)}</p>
+      <p className="text-3xl font-extrabold text-on-accent">{rupiah(tx.amount_idr)}</p>
       {qr ? <img src={qr} alt={`Kode QRIS pembayaran ${tx.plan_name}, ${rupiah(tx.amount_idr)}`} className="h-64 w-64" /> : <div className="grid h-64 w-64 place-items-center text-sm text-[#5b5878]">Menyiapkan kode QR...</div>}
       {info?.nmid && <p className="text-xs text-[#5b5878]">NMID: {info.nmid}</p>}
     </div>
@@ -82,7 +82,7 @@ export function ManualQrisCheckout({ tx, premiumUntil, reload }: { tx: ManualTx;
     return (
       <Card className="space-y-4">
         <div className="flex flex-col items-center gap-2 text-center"><Mascot mood="cheer" size={88} /><CheckCircle2 size={32} className="text-ok" aria-hidden /><h2 className="text-xl font-extrabold">Pembayaran dikonfirmasi</h2><p className="text-muted">{premiumUntil ? `Premium aktif sampai ${dateId(premiumUntil)}.` : 'Premium sedang diaktifkan.'}</p></div>
-        <div className="rounded-2xl border border-line p-4"><p className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Bukti pembayaran</p>{summary}</div>
+        <div className="rounded-2xl border border-line p-4"><p className="mb-3 text-sm font-bold text-muted">Bukti pembayaran</p>{summary}</div>
         <p className="text-xs text-muted">Tidak ada perpanjangan otomatis. Kamu bisa memperpanjang sendiri dari halaman paket sebelum masa aktif berakhir.</p>
         <div className="flex flex-col gap-2 sm:flex-row"><Button variant="secondary" full onClick={() => printPage(document.title)}>Cetak bukti</Button><LinkButton href="/app/path" full>Lanjut belajar</LinkButton></div>
       </Card>
@@ -123,7 +123,7 @@ export function ManualQrisCheckout({ tx, premiumUntil, reload }: { tx: ManualTx;
         </div>
         {expired && <Notice tone="accent" title="Pembayaran belum dilaporkan dalam 24 jam">Bila kamu sudah membayar, laporkan sekarang lewat formulir di bawah. Bila belum, buat pembayaran baru dari halaman paket.</Notice>}
         {qrCard}
-        {qr && <a href={qr} download={`qris-lentera-${tx.plan_id}.png`} className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border-2 border-b-4 border-line bg-surface px-5 py-2.5 font-bold text-ink hover:bg-surface-2"><Download size={18} aria-hidden />Simpan gambar QR</a>}
+        {qr && <a href={qr} download={`qris-lentera-${tx.plan_id}.png`} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line-strong bg-surface px-5 py-2.5 font-bold text-ink hover:bg-surface-2"><Download size={18} aria-hidden />Simpan gambar QR</a>}
         {summary}
       </Card>
       <Card>

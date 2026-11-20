@@ -10,7 +10,7 @@ import { syncIfPending, useLearner } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
 import { FriendsView } from '@/components/social/Friends';
 import { LeagueView } from '@/components/social/League';
-import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId } from '@/components/ui';
+import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId, Loading } from '@/components/ui';
 import { useSdMode } from '@/components/school/SchoolLevel';
 
 interface Board { week_start: string; top: { rank: number; name: string; avatar: number; xp: number; me: boolean }[]; me: { rank: number; xp: number } | null }
@@ -34,7 +34,7 @@ function AllBoard() {
   useEffect(() => { void load(); }, []);
 
   if (error) return <Empty title="Papan peringkat belum bisa dimuat" action={<Button onClick={load}>Coba lagi</Button>}>{error}</Empty>;
-  if (!board) return <Card className="text-muted"><span role="status">Memuat...</span></Card>;
+  if (!board) return <Loading label="Memuat papan peringkat…" lines={5} />;
   if (board.top.length === 0) return <Empty title="Belum ada yang mengumpulkan XP minggu ini" action={<LinkButton href="/app/path">Jadilah yang pertama</LinkButton>}>Minggu dimulai {dateId(board.week_start)}.</Empty>;
   return (
     <>
@@ -47,7 +47,7 @@ function AllBoard() {
         <ol aria-label="30 teratas minggu ini">
           {board.top.map((r) => (
             <li key={r.rank + r.name} className={cx('flex items-center gap-3 border-b border-line px-4 py-3 last:border-0', r.me && 'bg-brand-soft')}>
-              <span className={cx('grid h-8 w-8 place-items-center rounded-full text-sm font-extrabold', r.rank === 1 ? 'bg-accent text-[#1e1b3a]' : 'bg-surface-2')}>{r.rank === 1 ? <Crown size={16} aria-label="Peringkat 1" /> : r.rank}</span>
+              <span className={cx('grid h-8 w-8 place-items-center rounded-full text-sm font-extrabold', r.rank === 1 ? 'bg-accent text-on-accent' : 'bg-surface-2')}>{r.rank === 1 ? <Crown size={16} aria-label="Peringkat 1" /> : r.rank}</span>
               <Avatar index={r.avatar} size={36} decorative className="shrink-0" />
               <span className="min-w-0 flex-1 truncate font-bold">{r.name}{r.me && <span className="ml-2 text-xs font-bold text-brand">kamu</span>}</span>
               <span className="font-extrabold">{r.xp} XP</span>

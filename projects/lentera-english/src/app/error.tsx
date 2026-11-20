@@ -14,8 +14,8 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
       <h1 className="text-2xl font-extrabold">Ada yang tidak beres di halaman ini</h1>
       <p className="text-muted">Masalahnya sudah dilaporkan otomatis. Progres belajarmu tetap tersimpan di perangkat.</p>
       <div className="flex flex-wrap justify-center gap-2">
-        <button type="button" onClick={reset} className="min-h-11 rounded-2xl border-2 border-b-4 border-brand-strong bg-brand px-5 font-bold text-on-brand">Coba lagi</button>
-        <a href="/app" className="inline-flex min-h-11 items-center rounded-2xl border-2 border-b-4 border-line bg-surface px-5 font-bold">Ke beranda</a>
+        <button type="button" onClick={reset} className="min-h-11 rounded-xl bg-brand shadow-[0_2px_0_var(--brand-strong)] active:translate-y-[2px] active:shadow-none px-5 font-bold text-on-brand">Coba lagi</button>
+        <a href="/app" className="inline-flex min-h-11 items-center rounded-xl border border-line-strong bg-surface hover:bg-surface-2 px-5 font-bold">Ke beranda</a>
       </div>
     </main>
   );

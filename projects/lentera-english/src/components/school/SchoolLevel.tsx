@@ -33,8 +33,8 @@ export function SchoolLevelPicker({ value, onPick, label = 'Jenjang sekolah' }: 
     <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       {SCHOOL_CHOICES.map(([id, title, sub]) => (
         <button key={id} type="button" role="radio" aria-checked={value === id} onClick={() => onPick(id)}
-          className={cx('tile flex min-h-16 flex-col items-center justify-center rounded-2xl px-2 py-2 text-center', value === id ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>
-          <span className="font-display text-lg font-bold leading-tight">{title}</span>
+          className={cx('tile flex min-h-16 flex-col items-center justify-center rounded-xl px-2 py-2 text-center', value === id ? 'border-brand bg-brand-soft [--edge:var(--brand)]' : 'border-line bg-surface')}>
+          <span className="text-lg font-extrabold leading-tight">{title}</span>
           <span className="text-xs text-muted">{sub}</span>
         </button>
       ))}

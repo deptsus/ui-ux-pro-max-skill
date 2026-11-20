@@ -29,7 +29,7 @@ function Writing({ def }: { def: HomeworkDef }) {
       <PageHeader title={def.title} subtitle={w.prompt} />
       {w.source && (
         <Card>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand">Teks sumber</p>
+          <p className="mb-2 text-xs font-bold text-brand-ink dark:text-brand">Teks sumber</p>
           <p className="en whitespace-pre-line leading-relaxed">{w.source}</p>
         </Card>
       )}

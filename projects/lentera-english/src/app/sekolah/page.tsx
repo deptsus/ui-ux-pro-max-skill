@@ -25,7 +25,7 @@ export default function SchoolPage() {
     <PublicPage title="Lentera untuk Sekolah" intro="Satu ruang belajar bahasa Inggris untuk guru, siswa, dan orang tua, mengikuti kurikulum CEFR A1 sampai C2.">
       <ul className="grid gap-4 sm:grid-cols-2">
         {FEATURES.map(([Icon, title, body]) => (
-          <li key={title} className="rounded-3xl border border-line bg-surface p-5">
+          <li key={title} className="rounded-2xl border border-line bg-surface p-5">
             <Icon className="text-brand" aria-hidden />
             <h2 className="mt-2 text-lg font-extrabold">{title}</h2>
             <p className="mt-1 text-sm text-muted">{body}</p>
@@ -49,8 +49,8 @@ export default function SchoolPage() {
       </ol>
 
       <div className="mt-10 flex flex-wrap gap-3">
-        <Link href="/kontak?topik=sekolah" className="inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-b-4 border-brand-strong bg-brand px-6 font-extrabold text-on-brand">Minta penawaran untuk sekolah</Link>
-        <Link href="/app/guru" className="inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-b-4 border-line bg-surface px-6 font-extrabold"><KeyRound size={18} aria-hidden />Sudah punya kode lisensi</Link>
+        <Link href="/kontak?topik=sekolah" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand shadow-[0_2px_0_var(--brand-strong)] active:translate-y-[2px] active:shadow-none px-6 font-extrabold text-on-brand">Minta penawaran untuk sekolah</Link>
+        <Link href="/app/guru" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-line-strong bg-surface hover:bg-surface-2 px-6 font-extrabold"><KeyRound size={18} aria-hidden />Sudah punya kode lisensi</Link>
       </div>
       <p className="mt-4 text-sm text-muted">Orang tua yang ingin memantau anak: buat akun gratis, lalu buka <Link href="/app/orang-tua" className="font-bold text-brand underline">Pantau Anak</Link>.</p>
     </PublicPage>

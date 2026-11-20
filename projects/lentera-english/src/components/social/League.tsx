@@ -7,7 +7,7 @@ import { ArrowDown, ArrowUp, Clock, Crown, RefreshCw, Users } from 'lucide-react
 import { DIVISIONS, division, getLeague, timeLeft, zoneOf, type League } from '@/lib/client/habits';
 import { syncIfPending } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
-import { Badge, Button, Card, Empty, LinkButton, Notice, cx } from '@/components/ui';
+import { Badge, Button, Card, Empty, LinkButton, Notice, cx, Loading } from '@/components/ui';
 import { DivisionBadge } from './DivisionBadge';
 
 function Outcome({ l }: { l: League }) {
@@ -41,14 +41,14 @@ export function LeagueView() {
   useEffect(() => { void load(); }, []);
 
   if (error) return <Empty title="Liga belum bisa dimuat" action={<Button onClick={load}>Coba lagi</Button>}>{error}</Empty>;
-  if (!league) return <Card className="text-muted"><span role="status">Memuat liga...</span></Card>;
+  if (!league) return <Loading label="Memuat liga…" lines={4} />;
   const d = division(league.division);
   const ladder = (
     <ol className="flex items-end justify-center gap-1.5 sm:gap-3" aria-label="Lima divisi liga, dari bawah ke atas">
       {DIVISIONS.map((x, i) => (
         <li key={x.name} className={cx('flex flex-col items-center gap-1', i + 1 !== league.division && 'grayscale')} aria-current={i + 1 === league.division ? 'true' : undefined}>
           <DivisionBadge n={i + 1} size={i + 1 === league.division ? 44 : 32} />
-          <span className={cx('text-[11px] font-bold', i + 1 === league.division ? 'text-ink' : 'text-muted')}>{x.name}</span>
+          <span className={cx('text-xs font-bold', i + 1 === league.division ? 'text-ink' : 'text-muted')}>{x.name}</span>
         </li>
       ))}
     </ol>
@@ -106,7 +106,7 @@ export function LeagueView() {
               <li key={r.rank} className={cx('flex items-center gap-3 border-b border-l-4 border-b-line px-4 py-3 last:border-b-0',
                 zone === 'up' ? 'border-l-ok' : zone === 'down' ? 'border-l-bad' : 'border-l-transparent', r.me && 'bg-brand-soft',
                 r.rank === promote && promote < size && 'border-b-2 border-b-ok', demote > 0 && r.rank === size - demote && 'border-b-2 border-b-bad')}>
-                <span className={cx('grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-extrabold', r.rank === 1 ? 'bg-accent text-[#1e1b3a]' : 'bg-surface-2')}>{r.rank === 1 ? <Crown size={16} aria-label="Peringkat 1" /> : r.rank}</span>
+                <span className={cx('grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-extrabold', r.rank === 1 ? 'bg-accent text-on-accent' : 'bg-surface-2')}>{r.rank === 1 ? <Crown size={16} aria-label="Peringkat 1" /> : r.rank}</span>
                 <Avatar index={r.avatar} size={36} decorative className="shrink-0" />
                 <span className="flex min-w-0 flex-1 items-center gap-2"><span className="truncate font-bold">{r.name}</span>{r.me && <span className="shrink-0 text-xs font-bold text-brand">kamu</span>}{r.friend && <Badge tone="muted" className="shrink-0">teman</Badge>}</span>
                 {zone === 'up' && <ArrowUp size={16} className="shrink-0 text-ok" aria-label="zona naik" />}

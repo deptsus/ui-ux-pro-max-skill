@@ -7,7 +7,7 @@ import { signOut, useServerInfo, useSession } from '@/lib/client/session';
 import { isAdminPlan } from '@/lib/engine/types';
 import { act, pushProfile, syncNow, useRole, useSyncStatus } from '@/lib/client/store';
 import { AVATARS, Avatar } from '@/components/Avatar';
-import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
+import { Badge, Button, Card, Field, LinkButton, Notice, PageHeader, StatRow, cx, dateId, inputClass } from '@/components/ui';
 import { ParentLinkCard } from '@/components/ParentLinkCard';
 import { SchoolLevelPicker, chooseSchoolLevel } from '@/components/school/SchoolLevel';
 
@@ -57,7 +57,7 @@ export default function ProfilePage() {
     <div className="space-y-5">
       <PageHeader title="Profil" />
       <Card className="flex flex-wrap items-center gap-4">
-        <Avatar index={learner.profile.avatar} size={80} className="shrink-0" />
+        <Avatar index={learner.profile.avatar} size={72} className="shrink-0" />
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-2xl font-extrabold">{learner.profile.name}</h2>
           <p className="text-sm text-muted">{session ? <span className="break-all">{session.email}</span> : 'Tamu · progres hanya di perangkat ini'} · bergabung {dateId(learner.createdAt)}</p>
@@ -65,9 +65,7 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Statistik">
-        {stats.map(([label, value]) => <Card key={label} className="p-4"><p className="text-xs font-bold text-muted">{label}</p><p className="mt-1 text-xl font-extrabold">{value}</p></Card>)}
-      </section>
+      <section aria-label="Statistik"><StatRow items={stats.map(([label, value]) => ({ label, value }))} /></section>
 
       <Card className="space-y-3" as="section">
         <h2 className="text-lg font-extrabold">Jenjang sekolah</h2>
@@ -101,7 +99,7 @@ export default function ProfilePage() {
       </Card>
 
       {admin && (
-        <Card className="flex flex-wrap items-center justify-between gap-3 border-2 border-ink"><div className="flex items-center gap-3"><ShieldCheck size={28} className="shrink-0" aria-hidden /><div><p className="font-extrabold">Kamu admin</p><p className="text-sm text-muted">Konfirmasi pembayaran, kelola materi, dan atur notifikasi HP. Semua fitur Premium aktif gratis untuk akun admin.</p></div></div><LinkButton href="/admin">Dashboard admin</LinkButton></Card>
+        <Card className="flex flex-wrap items-center justify-between gap-3 border-ink/30"><div className="flex items-center gap-3"><ShieldCheck size={28} className="shrink-0" aria-hidden /><div><p className="font-extrabold">Kamu admin</p><p className="text-sm text-muted">Konfirmasi pembayaran, kelola materi, dan atur notifikasi HP. Semua fitur Premium aktif gratis untuk akun admin.</p></div></div><LinkButton href="/admin">Dashboard admin</LinkButton></Card>
       )}
       <ParentLinkCard />
       {session ? (

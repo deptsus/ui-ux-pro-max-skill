@@ -10,7 +10,7 @@ import { completeListening } from '@/lib/engine/state';
 import { AudioButton } from '@/components/AudioButton';
 import { Mouth } from '@/components/Mouth';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
-import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx } from '@/components/ui';
+import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx, Segmented, TabLinks } from '@/components/ui';
 
 /** Records the learner's own voice for self-comparison. Nothing is uploaded. */
 function Recorder() {
@@ -67,12 +67,9 @@ function Listening() {
         <PageHeader title={item.title} subtitle={`Level ${item.level} · dengarkan dulu tanpa membaca, ulangi sesukamu, lalu jawab pertanyaannya.`} />
         <Card className="space-y-3">
           <AudioButton text={item.transcript} audioKey={item.audioKey} size="lg" showSource />
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Aksen audio">
-            <span className="text-sm font-bold text-muted">Aksen</span>
-            {(['us', 'uk'] as const).map((a) => <Button key={a} size="sm" variant={accent === a ? 'primary' : 'secondary'} aria-pressed={accent === a} onClick={() => act((d) => { d.profile.accent = a; })}>{a === 'us' ? 'Amerika' : 'Inggris (British)'}</Button>)}
-          </div>
+          <Segmented label="Aksen audio" value={accent} onChange={(a) => act((d) => { d.profile.accent = a; })} options={[{ value: 'us' as const, label: 'Amerika' }, { value: 'uk' as const, label: 'Inggris (British)' }]} />
           <Button size="sm" variant="ghost" onClick={() => setShow((s) => !s)}>{show ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}{show ? 'Sembunyikan transkrip' : 'Tampilkan transkrip'}</Button>
-          {show && <div className="rounded-2xl bg-surface-2 p-3"><p className="en font-semibold">{item.transcript}</p><p className="mt-1 text-sm text-muted">{item.translation}</p></div>}
+          {show && <div className="rounded-xl bg-surface-2 p-3 dark:bg-line/60"><p className="en font-semibold">{item.transcript}</p><p className="mt-1 text-sm text-muted">{item.translation}</p></div>}
         </Card>
         <Button full size="lg" onClick={() => setRunning(true)}>Jawab {questions.length} pertanyaan</Button>
       </div>
@@ -82,16 +79,12 @@ function Listening() {
   return (
     <div>
       <PageHeader title="Pusat Menyimak dan Pelafalan" subtitle="Latih telinga dengan audio, lalu latih mulut dengan panduan posisi lidah dan bibir." />
-      <Card className="mb-4 flex flex-wrap items-center gap-3 p-4">
-        <p className="text-sm font-bold">Aksen audio</p>
-        {(['us', 'uk'] as const).map((a) => <Button key={a} size="sm" variant={accent === a ? 'primary' : 'secondary'} aria-pressed={accent === a} onClick={() => act((d) => { d.profile.accent = a; })}>{a === 'us' ? 'Amerika' : 'Inggris (British)'}</Button>)}
-        <p className="w-full text-xs text-muted">{audioSource(ix) === 'none' ? 'Perangkat ini tidak punya pemutar suara.' : ix.pack.audio.length ? 'Rekaman suara dipakai bila sudah ada untuk teksnya, sebaiknya dalam aksen pilihanmu. Teks yang belum direkam dibacakan suara bawaan perangkatmu (tanpa AI generatif).' : 'Audio dibacakan oleh suara bawaan perangkatmu (tanpa internet, tanpa AI generatif) sesuai aksen yang kamu pilih.'}</p>
+      <TabLinks label="Latihan suara" className="mb-4" items={[{ href: '/app/listening', label: 'Menyimak', current: tab === 'menyimak' }, { href: '/app/listening?tab=pelafalan', label: 'Pelafalan', current: tab === 'pelafalan' }, { href: '/app/shadowing', label: 'Shadowing', current: false }]} />
+      <Card className="mb-6 space-y-2 p-4">
+        <p id="aksen-label" className="text-sm font-bold">Aksen audio</p>
+        <Segmented label="Aksen audio" value={accent} onChange={(a) => act((d) => { d.profile.accent = a; })} options={[{ value: 'us' as const, label: 'Amerika' }, { value: 'uk' as const, label: 'Inggris (British)' }]} />
+        <p className="text-xs text-muted">{audioSource(ix) === 'none' ? 'Perangkat ini tidak punya pemutar suara.' : ix.pack.audio.length ? 'Rekaman suara dipakai bila sudah ada untuk teksnya, sebaiknya dalam aksen pilihanmu. Teks yang belum direkam dibacakan suara bawaan perangkatmu (tanpa AI generatif).' : 'Audio dibacakan oleh suara bawaan perangkatmu (tanpa internet, tanpa AI generatif) sesuai aksen yang kamu pilih.'}</p>
       </Card>
-      <nav className="mb-4 flex gap-2" aria-label="Latihan suara">
-        <LinkButton href="/app/listening" size="sm" variant={tab === 'menyimak' ? 'primary' : 'secondary'}>Menyimak</LinkButton>
-        <LinkButton href="/app/listening?tab=pelafalan" size="sm" variant={tab === 'pelafalan' ? 'primary' : 'secondary'}>Pelafalan</LinkButton>
-        <LinkButton href="/app/shadowing" size="sm" variant="secondary">Shadowing</LinkButton>
-      </nav>
 
       {tab === 'menyimak' ? (
         <div>
@@ -100,7 +93,7 @@ function Listening() {
             if (!list.length) return null;
             return (
               <section key={level} className="mb-6" aria-labelledby={`level-${level}`}>
-                <h2 id={`level-${level}`} className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Level {level} · {ix.pack.levels.find((x) => x.code === level)?.title}</h2>
+                <h2 id={`level-${level}`} className="mb-2 px-1 text-base font-extrabold">Level {level} · {ix.pack.levels.find((x) => x.code === level)?.title}</h2>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {list.map((l) => (
                     <Card as="li" key={l.id} className={cx('flex flex-col gap-2', l.locked && 'border-dashed')}>

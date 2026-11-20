@@ -50,13 +50,13 @@ export default function SubscriptionPage() {
     <div className="space-y-5">
       <PageHeader title="Paket Belajar" subtitle="Harga tetap, tanpa perpanjangan otomatis, tanpa biaya tersembunyi." />
       {adminPlan ? (
-        <Card className="flex flex-wrap items-center gap-3 border-2 border-accent">
+        <Card className="flex flex-wrap items-center gap-3 border-accent/60 bg-accent-soft/40">
           <ShieldCheck className="text-accent" size={28} aria-hidden />
           <div className="min-w-0 flex-1"><p className="text-lg font-extrabold">Premium aktif gratis untuk admin</p><p className="text-sm text-muted">Tanpa batas waktu, selama akun ini berperan admin. Tidak tercatat sebagai pembayaran atau pelanggan.</p></div>
           <LinkButton href="/admin" variant="secondary" size="sm">Dashboard admin</LinkButton>
         </Card>
       ) : premium ? (
-        <Card className="flex flex-wrap items-center gap-3 border-2 border-accent">
+        <Card className="flex flex-wrap items-center gap-3 border-accent/60 bg-accent-soft/40">
           <Crown className="text-accent" size={28} aria-hidden />
           <div className="min-w-0 flex-1"><p className="text-lg font-extrabold">Premium aktif sampai {dateId(ent.expiresAt!)}</p><p className="text-sm text-muted">{ent.plan === 'class' || ent.plan === 'teacher' ? `${daysLeft} hari lagi, dari lisensi sekolah ${ent.plan === 'teacher' ? 'tempatmu mengajar' : 'untuk kelasmu'}. Setelah lisensi berakhir, kamu bisa melanjutkan dengan paket Premium sendiri.` : `${daysLeft} hari lagi. Tidak ada tagihan otomatis: perpanjang sendiri kapan pun. Perpanjangan lebih awal ditambahkan setelah masa aktif sekarang berakhir.`}</p></div>
           {daysLeft <= 7 && <Badge tone="bad">Segera berakhir</Badge>}
@@ -68,10 +68,10 @@ export default function SubscriptionPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <h2 className="text-xl font-extrabold">Free</h2>
-          <p className="mt-1 text-3xl font-extrabold">Rp0</p>
+          <p className="mt-1 text-3xl font-extrabold tabular-nums">Rp0</p>
           <ul className="mt-4 space-y-2">{FREE_FEATURES.map((f) => <li key={f} className="flex gap-2 text-sm"><Check size={18} className="mt-0.5 shrink-0 text-ok" aria-hidden />{f}</li>)}</ul>
         </Card>
-        <Card className="border-2 border-brand">
+        <Card className="border-brand/50 shadow-e1">
           <div className="flex flex-wrap items-center gap-2"><h2 className="text-xl font-extrabold">Premium</h2>{!play && <Badge tone="accent">±{saving}% di bawah patokan {rupiah(BENCHMARK_MONTHLY)}/bulan</Badge>}</div>
           {!play && <>
           <p className="mt-1 text-3xl font-extrabold">{rupiah(PLANS.premium_monthly.price)}<span className="text-base font-bold text-muted"> / bulan</span></p>
@@ -91,7 +91,7 @@ export default function SubscriptionPage() {
           <legend className="mb-2 text-sm font-bold">1. Pilih paket</legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {(Object.values(PLANS)).map((p) => (
-              <label key={p.id} className={cx('flex cursor-pointer items-center gap-3 rounded-2xl border-2 p-3', plan === p.id ? 'border-brand bg-brand-soft' : 'border-line')}>
+              <label key={p.id} className={cx('flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors', plan === p.id ? 'border-brand bg-brand-soft ring-1 ring-brand' : 'border-line-strong/50 hover:bg-surface-2')}>
                 <input type="radio" name="plan" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id)} className="h-5 w-5 accent-[var(--brand)]" />
                 <span className="min-w-0 flex-1"><span className="block font-extrabold">{p.name}{p.discountPct > 0 && <Badge tone="ok" className="ml-2">Diskon {p.discountPct}%</Badge>}</span><span className="block text-sm text-muted">{p.note}</span></span>
                 <span className="text-right">{p.listPrice && <span className="block text-sm text-muted line-through" aria-label={`Harga normal ${rupiah(p.listPrice)}`}>{rupiah(p.listPrice)}</span>}<span className="block font-extrabold">{rupiah(p.price)}</span></span>
@@ -102,7 +102,7 @@ export default function SubscriptionPage() {
         {manual ? (
           <div>
             <p className="mb-2 text-sm font-bold">2. Metode pembayaran</p>
-            <div className="flex items-center gap-3 rounded-2xl border-2 border-brand bg-brand-soft p-3">
+            <div className="flex items-center gap-3 rounded-xl border border-brand bg-brand-soft p-3">
               <QrCode size={22} className="text-brand" aria-hidden />
               <span><span className="block font-extrabold">QRIS</span><span className="block text-xs text-muted">Bayar dari aplikasi mobile banking atau e-wallet apa pun</span></span>
             </div>
@@ -112,7 +112,7 @@ export default function SubscriptionPage() {
           <legend className="mb-2 text-sm font-bold">2. Pilih metode pembayaran</legend>
           <div className="grid gap-2 sm:grid-cols-3">
             {CHANNELS.map((c) => { const Icon = ICON[c.id]; return (
-              <label key={c.id} className={cx('flex cursor-pointer items-center gap-3 rounded-2xl border-2 p-3', channel === c.id ? 'border-brand bg-brand-soft' : 'border-line')}>
+              <label key={c.id} className={cx('flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors', channel === c.id ? 'border-brand bg-brand-soft ring-1 ring-brand' : 'border-line-strong/50 hover:bg-surface-2')}>
                 <input type="radio" name="channel" value={c.id} checked={channel === c.id} onChange={() => setChannel(c.id)} className="h-5 w-5 accent-[var(--brand)]" />
                 <Icon size={22} className="text-brand" aria-hidden />
                 <span><span className="block font-extrabold">{c.name}</span><span className="block text-xs text-muted">{c.desc}</span></span>
@@ -128,7 +128,7 @@ export default function SubscriptionPage() {
         {session ? (
           <Button full size="lg" disabled={busy || info.payments === 'off'} onClick={pay}>{busy ? 'Membuat pembayaran...' : `Bayar ${rupiah(PLANS[plan].price)} dengan ${manual ? 'QRIS' : CHANNELS.find((c) => c.id === channel)!.name}`}</Button>
         ) : (
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface-2 p-3"><p className="min-w-0 flex-1 text-sm">Buat akun dulu supaya Premium terikat ke akunmu, bukan ke satu perangkat.</p><LinkButton href="/daftar" size="sm">Daftar</LinkButton><LinkButton href="/masuk" size="sm" variant="secondary">Masuk</LinkButton></div>
+          <div className="flex flex-wrap items-center gap-3 rounded-xl bg-surface-2 p-3 dark:bg-line/60"><p className="min-w-0 flex-1 text-sm">Buat akun dulu supaya Premium terikat ke akunmu, bukan ke satu perangkat.</p><LinkButton href="/daftar" size="sm">Daftar</LinkButton><LinkButton href="/masuk" size="sm" variant="secondary">Masuk</LinkButton></div>
         )}
         <p className="text-xs text-muted">{manual
           ? 'Setelah membayar, laporkan pembayaranmu di halaman berikutnya. Premium aktif setelah pembayaran kami cocokkan dan konfirmasi. Kami tidak menyimpan data rekening atau e-wallet.'
@@ -143,7 +143,7 @@ export default function SubscriptionPage() {
           {!history ? <p className="mt-2 text-sm text-muted" role="status">Memuat...</p> : history.length === 0 ? <p className="mt-2 text-sm text-muted">Belum ada transaksi.</p> : (
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="text-xs uppercase text-muted"><tr><th className="py-2 pr-3">Tanggal</th><th className="py-2 pr-3">Paket</th><th className="py-2 pr-3">Metode</th><th className="py-2 pr-3 text-right">Nominal</th><th className="py-2 pr-3">Status</th><th className="py-2" /></tr></thead>
+                <thead className="text-xs font-bold text-muted"><tr><th className="py-2 pr-3">Tanggal</th><th className="py-2 pr-3">Paket</th><th className="py-2 pr-3">Metode</th><th className="py-2 pr-3 text-right">Nominal</th><th className="py-2 pr-3">Status</th><th className="py-2" /></tr></thead>
                 <tbody>
                   {history.map((t) => (
                     <tr key={t.id} className="border-t border-line">

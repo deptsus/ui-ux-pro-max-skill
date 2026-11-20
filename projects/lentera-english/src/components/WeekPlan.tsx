@@ -38,7 +38,7 @@ export function FreeDoneNotice() {
 /** Shown right above this week's list once the share is done: when the next steps open. */
 export function PlanLockNotice({ plan, now }: { plan: WeekPlan; now: number }) {
   return (
-    <div className="flex items-start gap-3 rounded-2xl border-2 border-accent bg-accent/15 p-3" role="status">
+    <div className="flex items-start gap-3 rounded-xl bg-warn-soft p-3" role="status">
       <Lock size={20} className="mt-0.5 shrink-0 text-accent-strong" aria-hidden />
       <p className="min-w-0 text-sm">
         <span className="block font-extrabold">Target minggu ini selesai. Langkah berikutnya terkunci.</span>

@@ -11,7 +11,7 @@ import { dueText, KIND_LABEL, rosterCsv, teacherAction, teacherOverview, type As
 import { isNativeApp, nativeShare, nativeShareFile } from '@/lib/client/native';
 import { useServerInfo, useSession } from '@/lib/client/session';
 import { Avatar } from '@/components/Avatar';
-import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx, dateId, inputClass } from '@/components/ui';
+import { Badge, Button, Card, Empty, LinkButton, Notice, PageHeader, cx, dateId, inputClass, Loading } from '@/components/ui';
 
 type Msg = { tone: 'ok' | 'bad'; text: string } | null;
 const inviteText = (code: string, name: string) => `Gabung ke kelas ${name} di Lentera English dengan kode ${code}: ${window.location.origin}/app/kelas?kode=${code}`;
@@ -86,7 +86,7 @@ function ClassView({ id, back }: { id: number; back: () => void }) {
     }
   };
   if (error) return <Empty title="Kelas tidak bisa dibuka" action={<Button onClick={back}>Kembali</Button>}>{error}</Empty>;
-  if (!d) return <Card className="text-muted"><span role="status">Memuat kelas...</span></Card>;
+  if (!d) return <Loading label="Memuat kelas…" lines={3} />;
   const c = d.class;
   const share = async () => {
     const text = inviteText(c.join_code, c.name);
@@ -167,7 +167,7 @@ function ClassView({ id, back }: { id: number; back: () => void }) {
             <Card className="hidden overflow-x-auto p-0 sm:block">
               <table className="w-full min-w-[40rem] text-left text-sm">
                 <caption className="sr-only">Progres siswa kelas {c.name}</caption>
-                <thead className="text-xs uppercase text-muted"><tr><th className="px-4 py-2">Siswa</th><th className="px-2 py-2 text-right">XP minggu ini</th><th className="px-2 py-2 text-right">Pelajaran</th><th className="px-2 py-2 text-right">Penguasaan</th><th className="px-2 py-2 text-right">Beruntun</th><th className="px-2 py-2 text-right">Tugas</th><th className="px-2 py-2">Terakhir aktif</th><th className="px-4 py-2"><span className="sr-only">Aksi</span></th></tr></thead>
+                <thead className="text-xs font-bold text-muted"><tr><th className="px-4 py-2">Siswa</th><th className="px-2 py-2 text-right">XP minggu ini</th><th className="px-2 py-2 text-right">Pelajaran</th><th className="px-2 py-2 text-right">Penguasaan</th><th className="px-2 py-2 text-right">Beruntun</th><th className="px-2 py-2 text-right">Tugas</th><th className="px-2 py-2">Terakhir aktif</th><th className="px-4 py-2"><span className="sr-only">Aksi</span></th></tr></thead>
                 <tbody>
                   {rows.map(({ s, missed, work, mastery, seen }) => (
                     <tr key={s.id} className="border-t border-line">
@@ -253,7 +253,7 @@ function Teacher() {
     <div className="space-y-5">
       <PageHeader title="Ruang Guru" subtitle="Kelola kelas, beri tugas dengan tenggat, dan pantau progres setiap siswa." />
       {msg && <div role="status"><Notice tone={msg.tone}>{msg.text}</Notice></div>}
-      {error ? <Notice tone="bad">{error}</Notice> : !data ? <Card className="text-muted"><span role="status">Memuat...</span></Card> : (
+      {error ? <Notice tone="bad">{error}</Notice> : !data ? <Loading label="Memuat…" lines={2} /> : (
         <>
           <Card className="space-y-3">
             <h2 className="flex items-center gap-2 font-extrabold"><KeyRound size={18} className="text-brand" aria-hidden />{data.licenses.length ? 'Tambah lisensi sekolah' : 'Aktifkan akun guru'}</h2>

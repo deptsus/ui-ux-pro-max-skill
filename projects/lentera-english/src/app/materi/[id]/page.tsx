@@ -87,10 +87,10 @@ export default async function MateriLesson({ params }: Props) {
           </ul>
         </section>
       )}
-      <div className="mt-10 rounded-3xl border-2 border-brand bg-brand-soft p-5">
+      <div className="mt-10 rounded-2xl border border-brand/40 bg-brand-soft p-5">
         <p className="text-lg font-extrabold">{free ? 'Latih sampai benar-benar paham' : 'Lanjutkan materi lengkapnya di aplikasi'}</p>
         <p className="mt-1 text-sm">{free ? 'Di aplikasi: latihan terbimbing dengan pembahasan, PR, tes penguasaan, dan ulangan terjadwal. Gratis, tanpa iklan.' : 'Materi lengkap, latihan, PR, dan tes penguasaan pelajaran ini tersedia untuk Premium. Coba dulu pelajaran gratisnya di aplikasi.'}</p>
-        <Link href={`/app/lesson?id=${lesson.id}`} className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-2xl border-2 border-b-4 border-brand-strong bg-brand px-5 font-extrabold text-on-brand">Buka di aplikasi<ArrowRight size={18} aria-hidden /></Link>
+        <Link href={`/app/lesson?id=${lesson.id}`} className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand shadow-[0_2px_0_var(--brand-strong)] active:translate-y-[2px] active:shadow-none px-5 font-extrabold text-on-brand">Buka di aplikasi<ArrowRight size={18} aria-hidden /></Link>
       </div>
       {track?.note && <p className="mt-6 text-xs text-muted">{track.note}</p>}
     </PublicPage>

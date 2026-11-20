@@ -15,7 +15,7 @@ import { useSession } from '@/lib/client/session';
 import { syncNow } from '@/lib/client/store';
 import { ManualQrisCheckout, type ManualTx } from '@/components/ManualQrisCheckout';
 import { Mascot } from '@/components/Mascot';
-import { Badge, Button, Card, Empty, LinkButton, Notice, dateId, dateTimeId, rupiah } from '@/components/ui';
+import { Badge, Button, Card, Empty, LinkButton, Notice, dateId, dateTimeId, rupiah, Loading } from '@/components/ui';
 import { ParentGate } from '@/components/school/SchoolLevel';
 
 interface Tx { id: string; reference_id: string; plan_id: string; plan_name: string; duration_days: number; amount_idr: number; currency: string; channel: 'QRIS' | 'DANA' | 'GOPAY'; status: string; checkout: { kind: 'qr' | 'redirect' | 'none'; value: string; deeplink?: string } | null; expires_at: string | null; paid_at: string | null; failure_code: string | null; created_at: string }
@@ -64,7 +64,7 @@ function Checkout() {
   if (!id) return <Empty title="Transaksi tidak ditemukan" action={<LinkButton href="/app/subscription">Ke halaman paket</LinkButton>} />;
   if (!session) return <Empty title="Masuk untuk melihat transaksi" action={<LinkButton href="/masuk">Masuk</LinkButton>} />;
   if (error && !data) return <Empty title="Transaksi belum bisa dimuat" action={<Button onClick={load}>Coba lagi</Button>}>{error}</Empty>;
-  if (!data) return <Card className="mx-auto max-w-xl text-muted"><span role="status">Memuat transaksi...</span></Card>;
+  if (!data) return <Loading className="mx-auto max-w-xl" label="Memuat transaksi…" lines={3} />;
 
   if (data.mode === 'manual') {
     return (
@@ -105,12 +105,12 @@ function Checkout() {
             {tx.checkout?.kind === 'qr' && (
               <div className="grid place-items-center gap-2 rounded-2xl bg-white p-4">
                 {qr ? <img src={qr} alt="Kode QRIS untuk pembayaran ini" className="h-64 w-64" /> : <div className="grid h-64 w-64 place-items-center text-sm text-[#5b5878]">Menyiapkan kode QR...</div>}
-                <p className="text-sm font-extrabold text-[#1e1b3a]">Lentera English · {rupiah(tx.amount_idr)}</p>
+                <p className="text-sm font-extrabold text-on-accent">Lentera English · {rupiah(tx.amount_idr)}</p>
               </div>
             )}
             {tx.checkout?.kind === 'redirect' && (data.mode === 'mock'
               ? <Notice tone="muted">Simulator lokal tidak punya halaman {NAME[tx.channel]} sungguhan. Gunakan tombol simulasi di bawah.</Notice>
-              : <a href={tx.checkout.deeplink ?? tx.checkout.value} target="_blank" rel="noopener noreferrer" className="flex min-h-13 items-center justify-center gap-2 rounded-2xl border-2 border-b-4 border-brand-strong bg-brand px-6 py-3.5 text-lg font-bold text-on-brand">Buka {NAME[tx.channel]}<ExternalLink size={18} aria-hidden /></a>)}
+              : <a href={tx.checkout.deeplink ?? tx.checkout.value} target="_blank" rel="noopener noreferrer" className="flex min-h-13 items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-lg font-bold text-on-brand shadow-[0_2px_0_var(--brand-strong)] active:translate-y-[2px] active:shadow-none">Buka {NAME[tx.channel]}<ExternalLink size={18} aria-hidden /></a>)}
             {tx.checkout?.kind === 'redirect' && data.mode !== 'mock' && tx.checkout.deeplink && <a href={tx.checkout.value} target="_blank" rel="noopener noreferrer" className="block text-center text-sm font-bold text-brand underline">Aplikasi tidak terbuka? Bayar lewat halaman web</a>}
             {summary}
           </Card>
@@ -127,7 +127,7 @@ function Checkout() {
       {status === 'SUCCEEDED' && (
         <Card className="space-y-4">
           <div className="flex flex-col items-center gap-2 text-center"><Mascot mood="cheer" size={88} /><CheckCircle2 size={32} className="text-ok" aria-hidden /><h2 className="text-xl font-extrabold">Pembayaran berhasil</h2><p className="text-muted">{data.entitlement.premium && data.entitlement.expires_at ? `Premium aktif sampai ${dateId(data.entitlement.expires_at)}.` : 'Premium sedang diaktifkan.'}</p></div>
-          <div className="rounded-2xl border border-line p-4"><p className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Bukti pembayaran</p>{summary}</div>
+          <div className="rounded-2xl border border-line p-4"><p className="mb-3 text-sm font-bold text-muted">Bukti pembayaran</p>{summary}</div>
           <p className="text-xs text-muted">Tidak ada perpanjangan otomatis. Kamu bisa memperpanjang sendiri dari halaman paket sebelum masa aktif berakhir.</p>
           <div className="flex flex-col gap-2 sm:flex-row"><Button variant="secondary" full onClick={() => printPage(document.title)}>Cetak bukti</Button><LinkButton href="/app/path" full>Lanjut belajar</LinkButton></div>
         </Card>

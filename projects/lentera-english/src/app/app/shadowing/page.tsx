@@ -187,20 +187,20 @@ function Step({ line, n, total, onRate }: { line: ShadowLine; n: number; total: 
         <Card className="space-y-3">
           <h2 className="flex items-center gap-2 font-extrabold"><span className="grid h-7 w-7 place-items-center rounded-full bg-brand text-sm text-on-brand">3</span>Bandingkan berdampingan</h2>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-2 rounded-2xl border-2 border-brand/30 p-3">
+            <div className="space-y-2 rounded-xl border border-brand/30 p-3">
               <div className="flex items-center justify-between gap-2"><p className="font-bold">Contoh</p><span className="text-sm text-muted">{modelMs ? `±${secs(modelMs)}` : ''}</span></div>
               {modelShape ? <Wave peaks={modelShape.peaks} tone="brand" /> : <p className="flex h-8 items-center text-xs text-muted">Suara bawaan perangkat (gelombang tidak tersedia)</p>}
               <Button size="sm" variant="secondary" full onClick={() => void playModel(false)} disabled={!!busy}><Play size={14} aria-hidden />Putar contoh</Button>
             </div>
-            <div className="space-y-2 rounded-2xl border-2 border-accent-strong/40 p-3">
+            <div className="space-y-2 rounded-xl border border-accent-strong/40 p-3">
               <div className="flex items-center justify-between gap-2"><p className="font-bold">Suaramu</p><span className="text-sm text-muted">{secs(ownMs)}</span></div>
               {mine.shape ? <Wave peaks={mine.shape.peaks} tone="accent" /> : <p className="flex h-8 items-center text-xs text-muted">Gelombang tidak tersedia di browser ini</p>}
               <Button size="sm" variant="secondary" full onClick={() => void playMine()} disabled={!!busy}><Play size={14} aria-hidden />Putar suaraku</Button>
             </div>
           </div>
           <Button full onClick={() => void playBoth()} disabled={!!busy} className={busy === 'both' ? 'animate-pulse' : ''}><Headphones size={18} aria-hidden />Putar berurutan: contoh, lalu suaraku</Button>
-          {tempo?.text && <p className={cx('rounded-2xl px-3 py-2 text-sm', tempo.tone === 'ok' ? 'bg-ok-soft' : 'bg-surface-2')}><span className="font-bold">Info tempo: </span>{tempo.text}</p>}
-          <details className="rounded-2xl bg-surface-2 p-3 text-sm">
+          {tempo?.text && <p className={cx('rounded-xl px-3 py-2 text-sm', tempo.tone === 'ok' ? 'bg-ok-soft' : 'bg-surface-2')}><span className="font-bold">Info tempo: </span>{tempo.text}</p>}
+          <details className="rounded-xl bg-surface-2 p-3 text-sm dark:bg-line/60">
             <summary className="cursor-pointer font-bold">Apa yang dibandingkan?</summary>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li><strong>Tekanan:</strong> kata yang paling keras dan panjang di contoh, apakah sama di suaramu?</li>
@@ -218,7 +218,7 @@ function Step({ line, n, total, onRate }: { line: ShadowLine; n: number; total: 
         <div className="grid grid-cols-3 gap-2" role="group" aria-label="Nilai sendiri hasil tiruanmu">
           {RATINGS.map((r) => (
             <button key={r.id} type="button" disabled={!canRate} onClick={() => onRate(r.id)}
-              className={cx('min-h-12 rounded-2xl border-2 px-2 py-2 text-sm font-extrabold transition disabled:opacity-40', r.tone, 'hover:brightness-95')}>{r.label}</button>
+              className={cx('min-h-12 rounded-xl border-2 px-2 py-2 text-sm font-extrabold transition disabled:opacity-40', r.tone, 'hover:brightness-95')}>{r.label}</button>
           ))}
         </div>
         <p className="text-xs text-muted">Tidak ada nilai otomatis: kamu yang menilai. Kalimat yang kamu tandai &quot;Perlu diulang&quot; bisa dilatih lagi di akhir.</p>

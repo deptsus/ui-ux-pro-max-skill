@@ -8,7 +8,7 @@ import { act, resetLearner } from '@/lib/client/store';
 import { api } from '@/lib/client/api';
 import { signOut, useSession } from '@/lib/client/session';
 import { buzz, chime, getFontScale, hapticsOn, hapticsSupported, setFontScale, setHaptics, setSound, soundOn, type FontScale } from '@/lib/client/prefs';
-import { Badge, Button, Card, LinkButton, Notice, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, LinkButton, Notice, PageHeader, Segmented, inputClass, merge } from '@/components/ui';
 import { ReminderSettings } from '@/components/ReminderSettings';
 
 export default function SettingsPage() {
@@ -61,42 +61,30 @@ export default function SettingsPage() {
       <PageHeader title="Pengaturan" />
       <Card className="space-y-3">
         <h2 className="font-extrabold">Tampilan</h2>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Tema">
-          {([['light', 'Terang', Sun], ['dark', 'Gelap', Moon], ['system', 'Ikuti perangkat', Monitor]] as const).map(([t, label, Icon]) => <Button key={t} role="radio" aria-checked={theme === t} variant={theme === t ? 'primary' : 'secondary'} size="sm" onClick={() => pick(t)}><Icon size={16} aria-hidden />{label}</Button>)}
-        </div>
+        <Segmented radio full label="Tema" value={theme} onChange={pick} options={([['light', 'Terang', Sun], ['dark', 'Gelap', Moon], ['system', 'Ikuti perangkat', Monitor]] as const).map(([t, label, Icon]) => ({ value: t, label, icon: <Icon size={16} aria-hidden /> }))} />
         <h3 className="flex items-center gap-2 pt-2 font-bold" id="ukuran-huruf"><Type size={16} aria-hidden />Ukuran huruf</h3>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="ukuran-huruf">
-          {([['normal', 'Normal'], ['large', 'Besar'], ['xlarge', 'Sangat besar']] as const).map(([f, label]) => <Button key={f} role="radio" aria-checked={font === f} variant={font === f ? 'primary' : 'secondary'} size="sm" onClick={() => { setFontScale(f); setFont(f); }}>{label}</Button>)}
-        </div>
+        <Segmented radio full labelledBy="ukuran-huruf" value={font} onChange={(f) => { setFontScale(f); setFont(f); }} options={([['normal', 'Normal'], ['large', 'Besar'], ['xlarge', 'Sangat besar']] as const).map(([f, label]) => ({ value: f, label }))} />
         <p className="text-sm text-muted">Mengubah ukuran seluruh tampilan di perangkat ini, termasuk tombol.</p>
         <h3 className="flex items-center gap-2 pt-2 font-bold" id="getaran"><Vibrate size={16} aria-hidden />Getaran saat menjawab</h3>
         {haptics.supported ? (
           <>
-            <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="getaran">
-              {([[true, 'Nyala'], [false, 'Mati']] as const).map(([on, label]) => <Button key={label} role="radio" aria-checked={haptics.on === on} variant={haptics.on === on ? 'primary' : 'secondary'} size="sm" onClick={() => { setHaptics(on); setHapticsState((h) => ({ ...h, on })); if (on) buzz('ok'); }}>{label}</Button>)}
-            </div>
+            <Segmented radio labelledBy="getaran" value={haptics.on ? 'on' : 'off'} onChange={(v) => { const on = v === 'on'; setHaptics(on); setHapticsState((h) => ({ ...h, on })); if (on) buzz('ok'); }} options={[{ value: 'on', label: 'Nyala' }, { value: 'off', label: 'Mati' }]} />
             <p className="text-sm text-muted">Getar singkat saat jawaban benar, dua kali saat belum tepat.</p>
           </>
         ) : <p className="text-sm text-muted">Perangkat atau browser ini tidak mendukung getaran (misalnya iPhone dan komputer). Di HP Android, getaran menyala otomatis.</p>}
         <h3 className="flex items-center gap-2 pt-2 font-bold" id="suara"><Volume2 size={16} aria-hidden />Efek suara</h3>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="suara">
-          {([[true, 'Nyala'], [false, 'Mati']] as const).map(([on, label]) => <Button key={label} role="radio" aria-checked={sound === on} variant={sound === on ? 'primary' : 'secondary'} size="sm" onClick={() => { setSound(on); setSoundState(on); if (on) chime('ok'); }}>{label}</Button>)}
-        </div>
+        <Segmented radio labelledBy="suara" value={sound ? 'on' : 'off'} onChange={(v) => { const on = v === 'on'; setSound(on); setSoundState(on); if (on) chime('ok'); }} options={[{ value: 'on', label: 'Nyala' }, { value: 'off', label: 'Mati' }]} />
         <p className="text-sm text-muted">Bunyi singkat saat jawaban benar atau belum tepat, saat kombo, dan saat sesi selesai. Mengikuti volume perangkat.</p>
       </Card>
       <Card className="space-y-3">
         <h2 className="font-extrabold">Target harian</h2>
         <p className="text-sm text-muted">Target yang realistis lebih baik daripada target tinggi yang jarang tercapai.</p>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Target XP harian">
-          {GAME.dailyGoalOptions.map((g, i) => <Button key={g} role="radio" aria-checked={learner.profile.dailyGoalXp === g} variant={learner.profile.dailyGoalXp === g ? 'primary' : 'secondary'} size="sm" onClick={() => act((d) => { d.profile.dailyGoalXp = g; })}>{g} XP · {['Santai', 'Rutin', 'Serius', 'Intensif'][i]}</Button>)}
-        </div>
+        <Segmented radio full label="Target XP harian" className="grid grid-cols-2 sm:flex" value={String(learner.profile.dailyGoalXp)} onChange={(v) => act((d) => { d.profile.dailyGoalXp = Number(v); })} options={GAME.dailyGoalOptions.map((g, i) => ({ value: String(g), label: `${g} XP · ${['Santai', 'Rutin', 'Serius', 'Intensif'][i]}` }))} />
       </Card>
       <section id="pengingat" className="scroll-mt-24"><ReminderSettings /></section>
       <Card className="space-y-3">
         <h2 className="font-extrabold">Aksen audio</h2>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Aksen">
-          {(['us', 'uk'] as const).map((a) => <Button key={a} role="radio" aria-checked={learner.profile.accent === a} variant={learner.profile.accent === a ? 'primary' : 'secondary'} size="sm" onClick={() => act((d) => { d.profile.accent = a; })}>{a === 'us' ? 'Amerika' : 'Inggris (British)'}</Button>)}
-        </div>
+        <Segmented radio full label="Aksen" value={learner.profile.accent} onChange={(a) => act((d) => { d.profile.accent = a; })} options={[{ value: 'us' as const, label: 'Amerika' }, { value: 'uk' as const, label: 'Inggris (British)' }]} />
       </Card>
       <Card className="space-y-3">
         <h2 className="flex items-center gap-2 font-extrabold"><Download size={18} aria-hidden />Belajar offline {premium ? <Badge tone="accent"><Crown size={12} aria-hidden />Premium</Badge> : <Badge tone="muted">Premium</Badge>}</h2>
@@ -116,7 +104,7 @@ export default function SettingsPage() {
             {deleting === 'idle' ? <Button size="sm" variant="secondary" onClick={() => setDeleting('confirm')}>Hapus akun saya</Button> : (
               <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); if (deleteText === 'HAPUS') void deleteAccount(); }}>
                 <label className="block"><span className="mb-1 block text-sm font-bold">Ketik HAPUS untuk mengonfirmasi</span>
-                  <input className="w-40 rounded-2xl border-2 border-line-strong bg-surface px-3 py-2 font-mono" value={deleteText} autoComplete="off" onChange={(e) => setDeleteText(e.target.value.toUpperCase())} />
+                  <input className={merge(inputClass, 'w-40 font-mono')} value={deleteText} autoComplete="off" onChange={(e) => setDeleteText(e.target.value.toUpperCase())} />
                 </label>
                 <Button type="submit" size="sm" variant="danger" disabled={deleteText !== 'HAPUS' || deleting === 'busy'}>{deleting === 'busy' ? 'Menghapus...' : 'Hapus akun selamanya'}</Button>
                 <Button type="button" size="sm" variant="ghost" onClick={() => { setDeleting('idle'); setDeleteText(''); }}>Batal</Button>
@@ -126,7 +114,8 @@ export default function SettingsPage() {
           </section>
         )}
       </Card>
-      <p className="text-center text-xs text-muted">Lentera English · konten {ix.pack.version} · seluruh mesin belajar berjalan tanpa layanan AI · <a href="/privasi" className="underline">Privasi</a> · <a href="/kontak" className="underline">Hubungi kami</a></p>
+      <p className="text-center text-xs text-muted">Lentera English · konten {ix.pack.version} · seluruh mesin belajar berjalan tanpa layanan AI</p>
+      <p className="-mt-3 flex justify-center gap-2 text-sm"><a href="/privasi" className="inline-flex min-h-11 items-center px-2 font-bold text-muted underline">Privasi</a><a href="/kontak" className="inline-flex min-h-11 items-center px-2 font-bold text-muted underline">Hubungi kami</a></p>
     </div>
   );
 }

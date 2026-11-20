@@ -50,10 +50,10 @@ export default function PairsPage() {
             const body = (
               <>
                 <span className="flex shrink-0 -space-x-3" aria-hidden>
-                  {t.keys.slice(0, 3).map((k) => <span key={k} className="grid h-12 w-12 place-items-center rounded-2xl border-2 border-outline bg-surface"><Pic k={k} size={36} label={false} /></span>)}
+                  {t.keys.slice(0, 3).map((k) => <span key={k} className="grid h-12 w-12 place-items-center rounded-2xl border-2 border-line bg-surface"><Pic k={k} size={36} label={false} /></span>)}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-display text-lg font-bold leading-tight">{t.title}</span>
+                  <span className="block text-lg font-extrabold leading-tight">{t.title}</span>
                   <span className="block text-sm text-muted">{t.keys.length} kata{best[t.id] ? ` · Rekor ${best[t.id]}` : ''}</span>
                 </span>
                 {locked ? <Badge tone="accent"><Lock size={12} aria-hidden />Premium</Badge> : t.premium && <Crown size={18} className="text-accent-strong" aria-label="Tema Premium" />}
@@ -62,10 +62,10 @@ export default function PairsPage() {
             return (
               <li key={t.id}>
                 {locked ? (
-                  <Link href="/app/subscription" className="flex h-full items-center gap-3 rounded-3xl border-2 border-dashed border-line-strong bg-surface-2 p-4">{body}<span className="sr-only">: khusus Premium, lihat paket Premium</span></Link>
+                  <Link href="/app/subscription" className="flex h-full items-center gap-3 rounded-2xl border-2 border-dashed border-line-strong bg-surface-2 p-4">{body}<span className="sr-only">: khusus Premium, lihat paket Premium</span></Link>
                 ) : (
                   <button type="button" onClick={() => start(t)}
-                    className="flex h-full w-full items-center gap-3 rounded-3xl border-[2.5px] border-outline bg-surface p-4 text-left shadow-[0_4px_0_var(--outline)] transition active:translate-y-[3px] active:shadow-[0_1px_0_var(--outline)]">{body}</button>
+                    className="flex h-full w-full items-center gap-3 rounded-2xl border-2 border-line bg-surface p-4 text-left shadow-[0_3px_0_var(--line)] transition active:translate-y-[3px] active:shadow-[0_1px_0_var(--line)]">{body}</button>
                 )}
               </li>
             );
@@ -157,7 +157,7 @@ function Board({ theme, best, seed, onAgain, onExit }: { theme: PairTheme; best:
     <div className="mx-auto max-w-xl">
       <p className="sr-only" role="status" aria-live="polite">{announce}</p>
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h1 className="flex items-center gap-2 font-display text-2xl font-bold"><Shapes size={24} className="text-brand" aria-hidden />{theme.title}</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-extrabold"><Shapes size={24} className="text-brand" aria-hidden />{theme.title}</h1>
         <Button variant="secondary" size="sm" onClick={onExit}>Ganti tema</Button>
       </div>
 
@@ -165,11 +165,11 @@ function Board({ theme, best, seed, onAgain, onExit }: { theme: PairTheme; best:
         <Card className="relative space-y-4 overflow-hidden text-center">
           <Confetti />
           <Mascot mood={done.record ? 'dance' : 'cheer'} size={96} className="mx-auto" />
-          <h2 className="font-display text-2xl font-bold">Semua pasangan ketemu!</h2>
+          <h2 className="text-2xl font-extrabold">Semua pasangan ketemu!</h2>
           {done.record && <p><Badge tone="accent"><Trophy size={14} aria-hidden />Rekor baru!</Badge></p>}
           <dl className="grid grid-cols-2 gap-2 text-left sm:grid-cols-4">
             {([['Skor', String(done.score)], ['Waktu', clock(done.seconds)], ['Kombo terbaik', `×${done.maxCombo}`], ['Salah tebak', String(done.misses)]] as const).map(([k, v]) => (
-              <div key={k} className="rounded-2xl border-2 border-line bg-surface-2 p-3"><dt className="text-xs font-bold text-muted">{k}</dt><dd className="font-display text-2xl font-bold">{v}</dd></div>
+              <div key={k} className="rounded-xl bg-surface-2 p-3 dark:bg-line/60"><dt className="text-xs font-bold text-muted">{k}</dt><dd className="font-display text-2xl font-bold">{v}</dd></div>
             ))}
           </dl>
           <p className="text-sm text-muted">
@@ -181,7 +181,7 @@ function Board({ theme, best, seed, onAgain, onExit }: { theme: PairTheme; best:
               {words.map((k) => (
                 <li key={k} className="flex items-center gap-3 rounded-2xl border-2 border-line bg-surface p-2">
                   <Pic k={k} size={40} label={false} />
-                  <span className="min-w-0 flex-1"><span lang="en" className="block font-display text-lg font-bold leading-tight">{pairWord(k)}</span><span className="block text-sm text-muted">{pairMeaning(k)}</span></span>
+                  <span className="min-w-0 flex-1"><span lang="en" className="block text-lg font-extrabold leading-tight">{pairWord(k)}</span><span className="block text-sm text-muted">{pairMeaning(k)}</span></span>
                   <AudioButton text={pairWord(k)} size="sm" label={`Dengar "${pairWord(k)}"`} />
                 </li>
               ))}
@@ -195,10 +195,10 @@ function Board({ theme, best, seed, onAgain, onExit }: { theme: PairTheme; best:
       ) : (
         <>
           <div className="mb-3 flex flex-wrap items-center gap-2" aria-label="Papan skor">
-            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-outline bg-surface px-3 py-1 font-bold"><Timer size={16} aria-hidden /><span className="sr-only">Waktu </span><span role="timer" aria-live="off">{clock(elapsed)}</span></span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-outline bg-surface px-3 py-1 font-bold"><Sparkles size={16} className="text-accent-strong" aria-hidden />Skor {score}</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-outline bg-surface px-3 py-1 font-bold">Pasangan {matched.length}/{total}</span>
-            {combo >= 2 && <span key={combo} className="combo-pop inline-flex items-center gap-1 rounded-full border-2 border-outline bg-accent px-3 py-1 font-display font-bold text-[#1e1b3a]"><Zap size={16} aria-hidden />Kombo ×{combo}!</span>}
+            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-line bg-surface px-3 py-1 font-bold"><Timer size={16} aria-hidden /><span className="sr-only">Waktu </span><span role="timer" aria-live="off">{clock(elapsed)}</span></span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-line bg-surface px-3 py-1 font-bold"><Sparkles size={16} className="text-accent-strong" aria-hidden />Skor {score}</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-line bg-surface px-3 py-1 font-bold">Pasangan {matched.length}/{total}</span>
+            {combo >= 2 && <span key={combo} className="combo-pop inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 font-extrabold text-on-accent"><Zap size={16} aria-hidden />Kombo ×{combo}!</span>}
           </div>
           {!startAt && <p className="mb-3 text-sm text-muted">Waktu mulai berjalan saat kamu membalik kartu pertama.</p>}
           <div role="group" aria-label="Papan kartu" className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
@@ -212,15 +212,15 @@ function Board({ theme, best, seed, onAgain, onExit }: { theme: PairTheme; best:
                   {/* The name comes from this text; the drawn faces are decoration. */}
                   <span className="sr-only">{isOpen ? `Kartu ${i + 1}: ${face}${isMatched ? ', sudah cocok' : ''}` : `Kartu ${i + 1}, tertutup`}</span>
                   <span className="flip-inner block" aria-hidden>
-                    <span className="flip-face grid place-items-center rounded-2xl border-[2.5px] border-outline bg-brand text-on-brand shadow-[0_4px_0_var(--outline)]">
+                    <span className="flip-face grid place-items-center rounded-2xl border-2 border-line bg-brand text-on-brand shadow-[0_3px_0_var(--line)]">
                       <LogoMark size={34} />
                     </span>
-                    <span className={cx('flip-face flip-front grid place-items-center rounded-2xl border-[2.5px] shadow-[0_4px_0_var(--outline)]', isMatched ? 'border-ok bg-ok-soft' : miss.includes(c.id) ? 'border-bad bg-bad-soft' : 'border-outline bg-surface')}>
+                    <span className={cx('flip-face flip-front grid place-items-center rounded-2xl border-2 shadow-[0_3px_0_var(--line)]', isMatched ? 'border-ok bg-ok-soft' : miss.includes(c.id) ? 'border-bad bg-bad-soft' : 'border-outline bg-surface')}>
                       {c.face === 'pic' ? (
                         <Pic k={c.key} size={64} label={false} className="h-[62%] w-[62%]" />
                       ) : (
                         <span className="px-1 text-center leading-tight">
-                          <span lang="en" className="block break-words font-display text-xl font-bold sm:text-2xl">{pairWord(c.key)}</span>
+                          <span lang="en" className="block break-words text-xl font-extrabold sm:text-2xl">{pairWord(c.key)}</span>
                           {isMatched && <span className="block text-xs font-bold text-muted">{pairMeaning(c.key)}</span>}
                         </span>
                       )}

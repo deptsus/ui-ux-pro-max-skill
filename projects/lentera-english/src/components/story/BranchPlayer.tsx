@@ -100,7 +100,7 @@ export function BranchPlayer({ story, onDone }: { story: Story; onDone: (r: Bran
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-card">
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div key={`${nodeId ?? 'intro'}:${picked ? 'reply' : 'scene'}`} className="animate-pop">
           <StoryStage scene={scene} characters={story.characters} speaker={speaker} speakerPose={picked ? (picked.correct && picked.natural === 3 ? 'happy' : 'think') : cur.line.pose} beat={i + picks.length * 10}
             label={`${onStage.join(', ')} di ${BACKDROP_LABEL[scene.backdrop]}.`} />
@@ -126,7 +126,7 @@ export function BranchPlayer({ story, onDone }: { story: Story; onDone: (r: Bran
           <p className="flex items-center gap-2 font-extrabold"><MessageCircle size={18} className="text-brand" aria-hidden />{node!.ask ?? 'Apa yang kamu katakan?'}</p>
           <div className="grid gap-2" role="group" aria-label="Pilihan jawaban">
             {order.map((k) => (
-              <button key={k} type="button" onClick={() => choose(node!.choices![k])} className="en rounded-2xl border-2 border-b-4 border-line bg-surface px-4 py-3 text-left font-semibold transition hover:bg-surface-2">
+              <button key={k} type="button" onClick={() => choose(node!.choices![k])} className="en min-h-12 rounded-xl tile border-line bg-surface px-4 py-3 text-left font-semibold hover:bg-surface-2">
                 {node!.choices![k].text}
               </button>
             ))}

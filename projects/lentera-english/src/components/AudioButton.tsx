@@ -25,10 +25,10 @@ export function AudioButton({ text, audioKey, size = 'md', label = 'Putar audio'
   const icon = size === 'lg' ? 30 : size === 'sm' ? 16 : 22;
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
-      <button type="button" onClick={() => run(false)} aria-label={label} className={cx('grid place-items-center rounded-2xl border-2 border-b-4 border-brand-strong bg-brand text-on-brand transition active:translate-y-0.5 active:border-b-2', dim, busy === 'normal' && 'animate-pulse')}>
+      <button type="button" onClick={() => run(false)} aria-label={label} className={cx('grid shrink-0 place-items-center rounded-xl bg-brand text-on-brand shadow-[0_2px_0_var(--brand-strong)] transition active:translate-y-[2px] active:shadow-none', dim, busy === 'normal' && 'animate-pulse')}>
         <Volume2 size={icon} aria-hidden />
       </button>
-      <button type="button" onClick={() => run(true)} aria-label={`${label} (lambat)`} title="Putar lambat" className={cx('grid place-items-center rounded-2xl border-2 border-b-4 border-line bg-surface text-brand transition active:translate-y-0.5 active:border-b-2', size === 'lg' ? 'h-12 w-12' : 'h-11 w-11', busy === 'slow' && 'animate-pulse')}>
+      <button type="button" onClick={() => run(true)} aria-label={`${label} (lambat)`} title="Putar lambat" className={cx('grid shrink-0 place-items-center rounded-xl border border-line-strong bg-surface text-brand transition hover:bg-surface-2 active:bg-surface-2', size === 'lg' ? 'h-12 w-12' : 'h-11 w-11', busy === 'slow' && 'animate-pulse')}>
         <Snail size={size === 'lg' ? 22 : 16} aria-hidden />
       </button>
       {showSource && (

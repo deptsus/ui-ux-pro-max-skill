@@ -83,7 +83,7 @@ function Conversations() {
         {node && !picked && (
           <div className="space-y-2">
             <p className="text-sm font-bold text-muted">Pilih responsmu:</p>
-            {options.map((o) => <button key={o.text} type="button" onClick={() => choose(o)} className="en w-full rounded-2xl border-2 border-b-4 border-line bg-surface px-4 py-3 text-left font-semibold transition hover:bg-surface-2">{o.text}</button>)}
+            {options.map((o) => <button key={o.text} type="button" onClick={() => choose(o)} className="en min-h-12 w-full rounded-xl tile border-line bg-surface px-4 py-3 text-left font-semibold hover:bg-surface-2">{o.text}</button>)}
           </div>
         )}
 
@@ -122,7 +122,7 @@ function Conversations() {
         if (!list.length) return null;
         return (
           <section key={level} className="mb-6" aria-labelledby={`level-${level}`}>
-            <h2 id={`level-${level}`} className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Level {level} · {ix.pack.levels.find((l) => l.code === level)?.title}</h2>
+            <h2 id={`level-${level}`} className="mb-2 px-1 text-base font-extrabold">Level {level} · {ix.pack.levels.find((l) => l.code === level)?.title}</h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {list.map((s) => {
                 const rec = learner.conversations[s.id];

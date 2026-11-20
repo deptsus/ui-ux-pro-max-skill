@@ -79,7 +79,7 @@ function Player({ story, onDone }: { story: Story; onDone: () => void }) {
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-card">
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div key={cur.si} className="animate-pop">
           <StoryStage scene={cur.scene} characters={story.characters} speaker={cur.line.who} speakerPose={cur.line.pose} beat={i} label={label} />
         </div>
@@ -179,7 +179,7 @@ function StoryView({ story }: { story: Story }) {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <PageHeader title={story.title} subtitle={story.branch ? `Level ${story.level} · cerita bercabang · ${story.branch.nodes.filter((n) => n.choices?.length).length} keputusan` : `Level ${story.level} · ${story.scenes.length} adegan · ${questions.length} pertanyaan`} />
-      <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-card">
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <StoryStage scene={{ ...first, lines: [] }} characters={story.characters} beat={0} label={`Pembuka cerita ${story.title}`} />
       </div>
       <Card className="space-y-3">
@@ -220,7 +220,7 @@ function Stories() {
         if (!items.length) return null;
         return (
           <section key={level} className="mb-6" aria-labelledby={`level-${level}`}>
-            <h2 id={`level-${level}`} className="mb-3 text-sm font-extrabold uppercase tracking-wide text-muted">Level {level} · {ix.pack.levels.find((x) => x.code === level)?.title}</h2>
+            <h2 id={`level-${level}`} className="mb-2 px-1 text-base font-extrabold">Level {level} · {ix.pack.levels.find((x) => x.code === level)?.title}</h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {items.map((s) => {
                 const done = learner.rewards[`story:${s.id}`];

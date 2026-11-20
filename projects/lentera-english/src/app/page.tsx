@@ -118,7 +118,7 @@ export default function Landing() {
 
         <section className="mx-auto max-w-6xl px-5 pb-12" aria-label="Lentera dalam angka">
           <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {STATS.map(([value, label]) => <div key={label} className="rounded-3xl border border-line bg-surface p-4 text-center"><dt className="sr-only">{label}</dt><dd><span className="block text-3xl font-extrabold text-brand">{value}</span><span className="text-sm font-bold text-muted">{label}</span></dd></div>)}
+            {STATS.map(([value, label]) => <div key={label} className="rounded-2xl border border-line bg-surface p-4 text-center"><dt className="sr-only">{label}</dt><dd><span className="block text-3xl font-extrabold text-brand">{value}</span><span className="text-sm font-bold text-muted">{label}</span></dd></div>)}
           </dl>
         </section>
 
@@ -134,7 +134,7 @@ export default function Landing() {
             <p className="mt-2 max-w-2xl text-muted">Setiap pelajaran mengikuti delapan langkah yang sama, seperti kelas yang dirancang guru berpengalaman.</p>
             <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map(([title, desc], i) => (
-                <li key={title} className="rounded-3xl border border-line bg-bg p-4"><span className="grid h-9 w-9 place-items-center rounded-full bg-brand text-sm font-extrabold text-on-brand">{i + 1}</span><p className="mt-3 font-extrabold">{title}</p><p className="mt-1 text-sm text-muted">{desc}</p></li>
+                <li key={title} className="rounded-2xl border border-line bg-bg p-4"><span className="grid h-9 w-9 place-items-center rounded-full bg-brand text-sm font-extrabold text-on-brand">{i + 1}</span><p className="mt-3 font-extrabold">{title}</p><p className="mt-1 text-sm text-muted">{desc}</p></li>
               ))}
             </ol>
           </div>
@@ -170,7 +170,7 @@ export default function Landing() {
             <h2 className="text-3xl font-extrabold tracking-tight">Dari nol sampai mahir</h2>
             <p className="mt-2 max-w-2xl text-muted">Kurikulum mengikuti kerangka CEFR. Naik level hanya setelah lulus ujian.</p>
             <ol className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {LEVELS.map(([code, name]) => <li key={code} className="rounded-3xl border border-line bg-bg p-4 text-center"><p className="text-3xl font-extrabold text-brand">{code}</p><p className="mt-1 text-sm font-bold">{name}</p></li>)}
+              {LEVELS.map(([code, name]) => <li key={code} className="rounded-2xl border border-line bg-bg p-4 text-center"><p className="text-3xl font-extrabold text-brand">{code}</p><p className="mt-1 text-sm font-bold">{name}</p></li>)}
             </ol>
             <p className="mt-4 flex items-start gap-2 text-sm text-muted"><ClipboardList size={18} className="mt-0.5 shrink-0" aria-hidden />Setiap level sudah memiliki pelajaran lengkap. Unit lanjutan di tiap level masih terus ditambahkan dan ditandai &ldquo;sedang disusun&rdquo; di jalur belajar.</p>
           </div>
@@ -208,13 +208,13 @@ export default function Landing() {
           <p className="mt-2 max-w-2xl text-muted">Belajar bahasa tidak boleh dibayar dengan data pribadi.</p>
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {TRUST.map(([Icon, title, desc]) => (
-              <li key={title} className="rounded-3xl border border-line bg-surface p-4"><Icon size={22} className="text-ok" aria-hidden /><p className="mt-2 font-extrabold">{title}</p><p className="mt-1 text-sm text-muted">{desc}</p></li>
+              <li key={title} className="rounded-2xl border border-line bg-surface p-4"><Icon size={22} className="text-ok" aria-hidden /><p className="mt-2 font-extrabold">{title}</p><p className="mt-1 text-sm text-muted">{desc}</p></li>
             ))}
           </ul>
-          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-3xl border-2 border-brand bg-brand-soft p-4">
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-brand/40 bg-brand-soft p-4">
             <Smartphone size={28} className="shrink-0 text-brand" aria-hidden />
             <div className="min-w-0 flex-1"><p className="font-extrabold">Aplikasi Android {ANDROID_APP.versionName}, tanpa Chrome</p><p className="text-sm text-muted">Suara dari mesin suara HP, pengingat yang tetap berbunyi walau tanpa internet, dan berbagi langsung dari aplikasi. Ukurannya sekitar 250 KB.</p></div>
-            <a href={ANDROID_APK} download className="inline-flex min-h-11 items-center gap-2 rounded-2xl border-2 border-b-4 border-brand-strong bg-brand px-4 font-extrabold text-on-brand"><Download size={18} aria-hidden />Unduh APK</a>
+            <a href={ANDROID_APK} download className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand shadow-[0_2px_0_var(--brand-strong)] active:translate-y-[2px] active:shadow-none px-4 font-extrabold text-on-brand"><Download size={18} aria-hidden />Unduh APK</a>
           </div>
           <p className="mt-3 text-sm text-muted">Rincian ada di <Link href="/privasi" className="font-bold text-brand underline">Kebijakan privasi</Link>. Sertifikat ujian level bisa dicek siapa pun di <Link href="/sertifikat" className="font-bold text-brand underline">Verifikasi sertifikat</Link>.</p>
         </section>

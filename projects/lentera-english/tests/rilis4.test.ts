@@ -289,8 +289,10 @@ describe('pengingat PR dan ringkasan PR (migrasi 0010)', () => {
     await snapshot(budi, { 'hw.a2-past-be': { assignedAt: now - 6 * DAY, dueAt: now - 4 * DAY, submissions: [{ at: now - 3 * DAY, score: 90, late: true }] } });
     await db.rpc('sync_learner', { p_user: budi, p_events: [{ id: 'hw-ev-1', kind: 'homework', at: now - 3 * DAY, data: { id: 'hw.a2-past-be', score: 90, late: true } }], p_snapshot: null, p_client_updated_at: 0 });
     const o = await db.rpc<{ totals: Record<string, number>; by_homework: { id: string; assigned: number; submitted: number; overdue: number }[]; learners: { name: string; overdue: number; open: number }[]; weeks: { submissions: number }[] }>('admin_homework_overview', { p_actor: admin });
-    // Ani 3 + Budi 1 + the admin's own PR from the previous test (still open).
-    expect(o.totals).toMatchObject({ assigned: 5, submitted: 2, open: 2, overdue: 1, late: 1, avg_score: 80 });
+    // Ani 3 + Budi 1 + the admin's own PR from an earlier test: due at NOW + 1 h (a fixed date),
+    // so it is open before that moment and overdue after it.
+    const adminOpen = now < NOW + 3600_000 ? 1 : 0;
+    expect(o.totals).toMatchObject({ assigned: 5, submitted: 2, open: 1 + adminOpen, overdue: 2 - adminOpen, late: 1, avg_score: 80 });
     expect(o.by_homework.find((h) => h.id === 'hw.week')).toMatchObject({ assigned: 2, submitted: 1, overdue: 0 });
     expect(o.by_homework.find((h) => h.id === 'hw.a2-past-be')).toMatchObject({ assigned: 2, submitted: 1, overdue: 1 });
     expect(o.learners[0]).toMatchObject({ name: 'Ani', overdue: 1, open: 1 });

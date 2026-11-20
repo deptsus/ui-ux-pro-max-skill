@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BellRing, CloudOff, Crown, Flame, Heart, ShieldCheck, X, Zap } from 'lucide-react';
-import { NAV, TABS } from '@/components/nav';
+import { NAV_GROUPS, TABS } from '@/components/nav';
 import { currentHearts, liveStreak } from '@/lib/engine/gamification';
 import { dueItems } from '@/lib/engine/srs';
 import { isPremium } from '@/lib/engine/types';
@@ -17,7 +17,11 @@ import { buildWeekly, ensureWeekly, weeklyId } from '@/lib/engine/weekly';
 import { AppUpdateBanner } from '@/components/AppUpdateBanner';
 import { NativeSync } from '@/components/NativeSync';
 import { Logo, Mascot } from '@/components/Mascot';
-import { Button, cx } from '@/components/ui';
+import { Button, Toaster, cx } from '@/components/ui';
+
+// Header stats: icon + number with a full name for screen readers; the hit area grows to 44 px.
+const CHIP_BASE = "relative flex h-9 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-sm font-extrabold tabular-nums before:absolute before:inset-x-0 before:-inset-y-1 before:content-['']";
+const CHIP = cx(CHIP_BASE, 'border-line bg-surface');
 import { applySdMode } from '@/lib/client/prefs';
 
 function Splash({ error, onRetry }: { error?: string | null; onRetry?: () => void }) {
@@ -32,7 +36,7 @@ function Splash({ error, onRetry }: { error?: string | null; onRetry?: () => voi
             <Button onClick={onRetry}>Coba lagi</Button>
           </>
         ) : (
-          <p className="font-bold text-muted" role="status">Menyalakan lentera...</p>
+          <p className="font-bold text-muted" role="status">Menyalakan lentera…</p>
         )}
       </div>
     </div>
@@ -89,22 +93,34 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const streak = liveStreak(learner.streak, now);
   const due = dueItems(learner.reviews, now).length;
   const active = (href: string) => (href === '/app' ? pathname === '/app' : pathname.startsWith(href));
+  // Bottom nav: a tab is current for its own pages; "Lainnya" for every page listed in it.
+  const tabOn = (t: (typeof TABS)[number]) => (t.href === '/app' ? pathname === '/app' : t.match.some((m) => pathname.startsWith(m)))
+    || (t.href === '/app/more' && pathname !== '/app' && !TABS.some((o) => o.href !== '/app/more' && o.match.some((m) => pathname.startsWith(m))));
 
   return (
     <div className="min-h-dvh lg:pl-64">
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-surface p-4 lg:flex">
-        <Link href="/app" className="mb-4 px-2 text-lg"><Logo /></Link>
-        <nav aria-label="Navigasi utama" className="flex-1 space-y-0.5 overflow-y-auto">
-          {NAV.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} aria-current={active(href) ? 'page' : undefined} className={cx('flex items-center gap-3 rounded-2xl border-2 px-3 py-2 font-display text-base font-bold transition', active(href) ? 'border-brand bg-brand-soft text-brand' : 'border-transparent text-muted hover:bg-surface-2 hover:text-ink')}>
-              <Icon size={18} aria-hidden />
-              {label}
-              {href === '/app/review' && due > 0 && <span className="ml-auto rounded-full bg-accent px-2 text-xs text-[#1e1b3a]">{due}</span>}
-            </Link>
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-surface px-3 pb-4 pt-[max(1rem,env(safe-area-inset-top))] lg:flex">
+        <Link href="/app" className="mb-3 flex min-h-11 items-center px-3 text-lg"><Logo /></Link>
+        <nav aria-label="Navigasi utama" className="-mx-1 flex-1 space-y-4 overflow-y-auto px-1">
+          {NAV_GROUPS.map((g) => (
+            <div key={g.title}>
+              <p className="px-3 pb-1 text-xs font-bold text-muted">{g.title}</p>
+              <ul className="space-y-0.5">
+                {g.items.map(({ href, label, icon: Icon }) => (
+                  <li key={href}>
+                    <Link href={href} aria-current={active(href) ? 'page' : undefined} className={cx('flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-bold transition-colors', active(href) ? 'bg-brand-soft text-brand-ink' : 'text-muted hover:bg-surface-2 hover:text-ink')}>
+                      <Icon size={18} aria-hidden />
+                      {label}
+                      {href === '/app/review' && due > 0 && <span className="ml-auto rounded-full bg-accent px-2 text-xs text-on-accent">{due}<span className="sr-only"> menunggu</span></span>}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
         </nav>
         {admin && (
-          <Link href="/admin" className="mt-3 flex items-center gap-3 rounded-xl bg-ink px-3 py-2.5 text-sm font-extrabold text-bg">
+          <Link href="/admin" className="mt-3 flex min-h-11 items-center gap-3 rounded-xl bg-ink px-3 py-2.5 text-sm font-bold text-bg">
             <ShieldCheck size={18} aria-hidden />
             Dashboard admin
             {!!pending && <span className="ml-auto rounded-full bg-bad px-2 text-xs text-on-brand">{pending}</span>}
@@ -112,58 +128,63 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       </aside>
 
-      <header className="sticky top-0 z-10 border-b-2 border-outline/10 bg-bg/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2.5">
-          <Link href="/app" className="mr-auto flex min-h-11 min-w-11 items-center lg:hidden"><Logo size={24} compact /></Link>
+      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center gap-1.5 px-4 py-2">
+          <Link href="/app" className="mr-auto flex min-h-11 min-w-11 items-center lg:hidden" aria-label="Lentera English, ke Beranda"><Logo size={24} compact /></Link>
           <span className="mr-auto hidden text-sm font-bold text-muted lg:block">{session ? session.email : 'Mode tamu · progres tersimpan di perangkat ini'}</span>
           {admin && (
-            <Link href="/admin" className="relative flex min-w-11 shrink-0 items-center justify-center gap-1 rounded-full bg-ink before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] px-2.5 py-1 text-sm font-extrabold text-bg lg:hidden" aria-label={pending ? `Dashboard admin, ${pending} pembayaran menunggu konfirmasi` : 'Dashboard admin'}>
-              <ShieldCheck size={16} aria-hidden /><span className="hidden min-[400px]:inline">Admin</span>
-              {!!pending && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-bad px-1 text-[11px] text-on-brand" aria-hidden>{pending}</span>}
+            <Link href="/admin" className={cx(CHIP_BASE, 'border-ink bg-ink text-bg lg:hidden')} aria-label={pending ? `Dashboard admin, ${pending} pembayaran menunggu konfirmasi` : 'Dashboard admin'}>
+              <ShieldCheck size={16} aria-hidden /><span aria-hidden>Admin</span>
+              {!!pending && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-bad px-1 text-xs text-on-brand" aria-hidden>{pending}</span>}
             </Link>
           )}
-          {sync === 'offline' && <span title="Sedang offline. Progres disimpan di perangkat dan dikirim saat tersambung." className="text-muted"><CloudOff size={18} aria-label="Offline" /></span>}
-          <Link href="/app/profile" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] bg-[#fff1d6] text-[#c2410c] dark:bg-accent-soft dark:text-accent-strong" title="Hari belajar beruntun"><Flame size={17} fill="#fb923c" aria-hidden /><span aria-label={`Beruntun ${streak} hari`}>{streak}</span></Link>
-          <Link href="/app/achievements" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] bg-brand-soft text-brand" title="Total XP"><Zap size={17} fill="currentColor" aria-hidden /><span aria-label={`${learner.xp} XP`}>{learner.xp}</span></Link>
+          {sync === 'offline' && <span title="Sedang offline. Progres disimpan di perangkat dan dikirim saat tersambung." className="grid h-11 w-8 place-items-center text-muted"><CloudOff size={18} aria-hidden /><span className="sr-only">Offline</span></span>}
+          <Link href="/app/profile" className={CHIP} aria-label={`Beruntun ${streak} hari`}><Flame size={16} className="text-accent-strong" fill="var(--accent)" aria-hidden />{streak}</Link>
+          <Link href="/app/achievements" className={CHIP} aria-label={`${learner.xp} XP`}><Zap size={16} className="text-brand" fill="currentColor" aria-hidden />{learner.xp}</Link>
           {premium ? (
-            <Link href="/app/subscription" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] min-w-11 justify-center bg-accent text-[#1e1b3a]"><Crown size={17} aria-hidden /><span className="sr-only min-[420px]:not-sr-only">Premium</span></Link>
+            <Link href="/app/subscription" className={cx(CHIP_BASE, 'border-accent bg-accent text-on-accent')}><Crown size={16} aria-hidden /><span className={admin ? 'sr-only min-[420px]:not-sr-only' : undefined}>Premium</span></Link>
           ) : (
-            <Link href="/app/subscription" className="relative flex shrink-0 items-center gap-1 rounded-full border-2 border-outline px-2.5 py-0.5 font-display text-base font-bold shadow-[0_2px_0_var(--outline)] before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-[''] bg-bad-soft text-bad" title="Nyawa. Berkurang saat salah di latihan mandiri dan tes."><Heart size={17} fill="currentColor" aria-hidden /><span aria-label={`${hearts} nyawa`}>{hearts}</span></Link>
+            <Link href="/app/subscription" className={CHIP} aria-label={`${hearts} nyawa`}><Heart size={16} className="text-bad" fill="currentColor" aria-hidden />{hearts}</Link>
           )}
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 pb-28 pt-5 lg:pb-12">
+      <main className="mx-auto max-w-5xl px-4 pb-[calc(var(--bottom-nav)+env(safe-area-inset-bottom)+2rem)] pt-5 lg:pb-12">
         <AppUpdateBanner />
         <NativeSync />
         {admin && alert && (
-          <div role="status" className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-bad bg-bad-soft p-3 text-sm">
+          <div role="status" className="mb-4 flex items-center gap-3 rounded-xl bg-bad-soft px-4 py-2 text-sm">
             <BellRing size={20} className="shrink-0 text-bad" aria-hidden />
             <p className="flex-1 font-bold">{alert}</p>
-            <Link href="/admin" onClick={dismissPendingAlert} className="inline-flex min-h-11 items-center rounded-full bg-bad px-4 font-extrabold text-on-brand">Buka</Link>
-            <button type="button" onClick={dismissPendingAlert} className="text-muted" aria-label="Tutup pemberitahuan"><X size={18} aria-hidden /></button>
+            <Link href="/admin" onClick={dismissPendingAlert} className="inline-flex min-h-11 items-center rounded-xl bg-bad px-4 font-bold text-on-brand">Buka</Link>
+            <button type="button" onClick={dismissPendingAlert} className="-mr-2 grid h-11 w-11 place-items-center rounded-full text-muted hover:bg-surface" aria-label="Tutup pemberitahuan"><X size={18} aria-hidden /></button>
           </div>
         )}
         {admin && !alert && !!pending && pathname === '/app' && (
-          <Link href="/admin" className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-line bg-surface p-3 text-sm">
+          <Link href="/admin" className="mb-4 flex min-h-11 items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm hover:bg-surface-2">
             <ShieldCheck size={20} className="shrink-0 text-brand" aria-hidden />
-            <span className="flex-1"><span className="font-extrabold">{pending} pembayaran menunggu konfirmasi.</span> <span className="text-muted">Ketuk untuk membuka dashboard admin.</span></span>
+            <span className="flex-1"><span className="font-bold">{pending} pembayaran menunggu konfirmasi.</span> <span className="text-muted">Ketuk untuk membuka dashboard admin.</span></span>
           </Link>
         )}
         {children}
       </main>
+      <Toaster />
 
-      <nav aria-label="Navigasi bawah" className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-outline bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
-        <ul className="mx-auto grid max-w-md grid-cols-5">
-          {TABS.map(({ href, label, icon: Icon }) => (
-            <li key={href}>
-              <Link href={href} aria-current={active(href) ? 'page' : undefined} className={cx('relative flex flex-col items-center gap-0.5 py-1.5 font-display text-xs font-bold', active(href) ? 'text-brand' : 'text-muted')}>
-                <span className={cx('grid h-8 w-12 place-items-center rounded-xl border-2 transition', active(href) ? 'border-brand bg-brand-soft' : 'border-transparent')}><Icon size={22} strokeWidth={active(href) ? 2.6 : 2} aria-hidden /></span>
-                {label}
-                {href === '/app/review' && due > 0 && <span className="absolute right-4 top-1 h-2.5 w-2.5 rounded-full bg-accent" aria-label={`${due} ulangan menunggu`} />}
-              </Link>
-            </li>
-          ))}
+      <nav aria-label="Navigasi bawah" className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+        <ul className="mx-auto grid h-16 max-w-md grid-cols-5">
+          {TABS.map((t) => {
+            const on = tabOn(t);
+            const Icon = t.icon;
+            return (
+              <li key={t.href}>
+                <Link href={t.href} aria-current={on ? 'page' : undefined} className={cx('relative flex h-full flex-col items-center justify-center gap-0.5 text-xs font-bold transition-colors', on ? 'text-brand-ink dark:text-brand' : 'text-muted hover:text-ink')}>
+                  <span className={cx('grid h-8 w-14 place-items-center rounded-full transition-colors', on && 'bg-brand-soft')}><Icon size={22} strokeWidth={on ? 2.4 : 2} aria-hidden /></span>
+                  {t.label}
+                  {t.href === '/app/review' && due > 0 && <><span className="absolute right-[calc(50%-1.5rem)] top-2 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-surface" aria-hidden /><span className="sr-only">, {due} ulangan menunggu</span></>}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </div>

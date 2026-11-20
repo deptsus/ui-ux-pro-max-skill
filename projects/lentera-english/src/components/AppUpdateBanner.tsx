@@ -40,7 +40,7 @@ export function AppUpdateBanner() {
     setShow(false);
   };
   return (
-    <div role="status" className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-brand bg-brand-soft p-3 text-sm">
+    <div role="status" className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-brand-soft p-3 text-sm">
       <Download size={20} className="shrink-0 text-brand" aria-hidden />
       <p className="min-w-0 flex-1">
         <span className="font-extrabold">Versi baru aplikasi Lentera ({ANDROID_APP.versionName}) tersedia.</span>{' '}
@@ -48,9 +48,9 @@ export function AppUpdateBanner() {
           ? relogin ? 'Buka file yang terunduh, pilih Perbarui, lalu masuk lagi dengan akunmu.' : 'Buka file yang terunduh, lalu pilih Perbarui. Login dan progresmu tetap aman.'
           : `${ANDROID_APP.news} ${relogin ? (session ? 'Setelah memperbarui, masuk sekali lagi dengan akun ini.' : 'Kamu belajar sebagai tamu: buat akun dulu agar progresmu ikut pindah, karena progres tamu hanya tersimpan di aplikasi lama.') : 'Perbarui agar fitur terbaru di HP berjalan dengan baik.'}`}
       </p>
-      {relogin && !session && !tapped && <Link href="/daftar" className="rounded-full border-2 border-brand px-3 py-1 font-extrabold text-brand">Buat akun</Link>}
-      <a href={ANDROID_APP.url} download onClick={() => setTapped(true)} className="rounded-full bg-brand px-3 py-1.5 font-extrabold text-on-brand">Perbarui</a>
-      <button type="button" onClick={later} className="text-muted" aria-label="Nanti saja"><X size={18} aria-hidden /></button>
+      {relogin && !session && !tapped && <Link href="/daftar" className="inline-flex min-h-11 items-center rounded-xl border border-brand px-4 font-bold text-brand">Buat akun</Link>}
+      <a href={ANDROID_APP.url} download onClick={() => setTapped(true)} className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-on-brand">Perbarui</a>
+      <button type="button" onClick={later} className="-mr-2 grid h-11 w-11 place-items-center rounded-full text-muted hover:bg-surface" aria-label="Nanti saja"><X size={18} aria-hidden /></button>
     </div>
   );
 }

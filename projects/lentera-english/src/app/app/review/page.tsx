@@ -9,7 +9,7 @@ import { refillHeart, reviewResult } from '@/lib/engine/state';
 import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
 import { SessionRunner, SessionSummary, type SessionResult } from '@/components/SessionRunner';
-import { Badge, Button, Card, LinkButton, Notice, PageHeader, dateId } from '@/components/ui';
+import { Badge, Button, Card, LinkButton, ListGroup, ListRow, Notice, PageHeader, SectionHeader, dateId } from '@/components/ui';
 
 const DAY = 86_400_000;
 
@@ -56,7 +56,7 @@ export default function ReviewPage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="space-y-3 lg:col-span-2">
           <div className="flex items-center gap-3">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand text-2xl font-extrabold text-on-brand">{due.length}</span>
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-brand text-2xl font-extrabold tabular-nums text-on-brand">{due.length}</span>
             <div><h2 className="text-lg font-extrabold">Ulangan menunggu</h2><p className="text-sm text-muted">{due.length ? 'Kerjakan sekarang supaya jadwalmu tetap terjaga.' : all.length ? `Tidak ada yang jatuh tempo. Berikutnya ${dateId(all[0].dueAt, { weekday: 'long', day: 'numeric', month: 'long' })}.` : 'Tuntaskan pelajaran pertamamu untuk mulai menjadwalkan ulangan.'}</p></div>
           </div>
           {due.length > 0 && quota > 0 && <Button full size="lg" onClick={() => setTasks(buildReviewTasks(ix, learner, due, quota, `${learner.userId}:${dayKey(now)}`))}>Mulai ulangan ({Math.min(due.length, quota)} materi)</Button>}
@@ -75,7 +75,7 @@ export default function ReviewPage() {
           <h2 className="flex items-center gap-2 font-extrabold"><CheckCircle2 size={18} className="text-ok" aria-hidden />Tes ulang untuk konfirmasi penguasaan</h2>
           <ul className="mt-3 space-y-2">
             {retests.map(([id, t]) => (
-              <li key={id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-surface-2 p-3">
+              <li key={id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-2 p-3 dark:bg-line/60">
                 <div><p className="font-bold">{ix.topicById.get(id)?.title ?? id}</p><p className="text-sm text-muted">Skor {t.score}% · {retestReady(t, now) ? 'siap diuji sekarang' : `dibuka ${dateId(t.retestDueAt ?? now, { weekday: 'long', hour: '2-digit', minute: '2-digit' })}`}</p></div>
                 {retestReady(t, now) ? <LinkButton size="sm" href={`/app/practice?mode=retest&topic=${encodeURIComponent(id)}`}>Tes ulang</LinkButton> : <Badge tone="muted">Menunggu jeda</Badge>}
               </li>
@@ -84,24 +84,13 @@ export default function ReviewPage() {
         </Card>
       )}
 
-      <Card className="mt-4 flex flex-wrap items-center gap-3">
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent text-[#1e1b3a]"><Timer size={24} aria-hidden /></span>
-        <div className="min-w-0 flex-1"><h2 className="font-extrabold">Tantangan Kilat</h2><p className="text-sm text-muted">Soal cepat berbatas waktu dari materi yang sudah kamu pelajari.</p></div>
-        <LinkButton href="/app/practice?mode=timed" variant="accent" size="sm">Main</LinkButton>
-      </Card>
-      <Card className="mt-3 flex flex-wrap items-center gap-3">
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-on-brand"><Shapes size={24} aria-hidden /></span>
-        <div className="min-w-0 flex-1"><h2 className="font-extrabold">Pasangan Kilat</h2><p className="text-sm text-muted">Cocokkan kata bahasa Inggris dengan gambarnya secepat mungkin.</p></div>
-        <LinkButton href="/app/pasangan" variant="secondary" size="sm">Main</LinkButton>
-      </Card>
-
-      <h2 className="mb-2 mt-6 flex items-center gap-2 text-lg font-extrabold"><CalendarClock size={20} aria-hidden />Jadwal semua materi</h2>
+      <h2 className="mb-3 mt-8 flex items-center gap-2 text-xl font-extrabold"><CalendarClock size={20} aria-hidden />Jadwal semua materi</h2>
       {all.length === 0 ? (
         <Card className="text-muted">Belum ada materi terjadwal.</Card>
       ) : (
         <Card className="overflow-x-auto p-0">
           <table className="w-full text-left text-sm">
-            <thead className="bg-surface-2 text-xs uppercase text-muted"><tr><th className="px-4 py-2.5">Materi</th><th className="px-4 py-2.5">Jarak</th><th className="px-4 py-2.5">Berikutnya</th><th className="px-4 py-2.5">Riwayat</th></tr></thead>
+            <thead className="bg-surface-2 text-xs font-bold text-muted dark:bg-line/60"><tr><th className="px-4 py-2.5">Materi</th><th className="px-4 py-2.5">Jarak</th><th className="px-4 py-2.5">Berikutnya</th><th className="px-4 py-2.5">Riwayat</th></tr></thead>
             <tbody>
               {all.map((r) => (
                 <tr key={r.key} className="border-t border-line">
@@ -115,6 +104,15 @@ export default function ReviewPage() {
           </table>
         </Card>
       )}
+
+      <section aria-labelledby="santai" className="mt-8">
+        <SectionHeader id="santai" title="Latihan santai" />
+        <p className="-mt-2 mb-3 text-sm text-muted">Permainan singkat dari materi yang sudah kamu pelajari. Tidak menggantikan ulangan terjadwal.</p>
+        <ListGroup>
+          <ListRow icon={<Timer size={20} />} iconTone="accent" title="Tantangan Kilat" subtitle="Soal cepat berbatas waktu dari materi yang sudah kamu pelajari." trailing={<LinkButton href="/app/practice?mode=timed" variant="secondary" size="sm">Main</LinkButton>} />
+          <ListRow icon={<Shapes size={20} />} title="Pasangan Kilat" subtitle="Cocokkan kata bahasa Inggris dengan gambarnya secepat mungkin." trailing={<LinkButton href="/app/pasangan" variant="secondary" size="sm">Main</LinkButton>} />
+        </ListGroup>
+      </section>
     </div>
   );
 }

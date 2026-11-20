@@ -12,7 +12,7 @@ export function Teaching({ sections }: { sections: TeachingSection[] }) {
           <h3 className="text-lg font-extrabold">{s.heading}</h3>
           <p className="mt-2 leading-relaxed">{s.body}</p>
           {s.table && (
-            <div className="mt-3 overflow-x-auto rounded-2xl border border-line">
+            <div className="mt-3 overflow-x-auto rounded-xl border border-line">
               <table className="w-full text-left text-sm">
                 <thead className="bg-surface-2"><tr>{s.table[0].map((h, j) => <th key={j} scope="col" className="px-3 py-2 font-extrabold">{h}</th>)}</tr></thead>
                 <tbody>{s.table.slice(1).map((row, r) => <tr key={r} className="border-t border-line">{row.map((c, j) => <td key={j} className={cx('px-3 py-2', j === 0 && 'en font-bold')}>{c}</td>)}</tr>)}</tbody>
@@ -22,7 +22,7 @@ export function Teaching({ sections }: { sections: TeachingSection[] }) {
           {s.examples && (
             <ul className="mt-3 space-y-2">
               {s.examples.map((e, j) => (
-                <li key={j} className="flex items-start gap-3 rounded-2xl bg-surface-2 p-3">
+                <li key={j} className="flex items-start gap-3 rounded-xl bg-surface-2 p-3 dark:bg-line/60">
                   <AudioButton text={e.en} size="sm" label={`Dengarkan: ${e.en}`} />
                   <div className="min-w-0"><p className="en font-bold">{e.en}</p><p className="text-sm text-muted">{e.id}</p>{e.note && <p className="mt-0.5 text-sm text-brand">{e.note}</p>}</div>
                 </li>

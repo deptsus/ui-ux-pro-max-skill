@@ -1,44 +1,29 @@
 'use client';
-import Link from 'next/link';
-import { NAV } from '@/components/nav';
-import { PageHeader } from '@/components/ui';
-
-const DESC: Record<string, string> = {
-  '/app/jalur': 'Jalur SD, SMP, SMA sesuai kurikulum sekolah, TOEFL ITP/IELTS, dan bahasa Inggris untuk kerja.',
-  '/app/plan': 'Target tiap minggu sampai C2 untuk Premium.',
-  '/app/homework': 'Tugas tiap pelajaran dan bab, lengkap dengan tenggat.',
-  '/app/exams': 'Tes penempatan, ujian unit, dan ujian level CEFR.',
-  '/app/vocabulary': 'Kata, IPA, arti, contoh, dan audio.',
-  '/app/pasangan': 'Permainan memori: cocokkan kata dengan gambarnya, kejar kombo dan rekor.',
-  '/app/grammar': 'Rujukan semua topik tata bahasa.',
-  '/app/stories': 'Cerita pendek beranimasi, lalu pertanyaan tentang ceritanya.',
-  '/app/listening': 'Latihan menyimak dan panduan pelafalan.',
-  '/app/shadowing': 'Dengar, rekam suaramu, lalu bandingkan sendiri.',
-  '/app/conversations': 'Simulasi situasi nyata dengan dialog bercabang.',
-  '/app/analytics': 'Ketepatan, waktu belajar, dan pola kesalahanmu.',
-  '/app/achievements': 'Lencana, tonggak XP, dan hadiah bab.',
-  '/app/leaderboard': 'Liga mingguan, teman, dan tantangan XP.',
-  '/app/kelas': 'Gabung ke kelas gurumu dengan kode, lihat tugas dan tenggatnya.',
-  '/app/guru': 'Untuk guru: buat kelas, beri tugas, pantau progres siswa.',
-  '/app/orang-tua': 'Untuk orang tua: pantau hari aktif, pelajaran, dan PR anak.',
-  '/app/subscription': 'Paket Free dan Premium, riwayat transaksi.',
-  '/app/settings': 'Tema, pengingat harian, aksen, dan mode offline.',
-};
+// Lainnya: every space that is not a bottom-nav tab, grouped like the desktop sidebar.
+import { NAV_GROUPS } from '@/components/nav';
+import { ListGroup, ListRow, PageHeader } from '@/components/ui';
 
 export default function MorePage() {
   return (
     <div>
       <PageHeader title="Lainnya" subtitle="Semua ruang belajar di sekolah digitalmu." />
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {NAV.filter((n) => DESC[n.href]).map(({ href, label, icon: Icon }) => (
-          <li key={href}>
-            <Link href={href} className="flex h-full items-center gap-3 rounded-3xl border border-line bg-surface p-4 shadow-card transition hover:border-brand">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand"><Icon size={24} aria-hidden /></span>
-              <span><span className="block font-extrabold">{label}</span><span className="block text-sm text-muted">{DESC[href]}</span></span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="space-y-6">
+        {NAV_GROUPS.map((g) => {
+          const items = g.items.filter((n) => n.desc);
+          if (!items.length) return null;
+          const id = `grup-${g.title.toLowerCase().replace(/[^a-z]+/g, '-')}`;
+          return (
+            <section key={g.title} aria-labelledby={id}>
+              <h2 id={id} className="mb-2 px-1 text-sm font-bold text-muted">{g.title}</h2>
+              <ListGroup>
+                {items.map(({ href, label, icon: Icon, desc }) => (
+                  <ListRow key={href} href={href} icon={<Icon size={20} />} title={label} subtitle={desc} />
+                ))}
+              </ListGroup>
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 }

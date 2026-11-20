@@ -32,7 +32,7 @@ export function PictureChoice({ ex, order, choice, locked, onPick }: ChoiceProps
         const o = ex.options![i];
         return (
           <button key={i} type="button" role="radio" aria-checked={choice === i} aria-label={o.text} disabled={locked} onClick={() => onPick(i)}
-            className={cx('tile grid aspect-square place-items-center rounded-3xl p-2', TILE_TONE[stateOf(i, choice, locked, right)])}>
+            className={cx('tile grid aspect-square place-items-center rounded-2xl p-2', TILE_TONE[stateOf(i, choice, locked, right)])}>
             {isPic(o.pic) && <Pic k={o.pic} size={92} label={false} />}
           </button>
         );
@@ -88,7 +88,7 @@ export function SceneChoice({ ex, order, choice, locked, onPick }: ChoiceProps) 
   ) : null;
   return (
     <div className="space-y-3">
-      <div className="relative mx-auto w-full max-w-sm rounded-3xl border-[2.5px] border-outline bg-[#eef6ff] dark:bg-surface-2" style={{ aspectRatio: '240 / 160' }}>
+      <div className="relative mx-auto w-full max-w-sm rounded-2xl border border-line bg-[#eef6ff] dark:bg-surface-2" style={{ aspectRatio: '240 / 160' }}>
         <svg viewBox="0 0 240 160" className="absolute inset-0 h-full w-full" aria-hidden>
           <path d="M0 150 H240" stroke={INK} strokeWidth="2" opacity="0.25" />
           {layer === 0 && figure}
@@ -105,8 +105,8 @@ export function SceneChoice({ ex, order, choice, locked, onPick }: ChoiceProps) 
             const st = stateOf(i, choice, locked, right);
             return (
               <button key={i} type="button" role="radio" aria-checked={choice === i} aria-label={o.text} disabled={locked} onClick={() => onPick(i)}
-                className={cx('absolute grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[2.5px] border-dashed font-display text-sm font-bold transition',
-                  st === 'right' ? 'border-ok bg-ok/25' : st === 'wrong' ? 'border-bad bg-bad/20' : st === 'chosen' ? 'border-brand bg-brand/15' : 'border-outline/50 bg-white/50 hover:bg-white/80')}
+                className={cx('absolute grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[2.5px] border-dashed text-sm font-bold transition',
+                  st === 'right' ? 'border-ok bg-ok/25' : st === 'wrong' ? 'border-bad bg-bad/20' : st === 'chosen' ? 'border-brand bg-brand/15' : 'border-line-strong/70 bg-white/50 hover:bg-white/80')}
                 style={{ left: `${(p[0] / 240) * 100}%`, top: `${((p[2] ?? p[1] - 18) / 160) * 100}%` }} />
             );
           })}
@@ -146,7 +146,7 @@ export function TimelineChoice({ ex, choice, locked, onPick }: Omit<ChoiceProps,
           const o: Option = ex.options![i];
           return (
             <button key={i} type="button" role="radio" aria-checked={choice === i} disabled={locked} onClick={() => onPick(i)}
-              className={cx('tile flex min-h-14 flex-col items-center justify-center rounded-2xl px-2 py-2 font-display text-base font-bold leading-tight', TILE_TONE[stateOf(i, choice, locked, right)])}>
+              className={cx('tile flex min-h-14 flex-col items-center justify-center rounded-xl px-2 py-2 text-base font-bold leading-tight', TILE_TONE[stateOf(i, choice, locked, right)])}>
               <span aria-hidden className="text-xs opacity-70">{ZONE_ICON[o.zone!]}</span>{o.text}
             </button>
           );
@@ -179,19 +179,19 @@ export function SpellTiles({ ex, seed, picked, locked, onChange }: { ex: Exercis
       <div className="flex flex-wrap justify-center gap-2" role="group" aria-label={reveal ? `Ejaan yang benar: ${answer}` : `Kata yang kamu susun: ${word || 'kosong'}`}>
         {Array.from({ length }, (_, s) => {
           const t = picked[s];
-          if (reveal) return <span key={s} className="tile en grid h-12 w-10 place-items-center rounded-xl border-ok bg-ok-soft font-display text-2xl font-bold [--edge:var(--ok)]" aria-hidden>{answer[s]}</span>;
+          if (reveal) return <span key={s} className="tile en grid h-12 w-10 place-items-center rounded-xl border-ok bg-ok-soft text-2xl font-extrabold [--edge:var(--ok)]" aria-hidden>{answer[s]}</span>;
           return t === undefined ? (
             <span key={s} className="grid h-12 w-10 place-items-center rounded-xl border-[2.5px] border-dashed border-line-strong" aria-hidden />
           ) : (
             <button key={s} type="button" disabled={locked} aria-label={`Hapus huruf ${tiles[t]}`} onClick={() => { const next = picked.filter((_, j) => j !== s); onChange(next, next.map((i) => tiles[i]).join('')); }}
-              className="tile en grid h-12 w-10 place-items-center rounded-xl border-brand bg-brand-soft font-display text-2xl font-bold [--edge:var(--brand)]">{tiles[t]}</button>
+              className="tile en grid h-12 w-10 place-items-center rounded-xl border-brand bg-brand-soft text-2xl font-extrabold [--edge:var(--brand)]">{tiles[t]}</button>
           );
         })}
       </div>
       <div className="flex flex-wrap justify-center gap-2" role="group" aria-label="Huruf">
         {tiles.map((c, i) => (
           <button key={i} type="button" disabled={locked || picked.includes(i) || picked.length >= length} onClick={() => { const next = [...picked, i]; onChange(next, next.map((j) => tiles[j]).join('')); }}
-            className={cx('tile en grid h-12 w-11 place-items-center rounded-xl border-line bg-surface font-display text-2xl font-bold disabled:opacity-35', picked.includes(i) && 'invisible')}>{c}</button>
+            className={cx('tile en grid h-12 w-11 place-items-center rounded-xl border-line bg-surface text-2xl font-extrabold disabled:opacity-35', picked.includes(i) && 'invisible')}>{c}</button>
         ))}
       </div>
     </div>
