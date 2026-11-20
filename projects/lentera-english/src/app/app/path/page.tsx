@@ -41,11 +41,11 @@ export default function PathPage() {
       <PathTabs />
 
       <nav aria-label="Level CEFR" className="sticky top-[calc(var(--app-header)+env(safe-area-inset-top))] z-[5] -mx-4 mb-6 border-b border-line bg-bg/95 px-4 py-2 backdrop-blur">
-        <ul className="grid grid-cols-6 gap-1.5">
+        <ul className="flex gap-1 overflow-x-auto">
           {levels.map(({ code, lessons, done }) => {
             const all = lessons.length > 0 && done === lessons.length;
             return (
-              <li key={code}>
+              <li key={code} className="min-w-11 flex-1">
                 <a href={`#level-${code}`} onClick={() => setOpenLevels((s) => new Set(s).add(code))} aria-current={code === focus ? 'step' : undefined}
                   className={cx('flex min-h-11 flex-col items-center justify-center rounded-xl text-sm font-extrabold transition-colors', code === focus ? 'bg-brand text-on-brand' : all ? 'bg-ok-soft text-ok' : levelOpen(learner, ix, code) ? 'bg-surface text-ink ring-1 ring-line hover:bg-surface-2' : 'bg-surface-2 text-muted dark:bg-line/60')}>
                   {code}

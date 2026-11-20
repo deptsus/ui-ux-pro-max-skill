@@ -105,7 +105,7 @@ export function BarChart({ title, subtitle, data, unit, column, format, insight 
           const top = y(v);
           const h = H - PAD.b - top;
           return (
-            <g key={d.title} tabIndex={0} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} aria-label={`${d.title}: ${say(v)}`}>
+            <g key={d.title} role="img" tabIndex={0} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} aria-label={`${d.title}: ${say(v)}`}>
               <rect x={L + slot * i} y={PAD.t} width={slot} height={H - PAD.t - PAD.b} fill="transparent" />
               {v > 0 && <path d={`M${x} ${H - PAD.b} V${top + Math.min(4, h)} Q${x} ${top} ${x + Math.min(4, bw / 2)} ${top} H${x + bw - Math.min(4, bw / 2)} Q${x + bw} ${top} ${x + bw} ${top + Math.min(4, h)} V${H - PAD.b} Z`} fill="var(--chart)" opacity={hover === null || hover === i ? 1 : 0.55} />}
               {(data.length - 1 - i) % every === 0 && <text x={L + slot * i + slot / 2} y={H - 8} textAnchor="middle" fontSize={FONT} fill="var(--muted)">{d.label}</text>}
@@ -143,7 +143,7 @@ export function LineChart({ title, subtitle, data, unit, insight }: { title: str
         <Axes W={W} max={100} ticks={[0, 50, 100]} suffix="%" />
         {segments.map((s, i) => <path key={i} d={s} fill="none" stroke="var(--chart)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />)}
         {data.map((d, i) => (
-          <g key={d.title} tabIndex={d.value === null ? -1 : 0} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} aria-label={d.value === null ? `${d.title}: tidak berlatih` : `${d.title}: ${d.value}%`}>
+          <g key={d.title} role="img" tabIndex={d.value === null ? -1 : 0} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} aria-label={d.value === null ? `${d.title}: tidak berlatih` : `${d.title}: ${d.value}%`}>
             <rect x={PAD.l + slot * i} y={PAD.t} width={slot} height={H - PAD.t - PAD.b} fill="transparent" />
             {d.value !== null && <circle cx={x(i)} cy={y(d.value)} r={hover === i ? 6 : 4} fill="var(--chart)" stroke="var(--surface)" strokeWidth="2" />}
             {(data.length - 1 - i) % every === 0 && <text x={x(i)} y={H - 8} textAnchor="middle" fontSize={FONT} fill="var(--muted)">{d.label}</text>}

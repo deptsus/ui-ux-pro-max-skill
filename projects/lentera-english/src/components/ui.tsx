@@ -252,13 +252,13 @@ export function Segmented<T extends string>({ options, value, onChange, label, l
     (e.currentTarget.parentElement?.children[n] as HTMLElement | undefined)?.focus();
   };
   return (
-    <div role={radio ? 'radiogroup' : 'group'} aria-label={labelledBy ? undefined : label} aria-labelledby={labelledBy} className={merge(cx('flex gap-1 rounded-xl bg-surface-2 p-1 dark:bg-line/60', full ? 'w-full' : 'inline-flex max-w-full'), className)}>
+    <div role={radio ? 'radiogroup' : 'group'} aria-label={labelledBy ? undefined : label} aria-labelledby={labelledBy} className={merge(cx('flex gap-1 overflow-x-auto rounded-xl bg-surface-2 p-1 dark:bg-line/60', full ? 'w-full' : 'inline-flex max-w-full'), className)}>
       {options.map((o, i) => {
         const on = o.value === value;
         return (
           <button key={o.value} type="button" onClick={() => onChange(o.value)} onKeyDown={(e) => move(e, i)}
             {...(radio ? { role: 'radio', 'aria-checked': on, tabIndex: on ? 0 : -1 } : { 'aria-pressed': on })}
-            className={cx('inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-sm font-bold leading-tight transition-colors', on ? 'bg-surface text-ink shadow-e1 ring-1 ring-line dark:bg-surface-2' : 'text-muted hover:text-ink')}>
+            className={cx('inline-flex min-h-11 min-w-11 flex-1 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-sm font-bold leading-tight transition-colors', on ? 'bg-surface text-ink shadow-e1 ring-1 ring-line dark:bg-surface-2' : 'text-muted hover:text-ink')}>
             {o.icon}{o.label}
           </button>
         );
@@ -369,7 +369,7 @@ export function Toaster() {
   const list = useSyncExternalStore((l) => { toastListeners.add(l); return () => { toastListeners.delete(l); }; }, () => toasts, () => NO_TOASTS);
   const Icon = { ok: CheckCircle2, bad: XCircle, brand: Info };
   return (
-    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottom-nav)+env(safe-area-inset-bottom)+0.75rem)] z-50 flex flex-col items-center gap-2 px-4">
+    <div role="status" className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottom-nav)+env(safe-area-inset-bottom)+0.75rem)] z-50 flex flex-col items-center gap-2 px-4">
       {list.map((t) => {
         const I = Icon[t.tone];
         return (
