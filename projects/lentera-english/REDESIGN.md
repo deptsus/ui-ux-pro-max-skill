@@ -587,3 +587,69 @@ Setiap fase baru selesai jika semua langkah ini lulus. Regresi diperbaiki sebelu
    - Menambah ESLint (`next/core-web-vitals` + aturan aksesibilitas JSX) sebagai alat pengembangan saja, tidak memengaruhi aplikasi.
    - Alternatif: tetap `typecheck` + `build`.
    - *Rekomendasi: tambah.*
+
+---
+
+## 9. Hasil pelaksanaan (20 November 2026)
+
+Semua keputusan di bagian 8 disetujui pemilik ("setuju semua"). Fase 0–4 dan sebagian Fase 5 sudah dikerjakan di branch. **Belum dideploy**: menunggu pemilik melihat gambar sebelum/sesudah.
+
+### Yang berubah
+
+- **Fase 0:** `e2e/ui-audit.mjs` (audit dan screenshot yang bisa diulang, ditambah `compare`), ESLint (`npm run lint`, hanya untuk pengembangan).
+- **Fase 1:** token baru di `globals.css`; kit komponen di `ui.tsx` (`ListGroup`/`ListRow`, `Segmented` dengan mode radio dan tombol panah, `TabLinks`, `StatRow`, `Skeleton`/`Loading`, `Sheet`/`ConfirmDialog`, `Toast`, `StickyActionBar`, `IconButton`, `merge`); galeri `/gaya`; `viewport-fit=cover` dan safe area.
+- **Fase 2:** header dengan chip berlabel (target 44 px), tab bawah "Belajar", sidebar dan Lainnya dikelompokkan, Beranda baru.
+- **Fase 3:**
+  - Jalur A1–C2: navigasi level, level dibuka/ditutup, jejak pelajaran.
+  - Jalur Sekolah & Khusus: tanpa kartu bersarang.
+  - Pelajaran: indikator langkah 44 px dan tombol utama lengket.
+  - Umpan balik jawaban lebih tenang dan opsi jawaban punya penanda selain warna.
+  - Ulangan: permainan dipisah ke "Latihan santai".
+  - Pembahasan tanpa kotak bersarang.
+- **Fase 4:**
+  - Kosakata: per level, dengan detail kata di bottom sheet.
+  - Tata Bahasa: berupa daftar.
+  - Analitik: grafik selebar layar asli, pilihan periode, kalimat insight.
+  - Pencapaian, Profil, Pengaturan, Menyimak, Shadowing, Premium/QRIS, Pasangan Kilat, Percakapan, Cerita: dirapikan ke gaya baru.
+  - Teks "Memuat…" diganti skeleton.
+- **Fase 5 (sebagian):** tombol dan kartu halaman publik memakai gaya baru. Tata letak halaman publik dan admin (selain token) belum didesain ulang.
+
+### Hasil audit (278 pengukuran, sebelum → sesudah)
+
+| Ukuran | Sebelum | Sesudah |
+|---|---|---|
+| Halaman bergeser ke samping | 0 | 0 |
+| Kotak berbingkai (kartu) | 5.408 | 2.518 |
+| Kartu bersarang | 486 | 94 |
+| Teks di bawah 12 px | 80 | 0 |
+| Total tinggi halaman | 1.158.582 px | 861.229 px (−26%) |
+| CLS tertinggi | 0,132 (Profil) | 0 |
+
+Per halaman (360 px):
+- Jalur A1–C2: 16.193 → 4.040 px.
+- Kosakata (Premium): sekitar 48.000 → sekitar 4.400 px.
+- Jalur Sekolah: kartu bersarang 43 → 0.
+- Lainnya: 19 kartu → 0.
+
+Tidak ada metrik yang lebih buruk dari baseline. Elemen di bawah 44 px yang masih tercatat adalah chip header, yang tampil setinggi 36 px tetapi area ketuknya 44 px.
+
+### Pengujian
+
+- Typecheck lulus.
+- `npm run lint`: 0 error. Peringatannya berasal dari kode lama: React Compiler dan variabel tak terpakai.
+- 374 unit test lulus.
+- Build lulus.
+- **20 suite e2e lulus.** Kegagalan yang muncul selama redesign sudah diperbaiki lalu suitenya dijalankan ulang:
+  - target level 43 px;
+  - `aria-label` di batang grafik tanpa role;
+  - dua wilayah `aria-live`;
+  - chip Premium 38 px.
+- Satu unit test lama ternyata bergantung tanggal (data 18 Nov 2026 sudah lewat), bukan akibat redesign; ujinya diperbaiki.
+- Pemeriksaan `git diff`: tidak ada perubahan di `src/lib`, `src/app/api`, `supabase`, atau `content`.
+
+### Yang belum diuji atau masih terbuka
+
+- Belum diuji di perangkat fisik: iPhone dengan notch, Android 15 edge-to-edge di WebView aplikasi 2.0, dan pembaca layar sungguhan. Yang ada baru pemeriksaan otomatis (axe) dan emulasi Chromium.
+- Tata letak halaman publik (landing, /materi, /sekolah) dan dashboard admin baru diberi token dan tombol baru, belum didesain ulang.
+- Toast dan ConfirmDialog sudah ada di kit, tetapi baru dipakai di galeri. Hapus akun tetap memakai konfirmasi ketik HAPUS yang sudah ada.
+- IPA memakai font sistem; tampilannya bergantung pada font yang ada di perangkat.

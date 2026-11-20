@@ -149,9 +149,19 @@ for (const mode of ['light', 'dark']) {
     await p.getByRole('heading', { name: 'Lulus tes penguasaan!' }).waitFor({ timeout: 15000 });
     await p.screenshot({ path: path.join(SHOTS, 'lesson-light-7-lulus.png'), fullPage: true });
   } catch (e) { rows.push({ who: 'learner', mode: 'light', w: 360, u: 'lesson:pass', error: String(e.message).slice(0, 160) }); }
+  // Same browser profile, so the progress just made is there even before the server sync finishes.
+  for (const mode of ['light', 'dark']) {
+    await p.evaluate((dark) => localStorage.setItem('lentera.theme', dark ? 'dark' : 'light'), mode === 'dark');
+    for (const u of LEARNER) {
+      try {
+        await p.evaluate(() => { window.__cls = 0; });
+        await visit(p, u);
+        rows.push({ who: 'learner', mode, w: 360, u, ...(await measure(p)), cls: Math.round((await p.evaluate(() => window.__cls)) * 1000) / 1000 });
+        await p.screenshot({ path: path.join(SHOTS, name('learner', mode, 360, u)), fullPage: true });
+      } catch (e) { rows.push({ who: 'learner', mode, w: 360, u, error: String(e.message).slice(0, 160) }); }
+    }
+  }
   await ctx.close();
-  await run('learner', 'light', [360], LEARNER, user);
-  await run('learner', 'dark', [360], LEARNER, user);
 }
 
 await browser.close();

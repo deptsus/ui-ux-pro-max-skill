@@ -135,7 +135,7 @@ export default function PathPage() {
                 {exam && (
                   <Card className="flex flex-wrap items-center gap-3 border-brand/40">
                     <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-soft text-brand" aria-hidden><GraduationCap size={22} /></span>
-                    <div className="min-w-0 flex-1"><p className="font-extrabold">{exam.title}</p><p className="text-sm text-muted">{examStatus === 'passed' ? 'Lulus. Level berikutnya terbuka.' : examStatus === 'premium' ? 'Ujian level tersedia untuk Premium.' : examStatus === 'locked' ? (examWait ? planWaitReason(examWait, now) : 'Tuntaskan semua unit dan ujian unit di level ini dulu.') : `Lulus min. ${exam.passScore}% untuk naik level.`}</p></div>
+                    <div className="min-w-[12rem] flex-1"><p className="font-extrabold">{exam.title}</p><p className="text-sm text-muted">{examStatus === 'passed' ? 'Lulus. Level berikutnya terbuka.' : examStatus === 'premium' ? 'Ujian level tersedia untuk Premium.' : examStatus === 'locked' ? (examWait ? planWaitReason(examWait, now) : 'Tuntaskan semua unit dan ujian unit di level ini dulu.') : `Lulus min. ${exam.passScore}% untuk naik level.`}</p></div>
                     {examStatus === 'available' && <LinkButton href={`/app/exams?id=${exam.id}`} size="sm">Ikuti ujian</LinkButton>}
                     {examStatus === 'premium' && <LinkButton href="/app/subscription" size="sm" variant="accent">Lihat Premium</LinkButton>}
                   </Card>

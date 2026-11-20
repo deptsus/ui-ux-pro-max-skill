@@ -87,7 +87,7 @@ function Exams() {
               return (
                 <li key={e.id}><Card className="flex flex-wrap items-center gap-3">
                   <span className={`grid h-10 w-10 place-items-center rounded-full ${st === 'passed' ? 'bg-ok text-on-brand' : st === 'available' ? 'bg-brand text-on-brand' : 'bg-surface-2 text-muted'}`}>{st === 'passed' ? <Check size={18} aria-hidden /> : st === 'premium' ? <Crown size={18} aria-hidden /> : st === 'locked' ? <Lock size={18} aria-hidden /> : <span className="text-sm font-extrabold">{e.scope === 'level' ? e.ref : 'U'}</span>}</span>
-                  <div className="min-w-0 flex-1"><p className="font-extrabold">{e.title}</p><p className="text-sm text-muted">{Math.round(e.timeLimitSec / 60)} menit · lulus {e.passScore}%{best ? ` · nilai terbaik ${best}%` : ''}</p></div>
+                  <div className="min-w-[12rem] flex-1"><p className="font-extrabold">{e.title}</p><p className="text-sm text-muted">{Math.round(e.timeLimitSec / 60)} menit · lulus {e.passScore}%{best ? ` · nilai terbaik ${best}%` : ''}</p></div>
                   {st === 'passed' && <Badge tone="ok">Lulus</Badge>}
                   {st === 'locked' && <Badge tone="muted">Terkunci</Badge>}
                   {st === 'premium' && <Badge tone="accent">Premium</Badge>}
