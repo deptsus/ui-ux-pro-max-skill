@@ -12,7 +12,7 @@ import { useApp } from '@/lib/client/hooks';
 import { act } from '@/lib/client/store';
 import { completeShadowing } from '@/lib/engine/state';
 import { linesByLevel, pickSession, shadowLines, SHADOW, tempoNote, type ShadowLine, type ShadowRating } from '@/lib/engine/shadowing';
-import { Badge, Button, Card, LinkButton, Notice, PageHeader, Progress, cx } from '@/components/ui';
+import { Badge, Button, Card, LinkButton, Notice, PageHeader, Progress, TabLinks, cx } from '@/components/ui';
 
 const RATINGS: { id: ShadowRating; label: string; tone: string }[] = [
   { id: 'good', label: 'Sudah mirip', tone: 'border-ok bg-ok-soft' },
@@ -307,6 +307,7 @@ export default function ShadowingPage() {
   return (
     <div className="space-y-4">
       <PageHeader title="Latihan Shadowing" subtitle="Dengarkan kalimat, tirukan dengan suaramu, lalu bandingkan berdampingan. Tanpa penilaian AI: telingamu jurinya." />
+      <TabLinks label="Latihan suara" className="mb-5" items={[{ href: '/app/listening', label: 'Menyimak', current: false }, { href: '/app/listening?tab=pelafalan', label: 'Pelafalan', current: false }, { href: '/app/shadowing', label: 'Shadowing', current: true }]} />
       <ol className="grid gap-3 sm:grid-cols-3">
         {[[Volume2, 'Dengar', 'Putar contohnya, normal atau pelan, sampai iramanya terasa.'], [Mic, 'Rekam', 'Tirukan persis: tekanan, nada, dan jedanya. Atau bicara bersamaan dengan contoh.'], [Headphones, 'Bandingkan', 'Putar contoh dan suaramu berdampingan, lalu nilai sendiri.']].map(([Icon, t, d], k) => {
           const I = Icon as typeof Mic;

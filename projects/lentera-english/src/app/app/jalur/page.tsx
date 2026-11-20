@@ -4,6 +4,11 @@
 // is free, and a final exam with a certificate closes the track. Special
 // tracks: the first lesson is free. Lessons open one after another inside a
 // track, whatever the learner's level.
+// Redesign fix (20 Nov 2026): Sekolah (/app/jalur) and Khusus (/app/jalur?jenis=khusus) are separate
+// views, so the CEFR | Sekolah | Khusus tabs always match the screen. Old links with a hash
+// (#sd, #work, #exam …) still land on the right view and scroll to that track.
+import { Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Award, Backpack, BookOpenCheck, Briefcase, Check, Crown, GraduationCap, School } from 'lucide-react';
 import { SCHOOL_TRACKS, SPECIAL_TRACKS, normTrack, type TrackInfo } from '@/lib/content/tracks';
 import type { TrackId } from '@/lib/content/types';
@@ -15,8 +20,25 @@ import { PathRow, PathTabs, Trail, UnitHeading } from '@/components/learn/PathPa
 
 const ICON: Record<TrackId, typeof Briefcase> = { work: Briefcase, exam: GraduationCap, kids: Backpack, sd: Backpack, smp: School, sma: BookOpenCheck };
 
+const SPECIAL_HASH = ['#khusus', '#work', '#exam'];
+
 export default function TracksPage() {
+  return <Suspense><Tracks /></Suspense>;
+}
+
+function Tracks() {
   const { ix, learner } = useApp();
+  const params = useSearchParams();
+  const router = useRouter();
+  const view = params.get('jenis') === 'khusus' ? 'khusus' : 'sekolah';
+  // A hash from an older link decides the view: #work and #exam belong to Khusus, the rest to Sekolah.
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+    const wants = SPECIAL_HASH.includes(hash) ? 'khusus' : 'sekolah';
+    if (wants !== view) { router.replace(`/app/jalur${wants === 'khusus' ? '?jenis=khusus' : ''}${hash}`, { scroll: false }); return; }
+    requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' }));
+  }, [view, router]);
   // The published curriculum may predate the tracks until the owner imports and publishes it.
   if (!ix.pack.chapters.some((c) => c.track)) {
     return (
@@ -32,27 +54,30 @@ export default function TracksPage() {
   return (
     <div>
       <PageHeader title="Jalur Sekolah & Khusus" subtitle="Belajar sesuai jenjang sekolah atau tujuan tertentu, di samping jalur CEFR utama." />
-      <PathTabs />
-      <section id="sekolah" aria-labelledby="h-sekolah" className="mb-10 scroll-mt-36 space-y-4">
-        <div>
-          <SectionHeader id="h-sekolah" title="Jalur Sekolah" className="mb-1" />
-          <p className="text-sm text-muted">Mengikuti tema pelajaran bahasa Inggris di sekolah (Kurikulum Merdeka). Unit pertama tiap jenjang gratis; Premium membuka semua unit dan ujian akhir bersertifikat.</p>
-        </div>
-        {!mine && (
-          <Card className="space-y-3">
-            <p className="font-extrabold">Kamu di jenjang apa?</p>
-            <SchoolLevelPicker onPick={chooseSchoolLevel} label="Pilih jenjang sekolahmu" />
-          </Card>
-        )}
-        {school.map((t) => <TrackCard key={t.id} t={t} mine={t.id === mine} />)}
-      </section>
-      <section id="khusus" aria-labelledby="h-khusus" className="scroll-mt-36 space-y-4">
-        <div>
-          <SectionHeader id="h-khusus" title="Jalur Khusus" className="mb-1" />
-          <p className="text-sm text-muted">Untuk tujuan tertentu. Pelajaran pertama tiap jalur gratis.</p>
-        </div>
-        {SPECIAL_TRACKS.map((t) => <TrackCard key={t.id} t={t} />)}
-      </section>
+      <PathTabs current={view} />
+      {view === 'sekolah' ? (
+        <section id="sekolah" aria-labelledby="h-sekolah" className="scroll-mt-36 space-y-4">
+          <div>
+            <SectionHeader id="h-sekolah" title="Jalur Sekolah" className="mb-1" />
+            <p className="text-sm text-muted">Mengikuti tema pelajaran bahasa Inggris di sekolah (Kurikulum Merdeka). Unit pertama tiap jenjang gratis; Premium membuka semua unit dan ujian akhir bersertifikat.</p>
+          </div>
+          {!mine && (
+            <Card className="space-y-3">
+              <p className="font-extrabold">Kamu di jenjang apa?</p>
+              <SchoolLevelPicker onPick={chooseSchoolLevel} label="Pilih jenjang sekolahmu" />
+            </Card>
+          )}
+          {school.map((t) => <TrackCard key={t.id} t={t} mine={t.id === mine} />)}
+        </section>
+      ) : (
+        <section id="khusus" aria-labelledby="h-khusus" className="scroll-mt-36 space-y-4">
+          <div>
+            <SectionHeader id="h-khusus" title="Jalur Khusus" className="mb-1" />
+            <p className="text-sm text-muted">Untuk tujuan tertentu. Pelajaran pertama tiap jalur gratis.</p>
+          </div>
+          {SPECIAL_TRACKS.map((t) => <TrackCard key={t.id} t={t} />)}
+        </section>
+      )}
     </div>
   );
 }

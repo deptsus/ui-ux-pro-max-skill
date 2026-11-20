@@ -10,7 +10,7 @@ import { syncIfPending, useLearner } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
 import { FriendsView } from '@/components/social/Friends';
 import { LeagueView } from '@/components/social/League';
-import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId, Loading } from '@/components/ui';
+import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId, Loading, TabLinks, Notice } from '@/components/ui';
 import { useSdMode } from '@/components/school/SchoolLevel';
 
 interface Board { week_start: string; top: { rank: number; name: string; avatar: number; xp: number; me: boolean }[]; me: { rank: number; xp: number } | null }
@@ -77,10 +77,8 @@ function Leaderboard() {
   return (
     <div>
       <PageHeader title="Liga & Teman" subtitle="Bersaing sehat setiap minggu. XP hanya datang dari kegiatan belajar, jadi yang rajin yang menang." />
-      {sd && <p className="mb-4 rounded-2xl bg-brand-soft px-4 py-3 text-sm"><b>Mode SD:</b> di liga dan papan umum, namamu tampil sebagai "Pelajar SD". Hanya teman yang kamu tambahkan yang melihat namamu.</p>}
-      <nav className="mb-4 flex gap-2" aria-label="Bagian papan peringkat">
-        {TABS.map((t) => <LinkButton key={t.id} href={t.id === 'liga' ? '/app/leaderboard' : `/app/leaderboard?tab=${t.id}`} size="sm" variant={tab === t.id ? 'primary' : 'secondary'}>{t.label}</LinkButton>)}
-      </nav>
+      {sd && <Notice className="mb-4" title="Mode SD">Di liga dan papan umum, namamu tampil sebagai "Pelajar SD". Hanya teman yang kamu tambahkan yang melihat namamu.</Notice>}
+      <TabLinks label="Bagian papan peringkat" className="mb-5" items={TABS.map((t) => ({ href: t.id === 'liga' ? '/app/leaderboard' : `/app/leaderboard?tab=${t.id}`, label: t.label, current: tab === t.id }))} />
       {!session ? (
         <Empty title={invite ? `Masuk untuk berteman dengan kode ${invite.toUpperCase()}` : 'Masuk untuk ikut liga dan berteman'} action={info.backend === 'none' ? undefined : <LinkButton href="/daftar">Buat akun gratis</LinkButton>}>
           {info.backend === 'none' ? 'Server ini berjalan tanpa backend akun, jadi liga dan teman belum tersedia. Progresmu tetap tersimpan di perangkat.' : 'Liga, teman, dan tantangan membandingkan XP antar akun, jadi butuh akun. Progres tamu ikut dipindahkan saat kamu mendaftar.'}

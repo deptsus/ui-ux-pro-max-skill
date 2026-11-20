@@ -2,8 +2,7 @@
 // Learning path pieces (redesign 2026), shared by Jalur Belajar (CEFR) and Jalur Sekolah & Khusus:
 // lesson rows on a vertical trail with five clear states, unit headings, and the path tabs.
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Check, Crown, Hourglass, Lock, Play, Trophy } from 'lucide-react';
 import { Progress, TabLinks, cx } from '@/components/ui';
 
@@ -63,24 +62,14 @@ export function UnitHeading({ title, done, total, badge, id }: { title: ReactNod
   );
 }
 
-const SPECIAL = ['#khusus', '#work', '#exam'];
-/** CEFR | Sekolah | Khusus. Sekolah and Khusus share /app/jalur; the hash tells them apart. */
-export function PathTabs() {
-  const pathname = usePathname();
-  const [hash, setHash] = useState('');
-  useEffect(() => {
-    const read = () => setHash(window.location.hash);
-    read();
-    window.addEventListener('hashchange', read);
-    return () => window.removeEventListener('hashchange', read);
-  }, []);
-  const onTracks = pathname.startsWith('/app/jalur');
-  const special = onTracks && SPECIAL.includes(hash);
+/** CEFR | Sekolah | Khusus: three views, each with its own address, so the highlighted tab always
+ *  matches what is on screen (redesign fix 20 Nov 2026; Sekolah and Khusus used to share a page). */
+export function PathTabs({ current }: { current: 'cefr' | 'sekolah' | 'khusus' }) {
   return (
     <TabLinks label="Jenis jalur" className="mb-6" items={[
-      { href: '/app/path', label: 'CEFR', current: pathname.startsWith('/app/path') },
-      { href: '/app/jalur#sekolah', label: 'Sekolah', current: onTracks && !special },
-      { href: '/app/jalur#khusus', label: 'Khusus', current: special },
+      { href: '/app/path', label: 'CEFR', current: current === 'cefr' },
+      { href: '/app/jalur', label: 'Sekolah', current: current === 'sekolah' },
+      { href: '/app/jalur?jenis=khusus', label: 'Khusus', current: current === 'khusus' },
     ]} />
   );
 }

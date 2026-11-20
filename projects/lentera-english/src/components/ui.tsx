@@ -258,7 +258,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, l
         return (
           <button key={o.value} type="button" onClick={() => onChange(o.value)} onKeyDown={(e) => move(e, i)}
             {...(radio ? { role: 'radio', 'aria-checked': on, tabIndex: on ? 0 : -1 } : { 'aria-pressed': on })}
-            className={cx('inline-flex min-h-11 min-w-11 flex-1 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-sm font-bold leading-tight transition-colors', on ? 'bg-surface text-ink shadow-e1 ring-1 ring-line dark:bg-surface-2' : 'text-muted hover:text-ink')}>
+            className={cx('inline-flex min-h-11 min-w-11 flex-1 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-sm font-bold leading-tight transition-[color,background-color,transform] duration-150 active:scale-[0.97]', on ? 'bg-surface text-ink shadow-e1 ring-1 ring-line dark:bg-surface-2' : 'text-muted hover:text-ink')}>
             {o.icon}{o.label}
           </button>
         );
@@ -273,7 +273,7 @@ export function TabLinks({ items, label, className }: { items: { href: string; l
     <nav aria-label={label} className={cx('flex gap-1 rounded-xl bg-surface-2 p-1 dark:bg-line/60', className)}>
       {items.map((t) => (
         <Link key={t.href} href={t.href} aria-current={t.current ? 'page' : undefined}
-          className={cx('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 text-sm font-bold transition-colors', t.current ? 'bg-surface text-ink shadow-e1 ring-1 ring-line' : 'text-muted hover:text-ink')}>
+          className={cx('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 text-sm font-bold transition-[color,background-color,transform] duration-150 active:scale-[0.97]', t.current ? 'bg-surface text-ink shadow-e1 ring-1 ring-line' : 'text-muted hover:text-ink')}>
           {t.label}
         </Link>
       ))}

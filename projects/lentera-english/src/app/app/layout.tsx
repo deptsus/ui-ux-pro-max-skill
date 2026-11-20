@@ -177,8 +177,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             const Icon = t.icon;
             return (
               <li key={t.href}>
-                <Link href={t.href} aria-current={on ? 'page' : undefined} className={cx('relative flex h-full flex-col items-center justify-center gap-0.5 text-xs font-bold transition-colors', on ? 'text-brand-ink dark:text-brand' : 'text-muted hover:text-ink')}>
-                  <span className={cx('grid h-8 w-14 place-items-center rounded-full transition-colors', on && 'bg-brand-soft')}><Icon size={22} strokeWidth={on ? 2.4 : 2} aria-hidden /></span>
+                <Link href={t.href} aria-current={on ? 'page' : undefined} className={cx('group relative flex h-full flex-col items-center justify-center gap-0.5 text-xs font-bold transition-colors', on ? 'text-brand-ink dark:text-brand' : 'text-muted hover:text-ink')}>
+                  <span className={cx('grid h-8 w-14 place-items-center rounded-full transition-[background-color,transform] duration-150 group-active:scale-90', on && 'bg-brand-soft')}><Icon size={22} strokeWidth={on ? 2.4 : 2} aria-hidden /></span>
                   {t.label}
                   {t.href === '/app/review' && due > 0 && <><span className="absolute right-[calc(50%-1.5rem)] top-2 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-surface" aria-hidden /><span className="sr-only">, {due} ulangan menunggu</span></>}
                 </Link>

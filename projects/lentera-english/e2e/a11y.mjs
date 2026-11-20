@@ -28,7 +28,7 @@ const admin = r.data;
 
 const PUBLIC = ['/', '/materi', '/materi/a1-greetings', '/materi/exam-toefl-written', '/sekolah', '/privasi', '/kontak', '/masuk', '/daftar', '/sertifikat'];
 const APP = [
-  '/app', '/app/path', '/app/jalur', '/app/lesson?id=a1-greetings', '/app/practice', '/app/review', '/app/stories', '/app/stories?id=story-first-day',
+  '/app', '/app/path', '/app/jalur', '/app/jalur?jenis=khusus', '/app/lesson?id=a1-greetings', '/app/practice', '/app/review', '/app/stories', '/app/stories?id=story-first-day',
   '/app/listening', '/app/listening?id=listen-a1-intro', '/app/conversations', '/app/homework', '/app/exams', '/app/grammar', '/app/vocabulary',
   '/app/plan', '/app/shadowing', '/app/leaderboard', '/app/leaderboard?tab=teman', '/app/achievements', '/app/analytics', '/app/profile',
   '/app/settings', '/app/subscription', '/app/placement', '/app/more', '/app/pasangan', '/app/lesson?id=sd-greetings', '/app/lesson?id=sma-snbt', '/app/kelas', '/app/guru', '/app/orang-tua',

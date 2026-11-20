@@ -30,7 +30,15 @@ const g = await phone();
 try {
   await g.goto(`${BASE}/app/jalur`);
   await g.getByRole('heading', { name: 'Jalur Sekolah & Khusus', level: 1 }).waitFor({ timeout: 30000 });
-  for (const t of ['Jalur SD', 'Jalur SMP', 'Jalur SMA', 'Bahasa Inggris untuk Kerja', 'Persiapan TOEFL ITP dan IELTS']) check(`jalur "${t}" tampil`, await g.getByRole('heading', { name: t, exact: true }).isVisible());
+  // Redesign (20 Nov 2026): Sekolah and Khusus are separate views behind the CEFR | Sekolah | Khusus tabs.
+  for (const t of ['Jalur SD', 'Jalur SMP', 'Jalur SMA']) check(`jalur "${t}" tampil di tab Sekolah`, await g.getByRole('heading', { name: t, exact: true }).isVisible());
+  const tabs = g.getByRole('navigation', { name: 'Jenis jalur' });
+  check('tab Sekolah aktif di /app/jalur', (await tabs.getByRole('link', { name: 'Sekolah' }).getAttribute('aria-current')) === 'page');
+  await tabs.getByRole('link', { name: 'Khusus' }).click();
+  await g.getByRole('heading', { name: 'Bahasa Inggris untuk Kerja', exact: true }).waitFor({ timeout: 15000 });
+  check('tab Khusus: alamat ?jenis=khusus dan tab Khusus aktif', g.url().includes('jenis=khusus') && (await tabs.getByRole('link', { name: 'Khusus' }).getAttribute('aria-current')) === 'page' && (await tabs.getByRole('link', { name: 'Sekolah' }).getAttribute('aria-current')) === null);
+  for (const t of ['Bahasa Inggris untuk Kerja', 'Persiapan TOEFL ITP dan IELTS']) check(`jalur "${t}" tampil di tab Khusus`, await g.getByRole('heading', { name: t, exact: true }).isVisible());
+  check('tab Khusus tidak menampilkan jalur sekolah', (await g.getByRole('heading', { name: 'Jalur SD', exact: true }).count()) === 0);
   check('jalur TOEFL/IELTS memuat catatan tidak berafiliasi', await g.getByText(/Lentera tidak berafiliasi/).first().isVisible());
   const work = g.locator('section').filter({ has: g.getByRole('heading', { name: 'Bahasa Inggris untuk Kerja' }) });
   const first = work.getByRole('link', { name: /Wawancara Kerja: Memperkenalkan Diri/ });
@@ -43,6 +51,9 @@ try {
   await g.getByRole('heading', { name: 'Wawancara Kerja: Memperkenalkan Diri' }).waitFor({ timeout: 30000 });
   const back = g.getByRole('link', { name: 'Jalur khusus' });
   check('halaman pelajaran jalur khusus kembali ke Jalur Khusus, bukan jalur CEFR', (await back.getAttribute('href')) === '/app/jalur#work');
+  await back.click();
+  await g.getByRole('heading', { name: 'Bahasa Inggris untuk Kerja', exact: true }).waitFor({ timeout: 15000 });
+  check('tautan lama /app/jalur#work membuka tab Khusus', g.url().includes('jenis=khusus') && (await g.getByRole('navigation', { name: 'Jenis jalur' }).getByRole('link', { name: 'Khusus' }).getAttribute('aria-current')) === 'page');
 
   await g.goto(`${BASE}/app/path`);
   await g.getByRole('heading', { name: 'Jalur Belajar' }).waitFor({ timeout: 30000 });

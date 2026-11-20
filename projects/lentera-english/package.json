@@ -31,7 +31,8 @@
     "e2e:ui": "node e2e/ui.mjs",
     "e2e:interactive": "node e2e/interactive.mjs",
     "e2e:school": "node e2e/school.mjs",
-    "e2e:content-cache": "node e2e/content-cache.mjs"
+    "e2e:content-cache": "node e2e/content-cache.mjs",
+    "e2e:redesign": "node e2e/redesign.mjs"
   },
   "engines": {
     "node": ">=20"
