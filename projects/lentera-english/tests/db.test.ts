@@ -252,7 +252,7 @@ describe('progress sync', () => {
     await db.rpc('sync_learner', { p_user: b, p_events: [{ id: 'y1', kind: 'xp', at: now, data: { amount: 150, reason: 'lesson' } }], p_snapshot: null, p_client_updated_at: 1 });
     const board = await db.rpc<{ top: { name: string; xp: number; rank: number; me: boolean }[]; me: { rank: number; xp: number } }>('get_leaderboard', { p_user: b });
     expect(board.top.slice(0, 2).map((r) => [r.name, r.xp])).toEqual([['Juara', 300], ['Runner', 150]]);
-    expect(board.me).toEqual({ rank: 2, xp: 150 });
+    expect(board.me).toEqual({ rank: 2, xp: 150, division: 1 }); // division: Liga Rank (0022)
     expect(board.top.find((r) => r.me)?.name).toBe('Runner');
   });
 });

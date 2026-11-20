@@ -134,6 +134,15 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
   - Akun uji lokal (`/api/dev-auth`, `tests/helpers.newUser`) dibuat tanpa trial kecuali diminta, supaya suite lama tetap menguji akun Free.
   - Layar daftar menyebut trial hanya bila server Supabase sudah punya fitur `trial`.
   - Chatbot Pijar ditunda (`PIJAR-AI.md`).
+  - Lama trial: 72 jam penuh sejak akun dibuat. Beranda menulis "Premium uji coba 3 hari penuh · Berakhir {hari, tanggal, jam} (sisa …)" supaya jelas sisa waktunya (klarifikasi pemilik 20 Nov 2026).
+- **Liga Rank (permintaan pemilik, 20 Nov 2026, migrasi 0022):** grup liga mingguan diganti satu tangga rank Lilin → Pelita → Obor → Lentera → Mercusuar.
+  - Poin Rank per minggu (Senin–Minggu WIB) maksimal 100: 70 dari XP (penuh di 250 XP, sama dengan misi mingguan) + 7,5 per hari belajar (penuh di 4 hari, sama dengan kebiasaan rencana mingguan). Minggu tanpa XP sama sekali −50. Poin tidak pernah di bawah 0, jadi rank bisa turun.
+  - Ambang: Pelita 500, Obor 1.500, Lentera 3.000, Mercusuar 5.000. Dengan poin penuh: minggu ke-5, 15, 30, 50 (sekitar setahun). XP berlebih tidak mempercepat.
+  - Minggu berjalan dihitung langsung (hanya menambah), jadi naik rank terasa saat itu juga; minggu yang selesai dikunci ke `league_ranks.points` (sekali seminggu untuk semua, dan saat pelajar membuka liga).
+  - Rank semua pelajar dihitung dari riwayat XP mereka sendiri; tabel lama `league_members` dibiarkan utuh tetapi tidak dipakai. Pelajar lama melihat pesan "Liga sekarang menjadi Liga Rank".
+  - Halaman Liga: rank + poin + progres ke rank berikutnya, poin minggu ini (XP dan hari belajar), pemain di rank yang sama (urut poin, nama SD tetap disamarkan), tangga rank. Papan "Semua" kini menampilkan rank setiap pemain.
+  - Lencana rank beranimasi (CSS, berhenti bila "kurangi gerakan" aktif): Lilin diam; Pelita berkedip kecil; Obor bergoyang + cahaya + 2 bara; Lentera + lidah api samping + 4 bara + kilau; Mercusuar api biru + sinar mercusuar berputar + cincin cahaya + bintang + 6 bara. Lencana kecil di daftar tidak beranimasi agar halaman tetap ringan.
+- **Hijab Nadia (SMA) digambar ulang (20 Nov 2026):** model pashmina/segi empat: kain membingkai wajah, disemat di bawah dagu, menjuntai di kedua bahu dengan satu ujung disampirkan ke dada. Foto pemilik hanya dipakai sebagai acuan bentuk hijab.
 - *(Sebelum redesign 2026)*
 - Warna brand ungu `#4b3fd6`, aksen amber `#f59e0b`, font Plus Jakarta Sans, sudut membulat besar, tombol bergaya "tekan" (border bawah tebal).
 - Maskot Pijar (kunang-kunang berlentera) dalam SVG, dengan suasana happy/cheer/think/sad.

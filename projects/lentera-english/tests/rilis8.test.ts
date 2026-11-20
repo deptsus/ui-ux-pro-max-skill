@@ -11,7 +11,7 @@ import { buildPack } from '@content/index';
 import { packForFree } from '@/lib/content/rows';
 import { createState, completeShadowing } from '@/lib/engine/state';
 import { linesByLevel, pickSession, shadowLines, splitSentences, SHADOW, tempoNote } from '@/lib/engine/shadowing';
-import { timeLeft, zoneLabel, zoneOf } from '@/lib/client/habits';
+import { timeLeft, zoneLabel } from '@/lib/client/habits';
 import { newUser } from './helpers';
 
 const ROOT = path.resolve(__dirname, '..');
@@ -117,7 +117,7 @@ describe('pengingat belajar harian pada jam pilihan pelajar', () => {
   });
 });
 
-describe('liga mingguan dengan divisi', () => {
+describe('liga mingguan dengan divisi (fungsi lama 0013, tidak dipakai sejak Liga Rank)', () => {
   // Weeks start on Monday, WIB; the tests run in whatever week it is now.
   let THIS = '';
   let LAST = '';
@@ -129,7 +129,6 @@ describe('liga mingguan dengan divisi', () => {
     TWO_AGO = minus(THIS, 14);
   });
   const inWeek = (week: string, day = 1, hourUtc = 3) => new Date(new Date(`${week}T00:00:00Z`).getTime() + day * 86_400_000 + hourUtc * 3600_000);
-  type League = { joined: boolean; division: number; outcome?: string; prev_rank?: number; promote?: number; demote?: number; rows?: { rank: number; name: string; xp: number; me: boolean }[] };
   const standings = (week: string, division: number, cohort: number) => db.query<{ user_id: string; xp: number; rank: number; size: number }>('select * from league_standings($1, $2, $3)', [week, division, cohort]);
 
   it('menempatkan setiap pelajar yang punya XP minggu itu, maksimal 30 per grup', async () => {
@@ -164,13 +163,8 @@ describe('liga mingguan dengan divisi', () => {
     expect(await next(low)).toMatchObject({ division: 2, outcome: 'demoted', prev_rank: 6 });
     expect(await next(gone)).toMatchObject({ division: 1, outcome: 'inactive' });
     expect(await next(fresh)).toMatchObject({ division: 1, outcome: 'new' });
-
-    // Before any XP this week the page shows the division to come; after it, the group.
-    expect(await db.rpc<League>('get_league', { p_user: top })).toMatchObject({ joined: false, division: 4 });
-    await xp(top, 40, new Date(new Date(`${THIS}T00:00:00Z`).getTime() + 3600_000)); // Monday 08.00 WIB
-    const l = await db.rpc<League>('get_league', { p_user: top });
-    expect(l).toMatchObject({ joined: true, division: 4, outcome: 'promoted', prev_rank: 1, promote: 1, demote: 0 });
-    expect(l.rows).toEqual([expect.objectContaining({ rank: 1, name: 'Atas', xp: 40, me: true })]);
+    // get_league itself now shows Liga Rank (migration 0022, tests/rank.test.ts); these
+    // weekly-group functions stay in the database unused.
   });
 
   it('juara grup kecil tetap butuh 50 XP untuk naik; divisi 5 tidak bisa naik lagi', async () => {
@@ -355,9 +349,8 @@ describe('latihan shadowing', () => {
 });
 
 describe('tampilan liga dan pengingat', () => {
-  it('zona naik dan turun, sisa waktu, dan nama zona waktu Indonesia', () => {
-    expect([1, 2, 5, 9, 10].map((r) => zoneOf(r, 10, 2, 2))).toEqual(['up', 'up', 'stay', 'down', 'down']);
-    expect(zoneOf(3, 3, 1, 0)).toBe('stay');
+  // The weekly zones went with the groups (Liga Rank, migration 0022: tests/rank.test.ts).
+  it('sisa waktu dan nama zona waktu Indonesia', () => {
     const now = Date.UTC(2026, 10, 18, 0, 0);
     expect(timeLeft(new Date(now + 2 * 86_400_000 + 5 * 3_600_000).toISOString(), now)).toBe('2 hari 5 jam');
     expect(timeLeft(new Date(now + 90 * 60_000).toISOString(), now)).toBe('1 jam 30 menit');

@@ -1,5 +1,5 @@
 // End-to-end check of Rilis 8 "Kebiasaan Belajar": daily reminder settings,
-// the weekly league, friends by invite link, friend challenges, shadowing with
+// Liga Rank, friends by invite link, friend challenges, shadowing with
 // Chromium's fake microphone, and small-phone layouts of the new screens.
 //
 // Needs a server with the embedded backend (see e2e/admin-app.mjs).
@@ -73,20 +73,35 @@ try {
   check('pengingat harian: macet', false, String(e.message).split('\n')[0].slice(0, 200));
 }
 
-// ───────────── 3. Weekly league ─────────────
+// ───────────── 3. Liga Rank (migration 0022) ─────────────
 try {
   await r.goto(`${BASE}/app/leaderboard`);
-  await r.getByRole('heading', { name: /^Liga Lilin$/ }).waitFor({ timeout: 30000 });
-  const list = r.getByRole('list', { name: /Peringkat Liga Lilin/ });
+  await r.getByRole('heading', { name: /^Rank Lilin$/ }).waitFor({ timeout: 30000 });
+  check('tab "Liga Rank" terpilih', await r.getByRole('link', { name: 'Liga Rank' }).getAttribute('aria-current') === 'page');
+  const list = r.getByRole('list', { name: /Pemain Rank Lilin/ });
   const text = await list.innerText();
-  check('liga: Rina dan Dimas satu grup di Liga Lilin, Rina di atas', text.indexOf('Rina Uji') >= 0 && text.indexOf('Dimas Uji') > text.indexOf('Rina Uji'), text.slice(0, 200));
-  check('liga: posisi, sisa waktu, dan aturan naik divisi tampil', await r.getByText(/Posisimu: #\d+ · 120 XP/).isVisible() && await r.getByText(/Berakhir dalam/).isVisible() && await r.getByText(/teratas \(minimal 50 XP\) naik ke Liga Pelita/).isVisible());
-  check('liga: lima divisi dari Lilin sampai Mercusuar', (await r.getByRole('list', { name: /Lima divisi liga/ }).getByRole('listitem').count()) === 5);
-  check('liga muat di layar 390 px', (await overflow(r)) <= 0);
+  check('liga rank: Rina dan Dimas di Rank Lilin, Rina di atas', text.indexOf('Rina Uji') >= 0 && text.indexOf('Dimas Uji') > text.indexOf('Rina Uji'), text.slice(0, 200));
+  // 120 XP on one day: 120/250 x 70 + 7.5 = 41 points.
+  check('liga rank: poin minggu ini (+41 dari 100) dan jarak ke Pelita', await r.getByText('+41 dari 100 poin minggu ini').isVisible() && await r.getByText(/459 poin lagi ke Rank Pelita/).isVisible() && await r.getByText(/Minggu berakhir dalam/).isVisible());
+  check('liga rank: aturan poin (250 XP, 4 hari, −50 minggu kosong) tertulis', await r.getByText(/Poin penuh: 250 XP di 4 hari berbeda.*mengurangi 50 poin/).isVisible());
+  const ladder = r.getByRole('list', { name: /Lima rank/ });
+  check('liga rank: tangga lima rank Lilin sampai Mercusuar, Lilin ditandai', (await ladder.getByRole('listitem').count()) === 5 && /Lilin/.test(await ladder.locator('[aria-current="true"]').innerText()));
+  check('liga rank: perkiraan ±1 tahun (Mercusuar minggu ke-50)', await r.getByText(/Mercusuar minggu ke-50/).isVisible());
+  const anim = await r.evaluate(() => Object.fromEntries([1, 2, 3, 4, 5].map((n) => [n, getComputedStyle(document.querySelector(`[aria-label="Lima rank, dari Lilin sampai Mercusuar"] .rank-${n} .rk-flame`)).animationName])));
+  check('api rank: Lilin diam, Pelita sampai Mercusuar beranimasi', anim[1] === 'none' && [2, 3, 4, 5].every((n) => anim[n] === 'rk-flicker'), JSON.stringify(anim));
+  const fx = await r.evaluate(() => [3, 4, 5].map((n) => document.querySelectorAll(`[aria-label="Lima rank, dari Lilin sampai Mercusuar"] .rank-${n} .rk-ember`).length).concat(document.querySelectorAll('[aria-label="Lima rank, dari Lilin sampai Mercusuar"] .rank-5 .rk-rays').length));
+  check('api rank makin megah: bara 2/4/6 (Obor/Lentera/Mercusuar) + sinar mercusuar', JSON.stringify(fx) === '[2,4,6,1]', JSON.stringify(fx));
+  check('liga rank muat di layar 390 px', (await overflow(r)) <= 0);
   await r.screenshot({ path: path.join(SHOTS, 'habits-liga.png'), fullPage: true });
+  await r.getByRole('link', { name: 'Semua' }).click();
+  const all = r.getByRole('list', { name: '30 teratas minggu ini' });
+  await all.waitFor({ timeout: 30000 });
+  const rinaRow = all.getByRole('listitem').filter({ hasText: 'Rina Uji' });
+  check('papan Semua: setiap pemain menampilkan rank (Rina: Rank Lilin)', /Rank Lilin/.test(await rinaRow.innerText()) && (await all.getByRole('listitem').count()) === (await all.getByText(/^Rank (Lilin|Pelita|Obor|Lentera|Mercusuar)$/).count()));
+  await r.screenshot({ path: path.join(SHOTS, 'habits-semua.png'), fullPage: true });
 } catch (e) {
   await r.screenshot({ path: path.join(SHOTS, 'habits-gagal-liga.png'), fullPage: true }).catch(() => {});
-  check('liga: macet', false, String(e.message).split('\n')[0].slice(0, 200));
+  check('liga rank: macet', false, String(e.message).split('\n')[0].slice(0, 200));
 }
 
 // ───────────── 4. Friends by invite link, then a challenge ─────────────

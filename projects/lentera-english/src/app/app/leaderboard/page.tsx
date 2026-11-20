@@ -1,19 +1,23 @@
 'use client';
-// Liga & Teman (Rilis 8): the weekly league in divisions, friends and friend
-// challenges, and the all-learners weekly board that came before them.
+// Liga & Teman (Rilis 8): Liga Rank (migration 0022, ranks Lilin to Mercusuar),
+// friends and friend challenges, and the all-learners weekly board, which shows
+// each player's rank too.
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { Crown, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/client/api';
+import { division } from '@/lib/client/habits';
 import { useServerInfo, useSession } from '@/lib/client/session';
 import { syncIfPending, useLearner } from '@/lib/client/store';
 import { Avatar } from '@/components/Avatar';
 import { FriendsView } from '@/components/social/Friends';
 import { LeagueView } from '@/components/social/League';
+import { DivisionBadge } from '@/components/social/DivisionBadge';
 import { Button, Card, Empty, LinkButton, PageHeader, cx, dateId, Loading, TabLinks, Notice } from '@/components/ui';
 import { useSdMode } from '@/components/school/SchoolLevel';
 
-interface Board { week_start: string; top: { rank: number; name: string; avatar: number; xp: number; me: boolean }[]; me: { rank: number; xp: number } | null }
+/** `division` (the player's rank) since migration 0022. */
+interface Board { week_start: string; top: { rank: number; name: string; avatar: number; xp: number; me: boolean; division?: number }[]; me: { rank: number; xp: number; division?: number } | null }
 
 function AllBoard() {
   const learner = useLearner();
@@ -40,7 +44,7 @@ function AllBoard() {
     <>
       <Card className="mb-4 flex flex-wrap items-center justify-between gap-2 p-4">
         <p className="font-bold">Posisimu minggu ini</p>
-        <p className="text-xl font-extrabold">{board.me ? `#${board.me.rank} · ${board.me.xp} XP` : 'Belum ada XP minggu ini'}</p>
+        <p className="flex items-center gap-2 text-xl font-extrabold">{board.me?.division && <DivisionBadge n={board.me.division} size={28} still title={`Rank ${division(board.me.division).name}`} />}{board.me ? `#${board.me.rank} · ${board.me.xp} XP` : 'Belum ada XP minggu ini'}</p>
         <Button size="sm" variant="secondary" onClick={load} disabled={loading} aria-label="Muat ulang papan peringkat"><RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden /></Button>
       </Card>
       <Card className="p-0">
@@ -49,8 +53,11 @@ function AllBoard() {
             <li key={r.rank + r.name} className={cx('flex items-center gap-3 border-b border-line px-4 py-3 last:border-0', r.me && 'bg-brand-soft')}>
               <span className={cx('grid h-8 w-8 place-items-center rounded-full text-sm font-extrabold', r.rank === 1 ? 'bg-accent text-on-accent' : 'bg-surface-2')}>{r.rank === 1 ? <Crown size={16} aria-label="Peringkat 1" /> : r.rank}</span>
               <Avatar index={r.avatar} size={36} decorative className="shrink-0" />
-              <span className="min-w-0 flex-1 truncate font-bold">{r.name}{r.me && <span className="ml-2 text-xs font-bold text-brand">kamu</span>}</span>
-              <span className="font-extrabold">{r.xp} XP</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-bold">{r.name}{r.me && <span className="ml-2 text-xs font-bold text-brand">kamu</span>}</span>
+                {r.division && <span className="flex items-center gap-1 text-xs font-bold text-muted"><DivisionBadge n={r.division} size={20} still decorative />Rank {division(r.division).name}</span>}
+              </span>
+              <span className="shrink-0 font-extrabold tabular-nums">{r.xp} XP</span>
             </li>
           ))}
         </ol>
@@ -61,7 +68,7 @@ function AllBoard() {
 }
 
 const TABS = [
-  { id: 'liga', label: 'Liga' },
+  { id: 'liga', label: 'Liga Rank' },
   { id: 'teman', label: 'Teman' },
   { id: 'semua', label: 'Semua' },
 ] as const;
@@ -76,7 +83,7 @@ function Leaderboard() {
 
   return (
     <div>
-      <PageHeader title="Liga & Teman" subtitle="Bersaing sehat setiap minggu. XP hanya datang dari kegiatan belajar, jadi yang rajin yang menang." />
+      <PageHeader title="Liga & Teman" subtitle="Naik rank dari Lilin sampai Mercusuar dengan belajar rutin. XP hanya datang dari kegiatan belajar, jadi yang rajin yang menang." />
       {sd && <Notice className="mb-4" title="Mode SD">Di liga dan papan umum, namamu tampil sebagai "Pelajar SD". Hanya teman yang kamu tambahkan yang melihat namamu.</Notice>}
       <TabLinks label="Bagian papan peringkat" className="mb-5" items={TABS.map((t) => ({ href: t.id === 'liga' ? '/app/leaderboard' : `/app/leaderboard?tab=${t.id}`, label: t.label, current: tab === t.id }))} />
       {!session ? (

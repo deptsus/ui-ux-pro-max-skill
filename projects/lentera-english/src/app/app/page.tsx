@@ -95,8 +95,8 @@ export default function Dashboard() {
       {ent.premium && ent.expiresAt && ent.plan === 'trial' && ent.expiresAt > now && (
         <ListGroup>
           <ListRow href="/app/subscription" icon={<Crown size={20} />} iconTone="accent"
-            title={`Premium uji coba · sisa ${Math.max(1, Math.ceil((ent.expiresAt - now) / 86_400_000))} hari`}
-            subtitle={`Berlaku sampai ${new Date(ent.expiresAt).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}. Semua materi, nyawa tak terbatas, dan ujian level terbuka. Setelah itu akun kembali ke Free; progresmu tetap tersimpan.`} />
+            title="Premium uji coba 3 hari penuh"
+            subtitle={`Berakhir ${new Date(ent.expiresAt).toLocaleString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })} (sisa ${timeLeft(ent.expiresAt, now)}). Dihitung 72 jam sejak akun dibuat. Semua materi, nyawa tak terbatas, dan ujian level terbuka; setelah itu akun kembali ke Free dan progresmu tetap tersimpan.`} />
         </ListGroup>
       )}
       {isNew ? <Welcome guest={!session} firstLesson={ix.orderedLessons[0]?.id} /> : (

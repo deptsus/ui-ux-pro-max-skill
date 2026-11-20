@@ -77,11 +77,26 @@ export function KidFigure({ look, mood = 'happy', still = false }: { look: Look;
 
         {hijab ? (
           <g>
-            {/* hijab: covers head and neck, drapes over the shoulders */}
-            <path d="M19 50 C17 24 33 12 48 12 C63 12 79 24 77 50 C77 63 72 71 66 75 L69 90 C58 94 38 94 27 90 L30 75 C24 71 19 63 19 50 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="3" strokeLinejoin="round" />
-            <path d="M30 75 Q48 84 66 75" fill="none" stroke={INK} strokeWidth="1.6" opacity="0.35" />
-            <ellipse cx="48" cy="45" rx="17.5" ry="19.5" fill={`url(#${skin})`} stroke={INK} strokeWidth="2.4" />
-            <ellipse cx="36" cy="22" rx="7" ry="3.4" fill="#fff" opacity="0.55" transform="rotate(-28 36 22)" />
+            {/* A soft square hijab / pashmina (redrawn 20 Nov 2026, after the owner's photo): one
+                cloth that frames the face closely, wraps under the chin where it is pinned, flows
+                over both shoulders, and has one end swept across the chest. Fold lines are faint
+                so they vanish at small sizes. */}
+            <path d="M48 15 C61 15 70.5 24.5 70.5 39 C70.5 48 69.6 55 68 60.5 C72.6 65.6 78.6 69.2 81 75.5 C82.4 79 82.6 83 82.6 86 C82.8 90 83 93.5 83.2 97 L12.8 97 C13 93.5 13.2 90 13.4 86 C13.4 83 13.6 79 15 75.5 C17.4 69.2 23.4 65.6 28 60.5 C26.4 55 25.5 48 25.5 39 C25.5 24.5 35 15 48 15 Z" fill={`url(#${hair})`} stroke={INK} strokeWidth="3" strokeLinejoin="round" />
+            {/* the end swept across the chest to the left shoulder */}
+            <path d="M68.6 63 C63 74.5 49 81.5 27.5 84.5 C26.4 88.5 26.6 93 27.6 97 L49 97 C60.5 91 69.5 82 72.4 70.5 Z" fill={tint(look.hijab ?? look.hair, -0.07)} stroke={INK} strokeWidth="1.8" strokeLinejoin="round" strokeOpacity="0.6" />
+            <g fill="none" stroke={INK} strokeLinecap="round" opacity="0.18" strokeWidth="1.4">
+              <path d="M64 74 C58 82 50 87 40 90.5" />
+              <path d="M22.5 74 C21 80 20.8 86 21.8 92" />
+              <path d="M74.6 75 C75.6 80 75.6 85 74.8 89" />
+              <path d="M29.5 31 C33 25 38.5 21 45 19.8" />
+            </g>
+            <ellipse cx="36.5" cy="23.5" rx="6.5" ry="3" fill="#fff" opacity="0.6" transform="rotate(-30 36.5 23.5)" />
+            {/* the inner fold around the face, then the face */}
+            <ellipse cx="48" cy="45.6" rx="18.4" ry="20.6" fill={tint(look.hijab ?? look.hair, -0.13)} />
+            <ellipse cx="48" cy="45" rx="17" ry="19.2" fill={`url(#${skin})`} stroke={INK} strokeWidth="2.4" />
+            {/* where the cloth wraps under the chin, and the pin that holds it */}
+            <path d="M66.8 57.5 C62.6 66.4 55.8 70.6 48 70.6 C41.4 70.6 35.6 67.6 31.4 62" fill="none" stroke={INK} strokeWidth="1.9" strokeLinecap="round" strokeOpacity="0.6" />
+            <circle cx="56.2" cy="68.4" r="1.9" fill="#fde68a" stroke={INK} strokeWidth="1.3" />
           </g>
         ) : (
           <g>

@@ -177,14 +177,14 @@ describe('analitik pemilik dan kesehatan', () => {
 });
 
 describe('liga lebih hemat', () => {
-  it('pelajar yang membuka liga langsung ditempatkan walau penempatan massal baru saja berjalan', async () => {
+  it('pelajar yang membuka liga langsung tampil walau penyelesaian mingguan baru saja berjalan', async () => {
     const [{ w }] = await db.query<{ w: string }>('select league_week(now())::text as w');
     const x = await newUser(db, 'Liga Hemat');
     await db.query("insert into xp_transactions (user_id, client_event_id, amount, reason, occurred_at) values ($1, 'lh1', 20, 'test', now())", [x]);
-    // Another learner just ran the 5-minute placement.
-    expect(await db.rpc('claim_job', { p_job: `league-fill:${w}`, p_min_seconds: 300 })).toBe(true);
-    const l = await db.rpc<{ joined: boolean; rows: { me: boolean }[] }>('get_league', { p_user: x });
-    expect(l.joined).toBe(true);
+    // Another learner just ran this week's settlement (Liga Rank, migration 0022).
+    await db.rpc('claim_job', { p_job: `league-fill:rank-${w}`, p_min_seconds: 300 });
+    const l = await db.rpc<{ points: number; rows: { me: boolean }[] }>('get_league', { p_user: x });
+    expect(l.points).toBeGreaterThan(0);
     expect(l.rows.some((r) => r.me)).toBe(true);
     const [{ n }] = await db.query<{ n: number }>("select count(*)::int as n from pg_indexes where indexname = 'xp_transactions_user_time_idx'");
     expect(n).toBe(1);

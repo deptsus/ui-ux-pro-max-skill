@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { usePlayBuild } from '@/lib/client/store-build';
 import { Check, Crown, QrCode, ShieldCheck, Smartphone, Wallet } from 'lucide-react';
 import { isAdminPlan } from '@/lib/engine/types';
+import { timeLeft } from '@/lib/engine/plan';
 import { api } from '@/lib/client/api';
 import { useApp } from '@/lib/client/hooks';
 import { useServerInfo, useSession } from '@/lib/client/session';
@@ -58,7 +59,7 @@ export default function SubscriptionPage() {
       ) : premium && ent.plan === 'trial' ? (
         <Card className="flex flex-wrap items-center gap-3 border-accent/60 bg-accent-soft/40">
           <Crown className="text-accent" size={28} aria-hidden />
-          <div className="min-w-[12rem] flex-1"><p className="text-lg font-extrabold">Premium uji coba sampai {dateId(ent.expiresAt!)}</p><p className="text-sm text-muted">Sisa {daysLeft} hari, bonus untuk akun baru. Setelah itu akun kembali ke Free tanpa tagihan; progresmu tetap tersimpan. Membayar sekarang langsung memulai masa Premium berbayar (sisa hari uji coba tidak ditambahkan).</p></div>
+          <div className="min-w-[12rem] flex-1"><p className="text-lg font-extrabold">Premium uji coba sampai {dateTimeId(ent.expiresAt!)}</p><p className="text-sm text-muted">Sisa {timeLeft(ent.expiresAt!, now)} dari 3 hari penuh (72 jam sejak akun dibuat), bonus untuk akun baru. Setelah itu akun kembali ke Free tanpa tagihan; progresmu tetap tersimpan. Membayar sekarang langsung memulai masa Premium berbayar (sisa hari uji coba tidak ditambahkan).</p></div>
           <Badge tone="accent">Uji coba</Badge>
         </Card>
       ) : premium ? (
