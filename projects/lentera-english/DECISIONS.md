@@ -118,6 +118,15 @@ yang diambil saat implementasi; ikuti juga, dan minta persetujuan sebelum mengub
 - Endpoint simulasi pembayaran hanya untuk mode uji; ditolak bila kunci produksi.
 
 ### B7. Desain
+- **Redesign 2026 ("tenang tapi hangat", disetujui pemilik 20 Nov 2026, lihat `REDESIGN.md`).** Menggantikan gaya clay R14 di bawah ini:
+  - Warna: brand `#5b3fd9` (gelap `#a496ff`), permukaan netral, token baru `warn`, `brand-ink`, `on-accent`; mode gelap punya palet sendiri, tanpa outline hitam. Semua pasangan teks lolos WCAG AA (angka di `globals.css`).
+  - Huruf: Plus Jakarta Sans untuk semua judul dan teks; Baloo 2 hanya untuk angka besar, perayaan, dan wordmark. Bobot 400/600/700 (`font-bold` = 600, `font-extrabold` = 700 lewat token). Skala: 12/14/16/17/20/24/32.
+  - Bentuk: kartu datar berbatas 1 px (`rounded-2xl`), tidak boleh bersarang; koleksi memakai `ListGroup`/`ListRow`. Pinggiran taktil 2 px hanya pada tombol solid dan pilihan jawaban.
+  - Navigasi: tab bawah Beranda, **Belajar**, Ulangan, Lainnya, Profil; "Belajar" berisi pilihan CEFR | Sekolah | Khusus (rute tetap `/app/path` dan `/app/jalur`). Sidebar dan Lainnya dikelompokkan (Belajar, Latihan, Kemajuan, Kelas & keluarga, Akun).
+  - Jalur A1–C2: navigasi level di atas, level yang sedang dipelajari terbuka, level lain bisa dibuka; peta berliku R14 diganti jejak vertikal.
+  - Komponen bersama di `src/components/ui.tsx` (+ `learn/PathParts.tsx`); `merge()` memastikan kelas yang dikirim pemanggil menang atas kelas bawaan komponen. Galeri komponen di `/gaya` (server lokal saja).
+  - ESLint hanya alat pengembangan (`npm run lint`); aturan React Compiler lama diturunkan ke peringatan karena memperbaikinya berarti mengubah logika.
+- *(Sebelum redesign 2026)*
 - Warna brand ungu `#4b3fd6`, aksen amber `#f59e0b`, font Plus Jakarta Sans, sudut membulat besar, tombol bergaya "tekan" (border bawah tebal).
 - Maskot Pijar (kunang-kunang berlentera) dalam SVG, dengan suasana happy/cheer/think/sad.
 - Grafik SVG tanpa library; warna grafik `--chart` (`#4b3fd6` terang, `#7d72f2` gelap) sudah divalidasi kontras dan buta warna; setiap grafik punya tampilan tabel.
