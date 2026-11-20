@@ -426,12 +426,12 @@ Sesi keempat dan kelima:
 
 - **Branch**: kerjakan dan push ke `ccr-17d3d5e4-jx43zs`. Netlify hanya mendeploy branch ini; push ke branch lain tidak sampai ke situs live.
 - **Trial Premium 3 hari (20 Nov 2026):** kode di branch; migrasi `0021_premium_trial.sql`.
-  - **Langkah pemilik setelah deploy:** Supabase → SQL Editor → tempel isi `supabase/manual/apply-0021.sql` → Run. Hasil yang diharapkan `siap = true`.
+  - `apply-0021.sql` sudah dijalankan pemilik (lihat entri Liga Rank di bawah).
   - Sebelum SQL dijalankan, akun baru tetap Free dan layar daftar tidak menyebut trial.
   - Uji: `tests/trial.test.ts` (7), `npm run e2e:trial` (11).
   - Chatbot Pijar ditunda; rencananya di `PIJAR-AI.md`.
 - **Liga Rank + hijab baru (20 Nov 2026):** kode di branch; migrasi `0022_rank_league.sql` (aturan di `DECISIONS.md` B7).
-  - **Langkah pemilik setelah deploy (urutan wajib):** Supabase → SQL Editor → jalankan `supabase/manual/apply-0021.sql` (bila belum), lalu `supabase/manual/apply-0022.sql`. Hasil yang diharapkan `siap = true` di keduanya.
+  - **`apply-0021.sql` dan `apply-0022.sql` sudah dijalankan pemilik dan diperiksa (20 Nov 2026, sebelum deploy):** tercatat `20271201102100 0021_premium_trial` dan `20271201102200 0022_rank_league`; `content_features` memuat `trial` dan `rank`; `rank_gain(250,4)=100`, `rank_gain(0,0)=-50`; `league_ranks` dengan RLS dan tertutup bagi anon; 0 fungsi terbuka bagi klien. Kode dideploy sesudahnya (commit `[deploy]`).
   - Sebelum `apply-0022.sql` dijalankan, tab Liga Rank menampilkan "Liga Rank sedang disiapkan" (tidak rusak); papan Semua tetap jalan tanpa lencana rank.
   - Uji: `tests/rank.test.ts` (11), `npm run e2e:habits` (37, termasuk animasi api per rank dan rank di papan Semua).
 - **Perbaikan 20 Nov 2026 (laporan video pemilik):** tab level CEFR kini benar-benar tab (yang diketuk menyala ungu, hanya isi level itu tampil, alamat `#level-B1`); CEFR | Sekolah | Khusus kini tiga tampilan (`/app/path`, `/app/jalur`, `/app/jalur?jenis=khusus`; tautan lama `#work`/`#exam` membuka Khusus). Suite baru `npm run e2e:redesign` menekan semua kontrol redesign (59 cek).
