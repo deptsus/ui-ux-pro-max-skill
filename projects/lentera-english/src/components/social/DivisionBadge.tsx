@@ -5,7 +5,8 @@
 // embers; Lentera adds side tongues, more embers and a shine across the shield;
 // Mercusuar adds a turning lighthouse beam, pulsing rings and twinkling stars.
 // The motion is CSS (globals.css, "rk-"), stops for prefers-reduced-motion, and
-// the extra effects only appear from 44 px so small list badges stay calm.
+// the extra effects (embers, beam, rings, stars) appear from 44 px, or at any size with
+// `effects` (the Semua board, 21 Nov 2026: the owner wants the same motion there).
 // Elements that animate a transform carry no transform attribute of their own
 // (a CSS transform would replace it): they sit in a positioned <g>.
 import { useId } from 'react';
@@ -22,14 +23,14 @@ const EMBERS = [[21.5, 15, -3], [26.5, 14, 3], [23, 12, -1.5], [28, 17, 4], [19.
 const STARS = [[5, 9], [43.5, 7], [3.5, 33], [45, 31]] as const;
 
 /** `decorative`: the rank name is already written next to it, so screen readers skip the picture. */
-export function DivisionBadge({ n, size = 56, title, still = false, decorative = false, className }: { n: number; size?: number; title?: string; still?: boolean; decorative?: boolean; className?: string }) {
+export function DivisionBadge({ n, size = 56, title, still = false, decorative = false, effects, className }: { n: number; size?: number; title?: string; still?: boolean; decorative?: boolean; effects?: boolean; className?: string }) {
   const raw = useId();
   const id = raw.replace(/[^a-zA-Z0-9_-]/g, '');
   const tier = Math.min(Math.max(n, 1), 5);
   const d = division(tier);
   const [outer, mid, core] = d.flame;
   const scale = 0.62 + tier * 0.08;
-  const fx = !still && size >= 44;
+  const fx = !still && (effects ?? size >= 44);
   const label = title ?? `Rank ${d.name}`;
   const embers = fx ? EMBERS.slice(0, tier === 3 ? 2 : tier === 4 ? 4 : tier === 5 ? 6 : 0) : [];
   return (

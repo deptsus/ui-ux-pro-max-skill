@@ -98,6 +98,7 @@ try {
   await all.waitFor({ timeout: 30000 });
   const rinaRow = all.getByRole('listitem').filter({ hasText: 'Rina Uji' });
   check('papan Semua: setiap pemain menampilkan rank (Rina: Rank Lilin)', /Rank Lilin/.test(await rinaRow.innerText()) && (await all.getByRole('listitem').count()) === (await all.getByText(/^Rank (Lilin|Pelita|Obor|Lentera|Mercusuar)$/).count()));
+  check('papan Semua: lencana rank beranimasi seperti di Liga Rank (tidak ada lencana diam)', (await all.locator('.rank-badge').count()) > 0 && (await r.locator('.rank-badge.rank-still').count()) === 0);
   await r.screenshot({ path: path.join(SHOTS, 'habits-semua.png'), fullPage: true });
 } catch (e) {
   await r.screenshot({ path: path.join(SHOTS, 'habits-gagal-liga.png'), fullPage: true }).catch(() => {});

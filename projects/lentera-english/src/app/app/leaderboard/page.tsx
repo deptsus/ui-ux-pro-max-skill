@@ -44,7 +44,7 @@ function AllBoard() {
     <>
       <Card className="mb-4 flex flex-wrap items-center justify-between gap-2 p-4">
         <p className="font-bold">Posisimu minggu ini</p>
-        <p className="flex items-center gap-2 text-xl font-extrabold">{board.me?.division && <DivisionBadge n={board.me.division} size={28} still title={`Rank ${division(board.me.division).name}`} />}{board.me ? `#${board.me.rank} · ${board.me.xp} XP` : 'Belum ada XP minggu ini'}</p>
+        <p className="flex items-center gap-2 text-xl font-extrabold">{board.me?.division && <DivisionBadge n={board.me.division} size={36} effects title={`Rank ${division(board.me.division).name}`} />}{board.me ? `#${board.me.rank} · ${board.me.xp} XP` : 'Belum ada XP minggu ini'}</p>
         <Button size="sm" variant="secondary" onClick={load} disabled={loading} aria-label="Muat ulang papan peringkat"><RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden /></Button>
       </Card>
       <Card className="p-0">
@@ -55,7 +55,7 @@ function AllBoard() {
               <Avatar index={r.avatar} size={36} decorative className="shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-bold">{r.name}{r.me && <span className="ml-2 text-xs font-bold text-brand">kamu</span>}</span>
-                {r.division && <span className="flex items-center gap-1 text-xs font-bold text-muted"><DivisionBadge n={r.division} size={20} still decorative />Rank {division(r.division).name}</span>}
+                {r.division && <span className="mt-0.5 flex items-center gap-1.5 text-xs font-bold text-muted"><DivisionBadge n={r.division} size={28} effects decorative />Rank {division(r.division).name}</span>}
               </span>
               <span className="shrink-0 font-extrabold tabular-nums">{r.xp} XP</span>
             </li>
